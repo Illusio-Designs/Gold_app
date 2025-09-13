@@ -125,6 +125,64 @@ const EditProfile = () => {
             }
           }
         }
+      } catch (err) {
+        // fallback to AsyncStorage if backend fails
+        const userStr = await AsyncStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setName(user.name || '');
+          setEmail(user.email || '');
+          setPhone(user.phone_number || '');
+          setAddress1(user.address_line1 || '');
+          setAddress2(user.address_line2 || '');
+          setLandmark(user.landmark || '');
+          setState(user.state || '');
+          setCity(user.city || '');
+          setPin(user.pin || '');
+          setBusiness(user.business_name || '');
+          setGst(user.gst_number || '');
+          setRemarks(user.remarks || '');
+          if (user.country) {
+            setCountryCode(user.country);
+          }
+          if (user.image) {
+            const imgUrl = user.image.startsWith('http')
+              ? user.image
+              : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
+            setPhotoUri({ uri: imgUrl });
+            console.log('[EditProfile] Image URL:', imgUrl);
+          }
+        } else {
+          // fallback to AsyncStorage if no id/token
+          console.log('[EditProfile] No userId/token, using AsyncStorage fallback');
+          const userStr = await AsyncStorage.getItem('user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            console.log('[EditProfile] AsyncStorage user data:', user);
+            setName(user.name || '');
+            setEmail(user.email || '');
+            setPhone(user.phone_number || '');
+            setAddress1(user.address_line1 || '');
+            setAddress2(user.address_line2 || '');
+            setLandmark(user.landmark || '');
+            setState(user.state || '');
+            setCity(user.city || '');
+            setPin(user.pin || '');
+            setBusiness(user.business_name || '');
+            setGst(user.gst_number || '');
+            setRemarks(user.remarks || '');
+            if (user.country) {
+              setCountryCode(user.country);
+            }
+            if (user.image) {
+              const imgUrl = user.image.startsWith('http')
+                ? user.image
+                : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
+              setPhotoUri({ uri: imgUrl });
+              console.log('[EditProfile] Image URL:', imgUrl);
+            }
+          }
+        }
       } catch (error: any) {
         console.error('[EditProfile] Error fetching user data:', error);
         console.error('[EditProfile] Error details:', {
