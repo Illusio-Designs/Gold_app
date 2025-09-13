@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import adminSocketService from '../services/adminSocketService';
+import { useEffect, useRef, useState } from "react";
+import adminSocketService from "../services/adminSocketService";
 
 /**
  * Custom hook for admin WebSocket functionality
@@ -7,15 +7,21 @@ import adminSocketService from '../services/adminSocketService';
  * @param {string} serverUrl - WebSocket server URL
  * @returns {Object} - Socket service and connection status
  */
-export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.15:3001') => {
+export const useAdminSocket = (
+  adminData = null,
+  serverUrl = "http://172.20.10.10:3001"
+) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const eventListenersRef = useRef(new Map());
 
   // Initialize connection
   useEffect(() => {
     if (adminData) {
-      console.log('🔌 [USE ADMIN SOCKET] Initializing with admin data:', adminData);
+      console.log(
+        "🔌 [USE ADMIN SOCKET] Initializing with admin data:",
+        adminData
+      );
       adminSocketService.connect(serverUrl, adminData);
     }
   }, [adminData, serverUrl]);
@@ -32,7 +38,7 @@ export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.1
     const updateConnectionStatus = () => {
       const connected = adminSocketService.getConnectionStatus();
       setIsConnected(connected);
-      setConnectionStatus(connected ? 'connected' : 'disconnected');
+      setConnectionStatus(connected ? "connected" : "disconnected");
     };
 
     // Initial status
@@ -40,32 +46,32 @@ export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.1
 
     // Listen for connection changes
     const handleConnect = () => {
-      console.log('✅ [USE ADMIN SOCKET] Connected');
+      console.log("✅ [USE ADMIN SOCKET] Connected");
       setIsConnected(true);
-      setConnectionStatus('connected');
+      setConnectionStatus("connected");
     };
 
     const handleDisconnect = () => {
-      console.log('❌ [USE ADMIN SOCKET] Disconnected');
+      console.log("❌ [USE ADMIN SOCKET] Disconnected");
       setIsConnected(false);
-      setConnectionStatus('disconnected');
+      setConnectionStatus("disconnected");
     };
 
     const handleAdminRoomJoined = (data) => {
-      console.log('✅ [USE ADMIN SOCKET] Admin room joined:', data);
-      setConnectionStatus('admin-room-joined');
+      console.log("✅ [USE ADMIN SOCKET] Admin room joined:", data);
+      setConnectionStatus("admin-room-joined");
     };
 
     // Add event listeners
-    adminSocketService.on('connect', handleConnect);
-    adminSocketService.on('disconnect', handleDisconnect);
-    adminSocketService.on('admin-room-joined', handleAdminRoomJoined);
+    adminSocketService.on("connect", handleConnect);
+    adminSocketService.on("disconnect", handleDisconnect);
+    adminSocketService.on("admin-room-joined", handleAdminRoomJoined);
 
     // Cleanup
     return () => {
-      adminSocketService.off('connect', handleConnect);
-      adminSocketService.off('disconnect', handleDisconnect);
-      adminSocketService.off('admin-room-joined', handleAdminRoomJoined);
+      adminSocketService.off("connect", handleConnect);
+      adminSocketService.off("disconnect", handleDisconnect);
+      adminSocketService.off("admin-room-joined", handleAdminRoomJoined);
     };
   }, []);
 
@@ -86,20 +92,20 @@ export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.1
     if (!eventListenersRef.current.has(event)) {
       eventListenersRef.current.set(event, []);
     }
-    
+
     const listeners = eventListenersRef.current.get(event);
     listeners.push(callback);
-    
+
     // Add listener to socket service
     adminSocketService.on(event, callback);
-    
+
     return () => {
       // Remove from our tracking
       const index = listeners.indexOf(callback);
       if (index > -1) {
         listeners.splice(index, 1);
       }
-      
+
       // Remove from socket service
       adminSocketService.off(event, callback);
     };
@@ -112,7 +118,7 @@ export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.1
    */
   const off = (event, callback) => {
     adminSocketService.off(event, callback);
-    
+
     if (eventListenersRef.current.has(event)) {
       const listeners = eventListenersRef.current.get(event);
       const index = listeners.indexOf(callback);
@@ -150,18 +156,17 @@ export const useAdminSocket = (adminData = null, serverUrl = 'http://10.106.29.1
     // Connection status
     isConnected,
     connectionStatus,
-    
+
     // Socket methods
     on,
     off,
     emit,
     disconnect,
     getAdminData,
-    
+
     // Direct access to service
-    socketService: adminSocketService
+    socketService: adminSocketService,
   };
 };
 
 export default useAdminSocket;
-

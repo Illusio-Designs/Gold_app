@@ -2,7 +2,7 @@ const axios = require('axios');
 
 // Test configuration
 const BACKEND_URL =
-  process.env.API_URL?.replace('/api', '') || 'http://192.168.0.105:3001';
+  process.env.API_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
 
 async function checkTokens() {
   console.log('🔍 Checking FCM tokens in database...\n');

@@ -12,6 +12,7 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 import { API_URL } from '@env';
+import { getSliderImageUrl } from '../../utils/imageUtils';
 
 const { width } = Dimensions.get('window');
 const SLIDE_WIDTH = width * 0.85;
@@ -69,7 +70,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
   // Use API sliders if available, otherwise use default slides
   const slides = sliders && sliders.length > 0 ? sliders.map(slider => {
     console.log('🖼️ Processing slider:', slider);
-    const imageUrl = slider.image_url ? `${API_URL || 'http://192.168.0.105:3001'}/uploads/slider/${slider.image_url}` : null;
+    const imageUrl = getSliderImageUrl(slider.image_url);
     console.log('🖼️ Constructed image URL:', imageUrl);
     
     return {

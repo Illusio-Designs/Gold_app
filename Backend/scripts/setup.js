@@ -257,9 +257,7 @@ async function createTablesAndAdmin() {
       sql: `CREATE TABLE IF NOT EXISTS sliders (
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255),
-        description TEXT,
         image_url VARCHAR(500) NOT NULL,
-        link_url VARCHAR(500),
         category_id INT,
         priority INT DEFAULT 0,
         is_active BOOLEAN DEFAULT TRUE,

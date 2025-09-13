@@ -10,6 +10,7 @@ const socketService = require("../services/socketService");
 const { createUser: createUserModel } = require("../models/user");
 const { db } = require("../config/db");
 const { executeQuery, checkConnection } = require("../utils/dbHelper");
+const { getBaseUrl } = require("../config/environment");
 
 // Create new product
 async function createProduct(req, res) {
@@ -454,9 +455,7 @@ function getProductsByCategory(req, res) {
 
             if (product.image) {
               // Original image URL
-              originalImageUrl = `${
-                process.env.BASE_URL || "http://10.106.29.15:3001"
-              }/uploads/products/${product.image}`;
+              originalImageUrl = `${getBaseUrl()}/uploads/products/${product.image}`;
 
               // Always check for cleaned/watermarked image first (highest priority)
               const baseName = product.image.split(".")[0]; // Remove original extension
@@ -469,9 +468,7 @@ function getProductsByCategory(req, res) {
 
               if (fs.existsSync(cleanedImagePath)) {
                 // Use cleaned/watermarked image (highest priority)
-                processedImageUrl = `${
-                  process.env.BASE_URL || "http://10.106.29.15:3001"
-                }/uploads/products/${cleanedImageName}`;
+                processedImageUrl = `${getBaseUrl()}/uploads/products/${cleanedImageName}`;
                 finalImageUrl = processedImageUrl;
                 console.log(
                   `[Backend] ✅ Using enhanced cleaned/watermarked image: ${processedImageUrl}`
@@ -494,9 +491,7 @@ function getProductsByCategory(req, res) {
 
                 if (fs.existsSync(processedImagePath)) {
                   // Use regular processed image
-                  processedImageUrl = `${
-                    process.env.BASE_URL || "http://10.106.29.15:3001"
-                  }/uploads/products/${processedImageName}`;
+                  processedImageUrl = `${getBaseUrl()}/uploads/products/${processedImageName}`;
                   finalImageUrl = processedImageUrl;
                   console.log(
                     `[Backend] ✅ Using processed image: ${processedImageUrl}`

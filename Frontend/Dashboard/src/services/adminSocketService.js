@@ -16,7 +16,7 @@ class AdminSocketService {
    * @param {string} serverUrl - WebSocket server URL
    * @param {Object} adminData - Admin user data
    */
-  connect(serverUrl = 'http://10.106.29.15:3001', adminData = null) {
+  connect(serverUrl = 'http://172.20.10.10:3001', adminData = null) {
     if (this.socket && this.isConnected) {
       console.log('🔌 [ADMIN SOCKET] Already connected');
       return;

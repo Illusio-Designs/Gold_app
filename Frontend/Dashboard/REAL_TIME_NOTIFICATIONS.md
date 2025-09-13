@@ -16,11 +16,13 @@ This document explains how to use and test the real-time notifications system fo
 ### Backend Components
 
 1. **Socket Service** (`Backend/services/socketService.js`)
+
    - Manages WebSocket connections
    - Handles admin room management
    - Emits notifications to specific rooms
 
 2. **Admin Notification Service** (`Backend/services/adminNotificationService.js`)
+
    - Sends push notifications via Firebase
    - Triggers WebSocket notifications
    - Manages notification records
@@ -33,11 +35,13 @@ This document explains how to use and test the real-time notifications system fo
 ### Frontend Components
 
 1. **Admin Socket Service** (`Frontend/Dashboard/src/services/adminSocketService.js`)
+
    - WebSocket client implementation
    - Connection management and reconnection
    - Event handling and room management
 
 2. **useAdminSocket Hook** (`Frontend/Dashboard/src/hooks/useAdminSocket.js`)
+
    - React hook for easy socket integration
    - Connection status management
    - Event listener management
@@ -52,12 +56,14 @@ This document explains how to use and test the real-time notifications system fo
 ### Backend Setup
 
 1. **Install Dependencies**
+
    ```bash
    cd Backend
    npm install
    ```
 
 2. **Start Server**
+
    ```bash
    npm start
    # Server will run on port 3001
@@ -70,6 +76,7 @@ This document explains how to use and test the real-time notifications system fo
 ### Frontend Setup
 
 1. **Install Dependencies**
+
    ```bash
    cd Frontend/Dashboard
    npm install
@@ -77,12 +84,13 @@ This document explains how to use and test the real-time notifications system fo
    ```
 
 2. **Start Development Server**
+
    ```bash
    npm run dev
    ```
 
 3. **Access Dashboard**
-   - Navigate to `http://localhost:5173/dashboard`
+   - Navigate to `http://172.20.10.10:5173/dashboard`
    - Login with admin credentials
    - Check connection status in header
 
@@ -100,8 +108,9 @@ Navigate to `/dashboard/test` to access the comprehensive test interface:
 ### 2. Test Notifications
 
 1. **Via API**:
+
    ```bash
-   curl -X POST "http://10.106.29.15:3001/api/admin-notifications/test-notification" \
+   curl -X POST "http://172.20.10.10:3001/api/admin-notifications/test-notification" \
      -H "Content-Type: application/json" \
      -d '{"message": "Test notification", "type": "test"}'
    ```
@@ -122,11 +131,13 @@ Navigate to `/dashboard/test` to access the comprehensive test interface:
 ### Connection Flow
 
 1. **Admin Dashboard Loads**
+
    - Connects to WebSocket server
    - Joins admin room automatically
    - Shows connection status
 
 2. **User Registration**
+
    - Mobile app registers new user
    - Backend processes registration
    - Sends push notification to admin
@@ -150,11 +161,13 @@ Navigate to `/dashboard/test` to access the comprehensive test interface:
 ### Common Issues
 
 1. **Connection Failed**
+
    - Check backend server is running
    - Verify port 3001 is accessible
    - Check firewall settings
 
 2. **Notifications Not Appearing**
+
    - Verify admin is in admin room
    - Check browser console for errors
    - Verify notification permissions
@@ -167,17 +180,19 @@ Navigate to `/dashboard/test` to access the comprehensive test interface:
 ### Debug Steps
 
 1. **Check Console Logs**
+
    - Backend: Look for Socket.IO messages
    - Frontend: Check browser console
    - Look for connection status messages
 
 2. **Verify API Endpoints**
+
    ```bash
    # Test admin notifications API
-   curl "http://10.106.29.15:3001/api/admin-notifications/stats"
-   
+   curl "http://172.20.10.10:3001/api/admin-notifications/stats"
+
    # Test connection status
-   curl "http://10.106.29.15:3001/api/admin-notifications/admin-clients"
+   curl "http://172.20.10.10:3001/api/admin-notifications/admin-clients"
    ```
 
 3. **Check Network Tab**
@@ -190,7 +205,7 @@ Navigate to `/dashboard/test` to access the comprehensive test interface:
 ### In Components
 
 ```jsx
-import useAdminSocket from '../hooks/useAdminSocket';
+import useAdminSocket from "../hooks/useAdminSocket";
 
 const MyComponent = () => {
   const { isConnected, on, emit } = useAdminSocket(adminData);
@@ -198,8 +213,8 @@ const MyComponent = () => {
   useEffect(() => {
     if (isConnected) {
       // Listen for notifications
-      const unsubscribe = on('new-user-registration', (data) => {
-        console.log('New user registered:', data);
+      const unsubscribe = on("new-user-registration", (data) => {
+        console.log("New user registered:", data);
         // Handle notification
       });
 
@@ -208,9 +223,7 @@ const MyComponent = () => {
   }, [isConnected, on]);
 
   return (
-    <div>
-      Connection Status: {isConnected ? 'Connected' : 'Disconnected'}
-    </div>
+    <div>Connection Status: {isConnected ? "Connected" : "Disconnected"}</div>
   );
 };
 ```
@@ -218,18 +231,18 @@ const MyComponent = () => {
 ### Direct Service Usage
 
 ```jsx
-import adminSocketService from '../services/adminSocketService';
+import adminSocketService from "../services/adminSocketService";
 
 // Connect to server
-adminSocketService.connect('http://10.106.29.15:3001', adminData);
+adminSocketService.connect("http://172.20.10.10:3001", adminData);
 
 // Listen for events
-adminSocketService.on('new-user-registration', (data) => {
-  console.log('New user:', data);
+adminSocketService.on("new-user-registration", (data) => {
+  console.log("New user:", data);
 });
 
 // Emit events
-adminSocketService.emit('custom-event', { message: 'Hello' });
+adminSocketService.emit("custom-event", { message: "Hello" });
 ```
 
 ## 🔒 Security Considerations
@@ -242,11 +255,13 @@ adminSocketService.emit('custom-event', { message: 'Hello' });
 ## 🚀 Production Deployment
 
 1. **Update Server URLs**
-   - Change `10.106.29.15:3001` to production domain
+
+   - Change `172.20.10.10:3001` to production domain
    - Update CORS settings
    - Configure SSL certificates
 
 2. **Environment Variables**
+
    ```bash
    NODE_ENV=production
    PORT=3001
@@ -267,9 +282,9 @@ adminSocketService.emit('custom-event', { message: 'Hello' });
 ## 🆘 Support
 
 For issues or questions:
+
 1. Check this documentation
 2. Review console logs
 3. Test with the test interface
 4. Check network connectivity
 5. Verify backend server status
-

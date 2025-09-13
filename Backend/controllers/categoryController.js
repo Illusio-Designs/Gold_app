@@ -2,6 +2,7 @@ const { db } = require("../config/db");
 const socketService = require("../services/socketService");
 const path = require("path");
 const fs = require("fs");
+const { getBaseUrl } = require("../config/environment");
 
 // Get all categories (only active ones with images)
 function getAllCategories(req, res) {
@@ -51,9 +52,7 @@ function getAllCategories(req, res) {
 
       if (category.image) {
         // Original image URL
-        originalImageUrl = `${
-          process.env.BASE_URL || "http://10.106.29.15:3001"
-        }/uploads/categories/${category.image}`;
+        originalImageUrl = `${getBaseUrl()}/uploads/categories/${category.image}`;
 
         // Always check for cleaned/watermarked image first (highest priority)
         const baseName = category.image.split(".")[0]; // Remove original extension
@@ -66,9 +65,7 @@ function getAllCategories(req, res) {
 
         if (fs.existsSync(cleanedImagePath)) {
           // Use cleaned/watermarked image (highest priority)
-          processedImageUrl = `${
-            process.env.BASE_URL || "http://10.106.29.15:3001"
-          }/uploads/categories/${cleanedImageName}`;
+          processedImageUrl = `${getBaseUrl()}/uploads/categories/${cleanedImageName}`;
           finalImageUrl = processedImageUrl;
           console.log(
             `[Backend] ✅ Using enhanced cleaned/watermarked category image: ${processedImageUrl}`
@@ -91,9 +88,7 @@ function getAllCategories(req, res) {
 
           if (fs.existsSync(processedImagePath)) {
             // Use regular processed image
-            processedImageUrl = `${
-              process.env.BASE_URL || "http://10.106.29.15:3001"
-            }/uploads/categories/${processedImageName}`;
+            processedImageUrl = `${getBaseUrl()}/uploads/categories/${processedImageName}`;
             finalImageUrl = processedImageUrl;
             console.log(
               `[Backend] ✅ Using processed category image: ${processedImageUrl}`

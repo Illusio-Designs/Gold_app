@@ -11,21 +11,25 @@ const {
 
 // Public routes
 router.post("/register", upload.single("image"), async (req, res) => {
-  console.log('Register API called');
-  console.log('Request body:', req.body);
+  console.log("Register API called");
+  console.log("Request body:", req.body);
   if (req.file) {
-    console.log('Uploaded file:', req.file);
+    console.log("Uploaded file:", req.file);
   }
   userController.registerUser(req, res);
 });
 router.post("/admin/login", userController.adminLogin);
 router.post("/business/login", userController.businessLogin);
-router.post('/check-exists', userController.checkUserExists);
-router.post('/verify-otp', userController.verifyBusinessOTP);
+router.post("/check-exists", userController.checkUserExists);
+router.post("/verify-otp", userController.verifyBusinessOTP);
 
 // Protected routes
 router.get("/", verifyToken, requireAdmin, userController.getAllUsers);
-router.get("/validate-session", verifyToken, userController.validateUserSession);
+router.get(
+  "/validate-session",
+  verifyToken,
+  userController.validateUserSession
+);
 router.post("/logout", verifyToken, userController.logoutUser);
 router.post(
   "/upload-profile",
@@ -39,7 +43,7 @@ router.patch(
   requireAdmin,
   userController.updateUserStatus
 );
-router.get('/:id', verifyToken, userController.getUserById);
+router.get("/:id", verifyToken, userController.getUserById);
 router.post(
   "/",
   verifyToken,

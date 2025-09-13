@@ -702,9 +702,15 @@ function deleteUser(req, res) {
 
 // Check if user exists by phone number or email
 async function checkUserExists(req, res) {
-  const { phone_number, email } = req.body;
+  const { phone_number, phoneNumber, email } = req.body;
+  const phone = phone_number || phoneNumber; // Support both formats
 
-  console.log("[checkUserExists] Request received:", { phone_number, email });
+  console.log("[checkUserExists] Request received:", {
+    phone_number,
+    phoneNumber,
+    email,
+    phone,
+  });
 
   // First check if database is connected
   const isConnected = await checkConnection();
@@ -718,15 +724,15 @@ async function checkUserExists(req, res) {
 
   let query = "";
   let params = [];
-  if (phone_number && !email) {
+  if (phone && !email) {
     query = "SELECT * FROM users WHERE phone_number = ?";
-    params = [phone_number];
-  } else if (email && !phone_number) {
+    params = [phone];
+  } else if (email && !phone) {
     query = "SELECT * FROM users WHERE email = ?";
     params = [email];
-  } else if (phone_number && email) {
+  } else if (phone && email) {
     query = "SELECT * FROM users WHERE phone_number = ? OR email = ?";
-    params = [phone_number, email];
+    params = [phone, email];
   } else {
     return res.status(400).json({ error: "Phone number or email required" });
   }

@@ -1,44 +1,49 @@
 const { db } = require("../config/db");
 const socketService = require("../services/socketService");
+const { getBaseUrl } = require("../config/environment");
 
 // Create new slider
 function createSlider(req, res) {
-  const { title, description, link, category_id } = req.body;
+  const { title, category_id } = req.body;
   const image = req.file ? req.file.filename : null;
+
+  console.log("Slider creation request:", { title, category_id, image });
+  console.log("Request body:", req.body);
 
   if (!title || !image) {
     return res.status(400).json({ error: "Title and image are required" });
   }
 
   const sql =
-    "INSERT INTO sliders (title, description, image_url, link_url, category_id) VALUES (?, ?, ?, ?, ?)";
-  db.query(
-    sql,
-    [title, description, image, link, category_id],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
+    "INSERT INTO sliders (title, image_url, category_id) VALUES (?, ?, ?)";
+  const categoryId = category_id && category_id !== "" ? category_id : null;
+  db.query(sql, [title, image, categoryId], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      if (err.code === "ER_NO_REFERENCED_ROW_2") {
+        return res.status(400).json({ error: "Invalid category selected" });
       }
-
-      // Get the created slider for real-time update
-      const sliderId = result.insertId;
-      db.query(
-        "SELECT * FROM sliders WHERE id = ?",
-        [sliderId],
-        (getErr, sliderResults) => {
-          if (!getErr && sliderResults.length > 0) {
-            // Emit real-time update
-            socketService.notifySliderUpdate(sliderResults[0], "created");
-          }
-        }
-      );
-
-      res.status(201).json({
-        message: "Slider created successfully",
-        sliderId: result.insertId,
-      });
+      return res.status(500).json({ error: err.message });
     }
-  );
+
+    // Get the created slider for real-time update
+    const sliderId = result.insertId;
+    db.query(
+      "SELECT * FROM sliders WHERE id = ?",
+      [sliderId],
+      (getErr, sliderResults) => {
+        if (!getErr && sliderResults.length > 0) {
+          // Emit real-time update
+          socketService.notifySliderUpdate(sliderResults[0], "created");
+        }
+      }
+    );
+
+    res.status(201).json({
+      message: "Slider created successfully",
+      sliderId: result.insertId,
+    });
+  });
 }
 
 // Get all sliders
@@ -53,7 +58,23 @@ function getSliders(req, res) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.json(results);
+
+    // Process results to include properly formatted image URLs
+    const processedResults = results.map((slider) => {
+      let processedImageUrl = null;
+
+      if (slider.image_url) {
+        // Construct the full image URL
+        processedImageUrl = `${getBaseUrl()}/uploads/slider/${slider.image_url}`;
+      }
+
+      return {
+        ...slider,
+        image_url: processedImageUrl,
+      };
+    });
+
+    res.json(processedResults);
   });
 }
 
@@ -68,14 +89,29 @@ function getSliderById(req, res) {
     if (results.length === 0) {
       return res.status(404).json({ error: "Slider not found" });
     }
-    res.json(results[0]);
+
+    // Process result to include properly formatted image URL
+    const slider = results[0];
+    let processedImageUrl = null;
+
+    if (slider.image_url) {
+      // Construct the full image URL
+      processedImageUrl = `${getBaseUrl()}/uploads/slider/${slider.image_url}`;
+    }
+
+    const processedSlider = {
+      ...slider,
+      image_url: processedImageUrl,
+    };
+
+    res.json(processedSlider);
   });
 }
 
 // Update slider
 function updateSlider(req, res) {
   const { id } = req.params;
-  const { title, description, link, category_id } = req.body;
+  const { title, category_id } = req.body;
   const image = req.file ? req.file.filename : null;
 
   if (!title) {
@@ -83,14 +119,14 @@ function updateSlider(req, res) {
   }
 
   let sql, params;
+  const categoryId = category_id && category_id !== "" ? category_id : null;
   if (image) {
     sql =
-      "UPDATE sliders SET title = ?, description = ?, image_url = ?, link_url = ?, category_id = ? WHERE id = ?";
-    params = [title, description, image, link, category_id, id];
+      "UPDATE sliders SET title = ?, image_url = ?, category_id = ? WHERE id = ?";
+    params = [title, image, categoryId, id];
   } else {
-    sql =
-      "UPDATE sliders SET title = ?, description = ?, link_url = ?, category_id = ? WHERE id = ?";
-    params = [title, description, link, category_id, id];
+    sql = "UPDATE sliders SET title = ?, category_id = ? WHERE id = ?";
+    params = [title, categoryId, id];
   }
 
   db.query(sql, params, (err, result) => {

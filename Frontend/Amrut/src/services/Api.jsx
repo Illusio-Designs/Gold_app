@@ -7,7 +7,7 @@ axios.defaults.retry = 2; // Retry failed requests
 axios.defaults.retryDelay = 1000; // Wait 1 second between retries
 
 // ✅ Fallback if API_URL is undefined
-export const BASE_URL = API_URL || 'http://192.168.0.105:3001/api';
+export const BASE_URL = API_URL || 'http://172.20.10.10:3001/api';
 // Use your LAN IP if on physical device
 
 console.log('🌍 API_URL from @env:', API_URL);

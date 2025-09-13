@@ -264,7 +264,7 @@ const MediaGalleryPage = () => {
                   e
                 );
                 // Try fallback URL with direct file access
-                const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:3001';
+                const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
                 let fallbackUrl;
                 if (imagePath.startsWith("/uploads/")) {
                   fallbackUrl = `${baseUrl}${imagePath}`;
@@ -303,7 +303,7 @@ const MediaGalleryPage = () => {
     }
 
     // Use environment variable for base URL
-    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:3001';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
 
     // Check if filename already contains the full path
     if (filename.startsWith("/uploads/")) {

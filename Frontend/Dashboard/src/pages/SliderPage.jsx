@@ -10,6 +10,7 @@ import {
   createSlider,
   updateSlider,
   deleteSlider,
+  getAllCategories,
 } from "../services/adminApiService";
 import "../styles/pages/SliderPage.css";
 
@@ -22,8 +23,6 @@ const SliderPage = () => {
   const [deleteSliderItem, setDeleteSliderItem] = useState(null);
   const [form, setForm] = useState({
     title: "",
-    description: "",
-    link: "",
     category_id: "",
   });
   const [selectedFile, setSelectedFile] = useState(null);
@@ -37,9 +36,6 @@ const SliderPage = () => {
       cell: (row) => (
         <div className="slider-info">
           <div className="slider-title">{row.title}</div>
-          {row.description && (
-            <div className="slider-description">{row.description}</div>
-          )}
         </div>
       ),
     },
@@ -62,26 +58,6 @@ const SliderPage = () => {
               <ImageIcon className="icon" />
               No Image
             </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      header: "Link",
-      accessor: "link_url",
-      cell: (row) => (
-        <div className="slider-link">
-          {row.link_url ? (
-            <a
-              href={row.link_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-url"
-            >
-              {row.link_url}
-            </a>
-          ) : (
-            <span className="no-link">No Link</span>
           )}
         </div>
       ),
@@ -156,18 +132,12 @@ const SliderPage = () => {
   const loadCategories = async () => {
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/categories`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setCategories(data || []);
+      const response = await getAllCategories(token);
+      console.log("Categories response:", response);
+      setCategories(response.data || response || []);
     } catch (err) {
       console.error("Failed to load categories:", err);
+      setCategories([]);
     }
   };
 
@@ -177,6 +147,19 @@ const SliderPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleDropdownChange = (selectedOption, actionMeta) => {
+    const { name } = actionMeta;
+    console.log("Category selection changed:", { selectedOption, name });
+    setForm((prev) => {
+      const newForm = {
+        ...prev,
+        [name]: selectedOption ? selectedOption.value : "",
+      };
+      console.log("Updated form:", newForm);
+      return newForm;
+    });
   };
 
   const handleFileChange = (e) => {
@@ -204,8 +187,6 @@ const SliderPage = () => {
     setEditSlider(null);
     setForm({
       title: "",
-      description: "",
-      link: "",
       category_id: "",
     });
     setSelectedFile(null);
@@ -217,8 +198,6 @@ const SliderPage = () => {
     setEditSlider(slider);
     setForm({
       title: slider.title || "",
-      description: slider.description || "",
-      link: slider.link_url || "",
       category_id: slider.category_id || "",
     });
     setSelectedFile(null);
@@ -239,11 +218,14 @@ const SliderPage = () => {
       setError("");
       const token = localStorage.getItem("admin_token");
 
+      console.log("Form data before submission:", form);
       const formData = new FormData();
       formData.append("title", form.title);
-      formData.append("description", form.description);
-      formData.append("link", form.link);
-      formData.append("category_id", form.category_id);
+      formData.append("category_id", form.category_id || "");
+      console.log("FormData values:", {
+        title: form.title,
+        category_id: form.category_id
+      });
 
       if (selectedFile) {
         formData.append("image", selectedFile);
@@ -365,35 +347,11 @@ const SliderPage = () => {
           </div>
 
           <div className="form-row">
-            <InputField
-              label="Description"
-              name="description"
-              type="text"
-              value={form.description}
-              onChange={handleInputChange}
-              placeholder="Enter slider description (optional)"
-              style={inputStyle}
-            />
-          </div>
-
-          <div className="form-row">
-            <InputField
-              label="Link URL"
-              name="link"
-              type="url"
-              value={form.link}
-              onChange={handleInputChange}
-              placeholder="Enter link URL (optional)"
-              style={inputStyle}
-            />
-          </div>
-
-          <div className="form-row">
             <DropdownSelect
               label="Category"
               name="category_id"
               value={form.category_id}
-              onChange={handleInputChange}
+              onChange={handleDropdownChange}
               options={[
                 { value: "", label: "Select a category" },
                 ...(Array.isArray(categories) ? categories : []).map((cat) => ({

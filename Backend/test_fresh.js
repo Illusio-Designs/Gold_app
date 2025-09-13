@@ -6,7 +6,7 @@ async function testApprovedCategories() {
 
     // First, let's get a fresh token for user 2
     const loginResponse = await axios.post(
-      "http://localhost:3001/api/users/business/login",
+      "http://172.20.10.10:3001/api/users/business/login",
       {
         phoneNumber: "7600046416",
         password: "password123",
@@ -20,7 +20,7 @@ async function testApprovedCategories() {
     // Now test the approved categories API
     console.log("\n🔍 Testing approved categories...");
     const categoriesResponse = await axios.get(
-      "http://localhost:3001/api/login-requests/approved-categories/2",
+      "http://172.20.10.10:3001/api/login-requests/approved-categories/2",
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,7 +35,7 @@ async function testApprovedCategories() {
     // Now test the approved products API
     console.log("\n🔍 Testing approved products...");
     const productsResponse = await axios.get(
-      "http://localhost:3001/api/login-requests/approved-products/2",
+      "http://172.20.10.10:3001/api/login-requests/approved-products/2",
       {
         headers: {
           Authorization: `Bearer ${token}`,

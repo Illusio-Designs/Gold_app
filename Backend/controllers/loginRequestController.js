@@ -5,6 +5,7 @@ const {
   notifyLoginRequest,
   notifyLoginRequestStatusChange,
 } = require("../services/adminNotificationService");
+const { getBaseUrl } = require("../config/environment");
 // const notificationModel = require("../models/notification");
 
 // Create login request
@@ -474,9 +475,7 @@ function getApprovedCategoriesForUser(req, res) {
 
           if (category.image) {
             // Original image URL
-            originalImageUrl = `${
-              process.env.BASE_URL || "http://10.106.29.15:3001"
-            }/uploads/categories/${category.image}`;
+            originalImageUrl = `${getBaseUrl()}/uploads/categories/${category.image}`;
 
             // Check for cleaned/watermarked image first (highest priority)
             const baseName = category.image.split(".")[0];
@@ -488,9 +487,7 @@ function getApprovedCategoriesForUser(req, res) {
             );
 
             if (fs.existsSync(cleanedImagePath)) {
-              processedImageUrl = `${
-                process.env.BASE_URL || "http://10.106.29.15:3001"
-              }/uploads/categories/${cleanedImageName}`;
+              processedImageUrl = `${getBaseUrl()}/uploads/categories/${cleanedImageName}`;
               finalImageUrl = processedImageUrl;
             } else {
               // Fallback to original image

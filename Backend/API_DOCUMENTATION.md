@@ -40,7 +40,7 @@ The Gold App Backend is a comprehensive Node.js API built for a jewelry/gold tra
 ### Base URL
 
 ```
-http://localhost:3001/api
+http://172.20.10.10:3001/api
 ```
 
 ## Authentication
@@ -254,9 +254,9 @@ GET /api/categories
     "name": "Gold Rings",
     "description": "Beautiful gold rings collection",
     "image": "rings.jpg",
-    "processedImageUrl": "http://localhost:3001/uploads/categories/rings-cleaned.webp",
-    "originalImageUrl": "http://localhost:3001/uploads/categories/rings.jpg",
-    "imageUrl": "http://localhost:3001/uploads/categories/rings-cleaned.webp",
+    "processedImageUrl": "http://172.20.10.10:3001/uploads/categories/rings-cleaned.webp",
+    "originalImageUrl": "http://172.20.10.10:3001/uploads/categories/rings.jpg",
+    "imageUrl": "http://172.20.10.10:3001/uploads/categories/rings-cleaned.webp",
     "hasProcessedImage": true,
     "status": "active",
     "created_at": "2024-01-01T00:00:00.000Z"
@@ -958,7 +958,7 @@ FCM_SERVER_KEY=your_fcm_key
 npm start
 ```
 
-The API will be available at `http://localhost:3001`
+The API will be available at `http://172.20.10.10:3001`
 
 ---
 

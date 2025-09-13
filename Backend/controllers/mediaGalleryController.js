@@ -1,6 +1,7 @@
 const { db } = require("../config/db");
 const path = require("path");
 const fs = require("fs");
+const { getBaseUrl } = require("../config/environment");
 
 // Get all media files
 function getAllMedia(req, res) {
@@ -792,7 +793,7 @@ function getMediaItemsWithProcessedImages(req, res) {
       let imageUrl = null;
 
       if (item.processed_image) {
-        const baseUrl = process.env.BASE_URL || "http://10.106.29.15:3001";
+        const baseUrl = getBaseUrl();
 
         // Determine directory based on file_url or type
         let directory;
