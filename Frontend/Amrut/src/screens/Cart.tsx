@@ -35,22 +35,22 @@ const Cart = () => {
     switch (action) {
       case 'item-added':
         // Refresh cart silently
-        refresh();
+        refreshCart();
         break;
         
       case 'item-updated':
         // Refresh cart silently
-        refresh();
+        refreshCart();
         break;
         
       case 'item-removed':
         // Refresh cart silently
-        refresh();
+        refreshCart();
         break;
         
       case 'cart-cleared':
         // Refresh cart silently
-        refresh();
+        refreshCart();
         break;
         
       default:
@@ -93,7 +93,7 @@ const Cart = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await refresh();
+      await refreshCart();
       Toast.show({
         type: 'success',
         text1: 'Cart Updated',
@@ -196,25 +196,8 @@ const Cart = () => {
     navigation.navigate('Home' as never);
   };
 
-  // Show loading state while cart is being fetched
-  if (loading && cartItems.length === 0) {
-    return <ScreenLoader text="Loading your cart..." />;
-  }
-
-  // Show error state if cart loading failed
-  if (error && cartItems.length === 0) {
-    return (
-      <View style={styles.container}>
-        <CustomHeader title="My Cart" timer={true} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Failed to load cart</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refresh}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
+  // Show loading state while cart is being fetched (if needed)
+  // Cart data is managed by CartContext, so we don't need separate loading state
 
   return (
     <View style={styles.container}>

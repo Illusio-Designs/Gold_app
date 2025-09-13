@@ -586,8 +586,27 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  // Refresh cart function for real-time updates
+  // Refresh cart function for real-time updates (with debounce)
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(0);
+  
   const refreshCart = async () => {
+    const now = Date.now();
+    const timeSinceLastRefresh = now - lastRefreshTime;
+    
+    if (isRefreshing) {
+      console.log('[CartContext] Refresh already in progress, skipping...');
+      return;
+    }
+    
+    // Prevent refreshing too frequently (minimum 1 second between refreshes)
+    if (timeSinceLastRefresh < 1000) {
+      console.log('[CartContext] Refresh too frequent, skipping...');
+      return;
+    }
+    
+    setIsRefreshing(true);
+    setLastRefreshTime(now);
     try {
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('accessToken');
@@ -621,6 +640,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     } catch (error) {
       console.error('[CartContext] Error refreshing cart:', error);
       return { data: cartItems };
+    } finally {
+      setIsRefreshing(false);
     }
   };
 

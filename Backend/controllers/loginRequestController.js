@@ -586,7 +586,7 @@ function getApprovedProductsForUser(req, res) {
       });
     }
 
-    // Fetch products only from the requested categories that are active
+    // Fetch products only from the requested categories that are active and in stock
     const placeholders = requestedCategories.map(() => "?").join(",");
     const productSql = `
       SELECT DISTINCT p.*, c.name as category_name, c.image as category_image
@@ -595,6 +595,7 @@ function getApprovedProductsForUser(req, res) {
       WHERE p.category_id IN (${placeholders})
         AND p.status = 'active'
         AND c.status = 'active'
+        AND p.stock_status = 'available'
       ORDER BY p.created_at DESC
     `;
 

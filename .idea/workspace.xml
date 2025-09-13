@@ -6,61 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="cd3428c9-e634-49d4-8442-066cee8951a1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/config/database.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/config/environment.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/config/environment.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/config/multerConfig.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/config/multerConfig.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/categoryController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/categoryController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/dashboardController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/dashboardController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/controllers/loginRequestController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/loginRequestController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/mediaGalleryController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/mediaGalleryController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/notificationController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/notificationController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/orderController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/orderController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/productController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/productController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/searchController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/searchController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/sliderController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/sliderController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/userController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/userController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/middlewares/auth.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/middlewares/auth.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/appIcon.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/appIcon.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/appVersion.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/appVersion.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/cart.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/cart.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/category.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/category.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/loginRequest.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/loginRequest.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/order.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/order.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/product.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/product.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/slider.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/slider.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/models/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/routes/mediaGallery.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/routes/mediaGallery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/scripts/clearUserCart.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/scripts/clearUserCart.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/scripts/setup.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/scripts/setup.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/services/adminNotificationService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/services/adminNotificationService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/services/autoDetectionService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/services/autoDetectionService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/services/enhancedImageProcessingService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/services/enhancedImageProcessingService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/services/imageProcessingService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/services/imageProcessingService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/services/mediaGalleryService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/services/mediaGalleryService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/utils/dbHelper.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/utils/dbHelper.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/.env" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/debug-tokens.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/debug-tokens.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CartItemCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CartItemCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CategoryFilterGroup.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CategoryFilterGroup.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CustomSlider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CustomSlider.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/context/CartContext.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/context/CartContext.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Cart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Cart.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Collection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Collection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Orders.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Orders.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Product.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Product.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/authorization/RequestForLogin.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/authorization/RequestForLogin.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/services/Api.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/services/Api.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/utils/imageUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/utils/imageUtils.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/.env" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/CategoriesPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/CategoriesPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/LoginRequestsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/LoginRequestsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/MediaGalleryPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/MediaGalleryPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/ProductsPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/ProductsPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/SliderPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/SliderPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/UsersPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/UsersPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/services/adminApiService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/services/adminApiService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +39,7 @@
     &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;
   }
 }</component>
