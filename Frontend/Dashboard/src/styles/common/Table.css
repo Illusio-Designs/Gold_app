@@ -1,0 +1,75 @@
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 16px;
+  vertical-align: middle;
+  color: #5d0829;
+}
+
+.custom-table thead th {
+  font-weight: 600;
+  color: #5d0829;
+  border-bottom: 1px solid #c09e83;
+}
+
+.custom-table tbody tr {
+  border-bottom: 1px solid #c09e83;
+}
+
+.custom-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #fce2bf;
+  color: #fce2bf;
+}
+
+.custom-table .clickable {
+  cursor: pointer;
+}
+
+/* Serial Number Column */
+.custom-table th:first-child,
+.custom-table td:first-child {
+  text-align: center;
+  width: 80px;
+  font-weight: 500;
+  color: #5d0829;
+}
+
+/* Actions Column */
+.custom-table th:last-child,
+.custom-table td:last-child {
+  text-align: center;
+  width: 120px;
+  color: #5d0829;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .custom-table th,
+  .custom-table td {
+    padding: 8px 12px;
+  }
+
+  .action-buttons {
+    gap: 4px;
+  }
+}

@@ -1,0 +1,201 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(93, 8, 41, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: #fce2bf;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideIn 0.2s ease;
+  box-shadow: 0 4px 6px rgba(93, 8, 41, 0.1);
+  border: 1px solid #c09e83;
+}
+
+.modal-content.small {
+  max-width: 400px;
+}
+
+.modal-content.large {
+  max-width: 800px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #c09e83;
+  color: #5d0829;
+  position: sticky;
+  top: 0;
+  background: #fce2bf;
+  z-index: 1;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #5d0829;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #c09e83;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #c09e83;
+  color: #fce2bf;
+}
+
+.modal-body {
+  padding: 0 24px 24px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #c09e83;
+}
+
+/* Form elements in modal */
+.modal-body input,
+.modal-body textarea,
+.modal-body select {
+  padding: 10px 12px;
+  border: 1px solid #c09e83;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background-color: #fff;
+  color: #5d0829;
+}
+
+.modal-body input:focus,
+.modal-body textarea:focus,
+.modal-body select:focus {
+  outline: none;
+  border-color: #5d0829;
+  box-shadow: 0 0 0 2px #c09e83;
+}
+
+.modal-body label {
+  display: block;
+  margin-bottom: 8px;
+  color: #5d0829;
+}
+
+/* Select specific styles */
+.modal-body select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231a1a1a' d='M6 8.825L1.175 4 2.05 3.125 6 7.075 9.95 3.125 10.825 4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* Select option styles */
+.modal-body select option {
+  padding: 8px 12px;
+  background-color: #fff;
+  color: #1a1a1a;
+}
+
+.modal-body select option:hover,
+.modal-body select option:focus {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+/* Overriding react-select dropdown styles specifically for modals */
+.modal-body .react-select__control {
+  background: #fff !important;
+  border-color: #c09e83 !important;
+  min-height: 42px;
+  margin-bottom: 15px;
+}
+
+.modal-body .react-select__control--is-focused {
+  border-color: #5d0829 !important;
+  box-shadow: 0 0 0 2px #c09e83 !important;
+}
+
+.modal-body .react-select__single-value,
+.modal-body .react-select__placeholder {
+  color: #5d0829 !important;
+}
+
+.modal-body .react-select__input-container {
+  color: #5d0829;
+}
+
+.modal-body .react-select__indicator {
+  color: #c09e83 !important;
+}
+
+.modal-body .react-select__indicator:hover {
+  color: #5d0829 !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 16px;
+    padding: 16px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,23 @@
+/* CollectionsPage styles */
+.collections-page h1 {
+  margin-bottom: 16px;
+  color: #5d0829;
+}
+
+.collections-page .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.collections-page .action-buttons .btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}

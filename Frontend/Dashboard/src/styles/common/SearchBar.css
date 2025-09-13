@@ -1,0 +1,40 @@
+.search-form {
+  width: 100%;
+  max-width: 280px;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+  background-color: #fce2bf;
+  border: 1px solid #c09e83;
+  border-radius: 8px;
+  padding: 0 12px;
+  transition: all 0.2s ease;
+}
+
+.search-group:focus-within {
+  border-color: #5d0829;
+  box-shadow: 0 0 0 3px #c09e83;
+}
+
+.search-icon {
+  color: #5d0829;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 14px;
+  width: 100%;
+  color: #5d0829;
+}
+
+.search-input::placeholder {
+  color: #c09e83;
+}

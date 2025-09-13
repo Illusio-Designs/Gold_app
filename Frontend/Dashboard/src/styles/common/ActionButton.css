@@ -1,0 +1,177 @@
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  background: #fce2bf;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #5d0829;
+}
+
+.action-button:hover {
+  background: linear-gradient(90deg, #fce2bf 0%, #c09e83 100%);
+  color: #5d0829;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button.edit:hover {
+  color: #c09e83;
+}
+
+.action-button.delete:hover {
+  color: #5d0829;
+  background: #fff0f0;
+}
+
+.action-button.small {
+  padding: 4px;
+}
+
+.action-button.small svg {
+  width: 14px;
+  height: 14px;
+}
+
+.action-button.medium {
+  padding: 6px;
+}
+
+.action-button.medium svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action-button.large {
+  padding: 8px;
+}
+
+.action-button.large svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Ensure proper alignment in table cells */
+td .action-button {
+  margin: 0 auto;
+}
+
+/* Size variants */
+.action-btn-small {
+  padding: 4px;
+}
+
+.action-btn-small svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action-btn-medium {
+  padding: 6px;
+}
+
+.action-btn-medium svg {
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn-large {
+  padding: 8px;
+}
+
+.action-btn-large svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Variant styles */
+.action-btn-view {
+  color: #5d0829;
+}
+
+.action-btn-view:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.action-btn-edit {
+  color: #c09e83;
+}
+
+.action-btn-edit:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.action-btn-delete {
+  color: #5d0829;
+}
+
+.action-btn-delete:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.action-btn-active {
+  color: #c09e83;
+}
+
+.action-btn-active:hover {
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.action-btn-inactive {
+  color: #c09e83;
+}
+
+.action-btn-inactive:hover {
+  background: rgba(142, 142, 147, 0.1);
+}
+
+.action-btn-approve {
+  color: #c09e83;
+}
+
+.action-btn-approve:hover {
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.action-btn-reject {
+  color: #5d0829;
+}
+
+.action-btn-reject:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+/* Table specific styles */
+.table-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Tooltip styles */
+.action-btn[title] {
+  position: relative;
+}
+
+.action-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  margin-bottom: 4px;
+}

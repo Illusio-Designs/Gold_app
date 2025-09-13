@@ -1,0 +1,46 @@
+.login-requests-page .table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.login-requests-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.login-requests-page .page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #5d0829;
+}
+
+.login-requests-page .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.login-requests-page .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.login-requests-page .status-pending {
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+.login-requests-page .status-approved {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.login-requests-page .status-denied {
+  color: #ef4444;
+  font-weight: 500;
+}

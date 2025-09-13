@@ -1,0 +1,41 @@
+.categories-page .table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.categories-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.categories-page .page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #5d0829;
+}
+
+.categories-page .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.categories-page .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.categories-page .image-preview {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.categories-page .image-preview img {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
