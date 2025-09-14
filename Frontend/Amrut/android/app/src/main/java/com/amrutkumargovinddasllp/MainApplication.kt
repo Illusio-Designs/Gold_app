@@ -1,4 +1,4 @@
-package com.amrut
+package com.amrutkumargovinddasllp
 
 import android.app.Application
 import com.facebook.react.PackageList

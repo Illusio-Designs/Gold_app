@@ -1,4 +1,4 @@
-package com.amrut
+package com.amrutkumargovinddasllp
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
