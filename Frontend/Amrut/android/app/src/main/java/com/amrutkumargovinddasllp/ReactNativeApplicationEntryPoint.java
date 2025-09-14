@@ -1,0 +1,32 @@
+package com.amrutkumargovinddasllp;
+
+import android.content.Context;
+import android.content.res.Resources;
+
+import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
+import com.facebook.react.common.annotations.internal.LegacyArchitectureLogger;
+import com.facebook.react.soloader.OpenSourceMergedSoMapping;
+import com.facebook.soloader.SoLoader;
+
+import java.io.IOException;
+
+/**
+  * This class is the entry point for loading React Native using the configuration
+  * that the users specifies in their .gradle files.
+  *
+  * The `loadReactNative(this)` method invocation should be called inside the
+  * application onCreate otherwise the app won't load correctly.            
+  */
+public class ReactNativeApplicationEntryPoint {
+  public static void loadReactNative(Context context) {
+    try {
+       SoLoader.init(context, OpenSourceMergedSoMapping.INSTANCE);
+    } catch (IOException error) {
+      throw new RuntimeException(error);
+    }
+    
+    if (com.amrutkumargovinddasllp.BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+      DefaultNewArchitectureEntryPoint.load();
+    }
+  }
+}
