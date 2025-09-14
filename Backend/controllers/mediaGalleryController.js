@@ -726,7 +726,7 @@ function getMediaItemsWithProcessedImages(req, res) {
             ...item,
             image: imagePath,
             imageUrl: hasProcessedImage
-              ? `http://10.106.29.15:3001/uploads/${
+              ? `${getBaseUrl()}/uploads/${
                   item.type === "category" ? "categories" : "products"
                 }/${imagePath}`
               : null,

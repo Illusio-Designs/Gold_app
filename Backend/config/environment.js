@@ -21,7 +21,10 @@ const config = {
   BASE_URLS: {
     DEVELOPMENT: "http://localhost:3001",
     LAN: "http://192.168.1.14:3001",
-    PRODUCTION: process.env.PRODUCTION_URL || "https://yourdomain.com",
+    PRODUCTION:
+      process.env.BASE_URL ||
+      process.env.PRODUCTION_URL ||
+      "https://api.amrutkumargovinddasllp.com",
   },
 
   // CORS Origins
@@ -30,6 +33,8 @@ const config = {
     "http://localhost:8081", // React Native development
     "http://192.168.1.14:8081", // React Native on LAN
     "http://192.168.1.14:3001",
+    "https://api.amrutkumargovinddasllp.com",
+    "https://amrutkumargovinddasllp.com",
     // Add production domains here
   ],
 
