@@ -6,30 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="cd3428c9-e634-49d4-8442-066cee8951a1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/API_DOCUMENTATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/API_DOCUMENTATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/check_statuses.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Backend/config/environment.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/config/environment.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/categoryController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/categoryController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/loginRequestController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/loginRequestController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/mediaGalleryController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/mediaGalleryController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/productController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/productController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/sliderController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/sliderController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/controllers/userController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/userController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/routes/user.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/routes/user.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/scripts/setup.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/scripts/setup.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/test_api.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/test_api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Backend/test_fresh.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/test_fresh.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/controllers/appVersionController.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/controllers/appVersionController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/debug_user_data.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/models/appVersion.js" beforeDir="false" afterPath="$PROJECT_DIR$/Backend/models/appVersion.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Backend/test_fresh.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend/Amrut/.env" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/debug-tokens.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/debug-tokens.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CustomSlider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/components/common/CustomSlider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/services/Api.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/services/Api.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/utils/imageUtils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/utils/imageUtils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/metro.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/metro.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Amrut/src/screens/Profile.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/.env" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/REAL_TIME_NOTIFICATIONS.md" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/REAL_TIME_NOTIFICATIONS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/hooks/useAdminSocket.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/hooks/useAdminSocket.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/MediaGalleryPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/MediaGalleryPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/SliderPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/pages/SliderPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/src/services/adminSocketService.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/src/services/adminSocketService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/Dashboard/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/Dashboard/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

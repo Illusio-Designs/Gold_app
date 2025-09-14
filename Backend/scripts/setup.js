@@ -235,7 +235,10 @@ async function createTablesAndAdmin() {
         created_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+        INDEX idx_platform_active (platform, is_active),
+        INDEX idx_build_number (build_number),
+        INDEX idx_platform_build (platform, build_number)
       )`,
     },
     {
@@ -450,6 +453,18 @@ async function createIndexes() {
       name: "notification_tokens_user_active_idx",
       sql: "CREATE INDEX notification_tokens_user_active_idx ON notification_tokens(user_id, active)",
     },
+    {
+      name: "app_versions_platform_active_idx",
+      sql: "CREATE INDEX app_versions_platform_active_idx ON app_versions(platform, is_active)",
+    },
+    {
+      name: "app_versions_build_number_idx",
+      sql: "CREATE INDEX app_versions_build_number_idx ON app_versions(build_number)",
+    },
+    {
+      name: "app_versions_platform_build_idx",
+      sql: "CREATE INDEX app_versions_platform_build_idx ON app_versions(platform, build_number)",
+    },
   ];
 
   for (const index of indexes) {
@@ -498,6 +513,9 @@ function getTableNameFromIndex(indexName) {
     product_stock_history_action_idx: "product_stock_history",
     notifications_type_idx: "notifications",
     notification_tokens_user_active_idx: "notification_tokens",
+    app_versions_platform_active_idx: "app_versions",
+    app_versions_build_number_idx: "app_versions",
+    app_versions_platform_build_idx: "app_versions",
   };
   return tableMap[indexName] || "users"; // fallback to users
 }

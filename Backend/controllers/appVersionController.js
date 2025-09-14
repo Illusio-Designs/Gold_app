@@ -4,73 +4,77 @@ const socketService = require("../services/socketService");
 // Check for app updates (public endpoint)
 function checkAppUpdate(req, res) {
   const { platform, version_code } = req.query;
-  
+
   if (!platform || !version_code) {
-    return res.status(400).json({ 
-      error: "Platform and version_code are required" 
+    return res.status(400).json({
+      error: "Platform and version_code are required",
     });
   }
 
   // Convert version_code to number for comparison
   const currentVersionCode = parseInt(version_code);
-  
+
   if (isNaN(currentVersionCode)) {
-    return res.status(400).json({ 
-      error: "Invalid version_code format" 
+    return res.status(400).json({
+      error: "Invalid version_code format",
     });
   }
 
-  appVersionModel.checkUpdateRequired(platform, currentVersionCode, (err, results) => {
-    if (err) {
-      console.error("Error checking app update:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
+  appVersionModel.checkUpdateRequired(
+    platform,
+    currentVersionCode,
+    (err, results) => {
+      if (err) {
+        console.error("Error checking app update:", err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
 
-    if (results.length === 0) {
-      // No update available
-      return res.json({
-        update_available: false,
-        force_update: false,
-        message: "App is up to date"
-      });
-    }
+      if (results.length === 0) {
+        // No update available
+        return res.json({
+          update_available: false,
+          force_update: false,
+          message: "App is up to date",
+        });
+      }
 
-    const latestVersion = results[0];
-    const forceUpdate = latestVersion.force_update === 1;
-    const updateType = latestVersion.update_type;
+      const latestVersion = results[0];
+      const forceUpdate = latestVersion.is_forced === 1;
+      const updateType = "minor"; // Default since we don't have update_type in current schema
 
-    // Check if force update is required
-    if (forceUpdate) {
+      // Check if force update is required
+      if (forceUpdate) {
+        return res.json({
+          update_available: true,
+          force_update: true,
+          update_type: updateType,
+          version_code: latestVersion.build_number,
+          version_name: latestVersion.version,
+          download_url: latestVersion.download_url,
+          release_notes: latestVersion.release_notes,
+          message: "Force update required",
+        });
+      }
+
+      // Optional update available
       return res.json({
         update_available: true,
-        force_update: true,
+        force_update: false,
         update_type: updateType,
-        version_code: latestVersion.version_code,
-        version_name: latestVersion.version_name,
+        version_code: latestVersion.build_number,
+        version_name: latestVersion.version,
         download_url: latestVersion.download_url,
         release_notes: latestVersion.release_notes,
-        message: "Force update required"
+        message: "Update available",
       });
     }
-
-    // Optional update available
-    return res.json({
-      update_available: true,
-      force_update: false,
-      update_type: updateType,
-      version_code: latestVersion.version_code,
-      version_name: latestVersion.version_name,
-      download_url: latestVersion.download_url,
-      release_notes: latestVersion.release_notes,
-      message: "Update available"
-    });
-  });
+  );
 }
 
 // Get latest version info (public endpoint)
 function getLatestVersion(req, res) {
   const { platform } = req.params;
-  
+
   if (!platform) {
     return res.status(400).json({ error: "Platform is required" });
   }
@@ -99,25 +103,28 @@ function createAppVersion(req, res) {
     force_update,
     min_version_code,
     download_url,
-    release_notes
+    release_notes,
   } = req.body;
 
   // Validation
   if (!version_code || !version_name || !platform || !update_type) {
-    return res.status(400).json({ 
-      error: "version_code, version_name, platform, and update_type are required" 
+    return res.status(400).json({
+      error:
+        "version_code, version_name, platform, and update_type are required",
     });
   }
 
-  if (!['android', 'ios'].includes(platform.toLowerCase())) {
-    return res.status(400).json({ 
-      error: "Platform must be 'android' or 'ios'" 
+  if (!["android", "ios"].includes(platform.toLowerCase())) {
+    return res.status(400).json({
+      error: "Platform must be 'android' or 'ios'",
     });
   }
 
-  if (!['major', 'minor', 'patch', 'force'].includes(update_type.toLowerCase())) {
-    return res.status(400).json({ 
-      error: "Update type must be 'major', 'minor', 'patch', or 'force'" 
+  if (
+    !["major", "minor", "patch", "force"].includes(update_type.toLowerCase())
+  ) {
+    return res.status(400).json({
+      error: "Update type must be 'major', 'minor', 'patch', or 'force'",
     });
   }
 
@@ -131,7 +138,7 @@ function createAppVersion(req, res) {
     download_url: download_url || null,
     release_notes: release_notes || null,
     is_active: 1,
-    created_by: req.user.id
+    created_by: req.user.id,
   };
 
   appVersionModel.createAppVersion(versionData, (err, result) => {
@@ -141,16 +148,19 @@ function createAppVersion(req, res) {
     }
 
     // Get the created version for real-time update
-    appVersionModel.getVersionById(result.insertId, (getErr, versionResults) => {
-      if (!getErr && versionResults.length > 0) {
-        // Emit real-time update
-        socketService.notifyAppVersionUpdate(versionResults[0], 'created');
+    appVersionModel.getVersionById(
+      result.insertId,
+      (getErr, versionResults) => {
+        if (!getErr && versionResults.length > 0) {
+          // Emit real-time update
+          socketService.notifyAppVersionUpdate(versionResults[0], "created");
+        }
       }
-    });
+    );
 
     res.status(201).json({
       message: "App version created successfully",
-      version_id: result.insertId
+      version_id: result.insertId,
     });
   });
 }
@@ -170,7 +180,7 @@ function getAllVersions(req, res) {
 // Get versions by platform (admin only)
 function getVersionsByPlatform(req, res) {
   const { platform } = req.params;
-  
+
   if (!platform) {
     return res.status(400).json({ error: "Platform is required" });
   }
@@ -197,13 +207,14 @@ function updateAppVersion(req, res) {
     min_version_code,
     download_url,
     release_notes,
-    is_active
+    is_active,
   } = req.body;
 
   // Validation
   if (!version_code || !version_name || !platform || !update_type) {
-    return res.status(400).json({ 
-      error: "version_code, version_name, platform, and update_type are required" 
+    return res.status(400).json({
+      error:
+        "version_code, version_name, platform, and update_type are required",
     });
   }
 
@@ -216,7 +227,7 @@ function updateAppVersion(req, res) {
     min_version_code: min_version_code ? parseInt(min_version_code) : null,
     download_url: download_url || null,
     release_notes: release_notes || null,
-    is_active: is_active ? 1 : 0
+    is_active: is_active ? 1 : 0,
   };
 
   appVersionModel.updateAppVersion(id, versionData, (err, result) => {
@@ -233,7 +244,7 @@ function updateAppVersion(req, res) {
     appVersionModel.getVersionById(id, (getErr, versionResults) => {
       if (!getErr && versionResults.length > 0) {
         // Emit real-time update
-        socketService.notifyAppVersionUpdate(versionResults[0], 'updated');
+        socketService.notifyAppVersionUpdate(versionResults[0], "updated");
       }
     });
 
@@ -261,7 +272,7 @@ function deleteAppVersion(req, res) {
 
       // Emit real-time update
       if (versionToDelete) {
-        socketService.notifyAppVersionUpdate(versionToDelete, 'deleted');
+        socketService.notifyAppVersionUpdate(versionToDelete, "deleted");
       }
 
       res.json({ message: "App version deleted successfully" });
@@ -282,31 +293,45 @@ function activateVersion(req, res) {
     const version = versionResults[0];
 
     // Deactivate other versions for the same platform
-    appVersionModel.deactivateOtherVersions(version.platform, id, (deactivateErr) => {
-      if (deactivateErr) {
-        console.error("Error deactivating other versions:", deactivateErr);
-        return res.status(500).json({ error: "Internal server error" });
-      }
-
-      // Activate the selected version
-      const versionData = { ...version, is_active: 1 };
-      appVersionModel.updateAppVersion(id, versionData, (updateErr, result) => {
-        if (updateErr) {
-          console.error("Error activating version:", updateErr);
+    appVersionModel.deactivateOtherVersions(
+      version.platform,
+      id,
+      (deactivateErr) => {
+        if (deactivateErr) {
+          console.error("Error deactivating other versions:", deactivateErr);
           return res.status(500).json({ error: "Internal server error" });
         }
 
-        // Get the activated version for real-time update
-        appVersionModel.getVersionById(id, (finalGetErr, finalVersionResults) => {
-          if (!finalGetErr && finalVersionResults.length > 0) {
-            // Emit real-time update
-            socketService.notifyAppVersionUpdate(finalVersionResults[0], 'activated');
-          }
-        });
+        // Activate the selected version
+        const versionData = { ...version, is_active: 1 };
+        appVersionModel.updateAppVersion(
+          id,
+          versionData,
+          (updateErr, result) => {
+            if (updateErr) {
+              console.error("Error activating version:", updateErr);
+              return res.status(500).json({ error: "Internal server error" });
+            }
 
-        res.json({ message: "Version activated successfully" });
-      });
-    });
+            // Get the activated version for real-time update
+            appVersionModel.getVersionById(
+              id,
+              (finalGetErr, finalVersionResults) => {
+                if (!finalGetErr && finalVersionResults.length > 0) {
+                  // Emit real-time update
+                  socketService.notifyAppVersionUpdate(
+                    finalVersionResults[0],
+                    "activated"
+                  );
+                }
+              }
+            );
+
+            res.json({ message: "Version activated successfully" });
+          }
+        );
+      }
+    );
   });
 }
 
@@ -318,5 +343,5 @@ module.exports = {
   getVersionsByPlatform,
   updateAppVersion,
   deleteAppVersion,
-  activateVersion
-}; 
+  activateVersion,
+};

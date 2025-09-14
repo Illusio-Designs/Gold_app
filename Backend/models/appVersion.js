@@ -3,18 +3,15 @@ const { db } = require("../config/db");
 // Create new app version
 function createAppVersion(versionData, callback) {
   const sql = `INSERT INTO app_versions (
-    version_code, version_name, platform, update_type, 
-    force_update, min_version_code, download_url, 
-    release_notes, is_active, created_by
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    version, build_number, platform, is_forced, 
+    download_url, release_notes, is_active, created_by
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
   const values = [
-    versionData.version_code,
     versionData.version_name,
+    versionData.version_code,
     versionData.platform,
-    versionData.update_type,
     versionData.force_update,
-    versionData.min_version_code,
     versionData.download_url,
     versionData.release_notes,
     versionData.is_active,
@@ -28,7 +25,7 @@ function createAppVersion(versionData, callback) {
 function getLatestVersion(platform, callback) {
   const sql = `SELECT * FROM app_versions 
                WHERE platform = ? AND is_active = 1 
-               ORDER BY version_code DESC 
+               ORDER BY build_number DESC 
                LIMIT 1`;
   db.query(sql, [platform], callback);
 }
@@ -48,25 +45,23 @@ function getAllVersions(callback) {
 // Get versions by platform
 function getVersionsByPlatform(platform, callback) {
   const sql =
-    "SELECT * FROM app_versions WHERE platform = ? ORDER BY version_code DESC";
+    "SELECT * FROM app_versions WHERE platform = ? ORDER BY build_number DESC";
   db.query(sql, [platform], callback);
 }
 
 // Update app version
 function updateAppVersion(id, versionData, callback) {
   const sql = `UPDATE app_versions SET 
-    version_code = ?, version_name = ?, platform = ?, update_type = ?, 
-    force_update = ?, min_version_code = ?, download_url = ?, 
+    version = ?, build_number = ?, platform = ?, 
+    is_forced = ?, download_url = ?, 
     release_notes = ?, is_active = ?, updated_at = NOW()
     WHERE id = ?`;
 
   const values = [
-    versionData.version_code,
     versionData.version_name,
+    versionData.version_code,
     versionData.platform,
-    versionData.update_type,
     versionData.force_update,
-    versionData.min_version_code,
     versionData.download_url,
     versionData.release_notes,
     versionData.is_active,
@@ -86,8 +81,8 @@ function deleteAppVersion(id, callback) {
 function checkUpdateRequired(platform, currentVersionCode, callback) {
   const sql = `SELECT * FROM app_versions 
                WHERE platform = ? AND is_active = 1 
-               AND version_code > ? 
-               ORDER BY version_code DESC 
+               AND build_number > ? 
+               ORDER BY build_number DESC 
                LIMIT 1`;
   db.query(sql, [platform, currentVersionCode], callback);
 }
@@ -96,9 +91,9 @@ function checkUpdateRequired(platform, currentVersionCode, callback) {
 function getForceUpdateInfo(platform, currentVersionCode, callback) {
   const sql = `SELECT * FROM app_versions 
                WHERE platform = ? AND is_active = 1 
-               AND force_update = 1 
-               AND version_code > ? 
-               ORDER BY version_code DESC 
+               AND is_forced = 1 
+               AND build_number > ? 
+               ORDER BY build_number DESC 
                LIMIT 1`;
   db.query(sql, [platform, currentVersionCode], callback);
 }

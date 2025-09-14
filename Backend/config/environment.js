@@ -20,7 +20,7 @@ const config = {
   // Base URLs for different environments
   BASE_URLS: {
     DEVELOPMENT: "http://localhost:3001",
-    LAN: "http://172.20.10.10:3001",
+    LAN: "http://192.168.1.14:3001",
     PRODUCTION: process.env.PRODUCTION_URL || "https://yourdomain.com",
   },
 
@@ -28,9 +28,8 @@ const config = {
   CORS_ORIGINS: [
     "http://localhost:3000", // Dashboard development
     "http://localhost:8081", // React Native development
-    "http://172.20.10.10:3000", // Dashboard on LAN
-    "http://172.20.10.10:8081", // React Native on LAN
-    "http://172.20.10.10:3001",
+    "http://192.168.1.14:8081", // React Native on LAN
+    "http://192.168.1.14:3001",
     // Add production domains here
   ],
 

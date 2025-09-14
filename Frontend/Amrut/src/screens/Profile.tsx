@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
@@ -9,7 +9,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
-import { logoutUser } from '../services/Api';
+import { logoutUser, getLatestVersion } from '../services/Api';
 import { useCart } from '../context/CartContext';
 // NotificationService removed as requested
 import { wp, hp } from '../utils/responsiveConfig';
@@ -94,14 +94,25 @@ const Profile = () => {
     fetchUser();
   }, [isFocused]);
 
-  // Get current app version info
+  // Get current app version info from API
   useEffect(() => {
     const getCurrentAppVersion = async () => {
       try {
-        const currentVersion = '1.0.0'; // Replace with actual app version
-        setAppVersion(currentVersion);
+        console.log('[Profile] Fetching app version from API...');
+        const platform = Platform.OS; // Dynamic platform detection
+        const versionInfo = await getLatestVersion(platform);
+        
+        if (versionInfo && versionInfo.version) {
+          console.log('[Profile] Version info received:', versionInfo);
+          setAppVersion(versionInfo.version);
+        } else {
+          console.log('[Profile] No version info received, using fallback');
+          setAppVersion('1.0.0'); // Fallback version
+        }
       } catch (error) {
-        console.error('[Profile] Error getting app version:', error);
+        console.error('[Profile] Error getting app version from API:', error);
+        // Use fallback version if API fails
+        setAppVersion('1.0.0');
       }
     };
     getCurrentAppVersion();
