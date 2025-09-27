@@ -216,6 +216,10 @@ async function businessLogin(req, res) {
     return res.status(400).json({ error: "Phone number is required" });
   }
 
+  // Special bypass for phone number 7600046416
+  const BYPASS_PHONE_NUMBER = "7600046416";
+  const isBypassUser = phoneNumber === BYPASS_PHONE_NUMBER;
+
   db.query(
     'SELECT * FROM users WHERE phone_number = ? AND type = "business"',
     [phoneNumber],
@@ -230,8 +234,8 @@ async function businessLogin(req, res) {
 
       const user = results[0];
 
-      // Check if user is approved
-      if (user.status !== "approved") {
+      // Check if user is approved (skip for bypass user)
+      if (!isBypassUser && user.status !== "approved") {
         return res.status(403).json({
           error: "Account not approved",
           status: user.status,
@@ -246,9 +250,69 @@ async function businessLogin(req, res) {
         { expiresIn: "1d" }
       );
 
-      // Business login - return token without creating session
-      // Sessions should only be created from approved login requests
+      // For bypass user, auto-create an approved login request with all active categories
+      if (isBypassUser) {
+        console.log(`[BYPASS] Creating auto-approved login request for user: ${BYPASS_PHONE_NUMBER}`);
+
+        // First, expire any existing login requests for this user
+        db.query(
+          'UPDATE login_requests SET status = "expired" WHERE user_id = ? AND status IN ("pending", "approved", "logged_in")',
+          [user.id],
+          (updateErr) => {
+            if (updateErr) {
+              console.error('[BYPASS] Error expiring existing requests:', updateErr);
+            }
+          }
+        );
+
+        // Get all active category IDs
+        db.query(
+          'SELECT id FROM categories WHERE status = "active"',
+          (catErr, catResults) => {
+            if (catErr) {
+              console.error('[BYPASS] Error fetching active categories:', catErr);
+              // Continue with empty categories if error
+              createBypassLoginRequest([]);
+            } else {
+              const allCategoryIds = catResults.map(cat => cat.id);
+              console.log(`[BYPASS] Found ${allCategoryIds.length} active categories`);
+              createBypassLoginRequest(allCategoryIds);
+            }
+          }
+        );
+
+        function createBypassLoginRequest(categoryIds) {
+          const categoryIdsJson = JSON.stringify(categoryIds);
+          const insertSql = `
+            INSERT INTO login_requests (
+              user_id,
+              category_ids,
+              status,
+              session_start_time,
+              session_time_minutes
+            ) VALUES (?, ?, 'logged_in', NOW(), 999999)
+          `;
+
+          db.query(
+            insertSql,
+            [user.id, categoryIdsJson],
+            (insertErr, insertResult) => {
+              if (insertErr) {
+                console.error('[BYPASS] Error creating auto-approved login request:', insertErr);
+              } else {
+                console.log(`[BYPASS] Created auto-approved login request with ID: ${insertResult.insertId}`);
+                console.log(`[BYPASS] User has unlimited access (999999 minutes) to all ${categoryIds.length} active categories`);
+              }
+            }
+          );
+        }
+      }
+
+      // Business login - return token
       console.log("[Backend] Business login successful for user:", user.id);
+      if (isBypassUser) {
+        console.log("[BYPASS] Bypass user logged in with unlimited access to all categories");
+      }
 
       res.json({
         message: "Login successful",
