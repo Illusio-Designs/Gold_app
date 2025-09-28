@@ -264,12 +264,12 @@ const MediaGalleryPage = () => {
                   e
                 );
                 // Try fallback URL with direct file access
-                const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
+                const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
                 let fallbackUrl;
                 if (imagePath.startsWith("/uploads/")) {
-                  fallbackUrl = `${baseUrl}${imagePath}`;
+                  fallbackUrl = `${imageBaseUrl}${imagePath.replace('/uploads', '')}`;
                 } else {
-                  fallbackUrl = `${baseUrl}/uploads/${
+                  fallbackUrl = `${imageBaseUrl}/${
                     item.type === "category" ? "categories" : "products"
                   }/${imagePath}`;
                 }
@@ -302,19 +302,19 @@ const MediaGalleryPage = () => {
       return null;
     }
 
-    // Use environment variable for base URL
-    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
+    // Use environment variable for image base URL
+    const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
 
     // Check if filename already contains the full path
     if (filename.startsWith("/uploads/")) {
       // If it already has the full path, use it directly
-      const fullUrl = `${baseUrl}${filename}`;
+      const fullUrl = `${imageBaseUrl}${filename.replace('/uploads', '')}`;
       console.log(`[Dashboard] Using full path URL: ${fullUrl}`);
       return fullUrl;
     } else {
       // If it's just the filename, construct the path
       const directory = type === "category" ? "categories" : "products";
-      const fullUrl = `${baseUrl}/uploads/${directory}/${filename}`;
+      const fullUrl = `${imageBaseUrl}/${directory}/${filename}`;
       console.log(`[Dashboard] Constructed URL: ${fullUrl}`);
       return fullUrl;
     }
