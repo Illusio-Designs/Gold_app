@@ -1244,6 +1244,14 @@ async function validateUserSession(req, res) {
         const BYPASS_PHONE_NUMBER = "7600046416";
         const isBypassUser = user.phone_number === BYPASS_PHONE_NUMBER;
 
+        console.log("[Backend] Phone number check:", {
+          userPhoneNumber: user.phone_number,
+          bypassPhoneNumber: BYPASS_PHONE_NUMBER,
+          isBypassUser: isBypassUser,
+          phoneNumberType: typeof user.phone_number,
+          bypassNumberType: typeof BYPASS_PHONE_NUMBER
+        });
+
         // Check if user status is valid (skip for bypass user)
         if (!isBypassUser && user.status !== "approved") {
           console.error("[Backend] User status is not approved:", user.status);
@@ -1406,22 +1414,44 @@ async function validateUserSession(req, res) {
               } else {
                 // Found an active session - return session info
                 const session = results[0];
+
+                // Check if this is a bypass user (double-check)
+                const BYPASS_PHONE_NUMBER = "7600046416";
+                const isBypassUserInSession = user.phone_number === BYPASS_PHONE_NUMBER;
+
+                console.log("[Backend] Regular session validation for user:", {
+                  userId: userId,
+                  userPhoneNumber: user.phone_number,
+                  isBypassUser: isBypassUserInSession,
+                  sessionTimeMinutes: session.session_time_minutes,
+                  sessionId: session.id
+                });
+
+                // If this is a bypass user but somehow ended up in regular validation,
+                // override the session duration to be unlimited
+                let sessionDuration = session.session_time_minutes;
+                if (isBypassUserInSession && session.session_time_minutes !== 999999) {
+                  console.log("[Backend] WARNING: Bypass user detected in regular validation path, correcting session duration");
+                  sessionDuration = 999999;
+                }
+
                 const sessionEndTime = new Date(session.session_start_time);
                 sessionEndTime.setMinutes(
-                  sessionEndTime.getMinutes() + session.session_time_minutes
+                  sessionEndTime.getMinutes() + sessionDuration
                 );
 
                 console.log("[Backend] Valid session found:", {
                   sessionId: session.id,
                   sessionStartTime: session.session_start_time,
-                  sessionDuration: session.session_time_minutes,
+                  sessionDuration: sessionDuration,
                   sessionEndTime: sessionEndTime.toISOString(),
+                  isBypassUserFallback: isBypassUserInSession
                 });
 
                 res.json({
                   valid: true,
                   sessionExpiry: sessionEndTime.toISOString(),
-                  sessionDurationMinutes: session.session_time_minutes,
+                  sessionDurationMinutes: sessionDuration,
                   loginRequestId: session.id,
                 });
               }
