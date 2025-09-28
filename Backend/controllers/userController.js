@@ -1257,77 +1257,177 @@ async function validateUserSession(req, res) {
           console.log("[Backend] Bypass user validation - skipping status check");
         }
 
-        // Check for active session with proper expiry validation
-        db.query(
-          `SELECT lr.* 
-         FROM login_requests lr 
-         WHERE lr.user_id = ? 
-         AND lr.status = 'logged_in' 
-         AND lr.session_time_minutes IS NOT NULL 
-         AND lr.session_start_time IS NOT NULL
-         AND NOW() < DATE_ADD(lr.session_start_time, INTERVAL lr.session_time_minutes MINUTE)
-         ORDER BY lr.created_at DESC 
-         LIMIT 1`,
-          [userId],
-          (err, results) => {
-            if (err) {
-              console.error("Session validation error:", err);
-              return res.status(500).json({ error: "Database error" });
-            }
+        // For bypass user, handle session differently
+        if (isBypassUser) {
+          console.log("[Backend] Bypass user session validation - ensuring unlimited access");
 
-            console.log("[Backend] Session query results:", results);
+          // For bypass user, just check for any logged_in session (ignore expiry)
+          db.query(
+            `SELECT lr.*
+             FROM login_requests lr
+             WHERE lr.user_id = ?
+             AND lr.status = 'logged_in'
+             ORDER BY lr.created_at DESC
+             LIMIT 1`,
+            [userId],
+            (err, results) => {
+              if (err) {
+                console.error("Bypass session validation error:", err);
+                return res.status(500).json({ error: "Database error" });
+              }
 
-            if (results.length === 0) {
-              // No active session found - check if there are expired sessions and clean them up
-              db.query(
-                `UPDATE login_requests 
-               SET status = 'expired', updated_at = CURRENT_TIMESTAMP
-               WHERE user_id = ? AND status = 'logged_in' AND session_time_minutes IS NOT NULL AND session_start_time IS NOT NULL
-               AND NOW() > DATE_ADD(session_start_time, INTERVAL session_time_minutes MINUTE)`,
-                [userId],
-                (cleanupErr, cleanupResult) => {
-                  if (cleanupErr) {
-                    console.error("Session cleanup error:", cleanupErr);
-                  } else if (cleanupResult.affectedRows > 0) {
-                    console.log(
-                      "[Backend] Cleaned up",
-                      cleanupResult.affectedRows,
-                      "expired sessions for user:",
-                      userId
+              if (results.length === 0) {
+                console.log("[Backend] No bypass session found, creating emergency session");
+
+                // Create emergency unlimited session for bypass user
+                db.query(
+                  'SELECT id FROM categories WHERE status = "active"',
+                  (catErr, catResults) => {
+                    const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
+                    const categoryIdsJson = JSON.stringify(categoryIds);
+
+                    db.query(
+                      `INSERT INTO login_requests (
+                        user_id,
+                        category_ids,
+                        status,
+                        session_start_time,
+                        session_time_minutes
+                      ) VALUES (?, ?, 'logged_in', NOW(), 999999)`,
+                      [userId, categoryIdsJson],
+                      (insertErr, insertResult) => {
+                        if (insertErr) {
+                          console.error('[Backend] Emergency bypass session creation failed:', insertErr);
+                          return res.status(500).json({ error: 'Failed to create bypass session' });
+                        }
+
+                        const sessionStartTime = new Date();
+                        const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
+
+                        console.log('[Backend] Emergency bypass session created successfully');
+
+                        return res.json({
+                          valid: true,
+                          sessionExpiry: sessionEndTime.toISOString(),
+                          sessionDurationMinutes: 999999,
+                          loginRequestId: insertResult.insertId,
+                        });
+                      }
                     );
                   }
+                );
+              } else {
+                // Found bypass session - ensure it has unlimited time
+                const session = results[0];
 
-                  // Return session expired response
-                  return res.status(401).json({
-                    error: "Session expired. Please login again.",
-                    action: "force_logout",
-                  });
+                // If session doesn't have unlimited time, update it
+                if (session.session_time_minutes !== 999999) {
+                  console.log("[Backend] Updating bypass session to unlimited time");
+
+                  db.query(
+                    "UPDATE login_requests SET session_time_minutes = 999999, session_start_time = NOW() WHERE id = ?",
+                    [session.id],
+                    (updateErr) => {
+                      if (updateErr) {
+                        console.error("[Backend] Failed to update bypass session:", updateErr);
+                      } else {
+                        console.log("[Backend] Bypass session updated to unlimited time");
+                      }
+                    }
+                  );
                 }
-              );
-            } else {
-              // Found an active session - return session info
-              const session = results[0];
-              const sessionEndTime = new Date(session.session_start_time);
-              sessionEndTime.setMinutes(
-                sessionEndTime.getMinutes() + session.session_time_minutes
-              );
 
-              console.log("[Backend] Valid session found:", {
-                sessionId: session.id,
-                sessionStartTime: session.session_start_time,
-                sessionDuration: session.session_time_minutes,
-                sessionEndTime: sessionEndTime.toISOString(),
-              });
+                const sessionStartTime = new Date();
+                const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
 
-              res.json({
-                valid: true,
-                sessionExpiry: sessionEndTime.toISOString(),
-                sessionDurationMinutes: session.session_time_minutes,
-                loginRequestId: session.id,
-              });
+                console.log("[Backend] Valid bypass session found:", {
+                  sessionId: session.id,
+                  sessionDuration: 999999,
+                  sessionEndTime: sessionEndTime.toISOString(),
+                });
+
+                res.json({
+                  valid: true,
+                  sessionExpiry: sessionEndTime.toISOString(),
+                  sessionDurationMinutes: 999999,
+                  loginRequestId: session.id,
+                });
+              }
             }
-          }
-        );
+          );
+        } else {
+          // Regular user session validation with expiry check
+          db.query(
+            `SELECT lr.*
+           FROM login_requests lr
+           WHERE lr.user_id = ?
+           AND lr.status = 'logged_in'
+           AND lr.session_time_minutes IS NOT NULL
+           AND lr.session_start_time IS NOT NULL
+           AND NOW() < DATE_ADD(lr.session_start_time, INTERVAL lr.session_time_minutes MINUTE)
+           ORDER BY lr.created_at DESC
+           LIMIT 1`,
+            [userId],
+            (err, results) => {
+              if (err) {
+                console.error("Session validation error:", err);
+                return res.status(500).json({ error: "Database error" });
+              }
+
+              console.log("[Backend] Session query results:", results);
+
+              if (results.length === 0) {
+                // No active session found - check if there are expired sessions and clean them up
+                db.query(
+                  `UPDATE login_requests
+                 SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+                 WHERE user_id = ? AND status = 'logged_in' AND session_time_minutes IS NOT NULL AND session_start_time IS NOT NULL
+                 AND NOW() > DATE_ADD(session_start_time, INTERVAL session_time_minutes MINUTE)`,
+                  [userId],
+                  (cleanupErr, cleanupResult) => {
+                    if (cleanupErr) {
+                      console.error("Session cleanup error:", cleanupErr);
+                    } else if (cleanupResult.affectedRows > 0) {
+                      console.log(
+                        "[Backend] Cleaned up",
+                        cleanupResult.affectedRows,
+                        "expired sessions for user:",
+                        userId
+                      );
+                    }
+
+                    // Return session expired response
+                    return res.status(401).json({
+                      error: "Session expired. Please login again.",
+                      action: "force_logout",
+                    });
+                  }
+                );
+              } else {
+                // Found an active session - return session info
+                const session = results[0];
+                const sessionEndTime = new Date(session.session_start_time);
+                sessionEndTime.setMinutes(
+                  sessionEndTime.getMinutes() + session.session_time_minutes
+                );
+
+                console.log("[Backend] Valid session found:", {
+                  sessionId: session.id,
+                  sessionStartTime: session.session_start_time,
+                  sessionDuration: session.session_time_minutes,
+                  sessionEndTime: sessionEndTime.toISOString(),
+                });
+
+                res.json({
+                  valid: true,
+                  sessionExpiry: sessionEndTime.toISOString(),
+                  sessionDurationMinutes: session.session_time_minutes,
+                  loginRequestId: session.id,
+                });
+              }
+            }
+          );
+        }
       }
     );
   } catch (error) {
