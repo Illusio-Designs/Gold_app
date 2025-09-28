@@ -1219,9 +1219,9 @@ async function validateUserSession(req, res) {
   console.log("[Backend] req.user:", req.user);
 
   try {
-    // First, verify the user exists
+    // First, verify the user exists and get their phone number for bypass check
     db.query(
-      "SELECT id, name, status FROM users WHERE id = ?",
+      "SELECT id, name, status, phone_number FROM users WHERE id = ?",
       [userId],
       (userErr, userResults) => {
         if (userErr) {
@@ -1240,13 +1240,21 @@ async function validateUserSession(req, res) {
         const user = userResults[0];
         console.log("[Backend] User found:", user);
 
-        // Check if user status is valid
-        if (user.status !== "approved") {
+        // Special bypass for phone number 7600046416
+        const BYPASS_PHONE_NUMBER = "7600046416";
+        const isBypassUser = user.phone_number === BYPASS_PHONE_NUMBER;
+
+        // Check if user status is valid (skip for bypass user)
+        if (!isBypassUser && user.status !== "approved") {
           console.error("[Backend] User status is not approved:", user.status);
           return res.status(401).json({
             error: "User account not approved",
             action: "force_logout",
           });
+        }
+
+        if (isBypassUser) {
+          console.log("[Backend] Bypass user validation - skipping status check");
         }
 
         // Check for active session with proper expiry validation
