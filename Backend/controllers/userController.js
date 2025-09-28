@@ -857,6 +857,10 @@ async function verifyBusinessOTP(req, res) {
     return res.status(400).json({ error: "Phone number is required" });
   }
 
+  // Special bypass for phone number 7600046416
+  const BYPASS_PHONE_NUMBER = "7600046416";
+  const isBypassUser = phoneNumber === BYPASS_PHONE_NUMBER;
+
   try {
     // Find the user by phone number
     db.query(
@@ -874,13 +878,63 @@ async function verifyBusinessOTP(req, res) {
 
         const user = results[0];
 
-        // Check if user is approved
-        if (user.status !== "approved") {
+        // Check if user is approved (skip for bypass user)
+        if (!isBypassUser && user.status !== "approved") {
           return res.status(403).json({
             error: "Account not approved",
             status: user.status,
             remarks: user.remarks,
           });
+        }
+
+        // For bypass user, ensure there's always a valid login request
+        if (isBypassUser) {
+          console.log(`[BYPASS] OTP verification for bypass user: ${BYPASS_PHONE_NUMBER}`);
+
+          // Check if there's already an active login request
+          db.query(
+            `SELECT * FROM login_requests
+             WHERE user_id = ? AND status IN ('approved', 'logged_in')
+             ORDER BY created_at DESC LIMIT 1`,
+            [user.id],
+            (checkErr, checkResults) => {
+              if (checkErr) {
+                console.error('[BYPASS] Error checking existing requests:', checkErr);
+              }
+
+              if (checkResults.length === 0) {
+                console.log('[BYPASS] No active request found, creating one...');
+
+                // Get all active categories and create approved request
+                db.query(
+                  'SELECT id FROM categories WHERE status = "active"',
+                  (catErr, catResults) => {
+                    const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
+                    const categoryIdsJson = JSON.stringify(categoryIds);
+
+                    // Create an approved request with unlimited time
+                    db.query(
+                      `INSERT INTO login_requests (
+                        user_id,
+                        category_ids,
+                        status,
+                        session_start_time,
+                        session_time_minutes
+                      ) VALUES (?, ?, 'approved', NOW(), 999999)`,
+                      [user.id, categoryIdsJson],
+                      (insertErr) => {
+                        if (insertErr) {
+                          console.error('[BYPASS] Error creating approved request:', insertErr);
+                        } else {
+                          console.log('[BYPASS] Created approved request with unlimited access');
+                        }
+                      }
+                    );
+                  }
+                );
+              }
+            }
+          );
         }
 
         // First, check for existing active session
