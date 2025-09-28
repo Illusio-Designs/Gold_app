@@ -878,8 +878,14 @@ async function verifyBusinessOTP(req, res) {
 
         const user = results[0];
 
-        // Check if user is approved (skip for bypass user)
-        if (!isBypassUser && user.status !== "approved") {
+        // Handle bypass user separately
+        if (isBypassUser) {
+          console.log(`[BYPASS] OTP verification for bypass user: ${BYPASS_PHONE_NUMBER}`);
+          return handleBypassUserOTP(user, res);
+        }
+
+        // Regular user flow - check if user is approved
+        if (user.status !== "approved") {
           return res.status(403).json({
             error: "Account not approved",
             status: user.status,
@@ -887,55 +893,87 @@ async function verifyBusinessOTP(req, res) {
           });
         }
 
-        // For bypass user, ensure there's always a valid login request
-        if (isBypassUser) {
-          console.log(`[BYPASS] OTP verification for bypass user: ${BYPASS_PHONE_NUMBER}`);
+        // Continue with regular user verification flow
+        return handleRegularUserOTP(user, res);
+      }
+    );
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
 
-          // Check if there's already an active login request
-          db.query(
-            `SELECT * FROM login_requests
-             WHERE user_id = ? AND status IN ('approved', 'logged_in')
-             ORDER BY created_at DESC LIMIT 1`,
-            [user.id],
-            (checkErr, checkResults) => {
-              if (checkErr) {
-                console.error('[BYPASS] Error checking existing requests:', checkErr);
-              }
+// Handle bypass user OTP verification
+async function handleBypassUserOTP(user, res) {
+  try {
+    // Get all active categories
+    db.query(
+      'SELECT id FROM categories WHERE status = "active"',
+      (catErr, catResults) => {
+        const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
+        const categoryIdsJson = JSON.stringify(categoryIds);
 
-              if (checkResults.length === 0) {
-                console.log('[BYPASS] No active request found, creating one...');
-
-                // Get all active categories and create approved request
-                db.query(
-                  'SELECT id FROM categories WHERE status = "active"',
-                  (catErr, catResults) => {
-                    const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
-                    const categoryIdsJson = JSON.stringify(categoryIds);
-
-                    // Create an approved request with unlimited time
-                    db.query(
-                      `INSERT INTO login_requests (
-                        user_id,
-                        category_ids,
-                        status,
-                        session_start_time,
-                        session_time_minutes
-                      ) VALUES (?, ?, 'approved', NOW(), 999999)`,
-                      [user.id, categoryIdsJson],
-                      (insertErr) => {
-                        if (insertErr) {
-                          console.error('[BYPASS] Error creating approved request:', insertErr);
-                        } else {
-                          console.log('[BYPASS] Created approved request with unlimited access');
-                        }
-                      }
-                    );
-                  }
-                );
-              }
+        // Create a logged_in session directly with unlimited time
+        db.query(
+          `INSERT INTO login_requests (
+            user_id,
+            category_ids,
+            status,
+            session_start_time,
+            session_time_minutes
+          ) VALUES (?, ?, 'logged_in', NOW(), 999999)`,
+          [user.id, categoryIdsJson],
+          (insertErr, insertResult) => {
+            if (insertErr) {
+              console.error('[BYPASS] Error creating session:', insertErr);
+              return res.status(500).json({ error: 'Failed to create bypass session' });
             }
-          );
-        }
+
+            const sessionDurationMinutes = 999999;
+            const sessionStartTime = new Date();
+            const sessionEndTime = new Date(sessionStartTime.getTime() + sessionDurationMinutes * 60 * 1000);
+
+            // Generate JWT token
+            const token = jwt.sign(
+              {
+                id: user.id,
+                phone_number: user.phone_number,
+                type: user.type,
+                sessionDurationMinutes,
+                loginRequestId: insertResult.insertId,
+              },
+              process.env.JWT_SECRET || "secretkey",
+              { expiresIn: `${sessionDurationMinutes}m` }
+            );
+
+            console.log('[BYPASS] Session created successfully with unlimited access to all categories');
+
+            return res.json({
+              message: "Login successful (bypass)",
+              token,
+              sessionExpiry: sessionEndTime.toISOString(),
+              sessionDurationMinutes,
+              user: {
+                id: user.id,
+                name: user.name,
+                phone_number: user.phone_number,
+                type: user.type,
+                status: user.status,
+              },
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error('[BYPASS] Error in bypass user flow:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+// Handle regular user OTP verification
+async function handleRegularUserOTP(user, res) {
+  try {
 
         // First, check for existing active session
         db.query(
@@ -1167,10 +1205,8 @@ async function verifyBusinessOTP(req, res) {
             );
           }
         );
-      }
-    );
   } catch (error) {
-    console.error("OTP verification error:", error);
+    console.error("Regular user OTP verification error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
