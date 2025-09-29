@@ -1,13 +1,14 @@
 // Utility functions for handling images in the app
-import { API_URL } from '@env';
+declare const API_URL: string;
+declare const IMAGE_URL: string;
 
-// Extract base URL from API_URL (remove /api suffix)
-const BACKEND_URL = API_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
+// Use IMAGE_URL from environment variables
+const BACKEND_URL = IMAGE_URL || API_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
 
 export const getProductImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
+  if (!imagePath || typeof imagePath !== 'string') return null;
   
-  if (imagePath.startsWith('http')) {
+  if (imagePath.indexOf('http') === 0) {
     return imagePath;
   }
   
@@ -21,9 +22,9 @@ export const getProductImageUrl = (imagePath: string | null | undefined): string
 };
 
 export const getCategoryImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
+  if (!imagePath || typeof imagePath !== 'string') return null;
   
-  if (imagePath.startsWith('http')) {
+  if (imagePath.indexOf('http') === 0) {
     return imagePath;
   }
   
@@ -37,9 +38,9 @@ export const getCategoryImageUrl = (imagePath: string | null | undefined): strin
 };
 
 export const getSliderImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
+  if (!imagePath || typeof imagePath !== 'string') return null;
   
-  if (imagePath.startsWith('http')) {
+  if (imagePath.indexOf('http') === 0) {
     return imagePath;
   }
   
@@ -53,9 +54,9 @@ export const getSliderImageUrl = (imagePath: string | null | undefined): string 
 };
 
 export const getProfileImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
+  if (!imagePath || typeof imagePath !== 'string') return null;
   
-  if (imagePath.startsWith('http')) {
+  if (imagePath.indexOf('http') === 0) {
     return imagePath;
   }
   
