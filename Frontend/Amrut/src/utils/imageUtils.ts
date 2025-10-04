@@ -1,9 +1,27 @@
 // Utility functions for handling images in the app
 declare const API_URL: string;
-declare const IMAGE_URL: string;
 
-// Use IMAGE_URL from environment variables
-const BACKEND_URL = IMAGE_URL || API_URL?.replace('/api', '') || 'http://172.20.10.10:3001';
+// Get IMAGE_URL from environment or fallback to API_URL base
+const getImageUrl = () => {
+  try {
+    // Try to get IMAGE_URL from environment
+    const imageUrl = process.env.IMAGE_URL || (__DEV__ ? process.env.REACT_NATIVE_IMAGE_URL : undefined);
+    if (imageUrl) return imageUrl;
+    
+    // Fallback to API_URL base
+    if (typeof API_URL !== 'undefined') {
+      return API_URL.replace('/api', '');
+    }
+    
+    // Final fallback
+    return 'http://172.20.10.10:3001';
+  } catch (error) {
+    console.log('[ImageUtils] Error getting image URL, using fallback:', error);
+    return 'http://172.20.10.10:3001';
+  }
+};
+
+const BACKEND_URL = getImageUrl();
 
 export const getProductImageUrl = (imagePath: string | null | undefined): string | null => {
   if (!imagePath || typeof imagePath !== 'string') return null;
@@ -13,7 +31,7 @@ export const getProductImageUrl = (imagePath: string | null | undefined): string
   }
   
   // Use direct file access for product images
-  const fullUrl = `${BACKEND_URL}/uploads/products/${imagePath}?t=${Date.now()}`;
+  const fullUrl = `${process.env.IMAGE_URL}/products/${imagePath}?t=${Date.now()}`;
   console.log(`[App] Product image URL:`, {
     imagePath,
     fullUrl

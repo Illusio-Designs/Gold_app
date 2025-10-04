@@ -26,13 +26,14 @@ type ProductCardProps = {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
+console.log("imageSource",imageUrl)
+
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
-
   return (
   <TouchableOpacity style={productCardStyles.card} onPress={onPress} activeOpacity={0.7}>
-      <Image source={imageSource} style={productCardStyles.image} resizeMode="cover" />
+      <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
       <Text style={productCardStyles.name}>{product.name || 'Product'}</Text>
   </TouchableOpacity>
 );
@@ -43,6 +44,7 @@ const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'new' | 'best'>('all');
   const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // Store all products
   const [productsLoading, setProductsLoading] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -137,10 +139,17 @@ const Home = () => {
     fetchCategories();
   }, [isUserLoggedIn, userId, accessToken]);
 
-  // Load products on mount and when category or auth state changes
+  // Load products on mount and when auth state changes
   useEffect(() => {
     loadProducts();
-  }, [selectedCategory, isUserLoggedIn, userId, accessToken]);
+  }, [isUserLoggedIn, userId, accessToken]);
+  
+  // Filter products when allProducts or selectedCategory changes
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      handleCategorySelect(selectedCategory);
+    }
+  }, [allProducts]);
 
   // Load products function
   const loadProducts = async () => {
@@ -153,12 +162,14 @@ const Home = () => {
         try {
           // Use filtered products for logged-in users
           response = await getApprovedProductsForUser(userId, accessToken);
-          
+          console.log('[Home] Approved products response:', response);
           if (response.success && response.data && response.data.length > 0) {
-            setProducts(response.data);
+            setAllProducts(response.data); // Store all products
+            setProducts(response.data); // Initially show all products
             console.log('[Home] Loaded approved products:', response.data.length);
           } else {
             console.log('[Home] No approved products found - user may not have approved login request yet');
+            setAllProducts([]);
             setProducts([]);
           }
         } catch (apiError: any) {
@@ -168,15 +179,18 @@ const Home = () => {
             setProducts([]);
           } else {
             console.log('[Home] Setting empty products array due to API error');
+            setAllProducts([]);
             setProducts([]);
           }
         }
       } else {
         console.log('[Home] User not logged in - showing empty products');
+        setAllProducts([]);
         setProducts([]);
       }
     } catch (error) {
       console.error('[Home] Error loading products:', error);
+      setAllProducts([]);
       setProducts([]);
     } finally {
       setProductsLoading(false);
@@ -190,8 +204,13 @@ const Home = () => {
     getSliders,
     []
   );
+  console.log("slidersData:", slidersData);
   
-  const slidersResponse = slidersData?.data || [];
+  // Process sliders response and fix localhost URLs
+  const slidersResponse = (slidersData?.data || []).map((slider: any) => ({
+    ...slider,
+    image_url: slider.image_url ? slider.image_url.replace('http://localhost:3001', 'https://api.amrutkumargovinddasllp.com') : slider.image_url
+  }));
   const slidersLoading = slidersData?.loading || false;
   const slidersError = slidersData?.error || null;
   const refreshSliders = slidersData?.refresh || (() => {});
@@ -329,12 +348,85 @@ const Home = () => {
     (navigation as any).navigate('ProductDetail', { productId: product.id });
   };
 
-  const handleCategorySelect = (category: 'all' | 'new' | 'best') => {
-    setSelectedCategory(category);
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category as 'all' | 'new' | 'best');
+    
+    // Filter products based on category selection
+    let filteredProducts = [];
+    
+    console.log('[Home] Filtering products for category:', category);
+    console.log('[Home] Total products available:', allProducts.length);
+    
+    if (category === 'all') {
+      filteredProducts = allProducts;
+    } else if (category === 'new') {
+      // Filter products updated in the last 30 days (using updated_at instead of created_at)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      filteredProducts = allProducts.filter((product: any) => {
+        const productUpdateDate = new Date(product.updated_at);
+        const isNew = productUpdateDate >= thirtyDaysAgo;
+        console.log('[Home] Product:', product.name, 'Updated:', product.updated_at, 'Is New:', isNew);
+        return isNew;
+      });
+      
+      // If no products found with updated_at filter, use created_at with extended period (60 days)
+      if (filteredProducts.length === 0) {
+        const sixtyDaysAgo = new Date();
+        sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+        
+        filteredProducts = allProducts.filter((product: any) => {
+          const productCreateDate = new Date(product.created_at);
+          return productCreateDate >= sixtyDaysAgo;
+        });
+        
+        console.log('[Home] No recent updates found, using 60-day created filter:', filteredProducts.length);
+      }
+      
+      // If still no products, show the most recently updated ones (top 50%)
+      if (filteredProducts.length === 0) {
+        filteredProducts = [...allProducts]
+          .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          .slice(0, Math.ceil(allProducts.length * 0.5));
+        
+        console.log('[Home] Using most recently updated products:', filteredProducts.length);
+      }
+    } else if (category === 'best') {
+      // For 'best' products - sort by gross_weight and recent updates
+      filteredProducts = [...allProducts]
+        .sort((a: any, b: any) => {
+          // Sort by gross_weight descending, then by updated_at descending
+          const weightDiff = parseFloat(b.gross_weight || '0') - parseFloat(a.gross_weight || '0');
+          if (weightDiff !== 0) return weightDiff;
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        })
+        .slice(0, Math.ceil(allProducts.length * 0.8)); // Show top 80% as 'best'
+      
+      console.log('[Home] Best products filtered:', filteredProducts.length);
+    } else {
+      // Handle actual category names (like "antique buti", "cz ladies viti")
+      console.log('[Home] Filtering by actual category name:', category);
+      
+      filteredProducts = allProducts.filter((product: any) => {
+        const productCategoryName = product.category_name?.toLowerCase();
+        const selectedCategoryName = category.toLowerCase();
+        const matches = productCategoryName === selectedCategoryName;
+        
+        console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
+        return matches;
+      });
+      
+      console.log('[Home] Category-specific products filtered:', filteredProducts.length);
+    }
+    
+    console.log('[Home] Final filtered products count:', filteredProducts.length);
+    setProducts(filteredProducts);
+    
     Toast.show({
       type: 'info',
       text1: 'Category Selected',
-      text2: `Showing ${category} products`,
+      text2: `Showing ${filteredProducts.length} ${category} products`,
       position: 'top',
       visibilityTime: 1500
     });
@@ -402,7 +494,7 @@ const Home = () => {
       {/* Responsive padding for CategoryFilterGroup */}
       <CategoryFilterGroup 
         selected={selectedCategory} 
-        onSelect={(val) => handleCategorySelect(val as 'all' | 'new' | 'best')}
+        onSelect={handleCategorySelect}
         categories={categories}
         loading={categoriesLoading}
         style={{

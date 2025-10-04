@@ -8,14 +8,6 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
-# Force legacy architecture to avoid build conflicts
-ENV['RCT_NEW_ARCH_ENABLED'] = '0'
-ENV['RCT_FABRIC_ENABLED'] = '0'
-ENV['RCT_HERMES_ENABLED'] = '0'
-
-# Fix for Swift module integration with static libraries
-use_modular_headers!
-
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
@@ -28,12 +20,7 @@ target 'Amrut' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
-    # Completely disable New Architecture to fix build issues
-    :fabric_enabled => false,
-    :hermes_enabled => false,
-    # Force legacy architecture
-    :new_arch_enabled => false
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
