@@ -16,8 +16,10 @@ import aboutImg from "../assests/ft.png";
 import footerBg from "../assests/bgdesign.png";
 import flower from "../assests/Flower.png";
 import cowflower from "../assests/cow & flower.png";
+import { getPublicCategories } from "../services/publicApiService";
 
-const categories = [
+// Fallback categories in case API fails
+const fallbackCategories = [
   { name: "Rings", img: ringImg },
   { name: "Necklace", img: necklaceImg },
   { name: "Earrings", img: earringsImg },
@@ -53,6 +55,9 @@ const HomePage = () => {
   const scrollPosition = useRef(0);
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
+  const [categories, setCategories] = useState(fallbackCategories);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -65,6 +70,74 @@ const HomePage = () => {
       setActiveSection(sectionId);
     }
   };
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError(null);
+        console.log("🔄 [HOMEPAGE] Fetching categories from API...");
+        console.log("🔄 [HOMEPAGE] Environment:", import.meta.env.DEV ? "development" : "production");
+        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://amrutkumargovinddasllp.com/api"));
+        
+        const apiCategories = await getPublicCategories();
+        console.log("✅ [HOMEPAGE] Categories fetched:", apiCategories);
+        console.log("✅ [HOMEPAGE] Categories count:", apiCategories.length);
+        
+        // Transform API categories to match our format and remove duplicates
+        const uniqueCategories = [];
+        const seenNames = new Set();
+        
+        const transformedCategories = apiCategories.map(category => {
+          // Skip if we've already seen this category name
+          if (seenNames.has(category.name)) {
+            console.log("⚠️ [HOMEPAGE] Skipping duplicate category:", category.name);
+            return null;
+          }
+          
+          seenNames.add(category.name);
+          
+          return {
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            img: category.processed_image_url || category.image_url || fallbackCategories[0].img, // Use API image or fallback
+            originalImage: category.image_url,
+            processedImage: category.processed_image_url
+          };
+        }).filter(category => category !== null); // Remove null entries
+        
+        if (transformedCategories.length > 0) {
+          setCategories(transformedCategories);
+          console.log("✅ [HOMEPAGE] Categories updated:", transformedCategories);
+          console.log("✅ [HOMEPAGE] Unique categories count:", transformedCategories.length);
+          console.log("✅ [HOMEPAGE] Categories with images:", transformedCategories.map(cat => ({
+            name: cat.name,
+            img: cat.img,
+            hasImage: cat.img !== fallbackCategories[0].img
+          })));
+        } else {
+          console.log("⚠️ [HOMEPAGE] No categories found, using fallback");
+          setCategories(fallbackCategories);
+        }
+      } catch (error) {
+        console.error("❌ [HOMEPAGE] Error fetching categories:", error);
+        console.error("❌ [HOMEPAGE] Error details:", {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+        setCategoriesError(error.message);
+        setCategories(fallbackCategories); // Use fallback on error
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Track scroll position to update active section
   useEffect(() => {
@@ -85,48 +158,32 @@ const HomePage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Create continuous loop by duplicating categories multiple times
-  const displayCategories = [...categories, ...categories, ...categories, ...categories];
+  // Display only the actual categories from API (no duplication)
+  const displayCategories = categories;
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const cardWidth = 300; // Width of each card + gap
-    let scrollPosition = categories.length * cardWidth; // Start from middle set
-    
-    // Set initial position to middle of duplicated array
+    // Disable auto-scrolling since we're showing actual categories only
+    // Users can manually scroll if needed
     container.scrollTo({
-      left: scrollPosition,
+      left: 0,
       behavior: 'auto'
     });
 
-    intervalRef.current = setInterval(() => {
-      scrollPosition += cardWidth;
-      
-      container.scrollTo({
-        left: scrollPosition,
-        behavior: 'smooth'
-      });
-
-      // Reset position invisibly when we've scrolled too far
-      if (scrollPosition >= categories.length * cardWidth * 3) {
-        setTimeout(() => {
-          scrollPosition = categories.length * cardWidth;
-          container.scrollTo({
-            left: scrollPosition,
-            behavior: 'auto'
-          });
-        }, 300);
-      }
-    }, 2000);
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  }, [categories]);
 
   return (
     <div className="homepage-root">
@@ -206,16 +263,47 @@ const HomePage = () => {
             className="homepage-categories-list"
             ref={scrollContainerRef}
           >
-            {displayCategories.map((cat, index) => (
-              <div className="homepage-category-card" key={`${cat.name}-${index}`}>
-                <img
-                  src={cat.img}
-                  alt={cat.name}
-                  className="homepage-category-img"
-                />
-                <span className="homepage-category-label">{cat.name}</span>
+            {categoriesLoading ? (
+              <div className="homepage-categories-loading">
+                <div className="homepage-loading-spinner"></div>
+                <p>Loading categories...</p>
               </div>
-            ))}
+            ) : categoriesError ? (
+              <div className="homepage-categories-error">
+                <p>Unable to load categories. Showing default categories.</p>
+                {displayCategories.map((cat, index) => (
+                  <div className="homepage-category-card" key={`${cat.name}-${index}`}>
+                    <img
+                      src={cat.img}
+                      alt={cat.name}
+                      className="homepage-category-img"
+                    />
+                    <span className="homepage-category-label">{cat.name}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              displayCategories.map((cat, index) => (
+                <div className="homepage-category-card" key={`${cat.id || cat.name}-${index}`}>
+                  <img
+                    src={cat.img}
+                    alt={cat.name}
+                    className="homepage-category-img"
+                    onError={(e) => {
+                      console.warn(`Failed to load image for ${cat.name}, using fallback`);
+                      e.target.src = fallbackCategories[0].img;
+                    }}
+                    onLoad={() => {
+                      console.log(`✅ Image loaded successfully for ${cat.name}:`, cat.img);
+                    }}
+                  />
+                  <span className="homepage-category-label">{cat.name}</span>
+                  {cat.description && (
+                    <span className="homepage-category-description">{cat.description}</span>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
