@@ -304,8 +304,8 @@ export default function DashboardLayout() {
         <header className="dashboard-header">
           <h1 className="dashboard-title">{getPageTitle()}</h1>
           <div className="header-actions">
-            <button className="header-icon-btn" onClick={handleFullscreen}>
-              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            <button className="header-icon-btn" onClick={handleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
+              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
             </button>
             
             {/* Real-Time Notifications */}
@@ -314,7 +314,7 @@ export default function DashboardLayout() {
             {/* Notification Bell */}
             <div className="notification-menu">
               <button
-                className="notification-trigger"
+                className="header-icon-btn"
                 onClick={handleNotificationClick}
                 title="Notifications"
               >

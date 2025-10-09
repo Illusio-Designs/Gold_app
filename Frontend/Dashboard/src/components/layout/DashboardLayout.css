@@ -12,13 +12,18 @@
 
 body {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: "Poppins", sans-serif !important;
 }
 
 .dashboard-layout {
   display: flex;
   height: 100vh;
   position: relative;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.dashboard-layout * {
+  font-family: "Poppins", sans-serif !important;
 }
 
 .dashboard-sidebar {
@@ -209,7 +214,7 @@ body {
 }
 
 .dashboard-header {
-  height: 80px;
+  height: 70px;
   background: var(--sidebar-bg);
   color: var(--sidebar-text-color);
   display: flex;
@@ -219,10 +224,13 @@ body {
   border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(93, 8, 41, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.page-title {
-  font-size: 24px;
+.dashboard-title {
+  font-size: 22px;
   font-weight: 600;
   margin: 0;
   color: var(--sidebar-text-color);
@@ -230,6 +238,7 @@ body {
   -webkit-background-clip: initial;
   background-clip: initial;
   -webkit-text-fill-color: initial;
+  font-family: 'Poppins', sans-serif;
 }
 
 .profile-menu {
@@ -244,10 +253,20 @@ body {
   align-items: center;
   gap: 10px;
   color: var(--sidebar-text-color);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.profile-trigger:hover {
+  background: rgba(252, 226, 191, 0.1);
+  transform: translateY(-1px);
 }
 
 .admin-name {
   font-weight: 500;
+  font-family: 'Poppins', sans-serif;
 }
 
 .profile-dropdown {
@@ -319,7 +338,7 @@ body {
 }
 
 .dashboard-footer {
-  height: 50px;
+  height: 60px;
   background: var(--sidebar-bg);
   color: var(--sidebar-text-color);
   display: flex;
@@ -328,13 +347,19 @@ body {
   border-top: 1px solid var(--border-color);
   flex-shrink: 0;
   font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   color: var(--sidebar-text-color);
+  font-family: 'Poppins', sans-serif;
 }
 
 .header-icon-btn {
@@ -342,37 +367,25 @@ body {
   border: none;
   color: var(--sidebar-text-color);
   cursor: pointer;
-  padding: 5px;
-  border-radius: 50%;
+  padding: 8px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  min-height: 40px;
+  position: relative;
 }
 
 .header-icon-btn:hover {
-  background: var(--button-hover-bg);
-  color: #fff;
+  background: rgba(252, 226, 191, 0.1);
+  color: var(--sidebar-text-color);
+  transform: translateY(-1px);
 }
 
 .notification-menu {
   position: relative;
-  margin-right: 16px;
-}
-
-.notification-trigger {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-  position: relative;
-  color: var(--text-primary);
-}
-
-.notification-trigger:hover {
-  background-color: rgba(93, 8, 41, 0.1);
 }
 
 .notification-dropdown {
@@ -478,4 +491,68 @@ body {
 
 .notification-manager .btn-danger:hover {
   background: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header {
+    height: 60px;
+    padding: 0 20px;
+  }
+  
+  .dashboard-title {
+    font-size: 18px;
+  }
+  
+  .header-actions {
+    gap: 8px;
+  }
+  
+  .header-icon-btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 6px;
+  }
+  
+  .profile-trigger {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  
+  .admin-name {
+    font-size: 14px;
+  }
+  
+  .dashboard-footer {
+    height: 50px;
+    font-size: 12px;
+  }
+  
+  .dashboard-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    height: 55px;
+    padding: 0 15px;
+  }
+  
+  .dashboard-title {
+    font-size: 16px;
+  }
+  
+  .header-actions {
+    gap: 6px;
+  }
+  
+  .admin-name {
+    display: none;
+  }
+  
+  .dashboard-footer {
+    height: 45px;
+    font-size: 11px;
+  }
 }

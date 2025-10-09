@@ -60,14 +60,6 @@ const CategoriesPage = () => {
         return (
           <div
             className="action-buttons"
-            style={{
-              display: "flex",
-              gap: "8px",
-              alignItems: "center",
-              border: "1px solid red", // Debug border
-              padding: "4px",
-              backgroundColor: "#f0f0f0", // Debug background
-            }}
           >
             <Button
               variant="outline"

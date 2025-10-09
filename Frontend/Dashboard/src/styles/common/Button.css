@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  padding: 10px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -10,7 +10,6 @@
   transition: all 0.2s ease;
   border: 1px solid #c09e83;
   gap: 8px;
-  min-width: 100px;
   outline: none;
   position: relative;
   background: #5d0829;
