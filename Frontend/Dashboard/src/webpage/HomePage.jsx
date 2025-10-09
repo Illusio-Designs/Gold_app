@@ -8,27 +8,32 @@ import flowers from "../assests/flowers.png";
 import phones from "../assests/phones.png";
 import appstore from "../assests/appstore.png";
 import googleplay from "../assests/googleplay.png";
-import ringImg from "../assests/Ring.png";
-import necklaceImg from "../assests/Neckless.png";
-import earringsImg from "../assests/Earrings.png";
-import braceletImg from "../assests/Bracelet.png";
 import aboutImg from "../assests/ft.png";
 import footerBg from "../assests/bgdesign.png";
 import flower from "../assests/Flower.png";
 import cowflower from "../assests/cow & flower.png";
 import { getPublicCategories } from "../services/publicApiService";
 
-// Fallback categories in case API fails
-const fallbackCategories = [
-  { name: "Rings", img: ringImg },
-  { name: "Necklace", img: necklaceImg },
-  { name: "Earrings", img: earringsImg },
-  { name: "Bracelet", img: braceletImg },
-  { name: "Chains", img: necklaceImg },
-  { name: "Bangles", img: braceletImg },
-  { name: "Pendants", img: earringsImg },
-  { name: "Anklets", img: braceletImg },
-];
+// Image base URL for constructing category image URLs
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://api.amrutkumargovinddasllp.com/uploads";
+
+// Helper function to construct category image URL from filename
+const getCategoryImageUrl = (filename) => {
+  if (!filename) return null;
+  
+  // If it's already a full URL, return as-is
+  if (filename.startsWith("http")) {
+    // But if it's localhost, transform it to production URL
+    if (filename.includes("localhost:3001")) {
+      const filenamePart = filename.split("/").pop();
+      return `${IMAGE_BASE_URL}/categories/${filenamePart}`;
+    }
+    return filename;
+  }
+  
+  // Construct the full URL from just the filename
+  return `${IMAGE_BASE_URL}/categories/${filename}`;
+};
 
 const faqData = [
   {
@@ -55,7 +60,7 @@ const HomePage = () => {
   const scrollPosition = useRef(0);
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
-  const [categories, setCategories] = useState(fallbackCategories);
+  const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState(null);
 
@@ -98,13 +103,23 @@ const HomePage = () => {
           
           seenNames.add(category.name);
           
+          // Use the image filename from backend (not full URLs)
+          // Backend returns: category.image (filename only)
+          const imageFilename = category.image;
+          const imageUrl = getCategoryImageUrl(imageFilename);
+          
+          console.log("🖼️ [HOMEPAGE] Category image:", {
+            name: category.name,
+            filename: imageFilename,
+            constructedUrl: imageUrl
+          });
+          
           return {
             id: category.id,
             name: category.name,
             description: category.description,
-            img: category.processed_image_url || category.image_url || fallbackCategories[0].img, // Use API image or fallback
-            originalImage: category.image_url,
-            processedImage: category.processed_image_url
+            image: imageFilename, // Store the filename
+            img: imageUrl // Constructed full URL for display
           };
         }).filter(category => category !== null); // Remove null entries
         
@@ -114,12 +129,13 @@ const HomePage = () => {
           console.log("✅ [HOMEPAGE] Unique categories count:", transformedCategories.length);
           console.log("✅ [HOMEPAGE] Categories with images:", transformedCategories.map(cat => ({
             name: cat.name,
-            img: cat.img,
-            hasImage: cat.img !== fallbackCategories[0].img
+            filename: cat.image,
+            url: cat.img,
+            hasImage: !!cat.image
           })));
         } else {
-          console.log("⚠️ [HOMEPAGE] No categories found, using fallback");
-          setCategories(fallbackCategories);
+          console.log("⚠️ [HOMEPAGE] No categories found from API");
+          setCategories([]);
         }
       } catch (error) {
         console.error("❌ [HOMEPAGE] Error fetching categories:", error);
@@ -130,7 +146,7 @@ const HomePage = () => {
           data: error.response?.data
         });
         setCategoriesError(error.message);
-        setCategories(fallbackCategories); // Use fallback on error
+        setCategories([]); // Empty array on error
       } finally {
         setCategoriesLoading(false);
       }
@@ -270,33 +286,34 @@ const HomePage = () => {
               </div>
             ) : categoriesError ? (
               <div className="homepage-categories-error">
-                <p>Unable to load categories. Showing default categories.</p>
-                {displayCategories.map((cat, index) => (
-                  <div className="homepage-category-card" key={`${cat.name}-${index}`}>
-                    <img
-                      src={cat.img}
-                      alt={cat.name}
-                      className="homepage-category-img"
-                    />
-                    <span className="homepage-category-label">{cat.name}</span>
-                  </div>
-                ))}
+                <p>Unable to load categories. Please try again later.</p>
+                <p style={{ fontSize: '14px', color: '#999' }}>{categoriesError}</p>
+              </div>
+            ) : displayCategories.length === 0 ? (
+              <div className="homepage-categories-empty">
+                <p>No categories available at the moment.</p>
               </div>
             ) : (
               displayCategories.map((cat, index) => (
                 <div className="homepage-category-card" key={`${cat.id || cat.name}-${index}`}>
-                  <img
-                    src={cat.img}
-                    alt={cat.name}
-                    className="homepage-category-img"
-                    onError={(e) => {
-                      console.warn(`Failed to load image for ${cat.name}, using fallback`);
-                      e.target.src = fallbackCategories[0].img;
-                    }}
-                    onLoad={() => {
-                      console.log(`✅ Image loaded successfully for ${cat.name}:`, cat.img);
-                    }}
-                  />
+                  {cat.img ? (
+                    <img
+                      src={cat.img}
+                      alt={cat.name}
+                      className="homepage-category-img"
+                      onError={(e) => {
+                        console.error(`❌ Failed to load image for ${cat.name}:`, cat.img);
+                        e.target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log(`✅ Image loaded successfully for ${cat.name}`);
+                      }}
+                    />
+                  ) : (
+                    <div className="homepage-category-img homepage-category-no-image">
+                      <span>No Image</span>
+                    </div>
+                  )}
                   <span className="homepage-category-label">{cat.name}</span>
                   {cat.description && (
                     <span className="homepage-category-description">{cat.description}</span>

@@ -29,7 +29,8 @@ const config = {
 
   // CORS Origins
   CORS_ORIGINS: [
-    "http://localhost:3000", // Dashboard development
+    "http://localhost:3000", // Dashboard development (webpack)
+    "http://localhost:5173", // Dashboard development (Vite)
     "http://localhost:8081", // React Native development
     "http://192.168.1.14:8081", // React Native on LAN
     "http://192.168.1.14:3001",

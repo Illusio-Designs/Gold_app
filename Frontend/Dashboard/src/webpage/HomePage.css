@@ -1,3 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
+
 @font-face {
   font-family: "Glorify";
   src: url("/Glorifydemo-BW3J3.otf") format("opentype");
@@ -5,9 +8,6 @@
   font-style: normal;
   font-display: swap;
 }
-
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
 
 * {
   font-family: "Glorify", serif !important;
@@ -263,11 +263,58 @@ body {
 }
 
 .homepage-category-img {
-  width: 80px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   margin-right: 1rem;
-  border-radius: 50px;
+  border-radius: 50%;
   background: #f8e9d2;
+  transition: filter 0.5s ease, opacity 0.3s ease;
+  overflow: hidden;
+  flex-shrink: 0;
+  isolation: isolate;
+}
+
+/* Grayscale effect while loading - only affects the circular image */
+.homepage-category-img.loading {
+  filter: grayscale(100%) blur(2px);
+  opacity: 0.7;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Full color when loaded - smooth transition */
+.homepage-category-img.loaded {
+  filter: grayscale(0%) blur(0px);
+  opacity: 1;
+  animation: none;
+}
+
+/* Pulse animation for loading state */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* No image placeholder */
+.homepage-category-no-image {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8e9d2 0%, #ecddc5 100%);
+  margin-right: 1rem;
+  border-radius: 50%;
+}
+
+.homepage-category-no-image span {
+  font-size: 10px;
+  color: #8b7355;
+  text-align: center;
 }
 
 .homepage-category-label {

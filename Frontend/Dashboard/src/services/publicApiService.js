@@ -61,13 +61,13 @@ export const getPublicCategories = () =>
         return [];
       }
       
-      // Log image URLs for debugging
+      // Log category data for debugging
       categories.forEach((category, index) => {
         console.log(`📸 [PUBLIC API] Category ${index + 1}:`, {
           name: category.name,
-          image_url: category.image_url,
-          processed_image_url: category.processed_image_url,
-          final_image: category.processed_image_url || category.image_url
+          image: category.image, // Just the filename
+          description: category.description,
+          status: category.status
         });
       });
       
