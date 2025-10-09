@@ -87,20 +87,18 @@ const SliderPage = () => {
       cell: (row) => (
         <div className="action-buttons">
           <Button
+            variant="outline"
+            size="sm"
             onClick={() => handleEdit(row)}
-            className="edit-btn"
-            size="small"
           >
-            <Edit className="icon" />
-            Edit
+            <Edit size={16} />
           </Button>
           <Button
+            variant="danger"
+            size="sm"
             onClick={() => handleDelete(row)}
-            className="delete-btn"
-            size="small"
           >
-            <Trash2 className="icon" />
-            Delete
+            <Trash2 size={16} />
           </Button>
         </div>
       ),
@@ -288,35 +286,32 @@ const SliderPage = () => {
 
   return (
     <div className="slider-page">
-      <div className="page-header">
-        <h1>Slider Management</h1>
-        <p>Manage home page sliders and banners</p>
-        <Button onClick={handleCreate} className="create-btn">
-          <Plus className="icon" />
-          Create New Slider
-        </Button>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
       <TableWithControls
         data={sliders}
         columns={columns}
         loading={loading}
-        searchPlaceholder="Search sliders..."
-        filterOptions={[
+        pageTitle="Slider Management"
+        searchFields={["title", "category_name"]}
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus className="icon" />
+            Create New Slider
+          </Button>
+        }
+        filters={[
           {
             key: "title",
-            label: "Title",
             options: [
-              { value: "", label: "All" },
+              { value: "", label: "All Titles" },
               ...sliders.map((slider) => ({
                 value: slider.title,
                 label: slider.title,
               })),
             ],
+            placeholder: "Filter by title",
           },
         ]}
+        errorMessage={error}
       />
 
       {/* Create/Edit Modal */}

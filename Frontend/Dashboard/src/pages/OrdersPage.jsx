@@ -10,6 +10,10 @@ import {
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { isAuthenticated, getAdminToken } from '../utils/authUtils';
 import { useNavigate } from 'react-router-dom';
+import TableWithControls from '../components/common/TableWithControls';
+import Button from '../components/common/Button';
+import DropdownSelect from '../components/common/DropdownSelect';
+import { ShoppingCart, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import '../styles/pages/OrdersPage.css';
 
 const OrdersPage = () => {
@@ -23,8 +27,6 @@ const OrdersPage = () => {
   const [selectedUser, setSelectedUser] = useState('');
   const [userCart, setUserCart] = useState(null);
   const [showUserCart, setShowUserCart] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [ordersPerPage] = useState(20);
   const navigate = useNavigate();
 
   const statusOptions = [
@@ -50,7 +52,6 @@ const OrdersPage = () => {
 
   useEffect(() => {
     filterOrders();
-    setCurrentPage(1); // Reset to first page when filters change
   }, [orders, filterStatus, searchTerm]);
 
   const loadOrders = async () => {
@@ -121,13 +122,6 @@ const OrdersPage = () => {
   
 
 
-  // Pagination logic
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
@@ -204,10 +198,10 @@ const OrdersPage = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedOrders.length === currentOrders.length) {
+    if (selectedOrders.length === filteredOrders.length) {
       setSelectedOrders([]);
     } else {
-      setSelectedOrders(currentOrders.map(order => order.id));
+      setSelectedOrders(filteredOrders.map(order => order.id));
     }
   };
 
@@ -261,224 +255,178 @@ const OrdersPage = () => {
   if (loading) {
     return (
       <div className="orders-page">
-        <div className="loading">Loading orders...</div>
+        <div className="loading">
+          <div className="loading-spinner"></div>
+        </div>
       </div>
     );
   }
 
+  // Create columns for TableWithControls
+  const columns = [
+
+    {
+      header: "Order ID",
+      accessor: "id",
+      cell: (row) => (
+        <span className="order-id">#{row.id}</span>
+      ),
+    },
+    {
+      header: "Product",
+      accessor: "product_info",
+      cell: (row) => (
+        <div className="product-info">
+          {row.product_image ? (
+            <img 
+              src={row.product_image} 
+              alt={row.product_name} 
+              className="product-thumbnail"
+            />
+          ) : (
+            <div className="product-thumbnail no-image">
+              <ImageIcon size={12} />
+            </div>
+          )}
+          <div className="product-details">
+            <div className="product-name">{row.product_name || 'N/A'}</div>
+            <div className="product-sku">SKU: {row.product_sku || 'N/A'}</div>
+            {row.net_weight && (
+              <div className="product-weight">Weight: {row.net_weight}g</div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "User",
+      accessor: "user_info",
+      cell: (row) => (
+        <div className="user-info">
+          <div className="user-name">{row.user_name || 'N/A'}</div>
+          <div className="business-name">{row.business_name || 'N/A'}</div>
+          <div className="user-phone">{row.user_phone || 'N/A'}</div>
+        </div>
+      ),
+    },
+    {
+      header: "Quantity",
+      accessor: "total_qty",
+      cell: (row) => (
+        <span className="quantity">{row.total_qty || 0}</span>
+      ),
+    },
+    {
+      header: "Amount",
+      accessor: "total_mark_amount",
+      cell: (row) => (
+        <span className="amount">{formatCurrency(row.total_mark_amount || 0)}</span>
+      ),
+    },
+    {
+      header: "Status",
+      accessor: "status",
+      cell: (row) => (
+        <select
+          value={row.status}
+          onChange={(e) => handleStatusUpdate(row.id, e.target.value)}
+          className="status-update-select"
+          style={{ borderColor: getStatusColor(row.status) }}
+        >
+          {statusOptions.slice(1).map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      header: "Created",
+      accessor: "created_at",
+      cell: (row) => (
+        <span className="created-date">{formatDate(row.created_at)}</span>
+      ),
+    },
+    {
+      header: "Actions",
+      accessor: "actions",
+      cell: (row) => (
+        <div className="action-buttons">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => viewUserCart(row.business_user_id)}
+            title="View User Cart"
+          >
+            <ShoppingCart size={16} />
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="orders-page">
-      <div className="page-header">
-        <h1>Order Management</h1>
-        <p>Manage orders and track individual product status</p>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="statistics-grid">
-        <div className="stat-card">
-          <h3>Total Orders</h3>
-          <p className="stat-number">{statistics.total_orders || 0}</p>
+      {/* Statistics Display */}
+      <div className="statistics-display">
+        <div className="stat-item">
+          <span className="stat-label">Total:</span>
+          <span className="stat-value">{statistics.total_orders || 0}</span>
         </div>
-        <div className="stat-card pending">
-          <h3>Pending</h3>
-          <p className="stat-number">{statistics.pending_orders || 0}</p>
+        <div className="stat-item">
+          <span className="stat-label">Pending:</span>
+          <span className="stat-value pending">{statistics.pending_orders || 0}</span>
         </div>
-        <div className="stat-card processing">
-          <h3>Processing</h3>
-          <p className="stat-number">{statistics.processing_orders || 0}</p>
+        <div className="stat-item">
+          <span className="stat-label">Processing:</span>
+          <span className="stat-value processing">{statistics.processing_orders || 0}</span>
         </div>
-        <div className="stat-card shipped">
-          <h3>Shipped</h3>
-          <p className="stat-number">{statistics.shipped_orders || 0}</p>
+        <div className="stat-item">
+          <span className="stat-label">Shipped:</span>
+          <span className="stat-value shipped">{statistics.shipped_orders || 0}</span>
         </div>
-        <div className="stat-card delivered">
-          <h3>Delivered</h3>
-          <p className="stat-number">{statistics.delivered_orders || 0}</p>
+        <div className="stat-item">
+          <span className="stat-label">Delivered:</span>
+          <span className="stat-value delivered">{statistics.delivered_orders || 0}</span>
         </div>
-        <div className="stat-card cancelled">
-          <h3>Cancelled</h3>
-          <p className="stat-number">{statistics.cancelled_orders || 0}</p>
+        <div className="stat-item">
+          <span className="stat-label">Cancelled:</span>
+          <span className="stat-value cancelled">{statistics.cancelled_orders || 0}</span>
         </div>
       </div>
 
-      {/* Filters and Actions */}
-      <div className="filters-section">
-        <div className="search-filter">
-          <input
-            type="text"
-            placeholder="Search by product name, user name, order ID, or SKU..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-
-        <div className="status-filter">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="status-select"
-          >
-            {statusOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="bulk-actions">
-          <select
-            onChange={(e) => handleBulkStatusUpdate(e.target.value)}
-            className="bulk-status-select"
-            defaultValue=""
-          >
-            <option value="" disabled>Bulk Update Status</option>
-            {statusOptions.slice(1).map(option => (
-              <option key={option.value} value={option.value}>
-                Update to {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Orders Summary */}
-      <div className="orders-summary">
-        <p>Showing {filteredOrders.length} orders ({indexOfFirstOrder + 1}-{Math.min(indexOfLastOrder, filteredOrders.length)} of {filteredOrders.length})</p>
-        {selectedOrders.length > 0 && (
-          <p className="selected-count">{selectedOrders.length} orders selected</p>
-        )}
-      </div>
-
-      {/* Orders Table */}
-      <div className="orders-table-container">
-        <table className="orders-table">
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={selectedOrders.length === currentOrders.length && currentOrders.length > 0}
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th>Order ID</th>
-              <th>Product</th>
-              <th>User</th>
-              <th>Quantity</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentOrders.map(order => (
-              <tr key={order.id} className={`order-row ${order.status}`}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedOrders.includes(order.id)}
-                    onChange={() => handleOrderSelection(order.id)}
-                  />
-                </td>
-                <td className="order-id">#{order.id}</td>
-                <td>
-                  <div className="product-info">
-                    {order.product_image && (
-                      <img 
-                        src={order.product_image} 
-                        alt={order.product_name} 
-                        className="product-thumbnail"
-                      />
-                    )}
-                    <div className="product-details">
-                      <div className="product-name">{order.product_name || 'N/A'}</div>
-                      <div className="product-sku">SKU: {order.product_sku || 'N/A'}</div>
-                      {order.net_weight && (
-                        <div className="product-weight">Weight: {order.net_weight}g</div>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div className="user-info">
-                    <div className="user-name">{order.user_name || 'N/A'}</div>
-                    <div className="business-name">{order.business_name || 'N/A'}</div>
-                    <div className="user-phone">{order.user_phone || 'N/A'}</div>
-                  </div>
-                </td>
-                <td className="quantity">{order.total_qty || 0}</td>
-                <td className="amount">{formatCurrency(order.total_mark_amount || 0)}</td>
-                <td>
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                    className="status-update-select"
-                    style={{ borderColor: getStatusColor(order.status) }}
-                  >
-                    {statusOptions.slice(1).map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="created-date">{formatDate(order.created_at)}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      onClick={() => viewUserCart(order.business_user_id)}
-                      className="btn btn-secondary btn-sm"
-                      title="View User Cart"
-                    >
-                      🛒 Cart
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {currentOrders.length === 0 && (
-          <div className="no-orders">
-            <p>No orders found matching your criteria</p>
+      <TableWithControls
+        columns={columns}
+        data={filteredOrders}
+        searchFields={["product_name", "user_name", "id", "product_sku"]}
+        pageTitle="Order Management"
+        loading={loading}
+        actions={
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div style={{ width: "max-content" }}>
+              <DropdownSelect
+                value={filterStatus}
+                onChange={setFilterStatus}
+                options={statusOptions}
+                placeholder="All Statuses"
+              />
+            </div>
+            <div style={{ width: "max-content" }}>
+              <DropdownSelect
+                value=""
+                onChange={(value) => handleBulkStatusUpdate(value)}
+                options={statusOptions.slice(1).map(option => ({
+                  value: option.value,
+                  label: `Update to ${option.label}`
+                }))}
+                placeholder="Bulk Update Status"
+                disabled={selectedOrders.length === 0}
+              />
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => paginate(currentPage - 1)} 
-            disabled={currentPage === 1}
-            className="pagination-btn"
-          >
-            Previous
-          </button>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-            <button
-              key={number}
-              onClick={() => paginate(number)}
-              className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
-            >
-              {number}
-            </button>
-          ))}
-          
-          <button 
-            onClick={() => paginate(currentPage + 1)} 
-            disabled={currentPage === totalPages}
-            className="pagination-btn"
-          >
-            Next
-          </button>
-        </div>
-      )}
+        }
+      />
 
       {/* User Cart Modal */}
       {showUserCart && userCart && (

@@ -324,8 +324,7 @@ const MediaGalleryPage = () => {
     return (
       <div className="media-gallery-page">
         <div className="loading-state">
-          <Image size={48} />
-          <h3>Loading Processed Images...</h3>
+          <div className="loading-spinner"></div>
         </div>
       </div>
     );
@@ -333,32 +332,28 @@ const MediaGalleryPage = () => {
 
   return (
     <div className="media-gallery-page">
-      <div className="page-header">
-        <h1>Media Gallery</h1>
-        <p>View your processed and watermarked product images</p>
-      </div>
-
-      {/* Action Bar */}
-      <div className="action-bar">
-        <div className="action-info">
-          <p>Showing {processedMediaItems.length} processed images</p>
-        </div>
-
-        <div className="action-buttons">
-          <button
-            className="bulk-upload-btn"
-            onClick={() => setShowBulkUploadModal(true)}
-          >
-            <Upload size={16} />
-            Upload Images
-          </button>
-          <button
-            className="bulk-upload-btn"
-            onClick={handleDebugDatabase}
-            style={{ marginLeft: "10px", backgroundColor: "#ff6b6b" }}
-          >
-            🔍 Debug Database
-          </button>
+      {/* Header Section */}
+      <div className="media-header-section">
+        <div className="table-controls">
+          <div className="controls-left">
+            <h2 className="page-title">Media Gallery</h2>
+          </div>
+          <div className="controls-right">
+            <button
+              className="upload-btn"
+              onClick={() => setShowBulkUploadModal(true)}
+            >
+              <Upload size={16} />
+              Upload Images
+            </button>
+            <button
+              className="upload-btn"
+              onClick={handleDebugDatabase}
+              style={{ backgroundColor: "#ff6b6b" }}
+            >
+              🔍 Debug Database
+            </button>
+          </div>
         </div>
       </div>
 

@@ -40,56 +40,56 @@ const AppVersionsPage = () => {
 
   const columns = [
     {
-      key: "version_name",
-      label: "Version",
-      render: (value, row) => (
+      header: "Version",
+      accessor: "version_name",
+      cell: (row) => (
         <div className="version-info">
-          <div className="version-name">{value}</div>
+          <div className="version-name">{row.version_name}</div>
           <div className="version-code">Code: {row.version_code}</div>
         </div>
       ),
     },
     {
-      key: "platform",
-      label: "Platform",
-      render: (value) => (
+      header: "Platform",
+      accessor: "platform",
+      cell: (row) => (
         <div className="platform-badge">
-          {value === "android" ? <Smartphone className="icon" /> : <Globe className="icon" />}
-          {value.toUpperCase()}
+          {row.platform === "android" ? <Smartphone className="icon" /> : <Globe className="icon" />}
+          {row.platform?.toUpperCase()}
         </div>
       ),
     },
     {
-      key: "update_type",
-      label: "Update Type",
-      render: (value, row) => (
+      header: "Update Type",
+      accessor: "update_type",
+      cell: (row) => (
         <div className="update-type-badge">
-          <span className={`type ${value}`}>{value.toUpperCase()}</span>
+          <span className={`type ${row.update_type}`}>{row.update_type?.toUpperCase()}</span>
           {row.force_update && <AlertTriangle className="force-icon" />}
         </div>
       ),
     },
     {
-      key: "is_active",
-      label: "Status",
-      render: (value) => (
+      header: "Status",
+      accessor: "is_active",
+      cell: (row) => (
         <div className="status-badge">
-          {value ? (
+          {row.is_active ? (
             <CheckCircle className="active-icon" />
           ) : (
             <XCircle className="inactive-icon" />
           )}
-          {value ? "Active" : "Inactive"}
+          {row.is_active ? "Active" : "Inactive"}
         </div>
       ),
     },
     {
-      key: "download_url",
-      label: "Download",
-      render: (value) => (
+      header: "Download",
+      accessor: "download_url",
+      cell: (row) => (
         <div className="download-info">
-          {value ? (
-            <a href={value} target="_blank" rel="noopener noreferrer" className="download-link">
+          {row.download_url ? (
+            <a href={row.download_url} target="_blank" rel="noopener noreferrer" className="download-link">
               <Download className="icon" />
               Download
             </a>
@@ -100,43 +100,32 @@ const AppVersionsPage = () => {
       ),
     },
     {
-      key: "created_at",
-      label: "Created",
-      render: (value) => new Date(value).toLocaleDateString(),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (_, row) => (
+      header: "Actions",
+      accessor: "actions",
+      cell: (row) => (
         <div className="action-buttons">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleEdit(row)}
-            className="edit-btn"
           >
-            <Edit className="icon" />
-            Edit
+            <Edit size={16} />
           </Button>
           {!row.is_active && (
             <Button
               variant="success"
               size="sm"
               onClick={() => handleActivate(row)}
-              className="activate-btn"
             >
-              <CheckCircle className="icon" />
-              Activate
+              <CheckCircle size={16} />
             </Button>
           )}
           <Button
             variant="danger"
             size="sm"
             onClick={() => handleDelete(row)}
-            className="delete-btn"
           >
-            <Trash2 className="icon" />
-            Delete
+            <Trash2 size={16} />
           </Button>
         </div>
       ),
@@ -285,35 +274,32 @@ const AppVersionsPage = () => {
 
   return (
     <div className="app-versions-page">
-      <div className="page-header">
-        <h1>App Version Management</h1>
-        <p>Manage app versions for Android and iOS platforms</p>
-        <Button onClick={handleCreate} className="create-btn">
-          <Plus className="icon" />
-          Create New Version
-        </Button>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
       <TableWithControls
         data={versions}
         columns={columns}
         loading={loading}
-        searchPlaceholder="Search versions..."
-        filterOptions={[
-          { key: "platform", label: "Platform", options: platformOptions },
-          { key: "update_type", label: "Update Type", options: updateTypeOptions },
+        pageTitle="App Version Management"
+        searchFields={["version_name", "version_code", "platform"]}
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus className="icon" />
+            Create New Version
+          </Button>
+        }
+        filters={[
+          { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
+          { key: "update_type", options: updateTypeOptions, placeholder: "Filter by update type" },
           {
             key: "is_active",
-            label: "Status",
             options: [
-              { value: "", label: "All" },
+              { value: "", label: "All Statuses" },
               { value: "true", label: "Active" },
               { value: "false", label: "Inactive" },
             ],
+            placeholder: "Filter by status",
           },
         ]}
+        errorMessage={error}
       />
 
       {/* Create/Edit Modal */}

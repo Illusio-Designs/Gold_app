@@ -44,34 +44,34 @@ const AppIconsPage = () => {
 
   const columns = [
     {
-      key: "icon_name",
-      label: "Icon Name",
-      render: (value, row) => (
+      header: "Icon Name",
+      accessor: "icon_name",
+      cell: (row) => (
         <div className="icon-info">
-          <div className="icon-name">{value}</div>
-          <div className="icon-type">{row.icon_type.toUpperCase()}</div>
+          <div className="icon-name">{row.icon_name}</div>
+          <div className="icon-type">{row.icon_type?.toUpperCase()}</div>
         </div>
       ),
     },
     {
-      key: "platform",
-      label: "Platform",
-      render: (value) => (
+      header: "Platform",
+      accessor: "platform",
+      cell: (row) => (
         <div className="platform-badge">
-          {value === "android" ? <Smartphone className="icon" /> : 
-           value === "ios" ? <Globe className="icon" /> : 
+          {row.platform === "android" ? <Smartphone className="icon" /> : 
+           row.platform === "ios" ? <Globe className="icon" /> : 
            <><Smartphone className="icon" /><Globe className="icon" /></>}
-          {value.toUpperCase()}
+          {row.platform?.toUpperCase()}
         </div>
       ),
     },
     {
-      key: "icon_path",
-      label: "Preview",
-      render: (value) => (
+      header: "Preview",
+      accessor: "icon_path",
+      cell: (row) => (
         <div className="icon-preview">
-          {value ? (
-            <img src={value} alt="Icon" className="preview-image" />
+          {row.icon_path ? (
+            <img src={row.icon_path} alt="Icon" className="preview-image" />
           ) : (
             <div className="no-preview">No Image</div>
           )}
@@ -79,92 +79,55 @@ const AppIconsPage = () => {
       ),
     },
     {
-      key: "is_active",
-      label: "Status",
-      render: (value, row) => (
+      header: "Status",
+      accessor: "is_active",
+      cell: (row) => (
         <div className="status-badge">
-          {value ? (
+          {row.is_active ? (
             <CheckCircle className="active-icon" />
           ) : (
             <XCircle className="inactive-icon" />
           )}
-          {value ? "Active" : "Inactive"}
+          {row.is_active ? "Active" : "Inactive"}
         </div>
       ),
     },
     {
-      key: "priority",
-      label: "Priority",
-      render: (value) => (
+      header: "Priority",
+      accessor: "priority",
+      cell: (row) => (
         <div className="priority-badge">
-          <span className={`priority-${value}`}>{value}</span>
+          <span className={`priority-${row.priority || 0}`}>{row.priority || 0}</span>
         </div>
       ),
     },
     {
-      key: "start_date",
-      label: "Schedule",
-      render: (value, row) => (
-        <div className="schedule-info">
-          {value || row.end_date ? (
-            <>
-              {value && (
-                <div className="schedule-item">
-                  <Calendar className="icon" />
-                  <span>Start: {new Date(value).toLocaleDateString()}</span>
-                </div>
-              )}
-              {row.end_date && (
-                <div className="schedule-item">
-                  <Clock className="icon" />
-                  <span>End: {new Date(row.end_date).toLocaleDateString()}</span>
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="no-schedule">No Schedule</span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "created_at",
-      label: "Created",
-      render: (value) => new Date(value).toLocaleDateString(),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (_, row) => (
+      header: "Actions",
+      accessor: "actions",
+      cell: (row) => (
         <div className="action-buttons">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleEdit(row)}
-            className="edit-btn"
           >
-            <Edit className="icon" />
-            Edit
+            <Edit size={16} />
           </Button>
           {!row.is_active && (
             <Button
               variant="success"
               size="sm"
               onClick={() => handleActivate(row)}
-              className="activate-btn"
             >
-              <CheckCircle className="icon" />
-              Activate
+              <CheckCircle size={16} />
             </Button>
           )}
           <Button
             variant="danger"
             size="sm"
             onClick={() => handleDelete(row)}
-            className="delete-btn"
           >
-            <Trash2 className="icon" />
-            Delete
+            <Trash2 size={16} />
           </Button>
         </div>
       ),
@@ -344,35 +307,32 @@ const AppIconsPage = () => {
 
   return (
     <div className="app-icons-page">
-      <div className="page-header">
-        <h1>Dynamic App Icon Management</h1>
-        <p>Manage app icons for different platforms and use cases</p>
-        <Button onClick={handleCreate} className="create-btn">
-          <Plus className="icon" />
-          Upload New Icon
-        </Button>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
       <TableWithControls
         data={icons}
         columns={columns}
         loading={loading}
-        searchPlaceholder="Search icons..."
-        filterOptions={[
-          { key: "platform", label: "Platform", options: platformOptions },
-          { key: "icon_type", label: "Icon Type", options: iconTypeOptions },
+        pageTitle="App Icon Management"
+        searchFields={["name", "platform", "icon_type"]}
+        actions={
+          <Button onClick={handleCreate}>
+            <Plus className="icon" />
+            Upload New Icon
+          </Button>
+        }
+        filters={[
+          { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
+          { key: "icon_type", options: iconTypeOptions, placeholder: "Filter by type" },
           {
             key: "is_active",
-            label: "Status",
             options: [
-              { value: "", label: "All" },
+              { value: "", label: "All Statuses" },
               { value: "true", label: "Active" },
               { value: "false", label: "Inactive" },
             ],
+            placeholder: "Filter by status",
           },
         ]}
+        errorMessage={error}
       />
 
       {/* Create/Edit Modal */}

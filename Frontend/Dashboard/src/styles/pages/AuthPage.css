@@ -1,7 +1,8 @@
 .auth-page {
   display: flex;
-  min-height: 100vh;
   font-family: "Poppins", sans-serif;
+  overflow: hidden;
+  height: 100vh;
 }
 
 .auth-left-panel {
@@ -11,7 +12,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 40px 0 40px;
   box-sizing: border-box;
 }
 
@@ -45,9 +46,9 @@
 
 .auth-cow {
   position: absolute;
-  bottom: -65px;
+  bottom: -57px;
   right: -23px;
-  width: 320px;
+  width: 311px;
   height: auto;
   object-fit: contain;
   z-index: 2;

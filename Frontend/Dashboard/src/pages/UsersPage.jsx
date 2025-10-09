@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Edit, Trash2, RefreshCw } from "lucide-react";
+import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
@@ -374,36 +374,6 @@ const UsersPage = () => {
     setImagePreview("");
   };
 
-  // Show loading state while data is being fetched
-  if (loading && !users.length) {
-    return (
-      <div className="users-page">
-        <div className="page-header">
-          <h1>User Management</h1>
-        </div>
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading users...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state if there's an error
-  if (error && !users.length) {
-    return (
-      <div className="users-page">
-        <div className="page-header">
-          <h1>User Management</h1>
-        </div>
-        <div className="error-container">
-          <p className="error-message">{error}</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="users-page">
       <TableWithControls
@@ -411,6 +381,7 @@ const UsersPage = () => {
         data={users}
         searchFields={["name", "email", "city", "business_name"]}
         pageTitle="User Management"
+        loading={loading}
         actions={
           <div style={{ display: "flex", gap: "10px" }}>
             <Button
@@ -448,6 +419,7 @@ const UsersPage = () => {
                 setModalOpen(true);
               }}
             >
+              <Plus size={16} />
               Add User
             </Button>
           </div>
@@ -463,8 +435,6 @@ const UsersPage = () => {
         ]}
         errorMessage={error}
       />
-      {loading && <div>Loading users...</div>}
-      {!loading && users.length === 0 && !error && <div>No users found.</div>}
       <Modal
         isOpen={modalOpen}
         onClose={handleCancel}

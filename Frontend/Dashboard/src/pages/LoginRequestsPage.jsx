@@ -295,6 +295,7 @@ const LoginRequestsPage = () => {
         data={loginRequests}
         searchFields={["user_id", "category_id", "status"]}
         pageTitle="Login Requests Management"
+        loading={loading}
         filters={[
           {
             key: "status",
@@ -317,10 +318,6 @@ const LoginRequestsPage = () => {
         itemsPerPage={10}
         errorMessage={error}
       />
-      {loading && <div>Loading login requests...</div>}
-      {!loading && loginRequests.length === 0 && !error && (
-        <div>No login requests found.</div>
-      )}
       <Modal
         isOpen={modalOpen}
         onClose={handleCancel}

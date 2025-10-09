@@ -15,6 +15,7 @@ const TableWithControls = ({
   filters = [],
   onRowClick,
   className = "",
+  loading = false,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -86,14 +87,22 @@ const TableWithControls = ({
       </div>
 
       <div className="table-entries-scroll">
-        <Table columns={columns} data={paginatedData} onRowClick={onRowClick} />
+        {loading ? (
+          <div className="table-loading-container">
+            <div className="table-loading-spinner"></div>
+          </div>
+        ) : (
+          <Table columns={columns} data={paginatedData} onRowClick={onRowClick} />
+        )}
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 };

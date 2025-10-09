@@ -1,225 +1,73 @@
-.orders-page {
-  padding: 20px;
-  background: #f8f9fa;
-  min-height: 100vh;
-}
 
-.page-header {
-  background: white;
-  padding: 24px;
+
+/* Statistics Display */
+.statistics-display {
+  background: #fff;
+  padding: 16px 24px;
+  margin-bottom: 20px;
   border-radius: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.page-header h1 {
-  margin: 0 0 8px 0;
-  color: #2c3e50;
-  font-size: 28px;
-  font-weight: 600;
-}
-
-.page-header p {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 16px;
-}
-
-/* Statistics Grid */
-.statistics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card h3 {
-  margin: 0 0 12px 0;
-  color: #7f8c8d;
-  font-size: 14px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-number {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 32px;
-  font-weight: 700;
-}
-
-.stat-card.pending .stat-number { color: #ff9800; }
-.stat-card.processing .stat-number { color: #2196f3; }
-.stat-card.shipped .stat-number { color: #9c27b0; }
-.stat-card.delivered .stat-number { color: #4caf50; }
-.stat-card.cancelled .stat-number { color: #f44336; }
-
-/* Filters Section */
-.filters-section {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(93, 8, 41, 0.06);
   display: flex;
-  gap: 20px;
+  gap: 24px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.search-filter {
-  flex: 1;
-  min-width: 300px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.status-filter {
-  min-width: 200px;
-}
-
-.status-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
-}
-
-.bulk-actions {
-  min-width: 200px;
-}
-
-.bulk-status-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 14px;
-  background: white;
-  cursor: pointer;
-}
-
-/* Orders Summary */
-.orders-summary {
-  background: white;
-  padding: 16px 20px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.stat-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
-.orders-summary p {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 14px;
+.stat-label {
+  font-size: 13px;
+  color: #8b4513;
+  font-weight: 500;
 }
 
-.selected-count {
-  color: #2196f3 !important;
-  font-weight: 600;
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #5d0829;
 }
 
-/* Orders Table */
-.orders-table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
+.stat-value.pending { color: #ff9800; }
+.stat-value.processing { color: #2196f3; }
+.stat-value.shipped { color: #9c27b0; }
+.stat-value.delivered { color: #4caf50; }
+.stat-value.cancelled { color: #f44336; }
 
-.orders-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
-.orders-table th {
-  background: #f8f9fa;
-  padding: 16px 12px;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #e1e8ed;
-}
-
-.orders-table td {
-  padding: 16px 12px;
-  border-bottom: 1px solid #e1e8ed;
-  vertical-align: middle;
-}
-
-.orders-table tbody tr:hover {
-  background: #f8f9fa;
-}
-
-.order-row.pending { border-left: 4px solid #ff9800; }
-.order-row.processing { border-left: 4px solid #2196f3; }
-.order-row.shipped { border-left: 4px solid #9c27b0; }
-.order-row.delivered { border-left: 4px solid #4caf50; }
-.order-row.cancelled { border-left: 4px solid #f44336; }
 
 /* Product Info */
 .product-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .product-thumbnail {
-  width: 50px;
-  height: 50px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
   object-fit: cover;
-  border: 1px solid #e1e8ed;
+  border: 1px solid #e0d0c0;
 }
 
 .product-name {
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 4px;
+  color: #5d0829;
+  margin-bottom: 3px;
+  font-size: 13px;
 }
 
 .product-sku {
-  font-size: 12px;
-  color: #7f8c8d;
+  font-size: 11px;
+  color: #8b4513;
 }
 
 .product-weight {
-  font-size: 11px;
-  color: #95a5a6;
+  font-size: 10px;
+  color: #a0a0a0;
   margin-top: 2px;
 }
 
@@ -233,34 +81,36 @@
 .user-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .user-name {
   font-weight: 600;
-  color: #2c3e50;
+  color: #5d0829;
+  font-size: 13px;
 }
 
 .business-name {
-  font-size: 12px;
-  color: #7f8c8d;
+  font-size: 11px;
+  color: #8b4513;
 }
 
 .user-phone {
-  font-size: 11px;
-  color: #95a5a6;
-  margin-top: 2px;
+  font-size: 10px;
+  color: #a0a0a0;
+  margin-top: 1px;
 }
 
 /* Status Update Select */
 .status-update-select {
-  padding: 8px 12px;
-  border: 2px solid;
+  padding: 6px 10px;
+  border: 1.5px solid;
   border-radius: 6px;
-  font-size: 13px;
-  background: white;
+  font-size: 12px;
+  background: #fafafa;
+  color: #5d0829;
   cursor: pointer;
-  min-width: 120px;
+  min-width: 110px;
 }
 
 /* Table Column Styling */
@@ -268,23 +118,25 @@
   font-weight: 600;
   color: #2196f3;
   font-family: 'Courier New', monospace;
+  font-size: 13px;
 }
 
 .quantity {
   text-align: center;
   font-weight: 600;
-  color: #2c3e50;
+  color: #5d0829;
 }
 
 .amount {
   font-weight: 600;
   color: #27ae60;
   font-family: 'Courier New', monospace;
+  font-size: 13px;
 }
 
 .created-date {
-  font-size: 12px;
-  color: #7f8c8d;
+  font-size: 11px;
+  color: #8b4513;
 }
 
 /* Action Buttons */
@@ -294,44 +146,60 @@
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background: #5d0829;
   color: white;
 }
 
 .btn-secondary:hover {
-  background: #5a6268;
+  background: #7a0a35;
 }
 
 .btn-sm {
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 5px 10px;
+  font-size: 11px;
 }
 
-/* No Orders */
-.no-orders {
-  padding: 40px;
-  text-align: center;
-  color: #7f8c8d;
-}
 
 /* Loading */
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
-  font-size: 16px;
-  color: #7f8c8d;
+  min-height: 400px;
+  padding: 60px 20px;
+  overflow: hidden;
+}
+
+.orders-page:has(.loading) {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f0e8e0;
+  border-top: 4px solid #5d0829;
+  border-radius: 50%;
+  animation: spin-orders 1s linear infinite;
+}
+
+@keyframes spin-orders {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Modal Styles */
@@ -484,13 +352,10 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .orders-page {
-    padding: 16px;
-  }
-  
   .filters-section {
     flex-direction: column;
     align-items: stretch;
+    padding: 12px 16px;
   }
   
   .search-filter,
@@ -499,18 +364,38 @@
     min-width: auto;
   }
   
+  .statistics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 12px 16px;
+  }
+  
+  .orders-summary {
+    padding: 10px 16px;
+  }
+  
   .orders-table {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .orders-table th,
   .orders-table td {
-    padding: 12px 8px;
+    padding: 8px 6px;
   }
   
   .product-thumbnail {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
+  }
+  
+  .pagination {
+    padding: 0 16px 24px 16px;
+    gap: 4px;
+  }
+  
+  .pagination-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12px;
   }
   
   .modal-content {

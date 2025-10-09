@@ -1,62 +1,7 @@
 .app-icons-page {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #c09e83;
-}
-
-.page-header h1 {
-  color: #5d0829;
+  padding: 0;
+  max-width: 100%;
   margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
-}
-
-.page-header p {
-  color: #8b4513;
-  margin: 0.5rem 0 0 0;
-  font-size: 1rem;
-}
-
-.create-btn {
-  background: linear-gradient(135deg, #5d0829, #8b4513);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(93, 8, 41, 0.2);
-}
-
-.create-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(93, 8, 41, 0.3);
-}
-
-.create-btn .icon {
-  width: 18px;
-  height: 18px;
-}
-
-.error-message {
-  background: #fee;
-  color: #c53030;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  border-left: 4px solid #c53030;
 }
 
 /* Icon Info Styles */
@@ -216,43 +161,9 @@
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.action-buttons .edit-btn {
-  background: #f9f2e7;
-  color: #5d0829;
-  border: 1px solid #c09e83;
-}
-
-.action-buttons .edit-btn:hover {
-  background: #e6d7c3;
-}
-
-.action-buttons .activate-btn {
-  background: #38a169;
-  color: white;
-  border: 1px solid #38a169;
-}
-
-.action-buttons .activate-btn:hover {
-  background: #2f855a;
-}
-
-.action-buttons .delete-btn {
-  background: #e53e3e;
-  color: white;
-  border: 1px solid #e53e3e;
-}
-
-.action-buttons .delete-btn:hover {
-  background: #c53030;
-}
-
-.action-buttons .icon {
-  width: 14px;
-  height: 14px;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* Form Styles */

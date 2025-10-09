@@ -4,6 +4,7 @@ import {
   Trash2,
   Image as ImageIcon,
   FileSpreadsheet,
+  Plus,
 } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
@@ -418,6 +419,7 @@ const ProductsPage = () => {
         data={products}
         searchFields={["name", "sku", "category_id", "purity"]}
         pageTitle="Product Management"
+        loading={loading}
         actions={
           <div style={{ display: "flex", gap: "10px" }}>
             <Button
@@ -440,6 +442,7 @@ const ProductsPage = () => {
                 setModalOpen(true);
               }}
             >
+              <Plus size={16} />
               Add Product
             </Button>
             <Button
@@ -466,10 +469,6 @@ const ProductsPage = () => {
         ]}
         errorMessage={error}
       />
-      {loading && <div>Loading products...</div>}
-      {!loading && products.length === 0 && !error && (
-        <div>No products found.</div>
-      )}
       <Modal
         isOpen={modalOpen}
         onClose={handleCancel}

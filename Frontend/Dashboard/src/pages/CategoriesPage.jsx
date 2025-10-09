@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
@@ -241,6 +241,7 @@ const CategoriesPage = () => {
         data={categories}
         searchFields={["name"]}
         pageTitle="Category Management"
+        loading={loading}
         actions={
           <Button
             onClick={() => {
@@ -250,16 +251,13 @@ const CategoriesPage = () => {
               setModalOpen(true);
             }}
           >
+            <Plus size={16} />
             Add Category
           </Button>
         }
         itemsPerPage={10}
         errorMessage={error}
       />
-      {loading && <div>Loading categories...</div>}
-      {!loading && categories.length === 0 && !error && (
-        <div>No categories found.</div>
-      )}
       <Modal
         isOpen={modalOpen}
         onClose={handleCancel}
