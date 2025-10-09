@@ -18,6 +18,9 @@ import AppIconsPage from "./pages/AppIconsPage";
 import SliderPage from "./pages/SliderPage";
 import AuthLayout from "./components/layout/AuthLayout";
 import AuthPage from "./pages/AuthPage";
+import HomePage from "./webpage/HomePage";
+import PrivacyPolicy from "./webpage/PrivacyPolicy";
+import DeletePage from "./webpage/DeletePage";
 
 // Removed Firebase messaging-related code
 
@@ -59,6 +62,11 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public webpage routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/delete" element={<DeletePage />} />
+        
         {/* Public route for authentication */}
         <Route path="/auth" element={<AuthPage />} />
         
@@ -78,11 +86,8 @@ function App() {
           </Route>
         </Route>
         
-        {/* Redirect root to dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
-        {/* Catch all other routes and redirect to dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        {/* Catch all other routes and redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

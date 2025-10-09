@@ -1,0 +1,691 @@
+@font-face {
+  font-family: "Glorify";
+  src: url("/Glorifydemo-BW3J3.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap");
+
+* {
+  font-family: "Glorify", serif !important;
+}
+
+body {
+  font-family: "Glorify", serif !important;
+}
+
+.homepage-root {
+  min-height: 100vh;
+  background: #fdf0de;
+}
+
+/* Combined Hero Section Container */
+.homepage-hero-section {
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+}
+
+.homepage-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 13%;
+  background: transparent;
+  position: relative;
+  z-index: 10;
+}
+
+.homepage-logo {
+  height: 100px;
+}
+
+.homepage-menu {
+  display: flex;
+  gap: 0px;
+  list-style: none;
+  border: 1.5px solid #fce2bf;
+  margin: 0;
+  padding: 10px 30px;
+  border-radius: 20px;
+}
+
+.homepage-menu li {
+  font-size: 1.1rem;
+  color: #c09e83;
+  background: transparent;
+  border-radius: 18px;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "DM Sans", sans-serif !important;
+  font-weight: 500;
+}
+
+.homepage-menu li:hover {
+  color: #fce2bf;
+}
+
+.homepage-menu li.active {
+  color: #fce2bf;
+  font-weight: 600;
+}
+
+/* Hero Content Area */
+.homepage-hero-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 48px 4vw 5rem;
+}
+
+/* Background Pattern Styling */
+.homepage-hero-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.homepage-bg-design {
+  position: absolute;
+  width: 450px;
+  height: auto;
+  opacity: 1;
+  z-index: 1;
+}
+
+.homepage-bg-design-left {
+  top: 35%;
+  left: -5%;
+}
+
+.homepage-bg-design-right {
+  top: 0%;
+  right: -5%;
+}
+
+.homepage-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 46%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.homepage-hero-bg-img {
+  width: 45%;
+  height: auto;
+  object-fit: contain;
+  opacity: 1;
+  filter: drop-shadow(0 8px 32px #3d373a44);
+}
+
+.homepage-hero-text h1 {
+  font-size: 49px;
+  color: #fce2bf;
+  margin-left: -30%;
+  margin-top: -8%;
+  line-height: 1.3;
+}
+
+.homepage-hero-desc {
+  font-size: 1.1rem;
+  color: #fce2bf;
+  margin-bottom: 1.5rem;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-download-btn {
+  font-size: 1.1rem;
+  background: #fce2bf;
+  color: #5d0829;
+  border: none;
+  border-radius: 18px;
+  padding: 0.7rem 2.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.2s, color 0.2s;
+}
+
+.homepage-download-btn:hover {
+  background: #fff;
+  color: #a86c2c;
+}
+
+.homepage-hero-img-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homepage-hero-img {
+  max-width: 350px;
+  width: 100%;
+  border-radius: 32px 32px 40px 40px;
+  box-shadow: 0 8px 32px #5a0a2d44;
+  background: #f8e9d2;
+  padding: 1.5rem;
+}
+
+.homepage-categories-section {
+  background: #fdf0de;
+  padding: 3rem 0 0rem 0;
+  text-align: center;
+}
+
+.homepage-categories-title {
+  font-size: 50px;
+  color: #5d0829;
+  font-weight: 700;
+}
+
+.homepage-categories-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Shadow gradients for fade effect */
+.homepage-categories-shadow-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    #fdf0de 0%,
+    rgba(253, 240, 222, 0.9) 30%,
+    rgba(253, 240, 222, 0.5) 70%,
+    transparent 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+.homepage-categories-shadow-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background: linear-gradient(
+    to left,
+    #fdf0de 0%,
+    rgba(253, 240, 222, 0.9) 30%,
+    rgba(253, 240, 222, 0.5) 70%,
+    transparent 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+.homepage-categories-list {
+  display: flex;
+  justify-content: flex-start;
+  gap: 2.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 50px 10%;
+}
+
+.homepage-category-card {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: 2px solid #5d0829;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(90, 10, 45, 0.1);
+  padding: 10px 15px;
+  transition: box-shadow 0.2s, border 0.2s;
+  cursor: pointer;
+}
+
+.homepage-category-card:hover {
+  box-shadow: 0 4px 24px rgba(168, 108, 44, 0.2);
+}
+
+.homepage-category-img {
+  width: 80px;
+  object-fit: cover;
+  margin-right: 1rem;
+  border-radius: 50px;
+  background: #f8e9d2;
+}
+
+.homepage-category-label {
+  font-size: 22px;
+  color: #5a0a2d;
+  font-weight: 700;
+}
+
+.homepage-hero-text-small {
+  margin-left: 20%;
+  margin-top: 25%;
+}
+
+.homepage-about {
+  background: #fdf0de;
+  padding: 4rem 10%;
+}
+
+.homepage-about-title {
+  font-size: 50px;
+  color: #5d0829;
+  text-align: center;
+  font-weight: 700;
+}
+
+.homepage-about-content {
+  display: flex;
+  align-items: center;
+  gap: 8rem;
+  margin: 0 auto;
+}
+
+.homepage-about-gallery {
+  flex: 1;
+}
+
+.homepage-about-gallery-frame {
+  position: relative;
+  padding: 2rem 0;
+  width: 600px;
+}
+
+.homepage-about-bg-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  object-fit: cover;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+}
+
+.homepage-about-photos {
+  position: relative;
+  z-index: 2;
+  justify-content: center;
+}
+
+.homepage-about-photo-item {
+  text-align: center;
+}
+.homepage-about-photo {
+  width: 100%;
+  object-fit: cover;
+}
+
+.homepage-about-text {
+  flex: 2;
+}
+
+.homepage-about-section {
+  margin-bottom: 1.8rem;
+}
+
+.homepage-about-section-title {
+  font-size: 20px;
+  color: #5d0829;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  font-family: "Montserrat", sans-serif !important;
+  display: inline;
+}
+
+.homepage-about-text p {
+  font-size: 20px;
+  color: #5d0829;
+  line-height: 1.5;
+  font-family: "Montserrat", sans-serif !important;
+  margin: 0;
+  display: inline;
+  margin-left: 0.5rem;
+}
+
+.homepage-faq {
+  padding: 4rem 10%;
+}
+
+.homepage-faq-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.homepage-faq-left {
+  flex: 0 0 52%;
+}
+
+.homepage-faq-title {
+  font-size: 50px;
+  color: #7a1538;
+  font-weight: 700;
+}
+
+.homepage-faq-subtitle {
+  font-size: 17px;
+  color: #7a1538;
+  width: 70%;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-faq-right {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 17%;
+  margin-left: -9%;
+}
+
+.homepage-faq-item {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1.3px solid #5d0829;
+  transition: all 0.3s ease;
+}
+
+.homepage-faq-item.expanded {
+  border: 1.3px solid #5d0829;
+}
+
+.homepage-faq-item.expanded .homepage-faq-question {
+  border-bottom: 1.3px solid #5d0829;
+  border-radius: 20px;
+}
+
+.homepage-faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 17px;
+  color: #5d0829;
+  font-weight: 600;
+}
+
+.homepage-faq-question span {
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-faq-icon {
+  font-size: 20px;
+  font-weight: bold;
+  color: #7a1538;
+  transition: all 0.3s ease;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-faq-icon.expanded {
+  transform: rotate(90deg);
+  color: #7a1538;
+}
+
+.homepage-faq-answer {
+  padding: 1.5rem;
+  animation: slideDown 0.3s ease;
+}
+
+.homepage-faq-answer p {
+  color: #7a1538;
+  line-height: 1.3;
+  font-size: 15px;
+  margin: 0;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+  }
+}
+
+/* Footer Section */
+.homepage-footer {
+  background: #7a1538;
+  position: relative;
+  margin-top: 17%;
+}
+
+/* App Promo Section */
+.homepage-app-promo-section {
+  background: #fce2bf;
+  padding: 3rem 3rem 1rem;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 80px;
+  z-index: 2;
+  margin: -162px 22% 00px;
+}
+
+.homepage-app-promo-content {
+  flex: 1;
+}
+
+.homepage-app-promo-title {
+  font-size: 43px;
+  color: #7a1538;
+  margin-bottom: 2rem;
+  font-weight: 700;
+  margin: 0;
+  margin-top: -50px;
+  line-height: 1;
+}
+
+.homepage-app-store-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.homepage-store-img {
+  width: 47%;
+  cursor: pointer;
+  margin-top: -8%;
+  margin-bottom: -18%;
+}
+
+.homepage-app-mockup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.homepage-phone-mockup {
+  width: 60%;
+  height: auto;
+  margin-top: -27%;
+}
+
+/* Decorative Elements */
+.homepage-decorative-flower {
+  position: absolute;
+  z-index: 1;
+}
+
+.homepage-flower-top {
+  top: 1rem;
+  right: 2rem;
+}
+
+.homepage-flower-img {
+  width: 80%;
+  height: auto;
+  position: relative;
+  top: -18rem;
+  left: -1%;
+}
+
+/* Footer Main Section */
+.homepage-footer-main {
+  background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+  padding: 10rem 10% 7rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 0 auto;
+  gap: 3rem;
+  color: #fce2bf;
+  z-index: 3;
+  position: relative;
+}
+
+.homepage-footer-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.homepage-footer-logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.homepage-company-name {
+  font-size: 20px;
+  color: #fce2bf;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.homepage-footer-center,
+.homepage-footer-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.homepage-footer-section h4 {
+  color: #fce2bf;
+  font-family: "Montserrat", sans-serif !important;
+  font-size: 24px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.homepage-footer-section p {
+  color: #fce2bf;
+  font-size: 17px;
+  margin: 10px 0;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-footer-section a {
+  display: block;
+  color: #fce2bf;
+  text-decoration: none;
+  font-size: 17px;
+  margin: 10px 0;
+  transition: opacity 0.3s ease;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+.homepage-footer-section a:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.homepage-contact-link {
+  color: #fce2bf !important;
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.homepage-contact-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+/* Decorative Elements in Footer */
+.homepage-decorative-elements {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+.homepage-flower-bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  bottom: -0.5rem;
+  width: 350px;
+  height: auto;
+}
+
+.homepage-flower-img-left {
+  width: 100%;
+  height: auto;
+}
+
+.homepage-decorative-cow {
+  position: absolute;
+  bottom: -0.2rem;
+  right: 6rem;
+  width: 160px;
+  height: auto;
+}
+
+.homepage-cow-img {
+  width: 100%;
+  height: auto;
+}
+
+.footer-bg-design {
+  width: 105%;
+  top: 47%;
+  position: absolute;
+  z-index: 2;
+}
