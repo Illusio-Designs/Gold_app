@@ -43,7 +43,6 @@ button {
 .homepage-hero-section {
   position: relative;
   overflow: hidden;
-  height: 100vh;
   background: linear-gradient(253.3deg, #43051d 1.95%, #5d0829 102.63%);
 }
 
@@ -1018,22 +1017,24 @@ button {
 
   .homepage-hero-text h1 {
     font-size: 38px;
-    margin-left: 0%;
-    margin-top: 27%;
-  }
+    margin-left: 2%;
+    margin-top: -7%;
+    position: absolute;
+}
 
-  .homepage-hero-bg {
-    top: 11%;
-  }
+
+.homepage-hero-bg {
+  top: 1%;
+}
 
   .homepage-hero-bg-img {
     width: 55%;
   }
 
   .homepage-hero-text-small {
-    margin-left: 36%;
+    margin-left: 67%;
     margin-top: 32%;
-  }
+}
 
   .homepage-categories-title,
   .homepage-about-title,
@@ -1181,14 +1182,14 @@ button {
 
   .homepage-hero-text h1 {
     font-size: 32px;
-    margin-left: -78%;
+    margin-left: -43%;
     margin-top: 0;
     text-align: left;
 }
 
-  .homepage-hero-bg {
-    top: -8%;
-  }
+.homepage-hero-bg {
+  top: -9%;
+}
 
   .homepage-hero-bg-img {
     width: 60%;
@@ -1196,9 +1197,9 @@ button {
 
   .homepage-hero-text-small {
     margin-left: 58%;
-    margin-top: 22%;
+    margin-top: 35%;
     text-align: center;
-  }
+}
 
   .homepage-categories-title,
   .homepage-about-title,
@@ -1374,11 +1375,15 @@ button {
   right: -17%;
 }
 
+.homepage-hero-content {
+  gap: 13rem;
+}
+
 .homepage-hero-text h1 {
   font-size: 28px;
-  margin-left: 0;
-        margin-top: 0;
-        text-align: center;
+  margin-left: -27%;
+  margin-top: 0;
+  text-align: center;
 }
 
 .homepage-hero-text-small {
@@ -1488,11 +1493,15 @@ button {
   right: -17%;
 }
 
+.homepage-hero-content {
+  gap: 13rem;
+}
+
 .homepage-hero-text h1 {
   font-size: 28px;
-  margin-left: 0;
-        margin-top: 0;
-        text-align: center;
+  margin-left: -27%;
+  margin-top: 0;
+  text-align: center;
 }
 
 .homepage-hero-text-small {
