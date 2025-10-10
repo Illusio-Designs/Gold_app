@@ -51,6 +51,7 @@ export default function DashboardLayout() {
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [tooltip, setTooltip] = useState({ show: false, text: '', x: 0, y: 0 });
   const location = useLocation();
   const navigate = useNavigate();
   const audioRef = React.useRef(null);
@@ -283,7 +284,20 @@ export default function DashboardLayout() {
                   <Link
                     to={link.path}
                     className={isActive ? "active" : ""}
-                    data-tooltip={link.name}
+                    onMouseEnter={(e) => {
+                      if (collapsed) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setTooltip({
+                          show: true,
+                          text: link.name,
+                          x: rect.right + 15,
+                          y: rect.top + rect.height / 2
+                        });
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      setTooltip({ show: false, text: '', x: 0, y: 0 });
+                    }}
                   >
                     <Icon size={22} className="sidebar-icon" />
                     <span className="link-text">{link.name}</span>
@@ -378,6 +392,31 @@ export default function DashboardLayout() {
       
       {/* Toast Manager for real-time notifications */}
       <ToastManager />
+      
+      {/* Tooltip */}
+      {tooltip.show && collapsed && (
+        <div
+          style={{
+            position: 'fixed',
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: 'translateY(-50%)',
+            background: 'linear-gradient(135deg, #5d0829 0%, #7d0a37 100%)',
+            color: '#fce2bf',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            whiteSpace: 'nowrap',
+            zIndex: 2147483647,
+            boxShadow: '0 4px 12px rgba(93, 8, 41, 0.3)',
+            border: '1px solid rgba(252, 226, 191, 0.2)',
+            pointerEvents: 'none'
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </div>
   );
 }

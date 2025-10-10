@@ -11,7 +11,11 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    // Sanitize filename: replace spaces and special characters
+    const sanitizedName = file.originalname
+      .replace(/\s+/g, '_')  // Replace spaces with underscores
+      .replace(/[^\w\-_.]/g, '');  // Remove special characters except dash, underscore, and dot
+    cb(null, uniqueSuffix + '-' + sanitizedName);
   }
 });
 const upload = multer({ storage });

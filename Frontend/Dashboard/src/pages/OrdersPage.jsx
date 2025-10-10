@@ -14,6 +14,7 @@ import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
 import { ShoppingCart, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
+import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
 
 const OrdersPage = () => {
@@ -279,9 +280,14 @@ const OrdersPage = () => {
         <div className="product-info">
           {row.product_image ? (
             <img 
-              src={row.product_image} 
+              src={getProductImageUrl(row.product_image)} 
               alt={row.product_name} 
               className="product-thumbnail"
+              onError={(e) => {
+                console.error("[OrdersPage] Product image failed to load:", row.product_image);
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
           ) : (
             <div className="product-thumbnail no-image">
@@ -453,9 +459,13 @@ const OrdersPage = () => {
                   <div key={item.id} className="cart-item">
                     <div className="cart-item-info">
                       <img 
-                        src={item.product_image} 
+                        src={getProductImageUrl(item.product_image)} 
                         alt={item.product_name} 
                         className="cart-item-image"
+                        onError={(e) => {
+                          console.error("[OrdersPage] Cart item image failed to load:", item.product_image);
+                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23f0f0f0' width='50' height='50'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        }}
                       />
                       <div>
                         <div className="cart-item-name">{item.product_name}</div>

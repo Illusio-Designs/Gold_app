@@ -4,6 +4,8 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
+  useLocation,
 } from "react-router-dom";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardPage from "./pages/DashboardPage";
@@ -21,10 +23,35 @@ import AuthPage from "./pages/AuthPage";
 import HomePage from "./webpage/HomePage";
 import PrivacyPolicy from "./webpage/PrivacyPolicy";
 import DeletePage from "./webpage/DeletePage";
+import { isAuthenticated, autoLogout } from "./utils/authUtils";
+import { showToast } from "./utils/toast";
 
 // Removed Firebase messaging-related code
 
 // This file previously used Firebase messaging for notifications.
+
+// Session check component that runs inside Router context
+function SessionChecker() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check session every minute
+    const checkSession = () => {
+      const isProtectedRoute = location.pathname.startsWith('/dashboard');
+      
+      if (isProtectedRoute && !isAuthenticated()) {
+        autoLogout(navigate, showToast);
+      }
+    };
+
+    const interval = setInterval(checkSession, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [navigate, location]);
+
+  return null;
+}
 
 function App() {
   // Add test function to global scope for debugging
@@ -61,6 +88,7 @@ function App() {
 
   return (
     <Router>
+      <SessionChecker />
       <Routes>
         {/* Public webpage routes */}
         <Route path="/" element={<HomePage />} />

@@ -1,12 +1,36 @@
 // Authentication utilities for the dashboard
 
+// Session duration: 24 hours in milliseconds
+const SESSION_DURATION = 24 * 60 * 60 * 1000;
+
 /**
- * Check if user is authenticated
- * @returns {boolean} - True if user is authenticated
+ * Check if user is authenticated and session is valid
+ * @returns {boolean} - True if user is authenticated and session is valid
  */
 export const isAuthenticated = () => {
   const token = localStorage.getItem("admin_token");
-  return !!token;
+  const loginTime = localStorage.getItem("admin_login_time");
+  
+  if (!token) {
+    return false;
+  }
+  
+  // Check if token is expired (JWT validation)
+  if (isTokenExpired(token)) {
+    return false;
+  }
+  
+  // Check if session duration has exceeded 24 hours
+  if (loginTime) {
+    const loginTimestamp = parseInt(loginTime, 10);
+    const currentTime = Date.now();
+    
+    if (currentTime - loginTimestamp > SESSION_DURATION) {
+      return false;
+    }
+  }
+  
+  return true;
 };
 
 /**
@@ -18,11 +42,12 @@ export const getAdminToken = () => {
 };
 
 /**
- * Set admin token
+ * Set admin token and login timestamp
  * @param {string} token - Admin token
  */
 export const setAdminToken = (token) => {
   localStorage.setItem("admin_token", token);
+  localStorage.setItem("admin_login_time", Date.now().toString());
 };
 
 /**
@@ -30,12 +55,13 @@ export const setAdminToken = (token) => {
  */
 export const clearAuthData = () => {
   localStorage.removeItem("admin_token");
+  localStorage.removeItem("admin_login_time");
   localStorage.removeItem("admin_user");
   localStorage.removeItem("notification_settings");
 };
 
 /**
- * Logout user
+ * Logout user with confirmation
  * @param {Function} navigate - React Router navigate function
  */
 export const logout = (navigate) => {
@@ -45,6 +71,26 @@ export const logout = (navigate) => {
   }
   
   clearAuthData();
+  
+  if (navigate) {
+    navigate("/auth", { replace: true });
+  } else {
+    window.location.href = "/auth";
+  }
+};
+
+/**
+ * Auto logout without confirmation (for expired sessions)
+ * @param {Function} navigate - React Router navigate function
+ * @param {Function} showToast - Toast notification function
+ */
+export const autoLogout = (navigate, showToast = null) => {
+  clearAuthData();
+  
+  // Show session expired notification
+  if (showToast) {
+    showToast("Your session has expired. Please login again.", "warning", "Session Expired");
+  }
   
   if (navigate) {
     navigate("/auth", { replace: true });
@@ -87,4 +133,23 @@ export const isTokenExpired = (token) => {
     console.error('Error checking token expiration:', error);
     return true;
   }
+};
+
+/**
+ * Get remaining session time in milliseconds
+ * @returns {number} - Remaining session time or 0 if expired
+ */
+export const getRemainingSessionTime = () => {
+  const loginTime = localStorage.getItem("admin_login_time");
+  
+  if (!loginTime) {
+    return 0;
+  }
+  
+  const loginTimestamp = parseInt(loginTime, 10);
+  const currentTime = Date.now();
+  const elapsed = currentTime - loginTimestamp;
+  const remaining = SESSION_DURATION - elapsed;
+  
+  return remaining > 0 ? remaining : 0;
 }; 

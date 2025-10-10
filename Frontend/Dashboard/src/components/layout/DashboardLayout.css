@@ -48,6 +48,14 @@ body {
   background: var(--sidebar-bg);
 }
 
+.dashboard-layout.collapsed .sidebar-nav {
+  overflow: visible;
+}
+
+.dashboard-layout.collapsed .sidebar-nav li {
+  overflow: visible;
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -74,6 +82,7 @@ body {
   width: 100%;
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
 }
@@ -114,9 +123,12 @@ body {
   border-radius: 12px;
   transition: all 0.3s ease;
   white-space: nowrap;
-  overflow: hidden;
   position: relative;
   background: none;
+}
+
+.sidebar-nav a .link-text {
+  overflow: hidden;
 }
 
 .sidebar-nav a:hover {
@@ -131,30 +143,7 @@ body {
   border-left-color: var(--sidebar-active-text-color);
 }
 
-.sidebar-nav a::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 85px;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #333;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  z-index: 1002;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-  pointer-events: none;
-}
-
-.dashboard-layout.collapsed .sidebar-nav a:hover::after {
-  opacity: 1;
-  visibility: visible;
-}
+/* Tooltips are now handled by React component */
 
 .sidebar-icon {
   min-width: 22px;
@@ -172,6 +161,8 @@ body {
 
 .dashboard-layout.collapsed .sidebar-nav a {
   justify-content: center;
+  padding: 15px;
+  gap: 0;
 }
 
 .sidebar-toggle-btn {

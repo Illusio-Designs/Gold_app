@@ -21,6 +21,28 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Response interceptor to handle 401 errors (token expired)
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token expired or invalid
+      const { clearAuthData } = require("../utils/authUtils");
+      const { showWarningToast } = require("../utils/toast");
+      
+      // Clear auth data
+      clearAuthData();
+      
+      // Show session expired notification
+      showWarningToast("Your session has expired. Please login again.", "Session Expired");
+      
+      // Redirect to login page
+      window.location.href = "/auth";
+    }
+    return Promise.reject(error);
+  }
+);
+
 // USERS
 export const adminLogin = (data) =>
   axiosInstance.post("/users/admin/login", data).then((r) => r.data);

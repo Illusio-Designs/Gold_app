@@ -12,6 +12,7 @@ import {
   deleteSlider,
   getAllCategories,
 } from "../services/adminApiService";
+import { getSliderImageUrl } from "../utils/imageUtils";
 import "../styles/pages/SliderPage.css";
 
 const SliderPage = () => {
@@ -46,9 +47,13 @@ const SliderPage = () => {
         <div className="slider-image">
           {row.image_url ? (
             <img
-              src={`${import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads'}/slider/${row.image_url}`}
+              src={getSliderImageUrl(row.image_url)}
               alt={row.title}
               className="preview-image"
+              onError={(e) => {
+                console.error("[SliderPage] Image failed to load:", row.image_url);
+                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
+              }}
             />
           ) : (
             <div className="no-image">
@@ -196,11 +201,7 @@ const SliderPage = () => {
       category_id: slider.category_id || "",
     });
     setSelectedFile(null);
-    setFilePreview(
-      slider.image_url
-        ? `${import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads'}/slider/${slider.image_url}`
-        : ""
-    );
+    setFilePreview(slider.image_url ? getSliderImageUrl(slider.image_url) : "");
     setModalOpen(true);
   };
 

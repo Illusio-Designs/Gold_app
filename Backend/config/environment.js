@@ -1,5 +1,6 @@
 // Environment Configuration
 // Update this file when changing IP addresses or ports
+require("dotenv").config();
 
 const config = {
   // Server Configuration
@@ -57,15 +58,25 @@ const config = {
 
 // Helper function to get base URL based on environment
 function getBaseUrl() {
+  // Log for debugging
+  console.log("Environment Check:", {
+    NODE_ENV: process.env.NODE_ENV,
+    BASE_URL: process.env.BASE_URL,
+    PRODUCTION_URL: process.env.PRODUCTION_URL,
+  });
+
   if (process.env.NODE_ENV === "production") {
+    console.log("✅ Using PRODUCTION URL:", config.BASE_URLS.PRODUCTION);
     return config.BASE_URLS.PRODUCTION;
   }
 
   // Check if running on LAN
   if (process.env.LAN_MODE === "true" || process.env.USE_LAN === "true") {
+    console.log("Using LAN URL:", config.BASE_URLS.LAN);
     return config.BASE_URLS.LAN;
   }
 
+  console.log("Using DEVELOPMENT URL:", config.BASE_URLS.DEVELOPMENT);
   return config.BASE_URLS.DEVELOPMENT;
 }
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../services/adminApiService";
-import { isAuthenticated, setAdminToken } from "../utils/authUtils";
+import { isAuthenticated, setAdminToken, clearAuthData } from "../utils/authUtils";
+import { showSuccessToast } from "../utils/toast";
 import "../styles/pages/AuthPage.css";
 import shreenathji from "../assests/shreenathji.png";
 import rightCow from "../assests/rightcow.png";
@@ -15,7 +16,10 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Clear any expired/invalid auth data when landing on login page
+    clearAuthData();
+    
+    // Check if user is already authenticated (shouldn't happen after clearAuthData)
     if (isAuthenticated()) {
       // Redirect to dashboard if already logged in
       navigate("/dashboard", { replace: true });
@@ -29,7 +33,14 @@ const AuthPage = () => {
     try {
       const res = await adminLogin({ email, password });
       setAdminToken(res.token);
-      navigate("/dashboard", { replace: true });
+      
+      // Show success notification
+      showSuccessToast("Welcome back! You have successfully logged in.", "Login Successful");
+      
+      // Small delay to show the notification before navigating
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
     } catch (err) {
       setError("Invalid email or password");
     } finally {

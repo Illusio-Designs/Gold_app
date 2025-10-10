@@ -27,14 +27,15 @@
 .slider-image {
   display: flex;
   align-items: center;
+  width: 71px;
+  height: auto;
 }
 
-.preview-image {
-  width: 60px;
-  height: 60px;
+.slider-image .preview-image {
+  width: -webkit-fill-available;
+  height: -webkit-fill-available;
   object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #c09e83;
 }
 
 .no-image {
@@ -199,14 +200,7 @@
 }
 
 /* Image Preview */
-.image-preview {
-  display: flex;
-  justify-content: center;
-  padding: 16px;
-  background: #f9f2e7;
-  border-radius: 8px;
-  border: 1px solid #c09e83;
-}
+
 
 .preview-img {
   max-width: 200px;

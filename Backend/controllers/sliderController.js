@@ -64,8 +64,10 @@ function getSliders(req, res) {
       let processedImageUrl = null;
 
       if (slider.image_url) {
+        // Encode the filename to handle spaces and special characters
+        const encodedFilename = encodeURIComponent(slider.image_url);
         // Construct the full image URL
-        processedImageUrl = `${getBaseUrl()}/uploads/slider/${slider.image_url}`;
+        processedImageUrl = `${getBaseUrl()}/uploads/slider/${encodedFilename}`;
       }
 
       return {
@@ -95,8 +97,10 @@ function getSliderById(req, res) {
     let processedImageUrl = null;
 
     if (slider.image_url) {
+      // Encode the filename to handle spaces and special characters
+      const encodedFilename = encodeURIComponent(slider.image_url);
       // Construct the full image URL
-      processedImageUrl = `${getBaseUrl()}/uploads/slider/${slider.image_url}`;
+      processedImageUrl = `${getBaseUrl()}/uploads/slider/${encodedFilename}`;
     }
 
     const processedSlider = {
