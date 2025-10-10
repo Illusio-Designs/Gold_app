@@ -3,6 +3,9 @@
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   flex-direction: column;
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 /* Navbar styling to match homepage */
@@ -481,4 +484,358 @@
 .cancel-delete-button:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+/* Burger Menu Styles for Delete Page */
+.delete-page .homepage-burger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.delete-page .homepage-burger-menu span {
+  width: 30px;
+  height: 3px;
+  background: #fce2bf;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.delete-page .homepage-burger-menu span.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.delete-page .homepage-burger-menu span.open:nth-child(2) {
+  opacity: 0;
+}
+
+.delete-page .homepage-burger-menu span.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Responsive Styles */
+
+/* 1440px */
+@media (max-width: 1440px) {
+  .delete-page .homepage-nav {
+    padding: 2rem 8%;
+  }
+
+  .delete-content {
+    padding: 40px;
+  }
+}
+
+/* 1024px */
+@media (max-width: 1024px) {
+  .delete-page .homepage-nav {
+    padding: 1.5rem 5%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 80px;
+  }
+
+  .delete-page .homepage-menu li {
+    font-size: 1rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  .delete-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .delete-content {
+    padding: 35px;
+  }
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  .delete-page .homepage-nav {
+    padding: 1.2rem 4%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 70px;
+  }
+
+  .delete-page .homepage-menu {
+    padding: 8px 20px;
+  }
+
+  .delete-page .homepage-menu li {
+    font-size: 0.95rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .delete-main {
+    padding: 60px 4%;
+  }
+
+  .delete-content {
+    padding: 30px 25px;
+    margin: 0 auto;
+  }
+
+  .delete-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .form-input {
+    padding: 12px;
+  }
+
+  .submit-button {
+    padding: 15px 35px;
+    font-size: 1rem;
+  }
+}
+
+/* 500px and below - Burger Menu */
+@media (max-width: 500px) {
+  .delete-page .homepage-burger-menu {
+    display: flex;
+  }
+
+  .delete-page .homepage-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 70%;
+    max-width: 300px;
+    background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    gap: 10px;
+    border: none;
+    border-radius: 0;
+    transition: right 0.3s ease;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .delete-page .homepage-menu.mobile-open {
+    right: 0;
+  }
+
+  .delete-page .homepage-menu li {
+    width: 100%;
+    padding: 1rem;
+    text-align: left;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(252, 226, 191, 0.2);
+  }
+
+  .delete-main {
+    padding: 50px 5% 100px;
+  }
+}
+
+/* 426px */
+@media (max-width: 426px) {
+  .delete-page .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 60px;
+  }
+
+  .delete-content h1 {
+    font-size: 2rem;
+  }
+
+  .delete-content p {
+    font-size: 0.95rem;
+  }
+
+  .delete-content {
+    padding: 25px 20px;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+  }
+
+  .form-input {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .submit-button {
+    padding: 14px 30px;
+    font-size: 1rem;
+  }
+
+  .popup-content {
+    padding: 30px 25px;
+  }
+
+  .popup-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .confirm-delete-button,
+  .cancel-delete-button {
+    padding: 15px 30px;
+    font-size: 1rem;
+  }
+
+
+}
+
+/* 383px */
+@media (max-width: 383px) {
+  .delete-page .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 55px;
+  }
+
+  .delete-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .popup-content h2 {
+    font-size: 1.4rem;
+  }
+
+
+}
+
+/* 375px */
+@media (max-width: 375px) {
+  .delete-page .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 50px;
+  }
+
+  .delete-content h1 {
+    font-size: 1.7rem;
+  }
+
+  .delete-content p {
+    font-size: 0.9rem;
+  }
+
+  .delete-content {
+    padding: 25px 15px;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-input {
+    padding: 11px;
+    font-size: 0.9rem;
+  }
+
+  .submit-button {
+    padding: 13px 28px;
+    font-size: 0.95rem;
+  }
+
+  .popup-content {
+    padding: 25px 20px;
+  }
+
+  .popup-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .popup-content p {
+    font-size: 0.9rem;
+  }
+
+  .confirm-delete-button,
+  .cancel-delete-button {
+    padding: 14px 28px;
+    font-size: 0.95rem;
+  }
+
+
+}
+
+/* 320px */
+@media (max-width: 320px) {
+  .delete-page .homepage-nav {
+    padding: 0.8rem 5%;
+  }
+
+  .delete-page .homepage-logo {
+    height: 45px;
+  }
+
+  .delete-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .delete-content p {
+    font-size: 0.85rem;
+  }
+
+  .delete-content {
+    padding: 20px 12px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .form-input {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  .form-actions {
+    margin-top: 30px;
+  }
+
+  .submit-button {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+
+  .popup-content {
+    padding: 20px 15px;
+  }
+
+  .popup-content h2 {
+    font-size: 1.2rem;
+  }
+
+  .popup-content p {
+    font-size: 0.85rem;
+  }
+
+  .account-details {
+    padding: 15px;
+  }
+
+  .warning-text {
+    padding: 12px;
+    font-size: 0.85rem;
+  }
+
+  .confirmation-buttons {
+    gap: 15px;
+  }
+
+  .confirm-delete-button,
+  .cancel-delete-button {
+    padding: 13px 25px;
+    font-size: 0.9rem;
+  }
 }

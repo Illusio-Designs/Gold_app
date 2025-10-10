@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './PrivacyPolicy.css';
 import './HomePage.css';
 import logo from "../assests/dashboardlogo.png";
@@ -11,15 +11,42 @@ import phones from "../assests/phones.png";
 import footerBg from "../assests/bgdesign.png";
 
 const PrivacyPolicy = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  // Page loader effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="privacy-policy">
+      {pageLoading && (
+        <div className="page-loader">
+          <div className="page-loader-spinner"></div>
+          <p className="page-loader-text">Loading...</p>
+        </div>
+      )}
       {/* Header */}
       <nav className="homepage-nav">
         <img src={logo} alt="Logo" className="homepage-logo" />
-        <ul className="homepage-menu">
-          <li><a href="/">Home</a></li>
-          <li><a href="/privacy" className="active">Privacy Policy</a></li>
-          <li><a href="/delete">Delete Account</a></li>
+        <button 
+          className="homepage-burger-menu"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className={isMobileMenuOpen ? 'open' : ''}></span>
+          <span className={isMobileMenuOpen ? 'open' : ''}></span>
+          <span className={isMobileMenuOpen ? 'open' : ''}></span>
+        </button>
+        <ul className={`homepage-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <li onClick={() => setIsMobileMenuOpen(false)}><a href="/">Home</a></li>
+          <li className="active" onClick={() => setIsMobileMenuOpen(false)}><a href="/privacy">Privacy Policy</a></li>
+          <li onClick={() => setIsMobileMenuOpen(false)}><a href="/delete">Delete Account</a></li>
         </ul>
       </nav>
       
@@ -165,6 +192,9 @@ const PrivacyPolicy = () => {
             alt="Background Pattern"
             className="homepage-bg-design homepage-bg-design-left footer-bg-design"
           />
+        </div>
+        <div className="homepage-copyright">
+          <p>© 2025. All Right Reserved. Design & Develop with ❤️ by - <a href="https://illusiodesigns.agency/" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Illusio Designs</a></p>
         </div>
         </div>
       </section>

@@ -15,11 +15,25 @@
 
 body {
   font-family: "Glorify", serif !important;
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+}
+
+/* Disable zoom on mobile */
+html {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+}
+
+input, select, textarea, button {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
 }
 
 .homepage-root {
   min-height: 100vh;
   background: #fdf0de;
+  overflow-x: hidden;
 }
 
 /* Combined Hero Section Container */
@@ -75,13 +89,19 @@ body {
   font-weight: 600;
 }
 
+/* Hide mobile-only menu items on desktop */
+.homepage-menu-mobile-only {
+  display: none;
+}
+
 /* Hero Content Area */
 .homepage-hero-content {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 48px 4vw 5rem;
+  padding: 0 5% 4vw 5%;
+  max-width: 100%;
 }
 
 /* Background Pattern Styling */
@@ -138,7 +158,7 @@ body {
 .homepage-hero-text h1 {
   font-size: 49px;
   color: #fce2bf;
-  margin-left: -30%;
+  margin-left: -22%;
   margin-top: -8%;
   line-height: 1.3;
 }
@@ -218,6 +238,7 @@ body {
   );
   z-index: 10;
   pointer-events: none;
+  transition: width 0.3s ease;
 }
 
 .homepage-categories-shadow-right {
@@ -235,6 +256,7 @@ body {
   );
   z-index: 10;
   pointer-events: none;
+  transition: width 0.3s ease;
 }
 
 .homepage-categories-list {
@@ -338,6 +360,8 @@ body {
   justify-content: center;
   padding: 50px;
   gap: 20px;
+  width: 100%;
+  min-height: 200px;
 }
 
 .homepage-loading-spinner {
@@ -381,7 +405,7 @@ body {
 }
 
 .homepage-hero-text-small {
-  margin-left: 20%;
+  margin-left: 22%;
   margin-top: 25%;
 }
 
@@ -613,7 +637,6 @@ body {
 .homepage-app-store-buttons {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .homepage-store-img {
@@ -658,7 +681,7 @@ body {
 /* Footer Main Section */
 .homepage-footer-main {
   background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
-  padding: 10rem 10% 7rem;
+  padding: 10rem 10% 0rem;
   position: relative;
   overflow: hidden;
 }
@@ -756,6 +779,7 @@ body {
   right: 0;
   height: 100%;
   pointer-events: none;
+  z-index: 4;
 }
 
 .homepage-flower-bottom-left {
@@ -789,7 +813,1021 @@ body {
 
 .footer-bg-design {
   width: 105%;
-  top: 47%;
+  top: 57%;
   position: absolute;
-  z-index: 2;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Copyright Section */
+.homepage-copyright {
+  text-align: center;
+  padding: 2rem 5%;
+  background: transparent;
+  position: relative;
+  z-index: 3;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(252, 226, 191, 0.3);
+  pointer-events: auto;
+}
+
+.homepage-copyright p {
+  color: #fce2bf;
+  font-size: 14px;
+  margin: 0;
+  font-family: "Montserrat", sans-serif !important;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.homepage-illusio {
+  font-weight: 600;
+  color: #fce2bf !important;
+  transition: color 0.3s ease;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  display: inline-block;
+  position: relative;
+  z-index: 100;
+  pointer-events: all !important;
+}
+
+.homepage-illusio:hover {
+  color: #fff !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+.homepage-illusio:active {
+  color: #ffd700 !important;
+}
+
+.homepage-illusio:visited {
+  color: #fce2bf !important;
+}
+
+/* Page Loader */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 20px;
+}
+
+.page-loader-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #5d0829;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.page-loader-text {
+  color: #5d0829;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: "Montserrat", sans-serif !important;
+}
+
+/* Burger Menu Styles */
+.homepage-burger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.homepage-burger-menu span {
+  width: 30px;
+  height: 3px;
+  background: #fce2bf;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.homepage-burger-menu span.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.homepage-burger-menu span.open:nth-child(2) {
+  opacity: 0;
+}
+
+.homepage-burger-menu span.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Responsive Styles */
+
+/* 1440px */
+@media (max-width: 1440px) {
+  .homepage-nav {
+    padding: 2rem 8%;
+  }
+
+  .homepage-hero-content {
+    padding: 0 8% 4vw 8%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 45px;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 45px;
+  }
+
+  .homepage-about {
+    padding: 3rem 8%;
+  }
+
+  .homepage-faq {
+    padding: 3rem 8%;
+  }
+
+  .homepage-app-promo-section {
+    margin: -162px 23% 0;
+}
+
+.homepage-app-promo-title {
+  font-size: 34px;
+}
+
+  .homepage-footer-main {
+    padding: 10rem 8% 0rem;
+  }
+
+  .footer-bg-design {
+    top: 51%;
+}
+
+  .homepage-footer-content {
+    padding: 0 2%;
+  }
+}
+
+/* 1024px */
+@media (max-width: 1024px) {
+  .homepage-nav {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-logo {
+    height: 80px;
+  }
+
+  .homepage-menu li {
+    font-size: 1rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  .homepage-hero-content {
+    padding: 0 5% 4vw 5%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 38px;
+    margin-left: -20%;
+  }
+
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 40px;
+  }
+
+  /* Category shadows smaller */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 180px;
+  }
+
+  /* Category card size adjustment */
+  .homepage-category-card {
+    padding: 10px 18px;
+  }
+
+  .homepage-category-img {
+    width: 55px;
+    height: 55px;
+  }
+
+  .homepage-category-label {
+    font-size: 20px;
+  }
+
+  .homepage-about {
+    padding: 3rem 5%;
+  }
+
+  .homepage-about-content {
+    gap: 4rem;
+  }
+
+  .homepage-about-gallery-frame {
+    width: 450px;
+  }
+
+  .homepage-about-text p,
+  .homepage-about-section-title {
+    font-size: 18px;
+  }
+
+  .homepage-faq {
+    padding: 3rem 5%;
+  }
+
+  .homepage-app-promo-section {
+    margin: -140px 15% 0;
+    padding: 2.5rem 2.5em 1rem;
+}
+
+.homepage-app-promo-section {
+  border-radius: 60px;
+}
+
+  .homepage-app-promo-title {
+    font-size: 29px;
+  }
+
+  .homepage-footer-main {
+    padding: 9rem 5% 0rem;
+  }
+
+  .homepage-footer-content {
+    padding: 0 2%;
+  }
+
+  .homepage-phone-mockup {
+    width: 50%;
+    margin-top: -24%;
+}
+
+.homepage-flower-img {
+  width: 74%;
+  top: -17rem;
+  left: 43%;
+}
+
+.homepage-footer-logo {
+  width: 100px;
+}
+.homepage-company-name {
+  font-size: 14px;
+}
+.homepage-footer-section h4 {
+  font-size: 20px;
+}
+.homepage-footer-section a {
+  font-size: 14px;
+}
+.homepage-footer-section p {
+  font-size: 14px;
+}
+.footer-bg-design {
+  top: 63%;
+}
+.homepage-cow-img {
+  width: 70%;
+  height: auto;
+}
+.homepage-decorative-cow {
+  right: -1rem;
+}
+.homepage-flower-img-left {
+  width: 70%;
+  height: auto;
+}
+.homepage-flower-bottom-left {
+  left: -1rem;
+}
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  .homepage-nav {
+    padding: 1.2rem 4%;
+  }
+
+  .homepage-logo {
+    height: 70px;
+  }
+
+  .homepage-menu {
+    padding: 8px 20px;
+    gap: 0;
+  }
+
+  .homepage-menu li {
+    font-size: 0.95rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .homepage-hero-section {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .homepage-hero-content {
+    flex-direction: column;
+    padding: 2rem 4%;
+    gap: 2rem;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 32px;
+    margin-left: 0;
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .homepage-hero-text-small {
+    margin-left: 0;
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .homepage-hero-bg-img {
+    width: 60%;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 36px;
+  }
+
+  /* Category shadows even smaller for tablets */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 120px;
+  }
+
+  /* Category card medium size */
+  .homepage-category-card {
+    padding: 8px 14px;
+    border-radius: 40px;
+  }
+
+  .homepage-category-img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .homepage-category-label {
+    font-size: 18px;
+  }
+
+  .homepage-categories-list {
+    padding: 40px 4%;
+    gap: 2rem;
+  }
+
+  .homepage-about {
+    padding: 2.5rem 4%;
+  }
+
+  .homepage-about-content {
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .homepage-about-gallery-frame {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .homepage-faq {
+    padding: 3rem 4%;
+  }
+
+  .homepage-faq-container {
+    flex-direction: column;
+  }
+
+  .homepage-faq-left {
+    flex: 1;
+    margin-bottom: 2rem;
+  }
+
+  .homepage-faq-subtitle {
+    width: 100%;
+  }
+
+  .homepage-faq-right {
+    flex: 1;
+    margin-top: 0;
+    margin-left: 0;
+  }
+
+  .homepage-app-promo-section {
+    margin: -120px 8% 0;
+    border-radius: 30px;
+}
+
+.homepage-app-promo-title {
+  font-size: 21px;
+  margin-top: 0;
+}
+
+.homepage-phone-mockup {
+  width: 35%;
+  margin-top: -65px;
+}
+
+.homepage-flower-img {
+  width: 31%;
+  top: -8rem;
+  left: 81%;
+}
+
+  .homepage-footer-content {
+    padding: 0 4%;
+  }
+
+  .homepage-footer-main {
+    padding: 4rem 4% 0rem;
+  }
+
+  .homepage-footer-left {
+    align-items: flex-start;
+  }
+  .homepage-cow-img {
+    width: 50%;
+    height: auto;
+}
+.homepage-flower-img-left {
+  width: 50%;
+  height: auto;
+}
+.homepage-decorative-cow {
+  right: -4rem;
+}
+.footer-bg-design {
+  top: 66%;
+}
+}
+
+/* 500px and below - Burger Menu */
+@media (max-width: 500px) {
+  .homepage-burger-menu {
+    display: flex;
+  }
+
+  .homepage-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 70%;
+    max-width: 300px;
+    background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    gap: 10px;
+    border: none;
+    border-radius: 0;
+    transition: right 0.3s ease;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+  }
+
+  .homepage-menu.mobile-open {
+    right: 0;
+  }
+
+  .homepage-menu li {
+    width: 100%;
+    padding: 1rem;
+    text-align: left;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(252, 226, 191, 0.2);
+  }
+
+  /* Show mobile-only menu items in burger menu */
+  .homepage-menu-mobile-only {
+    display: block !important;
+  }
+
+  /* Hero section mobile adjustments */
+  .homepage-hero-content {
+    padding: 1.5rem 5%;
+  }
+
+  /* Category shadows minimal for mobile */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 80px;
+  }
+
+  /* Category card small size */
+  .homepage-category-card {
+    padding: 6px 12px;
+    border-radius: 35px;
+  }
+
+  .homepage-category-img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .homepage-category-label {
+    font-size: 16px;
+  }
+
+  .homepage-categories-list {
+    padding: 35px 5%;
+    gap: 1.5rem;
+  }
+
+  .homepage-faq {
+    padding: 0rem 5% 7rem;
+}
+
+  /* Footer spacing */
+  .homepage-footer-main {
+    padding: 12rem 5% 2rem;
+  }
+
+  .homepage-footer-content {
+    padding: 0 5%;
+    flex-direction: column;
+    gap: 0rem;
+}
+
+.homepage-app-promo-section {
+  flex-direction: column-reverse;
+  gap: 25px;
+}
+
+.homepage-phone-mockup {
+  width: 40%;
+}
+
+  .footer-bg-design {
+    top: 84%;
+    width: 200%;
+}
+
+  .homepage-about {
+    padding: 2rem 5%;
+  }
+
+  .homepage-flower-img{
+    display: none;
+  }
+}
+
+/* 426px */
+@media (max-width: 426px) {
+  .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .homepage-logo {
+    height: 60px;
+  }
+
+  .homepage-hero-content {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 28px;
+  }
+
+  .homepage-hero-desc {
+    font-size: 1rem;
+  }
+
+  .homepage-download-btn {
+    font-size: 1rem;
+    padding: 0.6rem 1.8rem;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 32px;
+  }
+
+  /* Category shadows very small */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 60px;
+  }
+
+  .homepage-category-card {
+    padding: 6px 10px;
+    border-radius: 30px;
+  }
+
+  .homepage-category-img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .homepage-category-label {
+    font-size: 15px;
+  }
+
+  .homepage-categories-list {
+    padding: 30px 5%;
+    gap: 1.2rem;
+  }
+
+  .homepage-about {
+    padding: 2rem 5%;
+  }
+
+  .homepage-about-text p,
+  .homepage-about-section-title {
+    font-size: 16px;
+  }
+
+
+  .homepage-faq-question {
+    font-size: 15px;
+    padding: 15px;
+  }
+
+  .homepage-faq-answer p {
+    font-size: 14px;
+  }
+
+  .homepage-app-promo-title {
+    font-size: 26px;
+  }
+
+  .homepage-store-img {
+    width: 45%;
+  }
+
+  .homepage-footer-section h4 {
+    font-size: 20px;
+  }
+
+  .homepage-footer-section p,
+  .homepage-footer-section a {
+    font-size: 15px;
+  }
+
+  .homepage-company-name {
+    font-size: 16px;
+  }
+
+.homepage-cow-img {
+  width: 40%;
+}
+
+}
+
+/* 383px */
+@media (max-width: 384px) {
+  .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .homepage-logo {
+    height: 55px;
+  }
+
+  .homepage-hero-content {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 26px;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 28px;
+  }
+
+  /* Category shadows tiny */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 50px;
+  }
+
+  .homepage-category-card {
+    padding: 5px 9px;
+    border-radius: 28px;
+  }
+
+  .homepage-category-img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .homepage-category-label {
+    font-size: 14px;
+  }
+
+  .homepage-categories-list {
+    padding: 25px 5%;
+    gap: 1rem;
+  }
+
+  .homepage-about {
+    padding: 1.8rem 5%;
+  }
+
+  .homepage-faq {
+    padding: 0rem 5% 6rem;
+  }
+
+  .homepage-app-promo-section {
+    margin: -90px 5% 0;
+  }
+
+  .homepage-app-promo-title {
+    font-size: 24px;
+  }
+
+  .homepage-footer-content {
+    padding: 0 5%;
+  }
+
+  .homepage-footer-logo {
+    width: 100px;
+  }
+
+  .homepage-company-name {
+    font-size: 14px;
+  }
+  .footer-bg-design {
+    top: 85%;
+}
+.homepage-decorative-cow {
+  right: -6rem;
+}
+.homepage-cow-img {
+  width: 33%;
+}
+.homepage-flower-bottom-left {
+  left: -2rem;
+}
+.homepage-flower-img-left {
+  width: 40%;
+}
+
+}
+
+/* 375px */
+@media (max-width: 375px) {
+  .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .homepage-logo {
+    height: 50px;
+  }
+
+  .homepage-hero-content {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 24px;
+  }
+
+  .homepage-hero-desc {
+    font-size: 0.95rem;
+  }
+
+  .homepage-download-btn {
+    font-size: 0.95rem;
+    padding: 0.55rem 1.6rem;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 26px;
+  }
+
+  /* Category shadows minimal */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 45px;
+  }
+
+  .homepage-category-card {
+    padding: 5px 8px;
+    border-radius: 25px;
+  }
+
+  .homepage-category-img {
+    width: 33px;
+    height: 33px;
+  }
+
+  .homepage-category-label {
+    font-size: 13px;
+  }
+
+  .homepage-categories-list {
+    gap: 1rem;
+    padding: 25px 5%;
+  }
+
+  .homepage-about {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-faq {
+    padding: 0rem 5% 5rem;
+  }
+
+  .homepage-app-promo-section {
+    margin: -85px 5% 0;
+  }
+
+  .homepage-app-promo-title {
+    font-size: 22px;
+  }
+
+  .homepage-store-img {
+    width: 43%;
+  }
+
+  .homepage-footer-main {
+    padding: 6rem 5% 0rem;
+  }
+
+  .homepage-footer-content {
+    padding: 0 5%;
+  }
+
+  .homepage-footer-section h4 {
+    font-size: 18px;
+  }
+
+  .homepage-footer-section p,
+  .homepage-footer-section a {
+    font-size: 14px;
+  }
+}
+
+/* 320px */
+@media (max-width: 320px) {
+  .homepage-nav {
+    padding: 0.8rem 5%;
+  }
+
+  .homepage-logo {
+    height: 45px;
+  }
+
+  .homepage-hero-content {
+    padding: 1.2rem 5%;
+  }
+
+  .homepage-hero-text h1 {
+    font-size: 22px;
+  }
+
+  .homepage-hero-desc {
+    font-size: 0.9rem;
+  }
+
+  .homepage-download-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1.4rem;
+  }
+
+  .homepage-categories-title,
+  .homepage-about-title,
+  .homepage-faq-title {
+    font-size: 24px;
+  }
+
+  /* Category shadows very tiny */
+  .homepage-categories-shadow-left,
+  .homepage-categories-shadow-right {
+    width: 40px;
+  }
+
+  .homepage-category-card {
+    padding: 4px 8px;
+    border-radius: 22px;
+  }
+
+  .homepage-category-img {
+    width: 30px;
+    height: 30px;
+    margin-right: 0.6rem;
+  }
+
+  .homepage-category-label {
+    font-size: 12px;
+  }
+
+  .homepage-categories-list {
+    gap: 0.8rem;
+    padding: 20px 5%;
+  }
+
+  .homepage-about {
+    padding: 1.5rem 5%;
+  }
+
+  .homepage-about-text p,
+  .homepage-about-section-title {
+    font-size: 14px;
+  }
+
+  .homepage-faq {
+    padding: 0rem 5% 4rem;
+  }
+
+  .homepage-faq-question {
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  .homepage-faq-answer p {
+    font-size: 12px;
+  }
+
+  .homepage-app-promo-section {
+    margin: -80px 5% 0;
+    padding: 1.2rem;
+    border-radius: 30px;
+  }
+
+  .homepage-app-promo-title {
+    font-size: 20px;
+  }
+
+  .homepage-store-img {
+    width: 42%;
+  }
+
+  .homepage-footer-main {
+    padding: 10rem 5% 0rem;
+  }
+
+  .homepage-footer-content {
+    padding: 0 5%;
+  }
+
+  .homepage-footer-logo {
+    width: 80px;
+  }
+
+  .homepage-company-name {
+    font-size: 12px;
+  }
+
+  .homepage-footer-section h4 {
+    font-size: 16px;
+  }
+
+  .homepage-footer-section p,
+  .homepage-footer-section a {
+    font-size: 13px;
+  }
+
+  .homepage-decorative-cow {
+    display: none;
+  }
+
+  .homepage-flower-bottom-left {
+    display: none;
+  }
+
+  /* Copyright responsive */
+  .homepage-copyright {
+    padding: 1.5rem 5%;
+    margin-top: 1.5rem;
+  }
+
+  .homepage-copyright p {
+    font-size: 11px;
+    line-height: 1.6;
+  }
 }

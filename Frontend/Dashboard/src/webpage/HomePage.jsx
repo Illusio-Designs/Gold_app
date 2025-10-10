@@ -63,6 +63,8 @@ const HomePage = () => {
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -177,6 +179,15 @@ const HomePage = () => {
   // Display only the actual categories from API (no duplication)
   const displayCategories = categories;
 
+  // Page loader effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -203,6 +214,12 @@ const HomePage = () => {
 
   return (
     <div className="homepage-root">
+      {pageLoading && (
+        <div className="page-loader">
+          <div className="page-loader-spinner"></div>
+          <p className="page-loader-text">Loading...</p>
+        </div>
+      )}
       <section id="home" className="homepage-hero-section">
         <div className="homepage-hero-bg-pattern">
           <img
@@ -218,30 +235,69 @@ const HomePage = () => {
         </div>
         <nav className="homepage-nav">
           <img src={logo} alt="Logo" className="homepage-logo" />
-          <ul className="homepage-menu">
+          <button 
+            className="homepage-burger-menu"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className={isMobileMenuOpen ? 'open' : ''}></span>
+            <span className={isMobileMenuOpen ? 'open' : ''}></span>
+            <span className={isMobileMenuOpen ? 'open' : ''}></span>
+          </button>
+          <ul className={`homepage-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
             <li 
               className={activeSection === 'home' ? 'active' : ''} 
-              onClick={() => scrollToSection('home')}
+              onClick={() => {
+                scrollToSection('home');
+                setIsMobileMenuOpen(false);
+              }}
             >
               Home
             </li>
             <li 
               className={activeSection === 'categories' ? 'active' : ''} 
-              onClick={() => scrollToSection('categories')}
+              onClick={() => {
+                scrollToSection('categories');
+                setIsMobileMenuOpen(false);
+              }}
             >
               Categories
             </li>
             <li 
               className={activeSection === 'about' ? 'active' : ''} 
-              onClick={() => scrollToSection('about')}
+              onClick={() => {
+                scrollToSection('about');
+                setIsMobileMenuOpen(false);
+              }}
             >
               About Us
             </li>
             <li 
               className={activeSection === 'faqs' ? 'active' : ''} 
-              onClick={() => scrollToSection('faqs')}
+              onClick={() => {
+                scrollToSection('faqs');
+                setIsMobileMenuOpen(false);
+              }}
             >
               FAQs
+            </li>
+            <li 
+              className="homepage-menu-mobile-only"
+              onClick={() => {
+                window.location.href = '/privacy';
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Privacy Policy
+            </li>
+            <li 
+              className="homepage-menu-mobile-only"
+              onClick={() => {
+                window.location.href = '/delete';
+                setIsMobileMenuOpen(false);
+              }}
+            >
+              Delete Account
             </li>
           </ul>
         </nav>
@@ -466,6 +522,9 @@ const HomePage = () => {
             alt="Background Pattern"
             className="homepage-bg-design homepage-bg-design-left footer-bg-design"
           />
+        </div>
+        <div className="homepage-copyright">
+          <p>© 2025. All Right Reserved. Design & Develop with ❤️ by - <a href="https://illusiodesigns.agency/" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Illusio Designs</a></p>
         </div>
         </div>
       </section>

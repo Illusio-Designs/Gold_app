@@ -3,6 +3,9 @@
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   flex-direction: column;
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  overflow-x: hidden;
 }
 
 /* Navbar styling to match homepage */
@@ -339,4 +342,288 @@
   font-weight: 600;
   margin: 0;
   font-size: 1.1rem;
+}
+
+/* Burger Menu Styles for Privacy Policy Page */
+.privacy-policy .homepage-burger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.privacy-policy .homepage-burger-menu span {
+  width: 30px;
+  height: 3px;
+  background: #fce2bf;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+.privacy-policy .homepage-burger-menu span.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.privacy-policy .homepage-burger-menu span.open:nth-child(2) {
+  opacity: 0;
+}
+
+.privacy-policy .homepage-burger-menu span.open:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Responsive Styles */
+
+/* 1440px */
+@media (max-width: 1440px) {
+  .privacy-policy .homepage-nav {
+    padding: 2rem 8%;
+  }
+
+  .privacy-content {
+    padding: 40px;
+  }
+}
+
+/* 1024px */
+@media (max-width: 1024px) {
+  .privacy-policy .homepage-nav {
+    padding: 1.5rem 5%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 80px;
+  }
+
+  .privacy-policy .homepage-menu li {
+    font-size: 1rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  .privacy-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .privacy-content {
+    padding: 35px;
+  }
+}
+
+/* 768px */
+@media (max-width: 768px) {
+  .privacy-policy .homepage-nav {
+    padding: 1.2rem 4%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 70px;
+  }
+
+  .privacy-policy .homepage-menu {
+    padding: 8px 20px;
+  }
+
+  .privacy-policy .homepage-menu li {
+    font-size: 0.95rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .privacy-main {
+    padding: 60px 4%;
+  }
+
+  .privacy-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .privacy-content {
+    padding: 30px 25px;
+    margin: 0 auto;
+  }
+
+  .privacy-content p,
+  .privacy-content li {
+    font-size: 0.95rem;
+  }
+}
+
+/* 500px and below - Burger Menu */
+@media (max-width: 500px) {
+  .privacy-policy .homepage-burger-menu {
+    display: flex;
+  }
+
+  .privacy-policy .homepage-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    height: 100vh;
+    width: 70%;
+    max-width: 300px;
+    background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    gap: 10px;
+    border: none;
+    border-radius: 0;
+    transition: right 0.3s ease;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .privacy-policy .homepage-menu.mobile-open {
+    right: 0;
+  }
+
+  .privacy-policy .homepage-menu li {
+    width: 100%;
+    padding: 1rem;
+    text-align: left;
+    font-size: 1.1rem;
+    border-bottom: 1px solid rgba(252, 226, 191, 0.2);
+  }
+
+  .privacy-main {
+    padding: 50px 5% 100px;
+  }
+}
+
+/* 426px */
+@media (max-width: 426px) {
+  .privacy-policy .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 60px;
+  }
+
+  .privacy-content h1 {
+    font-size: 2rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .privacy-content {
+    padding: 25px 20px;
+  }
+
+  .privacy-content p,
+  .privacy-content li {
+    font-size: 0.9rem;
+  }
+}
+
+/* 383px */
+@media (max-width: 383px) {
+  .privacy-policy .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 55px;
+  }
+
+  .privacy-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* 375px */
+@media (max-width: 375px) {
+  .privacy-policy .homepage-nav {
+    padding: 1rem 5%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 50px;
+  }
+
+  .privacy-content h1 {
+    font-size: 1.7rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.25rem;
+  }
+
+  .privacy-content {
+    padding: 25px 15px;
+  }
+
+  .privacy-content p,
+  .privacy-content li {
+    font-size: 0.85rem;
+  }
+
+  .privacy-content ul {
+    padding-left: 15px;
+  }
+
+  .highlight-box p {
+    font-size: 1rem;
+  }
+
+
+}
+
+/* 320px */
+@media (max-width: 320px) {
+  .privacy-policy .homepage-nav {
+    padding: 0.8rem 5%;
+  }
+
+  .privacy-policy .homepage-logo {
+    height: 45px;
+  }
+
+  .privacy-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .privacy-content h2 {
+    font-size: 1.15rem;
+    margin: 30px 0 15px 0;
+  }
+
+  .privacy-content {
+    padding: 20px 12px;
+  }
+
+  .privacy-content p,
+  .privacy-content li {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .privacy-content ul {
+    padding-left: 12px;
+  }
+
+  .highlight-box {
+    padding: 15px;
+  }
+
+  .highlight-box p {
+    font-size: 0.9rem;
+  }
+
+
 }
