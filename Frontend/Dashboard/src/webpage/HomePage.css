@@ -25,7 +25,10 @@ html {
   -ms-touch-action: manipulation;
 }
 
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   touch-action: manipulation;
   -ms-touch-action: manipulation;
 }
@@ -41,7 +44,7 @@ input, select, textarea, button {
   position: relative;
   overflow: hidden;
   height: 100vh;
-  background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+  background: linear-gradient(253.3deg, #43051d 1.95%, #5d0829 102.63%);
 }
 
 .homepage-nav {
@@ -278,6 +281,7 @@ input, select, textarea, button {
   padding: 10px 15px;
   transition: box-shadow 0.2s, border 0.2s;
   cursor: pointer;
+  gap: 10px;
 }
 
 .homepage-category-card:hover {
@@ -288,7 +292,6 @@ input, select, textarea, button {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  margin-right: 1rem;
   border-radius: 50%;
   background: #f8e9d2;
   transition: filter 0.5s ease, opacity 0.3s ease;
@@ -313,7 +316,8 @@ input, select, textarea, button {
 
 /* Pulse animation for loading state */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.7;
   }
   50% {
@@ -374,8 +378,12 @@ input, select, textarea, button {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .homepage-categories-loading p {
@@ -680,7 +688,7 @@ input, select, textarea, button {
 
 /* Footer Main Section */
 .homepage-footer-main {
-  background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+  background: linear-gradient(253.3deg, #43051d 1.95%, #5d0829 102.63%);
   padding: 10rem 10% 0rem;
   position: relative;
   overflow: hidden;
@@ -938,7 +946,7 @@ input, select, textarea, button {
 /* 1440px */
 @media (max-width: 1440px) {
   .homepage-nav {
-    padding: 2rem 8%;
+    padding: 2rem 8% 1rem;
   }
 
   .homepage-hero-content {
@@ -947,6 +955,11 @@ input, select, textarea, button {
 
   .homepage-hero-text h1 {
     font-size: 45px;
+    margin-left: -12%;
+  }
+
+  .homepage-hero-text-small {
+    margin-left: 27%;
   }
 
   .homepage-categories-title,
@@ -965,11 +978,11 @@ input, select, textarea, button {
 
   .homepage-app-promo-section {
     margin: -162px 23% 0;
-}
+  }
 
-.homepage-app-promo-title {
-  font-size: 34px;
-}
+  .homepage-app-promo-title {
+    font-size: 34px;
+  }
 
   .homepage-footer-main {
     padding: 10rem 8% 0rem;
@@ -977,7 +990,7 @@ input, select, textarea, button {
 
   .footer-bg-design {
     top: 51%;
-}
+  }
 
   .homepage-footer-content {
     padding: 0 2%;
@@ -1000,14 +1013,27 @@ input, select, textarea, button {
   }
 
   .homepage-hero-content {
-    padding: 0 5% 4vw 5%;
+    padding: 0 4% 4vw;
   }
 
   .homepage-hero-text h1 {
     font-size: 38px;
-    margin-left: -20%;
+    margin-left: 0%;
+    margin-top: 27%;
   }
 
+  .homepage-hero-bg {
+    top: 11%;
+  }
+
+  .homepage-hero-bg-img {
+    width: 55%;
+  }
+
+  .homepage-hero-text-small {
+    margin-left: 36%;
+    margin-top: 32%;
+  }
 
   .homepage-categories-title,
   .homepage-about-title,
@@ -1059,11 +1085,11 @@ input, select, textarea, button {
   .homepage-app-promo-section {
     margin: -140px 15% 0;
     padding: 2.5rem 2.5em 1rem;
-}
+  }
 
-.homepage-app-promo-section {
-  border-radius: 60px;
-}
+  .homepage-app-promo-section {
+    border-radius: 60px;
+  }
 
   .homepage-app-promo-title {
     font-size: 29px;
@@ -1080,46 +1106,46 @@ input, select, textarea, button {
   .homepage-phone-mockup {
     width: 50%;
     margin-top: -24%;
-}
+  }
 
-.homepage-flower-img {
-  width: 74%;
-  top: -17rem;
-  left: 43%;
-}
+  .homepage-flower-img {
+    width: 74%;
+    top: -17rem;
+    left: 43%;
+  }
 
-.homepage-footer-logo {
-  width: 100px;
-}
-.homepage-company-name {
-  font-size: 14px;
-}
-.homepage-footer-section h4 {
-  font-size: 20px;
-}
-.homepage-footer-section a {
-  font-size: 14px;
-}
-.homepage-footer-section p {
-  font-size: 14px;
-}
-.footer-bg-design {
-  top: 63%;
-}
-.homepage-cow-img {
-  width: 70%;
-  height: auto;
-}
-.homepage-decorative-cow {
-  right: -1rem;
-}
-.homepage-flower-img-left {
-  width: 70%;
-  height: auto;
-}
-.homepage-flower-bottom-left {
-  left: -1rem;
-}
+  .homepage-footer-logo {
+    width: 100px;
+  }
+  .homepage-company-name {
+    font-size: 14px;
+  }
+  .homepage-footer-section h4 {
+    font-size: 20px;
+  }
+  .homepage-footer-section a {
+    font-size: 14px;
+  }
+  .homepage-footer-section p {
+    font-size: 14px;
+  }
+  .footer-bg-design {
+    top: 63%;
+  }
+  .homepage-cow-img {
+    width: 70%;
+    height: auto;
+  }
+  .homepage-decorative-cow {
+    right: -1rem;
+  }
+  .homepage-flower-img-left {
+    width: 70%;
+    height: auto;
+  }
+  .homepage-flower-bottom-left {
+    left: -1rem;
+  }
 }
 
 /* 768px */
@@ -1150,24 +1176,28 @@ input, select, textarea, button {
   .homepage-hero-content {
     flex-direction: column;
     padding: 2rem 4%;
-    gap: 2rem;
+    gap: 7rem;
   }
 
   .homepage-hero-text h1 {
     font-size: 32px;
-    margin-left: 0;
+    margin-left: -78%;
     margin-top: 0;
-    text-align: center;
-  }
+    text-align: left;
+}
 
-  .homepage-hero-text-small {
-    margin-left: 0;
-    margin-top: 0;
-    text-align: center;
+  .homepage-hero-bg {
+    top: -8%;
   }
 
   .homepage-hero-bg-img {
     width: 60%;
+  }
+
+  .homepage-hero-text-small {
+    margin-left: 58%;
+    margin-top: 22%;
+    text-align: center;
   }
 
   .homepage-categories-title,
@@ -1243,23 +1273,23 @@ input, select, textarea, button {
   .homepage-app-promo-section {
     margin: -120px 8% 0;
     border-radius: 30px;
-}
+  }
 
-.homepage-app-promo-title {
-  font-size: 21px;
-  margin-top: 0;
-}
+  .homepage-app-promo-title {
+    font-size: 21px;
+    margin-top: 0;
+  }
 
-.homepage-phone-mockup {
-  width: 35%;
-  margin-top: -65px;
-}
+  .homepage-phone-mockup {
+    width: 35%;
+    margin-top: -65px;
+  }
 
-.homepage-flower-img {
-  width: 31%;
-  top: -8rem;
-  left: 81%;
-}
+  .homepage-flower-img {
+    width: 31%;
+    top: -8rem;
+    left: 81%;
+  }
 
   .homepage-footer-content {
     padding: 0 4%;
@@ -1275,17 +1305,17 @@ input, select, textarea, button {
   .homepage-cow-img {
     width: 50%;
     height: auto;
-}
-.homepage-flower-img-left {
-  width: 50%;
-  height: auto;
-}
-.homepage-decorative-cow {
-  right: -4rem;
-}
-.footer-bg-design {
-  top: 66%;
-}
+  }
+  .homepage-flower-img-left {
+    width: 50%;
+    height: auto;
+  }
+  .homepage-decorative-cow {
+    right: -4rem;
+  }
+  .footer-bg-design {
+    top: 66%;
+  }
 }
 
 /* 500px and below - Burger Menu */
@@ -1301,7 +1331,7 @@ input, select, textarea, button {
     height: 100vh;
     width: 70%;
     max-width: 300px;
-    background: linear-gradient(253.3deg, #43051D 1.95%, #5D0829 102.63%);
+    background: linear-gradient(253.3deg, #43051d 1.95%, #5d0829 102.63%);
     flex-direction: column;
     padding: 80px 20px 20px;
     gap: 10px;
@@ -1334,6 +1364,42 @@ input, select, textarea, button {
     padding: 1.5rem 5%;
   }
 
+  .homepage-hero-bg-pattern .homepage-bg-design-left {
+    top: 50%;
+    left: -5%;
+}
+
+.homepage-hero-bg-pattern .homepage-bg-design-right {
+  top: -12%;
+  right: -17%;
+}
+
+.homepage-hero-text h1 {
+  font-size: 28px;
+  margin-left: 0;
+        margin-top: 0;
+        text-align: center;
+}
+
+.homepage-hero-text-small {
+  margin-left: 0;
+  margin-top: 49%;
+  text-align: center;
+}
+
+.homepage-hero-bg {
+  top: -3%;
+}
+
+.homepage-hero-bg-img {
+  width: 100%;
+  margin-left: -8%;
+}
+
+.homepage-bg-design {
+  width: 350px;
+}
+
   /* Category shadows minimal for mobile */
   .homepage-categories-shadow-left,
   .homepage-categories-shadow-right {
@@ -1362,7 +1428,7 @@ input, select, textarea, button {
 
   .homepage-faq {
     padding: 0rem 5% 7rem;
-}
+  }
 
   /* Footer spacing */
   .homepage-footer-main {
@@ -1373,27 +1439,27 @@ input, select, textarea, button {
     padding: 0 5%;
     flex-direction: column;
     gap: 0rem;
-}
+  }
 
-.homepage-app-promo-section {
-  flex-direction: column-reverse;
-  gap: 25px;
-}
+  .homepage-app-promo-section {
+    flex-direction: column-reverse;
+    gap: 25px;
+  }
 
-.homepage-phone-mockup {
-  width: 40%;
-}
+  .homepage-phone-mockup {
+    width: 40%;
+  }
 
   .footer-bg-design {
     top: 84%;
     width: 200%;
-}
+  }
 
   .homepage-about {
     padding: 2rem 5%;
   }
 
-  .homepage-flower-img{
+  .homepage-flower-img {
     display: none;
   }
 }
@@ -1412,9 +1478,37 @@ input, select, textarea, button {
     padding: 1.5rem 5%;
   }
 
-  .homepage-hero-text h1 {
-    font-size: 28px;
-  }
+  .homepage-hero-bg-pattern .homepage-bg-design-left {
+    top: 50%;
+    left: -5%;
+}
+
+.homepage-hero-bg-pattern .homepage-bg-design-right {
+  top: -12%;
+  right: -17%;
+}
+
+.homepage-hero-text h1 {
+  font-size: 28px;
+  margin-left: 0;
+        margin-top: 0;
+        text-align: center;
+}
+
+.homepage-hero-text-small {
+  margin-left: 0;
+  margin-top: 49%;
+  text-align: center;
+}
+
+.homepage-hero-bg {
+  top: -3%;
+}
+
+.homepage-hero-bg-img {
+  width: 100%;
+  margin-left: -8%;
+}
 
   .homepage-hero-desc {
     font-size: 1rem;
@@ -1465,7 +1559,6 @@ input, select, textarea, button {
     font-size: 16px;
   }
 
-
   .homepage-faq-question {
     font-size: 15px;
     padding: 15px;
@@ -1496,10 +1589,9 @@ input, select, textarea, button {
     font-size: 16px;
   }
 
-.homepage-cow-img {
-  width: 40%;
-}
-
+  .homepage-cow-img {
+    width: 40%;
+  }
 }
 
 /* 383px */
@@ -1579,21 +1671,20 @@ input, select, textarea, button {
     font-size: 14px;
   }
   .footer-bg-design {
-    top: 85%;
-}
-.homepage-decorative-cow {
-  right: -6rem;
-}
-.homepage-cow-img {
-  width: 33%;
-}
-.homepage-flower-bottom-left {
-  left: -2rem;
-}
-.homepage-flower-img-left {
-  width: 40%;
-}
-
+    top: 86%;
+  }
+  .homepage-decorative-cow {
+    right: -6rem;
+  }
+  .homepage-cow-img {
+    width: 33%;
+  }
+  .homepage-flower-bottom-left {
+    left: -2rem;
+  }
+  .homepage-flower-img-left {
+    width: 40%;
+  }
 }
 
 /* 375px */
