@@ -7,7 +7,7 @@ export default defineConfig({
     port: parseInt(process.env.PORT) || 3000,
     proxy: {
       "/api": {
-        target: "http://172.20.10.10:3001",
+        target: "http://localhost:3001",
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, "/api"),

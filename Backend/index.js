@@ -22,6 +22,7 @@ const searchRoutes = require("./routes/search");
 const dashboardRoutes = require("./routes/dashboard");
 const notificationRoutes = require("./routes/notifications");
 const adminNotificationRoutes = require("./routes/adminNotifications");
+const seoRoutes = require("./routes/seo");
 
 const app = express();
 
@@ -82,6 +83,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin-notifications", adminNotificationRoutes);
+app.use("/api/seo", seoRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -110,16 +112,21 @@ async function startServer() {
   try {
     console.log("🚀 Starting server with database setup...");
 
-    // Run database setup first
+    // Try database setup, but don't fail if it doesn't work
+    try {
     await createTablesAndAdmin();
+    } catch (dbError) {
+      console.warn("⚠️ Database setup failed, but server will continue:", dbError.message);
+    }
 
-    // Start the server
+    // Start the server even if database failed
     app.listen(PORT, HOST, () => {
       serverStarted = true;
       console.log(`✅ Server running on http://${HOST}:${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
       console.log(`CORS Origins: ${getCorsOrigins().join(", ")}`);
       console.log("🎉 Server is ready to accept requests!");
+      console.log("📄 SEO endpoint available at: /api/seo");
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);

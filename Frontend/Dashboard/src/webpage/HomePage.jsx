@@ -13,6 +13,7 @@ import footerBg from "../assests/bgdesign.png";
 import flower from "../assests/Flower.png";
 import cowflower from "../assests/cow & flower.png";
 import { getPublicCategories } from "../services/publicApiService";
+import SEOWrapper from "../components/SEOWrapper";
 
 // Image base URL for constructing category image URLs
 const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://api.amrutkumargovinddasllp.com/uploads";
@@ -213,14 +214,15 @@ const HomePage = () => {
   }, [categories]);
 
   return (
-    <div className="homepage-root">
-      {pageLoading && (
-        <div className="page-loader">
-          <div className="page-loader-spinner"></div>
-          <p className="page-loader-text">Loading...</p>
-        </div>
-      )}
-      <section id="home" className="homepage-hero-section">
+    <SEOWrapper pageUrl="/">
+      <div className="homepage-root">
+        {pageLoading && (
+          <div className="page-loader">
+            <div className="page-loader-spinner"></div>
+            <p className="page-loader-text">Loading...</p>
+          </div>
+        )}
+        <section id="home" className="homepage-hero-section">
         <div className="homepage-hero-bg-pattern">
           <img
             src={designBg}
@@ -528,7 +530,8 @@ const HomePage = () => {
         </div>
         </div>
       </section>
-    </div>
+      </div>
+    </SEOWrapper>
   );
 };
 

@@ -9,6 +9,7 @@ import googleplay from "../assests/googleplay.png";
 import flowers from "../assests/flowers.png";
 import phones from "../assests/phones.png";
 import footerBg from "../assests/bgdesign.png";
+import SEOWrapper from "../components/SEOWrapper";
 
 const DeletePage = () => {
   const [formData, setFormData] = useState({
@@ -71,15 +72,16 @@ const DeletePage = () => {
   }, []);
 
   return (
-    <div className="delete-page">
-      {pageLoading && (
-        <div className="page-loader">
-          <div className="page-loader-spinner"></div>
-          <p className="page-loader-text">Loading...</p>
-        </div>
-      )}
-      {/* Header */}
-      <nav className="homepage-nav">
+    <SEOWrapper pageUrl="/delete">
+      <div className="delete-page">
+        {pageLoading && (
+          <div className="page-loader">
+            <div className="page-loader-spinner"></div>
+            <p className="page-loader-text">Loading...</p>
+          </div>
+        )}
+        {/* Header */}
+        <nav className="homepage-nav">
         <img src={logo} alt="Logo" className="homepage-logo" />
         <button 
           className="homepage-burger-menu"
@@ -269,7 +271,8 @@ const DeletePage = () => {
         </div>
         </div>
       </section>
-    </div>
+      </div>
+    </SEOWrapper>
   );
 };
 

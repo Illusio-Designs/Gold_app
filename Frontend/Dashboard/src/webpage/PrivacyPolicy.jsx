@@ -9,6 +9,7 @@ import googleplay from "../assests/googleplay.png";
 import flowers from "../assests/flowers.png";
 import phones from "../assests/phones.png";
 import footerBg from "../assests/bgdesign.png";
+import SEOWrapper from "../components/SEOWrapper";
 
 const PrivacyPolicy = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,15 +25,16 @@ const PrivacyPolicy = () => {
   }, []);
 
   return (
-    <div className="privacy-policy">
-      {pageLoading && (
-        <div className="page-loader">
-          <div className="page-loader-spinner"></div>
-          <p className="page-loader-text">Loading...</p>
-        </div>
-      )}
-      {/* Header */}
-      <nav className="homepage-nav">
+    <SEOWrapper pageUrl="/privacy">
+      <div className="privacy-policy">
+        {pageLoading && (
+          <div className="page-loader">
+            <div className="page-loader-spinner"></div>
+            <p className="page-loader-text">Loading...</p>
+          </div>
+        )}
+        {/* Header */}
+        <nav className="homepage-nav">
         <img src={logo} alt="Logo" className="homepage-logo" />
         <button 
           className="homepage-burger-menu"
@@ -198,7 +200,8 @@ const PrivacyPolicy = () => {
         </div>
         </div>
       </section>
-    </div>
+      </div>
+    </SEOWrapper>
   );
 };
 
