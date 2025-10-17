@@ -13,6 +13,7 @@ import NotificationManager from './src/components/NotificationManager';
 import UserNotificationManager from './src/components/UserNotificationManager';
 
 import firebaseService from './src/services/firebaseService';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const App = () => {
   const [userId, setUserId] = useState(null);
@@ -181,6 +182,8 @@ const App = () => {
 
   return (
     <>
+    <SafeAreaView style={{ flex: 1 }}>
+
       <StackNavigation />
       <NotificationManager userId={userId} />
       <UserNotificationManager 
@@ -191,6 +194,8 @@ const App = () => {
         } : null} 
       />
       
+    </SafeAreaView>
+
       {/* Manual permission request button - temporarily disabled */}
       {/* {showPermissionButton && (
         <View style={styles.permissionOverlay}>

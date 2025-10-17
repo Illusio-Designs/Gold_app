@@ -31,7 +31,7 @@ export const getProductImageUrl = (imagePath: string | null | undefined): string
   }
   
   // Use direct file access for product images
-  const fullUrl = `${process.env.IMAGE_URL}/products/${imagePath}?t=${Date.now()}`;
+  const fullUrl = `${process.env.IMAGE_URL}/uploads/products/${imagePath}?t=${Date.now()}`;
   console.log(`[App] Product image URL:`, {
     imagePath,
     fullUrl
