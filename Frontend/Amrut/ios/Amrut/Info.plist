@@ -39,8 +39,6 @@
 	<string>This app needs access to your photo library to allow you to select and upload profile pictures or product images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs access to save photos to your photo library.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This app uses analytics to improve performance and user experience. No data is shared with third parties for advertising purposes.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

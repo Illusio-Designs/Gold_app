@@ -199,19 +199,17 @@ const Register = () => {
   const validateAllFields = () => {
     let isValid = true;
     
-    // Validate all required fields
+    // Validate only required fields (Address, Landmark, and PAN/GST are now optional)
     isValid = validateRequiredField(name, 'Name', setNameError) && isValid;
     isValid = validateEmail(email) && isValid;
     isValid = validatePassword(password) && isValid;
     isValid = validateRequiredField(phone, 'Phone number', setPhoneError) && isValid;
-    isValid = validateRequiredField(address1, 'Address line 1', setAddress1Error) && isValid;
-    isValid = validateRequiredField(address2, 'Address line 2', setAddress2Error) && isValid;
-    isValid = validateRequiredField(landmark, 'Landmark', setLandmarkError) && isValid;
+    // Address fields are now optional - removed validation
     isValid = validateRequiredField(city, 'City', setCityError) && isValid;
     isValid = validateRequiredField(state, 'State', setStateError) && isValid;
     isValid = validateRequiredField(pin, 'Pin code', setPinError) && isValid;
     isValid = validateRequiredField(business, 'Business name', setBusinessError) && isValid;
-    isValid = validateRequiredField(gst, 'GST/PAN number', setGstError) && isValid;
+    // GST/PAN field is now optional - removed validation
     
     // Phone validation (already has specific validation)
     if (!phone || phone.trim() === '') {
@@ -236,19 +234,17 @@ const Register = () => {
     setError('');
     setSuccess('');
     
-    // Clear all previous validation errors
+    // Clear all previous validation errors (keeping only required field errors)
     setNameError('');
     setEmailError('');
     setPasswordError('');
     setPhoneError('');
-    setAddress1Error('');
-    setAddress2Error('');
-    setLandmarkError('');
+    // Address and landmark fields are now optional - no need to clear errors
     setCityError('');
     setStateError('');
     setPinError('');
     setBusinessError('');
-    setGstError('');
+    // GST field is now optional - no need to clear error
     
     // Validate all fields before proceeding
     if (!validateAllFields()) {
@@ -266,14 +262,14 @@ const Register = () => {
         email: email.trim(),
         password,
         phone_number: phone.trim(),
-        address_line1: address1.trim(),
-        address_line2: address2.trim(),
-        landmark: landmark.trim(),
+        address_line1: address1.trim() || null, // Optional field - send null if empty
+        address_line2: address2.trim() || null, // Optional field - send null if empty
+        landmark: landmark.trim() || null, // Optional field - send null if empty
         state: state.trim(),
         city: city.trim(),
         country: countryCode,
-        gst_number: gst.trim(),
-        pan_number: '', // Add if you have a field
+        gst_number: gst.trim() || null, // Optional field - send null if empty
+        pan_number: null, // Optional field - set to null
         business_name: business.trim(),
         remarks: remarks.trim(), // Optional field
         image: null, // Add image upload logic if needed
@@ -317,7 +313,7 @@ const Register = () => {
         <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
         
         {/* Required fields note */}
-        <Text style={styles.requiredNote}>* Required fields</Text>
+        <Text style={styles.requiredNote}>* Required fields. Address and PAN/GST are optional.</Text>
         
         <View style={styles.form}>
           <CustomTextInput 
@@ -367,31 +363,29 @@ const Register = () => {
           </View>
           {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
           <CustomTextInput 
-            placeholder="Address line-1 *" 
+            placeholder="Address line-1 (Optional)" 
             value={address1} 
             onChangeText={(text) => {
               setAddress1(text);
-              if (address1Error) validateRequiredField(text, 'Address line 1', setAddress1Error);
+              // Remove validation as field is now optional
             }} 
           />
-          {address1Error ? <Text style={styles.errorText}>{address1Error}</Text> : null}
           
           <CustomTextInput 
-            placeholder="Address line-2 *" 
+            placeholder="Address line-2 (Optional)" 
             value={address2} 
             onChangeText={(text) => {
               setAddress2(text);
-              if (address2Error) validateRequiredField(text, 'Address line 2', setAddress2Error);
+              // Remove validation as field is now optional
             }} 
           />
-          {address2Error ? <Text style={styles.errorText}>{address2Error}</Text> : null}
           
           <CustomTextInput 
-            placeholder="Landmark *" 
+            placeholder="Landmark (Optional)" 
             value={landmark} 
             onChangeText={(text) => {
               setLandmark(text);
-              if (landmarkError) validateRequiredField(text, 'Landmark', setLandmarkError);
+              // Remove validation as field is now optional
             }} 
           />
           {landmarkError ? <Text style={styles.errorText}>{landmarkError}</Text> : null}
@@ -502,14 +496,14 @@ const Register = () => {
           <CustomTextInput placeholder="Remarks" value={remarks} onChangeText={setRemarks} />
           
           <CustomTextInput 
-            placeholder="GST Number / PAN Number *" 
+            placeholder="GST Number / PAN Number (Optional)" 
             value={gst} 
             onChangeText={(text) => {
               setGst(text);
-              if (gstError) validateRequiredField(text, 'GST/PAN number', setGstError);
+              // Remove validation as field is now optional
             }} 
           />
-          {gstError ? <Text style={styles.errorText}>{gstError}</Text> : null}
+          {/* Removed error display as field is now optional */}
           <Button
             onPress={handleRegister}
             style={{}}

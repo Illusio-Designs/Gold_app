@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
@@ -31,6 +31,7 @@ const Profile = () => {
   const isFocused = useIsFocused();
   const { clearCartOnLogout } = useCart();
 
+  
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -93,6 +94,7 @@ const Profile = () => {
     };
     fetchUser();
   }, [isFocused]);
+
 
   // Get current app version info from API
   useEffect(() => {
@@ -177,6 +179,81 @@ const Profile = () => {
         }
       }
     );
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: confirmAccountDeletion,
+        },
+      ]
+    );
+  };
+
+  const confirmAccountDeletion = () => {
+    Alert.alert(
+      'Final Confirmation',
+      'This will permanently delete all your data including:\n• Profile information\n• Order history\n• Personal data\n\nType "DELETE" to confirm:',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'I understand, DELETE my account',
+          style: 'destructive',
+          onPress: executeAccountDeletion,
+        },
+      ]
+    );
+  };
+
+  const executeAccountDeletion = async () => {
+    try {
+      // Redirect to the account deletion website
+      const deletionUrl = 'https://amrutkumar-govinddas-account-deletion.netlify.app/';
+      
+      const supported = await Linking.canOpenURL(deletionUrl);
+      
+      if (supported) {
+        await Linking.openURL(deletionUrl);
+        
+        Alert.alert(
+          'Account Deletion',
+          'You have been redirected to our account deletion portal. Please complete the process there.',
+          [
+            {
+              text: 'OK',
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Unable to Open Link',
+          'Please visit: https://amrutkumar-govinddas-account-deletion.netlify.app/ to delete your account.',
+          [
+            {
+              text: 'OK',
+            }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('[Profile] Delete account error:', error);
+      Alert.alert(
+        'Error', 
+        'Unable to open deletion portal. Please visit: https://amrutkumar-govinddas-account-deletion.netlify.app/ in your browser.'
+      );
+    }
   };
 
   const handleLogout = async () => {
@@ -267,6 +344,14 @@ const Profile = () => {
         >
           <Image source={require('../assets/img/profile/order.png')} style={styles.menuIcon} />
           <Text style={styles.menuText}>My Orders</Text>
+          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.menuBtn} 
+          onPress={handleDeleteAccount}
+        >
+          <Image source={require('../assets/img/profile/logout.png')} style={[styles.menuIcon, {tintColor: '#dc2626'}]} />
+          <Text style={[styles.menuText, {color: '#dc2626'}]}>Delete Account</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBtn} onPress={handleLogout}>
