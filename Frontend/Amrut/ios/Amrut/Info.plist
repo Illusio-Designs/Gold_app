@@ -31,10 +31,16 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to your camera to take photos for profile pictures or product images.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>This app needs access to your location to provide location-based services and find nearby stores.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to allow you to select and upload profile pictures or product images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs access to save photos to your photo library.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>This app needs access to SMS for OTP auto-fill functionality</string>
+	<string>This app uses analytics to improve performance and user experience. No data is shared with third parties for advertising purposes.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

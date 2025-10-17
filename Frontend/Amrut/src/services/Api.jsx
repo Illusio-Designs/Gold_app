@@ -22,15 +22,15 @@ export const registerUser = async userData => {
     const shouldUseJson = !userData.image;
 
     // Attach device FCM token if available so backend can link it to the new user
-    try {
-      const firebaseService = require('./firebaseService').default;
-      const storedToken = await firebaseService.getStoredToken();
-      if (storedToken) {
-        userData.device_fcm_token = storedToken;
-      }
-    } catch (e) {
-      console.log('⚠️ Could not attach device FCM token to registration');
-    }
+    // try {
+    //   const firebaseService = require('./firebaseService').default;
+    //   const storedToken = await firebaseService.getStoredToken();
+    //   if (storedToken) {
+    //     userData.device_fcm_token = storedToken;
+    //   }
+    // } catch (e) {
+    //   console.log('⚠️ Could not attach device FCM token to registration');
+    // }
 
     let response;
     if (shouldUseJson) {

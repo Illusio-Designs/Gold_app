@@ -17,13 +17,13 @@ import CountryPickerModal from '../../components/common/CountryPickerModal';
 import { Country } from '../../data/countries';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { verifyBusinessOTP, registerFCMToken } from '../../services/Api';
+import { verifyBusinessOTP } from '../../services/Api';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
 import SessionValidationService from '../../services/SessionValidationService';
-import messaging from '@react-native-firebase/messaging';
+// import messaging from '@react-native-firebase/messaging';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
 
@@ -256,8 +256,8 @@ const Login = () => {
                       // Update Firebase service with user ID for targeted notifications
           // Do this AFTER storing the access token
           try {
-            const firebaseService = require('../../services/firebaseService').default;
-            await firebaseService.updateUserId(loginResult.user.id);
+            // const firebaseService = require('../../services/firebaseService').default;
+            // await firebaseService.updateUserId(loginResult.user.id);
             console.log('[Login] Firebase service updated with user ID:', loginResult.user.id);
           } catch (error) {
             console.error('[Login] Error updating Firebase service with user ID:', error);

@@ -9,10 +9,10 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
-import NotificationManager from './src/components/NotificationManager';
-import UserNotificationManager from './src/components/UserNotificationManager';
+// import NotificationManager from './src/components/NotificationManager';
+// import UserNotificationManager from './src/components/UserNotificationManager';
 
-import firebaseService from './src/services/firebaseService';
+// import firebaseService from './src/services/firebaseService';
 
 const App = () => {
   const [userId, setUserId] = useState(null);
@@ -24,7 +24,7 @@ const App = () => {
     console.log('🔔 [APP] Initializing app...');
     
     // Initialize Firebase immediately when app starts
-    initializeFirebaseOnStartup();
+    // initializeFirebaseOnStartup();
     
     // Check for stored user token and get user ID
     checkUserAuth();
@@ -44,15 +44,16 @@ const App = () => {
     const subscription = AppState.addEventListener('change', async (nextState) => {
       if (nextState === 'active') {
         try {
-          console.log('🔔 [APP] App resumed - ensuring notification registration is up to date');
-          // Always initialize silently (ensures FCM token exists and unauth token is registered)
-          await firebaseService.initialize();
-          const accessToken = await AsyncStorage.getItem('accessToken');
-          const storedUserId = await AsyncStorage.getItem('userId');
-          if (accessToken && storedUserId) {
-            await firebaseService.updateUserId(parseInt(storedUserId));
-            console.log('🔔 [APP] Re-registered token for user on resume:', storedUserId);
-          }
+          console.log('🔔 [APP] App resumed - Firebase disabled');
+          // console.log('🔔 [APP] App resumed - ensuring notification registration is up to date');
+          // // Always initialize silently (ensures FCM token exists and unauth token is registered)
+          // await firebaseService.initialize();
+          // const accessToken = await AsyncStorage.getItem('accessToken');
+          // const storedUserId = await AsyncStorage.getItem('userId');
+          // if (accessToken && storedUserId) {
+          //   await firebaseService.updateUserId(parseInt(storedUserId));
+          //   console.log('🔔 [APP] Re-registered token for user on resume:', storedUserId);
+          // }
         } catch (e) {
           console.log('⚠️ [APP] Notification re-registration on resume failed silently');
         }
@@ -63,24 +64,26 @@ const App = () => {
 
   const initializeFirebaseOnStartup = async () => {
     try {
-      console.log('🔔 [APP] Initializing Firebase on startup...');
+      console.log('🔔 [APP] Firebase disabled - skipping initialization...');
+      // console.log('🔔 [APP] Initializing Firebase on startup...');
       
-      // Configure push notifications
-      firebaseService.configurePushNotifications();
+      // // Configure push notifications
+      // firebaseService.configurePushNotifications();
       
-      // Initialize Firebase (no user ID required)
-      const success = await firebaseService.initialize();
+      // // Initialize Firebase (no user ID required)
+      // const success = await firebaseService.initialize();
       
-      if (success) {
-        console.log('✅ [APP] Firebase initialized successfully on startup');
-        setNotificationStatus('initialized');
+      // if (success) {
+      //   console.log('✅ [APP] Firebase initialized successfully on startup');
+      //   setNotificationStatus('initialized');
         
-        // Check notification settings after initialization
-        checkNotificationSettings();
-      } else {
-        console.log('❌ [APP] Firebase initialization failed on startup');
-        setNotificationStatus('failed');
-      }
+      //   // Check notification settings after initialization
+      //   checkNotificationSettings();
+      // } else {
+      //   console.log('❌ [APP] Firebase initialization failed on startup');
+      //   setNotificationStatus('failed');
+      // }
+      setNotificationStatus('disabled');
     } catch (error) {
       console.error('❌ [APP] Error initializing Firebase on startup:', error);
       console.log('⚠️ [APP] Firebase service not available, but app will continue');
@@ -101,13 +104,14 @@ const App = () => {
         setUserId(parseInt(userId));
         
         // Update Firebase service with user ID for targeted notifications
-        try {
-          await firebaseService.updateUserId(parseInt(userId));
-          console.log('🔔 [APP] Firebase service updated with user ID:', userId);
-        } catch (error) {
-          console.error('❌ [APP] Error updating Firebase service with user ID:', error);
-          // Don't fail the app if Firebase update fails
-        }
+        // try {
+        //   await firebaseService.updateUserId(parseInt(userId));
+        //   console.log('🔔 [APP] Firebase service updated with user ID:', userId);
+        // } catch (error) {
+        //   console.error('❌ [APP] Error updating Firebase service with user ID:', error);
+        //   // Don't fail the app if Firebase update fails
+        // }
+        console.log('🔔 [APP] Firebase disabled - user ID not updated');
       } else {
         console.log('🔔 [APP] No user found');
         setUserId(null);
@@ -122,22 +126,24 @@ const App = () => {
 
   const requestNotificationPermission = async () => {
     try {
-      console.log('🔔 [APP] Manually requesting notification permission...');
+      console.log('🔔 [APP] Firebase disabled - notification permission not available...');
+      // console.log('🔔 [APP] Manually requesting notification permission...');
       
-      const granted = await firebaseService.requestPermission();
+      // const granted = await firebaseService.requestPermission();
       
-      if (granted) {
-        console.log('✅ [APP] Notification permission granted!');
-        setNotificationStatus('granted');
-        setShowPermissionButton(false);
+      // if (granted) {
+      //   console.log('✅ [APP] Notification permission granted!');
+      //   setNotificationStatus('granted');
+      //   setShowPermissionButton(false);
         
-        // Check notification settings after permission
-        checkNotificationSettings();
-      } else {
-        console.log('❌ [APP] Notification permission denied!');
-        setNotificationStatus('denied');
-        Alert.alert('Permission Denied', 'Please enable notifications in device settings');
-      }
+      //   // Check notification settings after permission
+      //   checkNotificationSettings();
+      // } else {
+      //   console.log('❌ [APP] Notification permission denied!');
+      //   setNotificationStatus('denied');
+      //   Alert.alert('Permission Denied', 'Please enable notifications in device settings');
+      // }
+      setNotificationStatus('disabled');
     } catch (error) {
       console.error('❌ [APP] Error requesting notification permission:', error);
       setNotificationStatus('error');
@@ -146,23 +152,25 @@ const App = () => {
 
   const checkNotificationSettings = async () => {
     try {
-      console.log('🔍 [APP] Checking notification settings...');
+      console.log('🔍 [APP] Firebase disabled - notification settings not available...');
+      // console.log('🔍 [APP] Checking notification settings...');
       
-      // Check if notifications are enabled
-      const enabled = await firebaseService.checkNotificationEnabled();
-      console.log('🔍 [APP] Notifications enabled:', enabled);
+      // // Check if notifications are enabled
+      // const enabled = await firebaseService.checkNotificationEnabled();
+      // console.log('🔍 [APP] Notifications enabled:', enabled);
       
-      if (!enabled) {
-        console.log('⚠️ [APP] Notifications are disabled in device settings');
-        setNotificationStatus('disabled');
-        Alert.alert(
-          'Notifications Disabled', 
-          'Please enable notifications for this app in your device settings:\n\nSettings > Apps > Amrut > Notifications > Show notifications = ON'
-        );
-      } else {
-        console.log('✅ [APP] Notifications are enabled in device settings');
-        setNotificationStatus('enabled');
-      }
+      // if (!enabled) {
+      //   console.log('⚠️ [APP] Notifications are disabled in device settings');
+      //   setNotificationStatus('disabled');
+      //   Alert.alert(
+      //     'Notifications Disabled', 
+      //     'Please enable notifications for this app in your device settings:\n\nSettings > Apps > Amrut > Notifications > Show notifications = ON'
+      //   );
+      // } else {
+      //   console.log('✅ [APP] Notifications are enabled in device settings');
+      //   setNotificationStatus('enabled');
+      // }
+      setNotificationStatus('disabled');
     } catch (error) {
       console.error('❌ [APP] Error checking notification settings:', error);
     }
@@ -182,14 +190,15 @@ const App = () => {
   return (
     <>
       <StackNavigation />
-      <NotificationManager userId={userId} />
-      <UserNotificationManager 
+      {/* Firebase disabled - NotificationManager and UserNotificationManager commented out */}
+      {/* <NotificationManager userId={userId} /> */}
+      {/* <UserNotificationManager 
         userData={userId ? { 
           id: userId, 
           name: 'User', // Will be updated from storage in UserNotificationManager
           type: 'business' 
         } : null} 
-      />
+      /> */}
       
       {/* Manual permission request button - temporarily disabled */}
       {/* {showPermissionButton && (

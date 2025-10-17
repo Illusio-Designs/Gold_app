@@ -1,51 +1,53 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import firebaseService, { NOTIFICATION_TYPES } from '../services/firebaseService';
+// import firebaseService, { NOTIFICATION_TYPES } from '../services/firebaseService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NotificationManager = ({ navigation, userId }) => {
   const notificationRef = useRef(null);
 
   useEffect(() => {
-    console.log('🔔 [NOTIFICATION MANAGER] Initializing notification manager...');
-    console.log('🔔 [NOTIFICATION MANAGER] User ID:', userId);
+    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - notification manager disabled...');
+    // console.log('🔔 [NOTIFICATION MANAGER] Initializing notification manager...');
+    // console.log('🔔 [NOTIFICATION MANAGER] User ID:', userId);
     
-    // Initialize Firebase service - always initialize for testing
-    initializeNotifications();
+    // // Initialize Firebase service - always initialize for testing
+    // initializeNotifications();
     
-    // Setup notification callbacks
-    setupNotificationCallbacks();
+    // // Setup notification callbacks
+    // setupNotificationCallbacks();
     
-    return () => {
-      console.log('🔔 [NOTIFICATION MANAGER] Cleaning up notification manager...');
-      firebaseService.cleanup();
-    };
+    // return () => {
+    //   console.log('🔔 [NOTIFICATION MANAGER] Cleaning up notification manager...');
+    //   firebaseService.cleanup();
+    // };
   }, [userId]);
 
   /**
    * Initialize Firebase notifications
    */
   const initializeNotifications = async () => {
-    try {
-      console.log('🔔 [NOTIFICATION MANAGER] Initializing notifications...');
+    // try {
+    //   console.log('🔔 [NOTIFICATION MANAGER] Initializing notifications...');
       
-      // Configure push notifications
-      firebaseService.configurePushNotifications();
+    //   // Configure push notifications
+    //   firebaseService.configurePushNotifications();
       
-      // Initialize Firebase messaging - use userId if available, otherwise use 1 for testing
-      const testUserId = userId || 1;
-      console.log('🔔 [NOTIFICATION MANAGER] Using test user ID:', testUserId);
+    //   // Initialize Firebase messaging - use userId if available, otherwise use 1 for testing
+    //   const testUserId = userId || 1;
+    //   console.log('🔔 [NOTIFICATION MANAGER] Using test user ID:', testUserId);
       
-      const success = await firebaseService.initialize(testUserId);
+    //   const success = await firebaseService.initialize(testUserId);
       
-      if (success) {
-        console.log('✅ [NOTIFICATION MANAGER] Notifications initialized successfully');
-      } else {
-        console.log('⚠️ [NOTIFICATION MANAGER] Failed to initialize notifications');
-      }
-    } catch (error) {
-      console.error('❌ [NOTIFICATION MANAGER] Error initializing notifications:', error);
-    }
+    //   if (success) {
+    //     console.log('✅ [NOTIFICATION MANAGER] Notifications initialized successfully');
+    //   } else {
+    //     console.log('⚠️ [NOTIFICATION MANAGER] Failed to initialize notifications');
+    //   }
+    // } catch (error) {
+    //   console.error('❌ [NOTIFICATION MANAGER] Error initializing notifications:', error);
+    // }
+    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - notifications not available...');
   };
 
   /**
@@ -76,7 +78,8 @@ const NotificationManager = ({ navigation, userId }) => {
     };
 
     // Set callbacks
-    firebaseService.setNotificationCallbacks(handleNotificationReceived, handleNotificationOpened);
+    // firebaseService.setNotificationCallbacks(handleNotificationReceived, handleNotificationOpened);
+    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - callbacks not set...');
   };
 
   /**
@@ -139,12 +142,13 @@ const NotificationManager = ({ navigation, userId }) => {
    * Update user ID when user logs in/out
    */
   const updateUserId = async (newUserId) => {
-    try {
-      console.log('🔔 [NOTIFICATION MANAGER] Updating user ID:', newUserId);
-      await firebaseService.updateUserId(newUserId);
-    } catch (error) {
-      console.error('❌ [NOTIFICATION MANAGER] Error updating user ID:', error);
-    }
+    // try {
+    //   console.log('🔔 [NOTIFICATION MANAGER] Updating user ID:', newUserId);
+    //   await firebaseService.updateUserId(newUserId);
+    // } catch (error) {
+    //   console.error('❌ [NOTIFICATION MANAGER] Error updating user ID:', error);
+    // }
+    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - user ID not updated...');
   };
 
   // Expose updateUserId method for parent components

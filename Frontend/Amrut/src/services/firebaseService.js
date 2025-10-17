@@ -1,19 +1,19 @@
-import messaging from '@react-native-firebase/messaging';
-import PushNotification from 'react-native-push-notification';
+// import messaging from '@react-native-firebase/messaging';
+// import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { BASE_URL } from './Api';
 
 // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDW0FnbA7vJrV7EsNnZK7Adu2dfBcVe3eg",
-  authDomain: "amrut-9cc5e.firebaseapp.com",
-  projectId: "amrut-9cc5e",
-  storageBucket: "amrut-9cc5e.firebasestorage.app",
-  messagingSenderId: "76051395970",
-  appId: "1:76051395970:web:1d7817edf09d6b2bb4cb9b",
-  measurementId: "G-C0MD37JBH6"
-};
+// const firebaseConfig = {
+//   apiKey: "AIzaSyDW0FnbA7vJrV7EsNnZK7Adu2dfBcVe3eg",
+//   authDomain: "amrut-9cc5e.firebaseapp.com",
+//   projectId: "amrut-9cc5e",
+//   storageBucket: "amrut-9cc5e.firebasestorage.app",
+//   messagingSenderId: "76051395970",
+//   appId: "1:76051395970:web:1d7817edf09d6b2bb4cb9b",
+//   measurementId: "G-C0MD37JBH6"
+// };
 
 // Notification types and their navigation screens
 export const NOTIFICATION_TYPES = {
@@ -54,37 +54,39 @@ class FirebaseService {
    */
   async initialize() {
     try {
-      console.log('🔔 [FIREBASE] Initializing Firebase messaging for app startup...');
+      console.log('🔔 [FIREBASE] Firebase disabled - skipping initialization...');
+      // console.log('🔔 [FIREBASE] Initializing Firebase messaging for app startup...');
       
       // Request permission
-      console.log('🔔 [FIREBASE] Requesting notification permission...');
-      const authStatus = await messaging().requestPermission();
-      console.log('🔔 [FIREBASE] Authorization status:', authStatus);
-      console.log('🔔 [FIREBASE] Authorization status code:', authStatus);
+      // console.log('🔔 [FIREBASE] Requesting notification permission...');
+      // const authStatus = await messaging().requestPermission();
+      // console.log('🔔 [FIREBASE] Authorization status:', authStatus);
+      // console.log('🔔 [FIREBASE] Authorization status code:', authStatus);
       
-      if (authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-          authStatus === messaging.AuthorizationStatus.PROVISIONAL) {
+      // if (authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      //     authStatus === messaging.AuthorizationStatus.PROVISIONAL) {
         
-        console.log('🔔 [FIREBASE] Permission granted');
+      //   console.log('🔔 [FIREBASE] Permission granted');
         
-        // Get FCM token
-        await this.getFCMToken();
+      //   // Get FCM token
+      //   await this.getFCMToken();
         
-        // Setup message handlers
-        this.setupMessageHandlers();
+      //   // Setup message handlers
+      //   this.setupMessageHandlers();
         
-        // Setup notification handlers
-        this.setupNotificationHandlers();
+      //   // Setup notification handlers
+      //   this.setupNotificationHandlers();
         
-        this.isInitialized = true;
-        console.log('✅ [FIREBASE] Firebase messaging initialized successfully');
+      //   this.isInitialized = true;
+      //   console.log('✅ [FIREBASE] Firebase messaging initialized successfully');
         
-        return true;
-      } else {
-        console.log('❌ [FIREBASE] Permission denied');
-        console.log('❌ [FIREBASE] Status:', authStatus);
-        return false;
-      }
+      //   return true;
+      // } else {
+      //   console.log('❌ [FIREBASE] Permission denied');
+      //   console.log('❌ [FIREBASE] Status:', authStatus);
+      //   return false;
+      // }
+      return false;
     } catch (error) {
       console.error('❌ [FIREBASE] Error initializing Firebase:', error);
       console.error('❌ [FIREBASE] Error details:', error.message);
@@ -97,13 +99,15 @@ class FirebaseService {
    */
   async checkNotificationEnabled() {
     try {
-      console.log('🔍 [FIREBASE] Checking if notifications are enabled...');
+      console.log('🔍 [FIREBASE] Firebase disabled - notifications not available...');
+      // console.log('🔍 [FIREBASE] Checking if notifications are enabled...');
       
-      const authStatus = await messaging().hasPermission();
-      console.log('🔍 [FIREBASE] Current authorization status:', authStatus);
+      // const authStatus = await messaging().hasPermission();
+      // console.log('🔍 [FIREBASE] Current authorization status:', authStatus);
       
-      return authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      // return authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      //        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      return false;
     } catch (error) {
       console.error('❌ [FIREBASE] Error checking notification status:', error);
       return false;
@@ -115,13 +119,15 @@ class FirebaseService {
    */
   async requestPermission() {
     try {
-      console.log('🔔 [FIREBASE] Requesting notification permission...');
+      console.log('🔔 [FIREBASE] Firebase disabled - permission not available...');
+      // console.log('🔔 [FIREBASE] Requesting notification permission...');
       
-      const authStatus = await messaging().requestPermission();
-      console.log('🔔 [FIREBASE] Authorization status:', authStatus);
+      // const authStatus = await messaging().requestPermission();
+      // console.log('🔔 [FIREBASE] Authorization status:', authStatus);
       
-      return authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      // return authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      //        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      return false;
     } catch (error) {
       console.error('❌ [FIREBASE] Error requesting permission:', error);
       return false;
@@ -133,21 +139,23 @@ class FirebaseService {
    */
   async getFCMToken() {
     try {
-      console.log('🔔 [FIREBASE] Getting FCM token...');
+      console.log('🔔 [FIREBASE] Firebase disabled - no FCM token available...');
+      // console.log('🔔 [FIREBASE] Getting FCM token...');
       
-      const token = await messaging().getToken();
-      console.log('🔔 [FIREBASE] FCM token received:', token.substring(0, 20) + '...');
+      // const token = await messaging().getToken();
+      // console.log('🔔 [FIREBASE] FCM token received:', token.substring(0, 20) + '...');
       
-      this.fcmToken = token;
+      // this.fcmToken = token;
       
-      // Store token locally
-      await AsyncStorage.setItem('fcm_token', token);
+      // // Store token locally
+      // await AsyncStorage.setItem('fcm_token', token);
       
-      // Always register token with backend (no user ID required)
-      console.log('🔔 [FIREBASE] Registering token with backend (no user ID)...');
-      await this.registerTokenWithBackend(token);
+      // // Always register token with backend (no user ID required)
+      // console.log('🔔 [FIREBASE] Registering token with backend (no user ID)...');
+      // await this.registerTokenWithBackend(token);
       
-      return token;
+      // return token;
+      return null;
     } catch (error) {
       console.error('❌ [FIREBASE] Error getting FCM token:', error);
       return null;
@@ -204,51 +212,54 @@ class FirebaseService {
    * Setup message handlers for foreground messages
    */
   setupMessageHandlers() {
-    console.log('🔔 [FIREBASE] Setting up message handlers...');
+    console.log('🔔 [FIREBASE] Firebase disabled - message handlers not available...');
+    // console.log('🔔 [FIREBASE] Setting up message handlers...');
     
-    // Handle foreground messages
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('🔔 [FIREBASE] Received foreground message:', remoteMessage);
+    // // Handle foreground messages
+    // const unsubscribe = messaging().onMessage(async remoteMessage => {
+    //   console.log('🔔 [FIREBASE] Received foreground message:', remoteMessage);
       
-      // Show local notification
-      this.showLocalNotification(remoteMessage);
+    //   // Show local notification
+    //   this.showLocalNotification(remoteMessage);
       
-      // Call callback if provided
-      if (this.onNotificationReceived) {
-        this.onNotificationReceived(remoteMessage);
-      }
-    });
+    //   // Call callback if provided
+    //   if (this.onNotificationReceived) {
+    //     this.onNotificationReceived(remoteMessage);
+    //   }
+    // });
 
-    return unsubscribe;
+    // return unsubscribe;
+    return null;
   }
 
   /**
    * Setup notification handlers for background/quit state
    */
   setupNotificationHandlers() {
-    console.log('🔔 [FIREBASE] Setting up notification handlers...');
+    console.log('🔔 [FIREBASE] Firebase disabled - notification handlers not available...');
+    // console.log('🔔 [FIREBASE] Setting up notification handlers...');
     
-    // Handle notification opened when app is in background
-    messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('🔔 [FIREBASE] Notification opened from background:', remoteMessage);
+    // // Handle notification opened when app is in background
+    // messaging().onNotificationOpenedApp(remoteMessage => {
+    //   console.log('🔔 [FIREBASE] Notification opened from background:', remoteMessage);
       
-      if (this.onNotificationOpened) {
-        this.onNotificationOpened(remoteMessage);
-      }
-    });
+    //   if (this.onNotificationOpened) {
+    //     this.onNotificationOpened(remoteMessage);
+    //   }
+    // });
 
-    // Handle notification opened when app is quit
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log('🔔 [FIREBASE] Notification opened from quit state:', remoteMessage);
+    // // Handle notification opened when app is quit
+    // messaging()
+    //   .getInitialNotification()
+    //   .then(remoteMessage => {
+    //     if (remoteMessage) {
+    //       console.log('🔔 [FIREBASE] Notification opened from quit state:', remoteMessage);
           
-          if (this.onNotificationOpened) {
-            this.onNotificationOpened(remoteMessage);
-          }
-        }
-      });
+    //       if (this.onNotificationOpened) {
+    //         this.onNotificationOpened(remoteMessage);
+    //       }
+    //     }
+    //   });
   }
 
   /**
@@ -297,39 +308,39 @@ class FirebaseService {
       });
       
       // Show native notification banner (not alert)
-      PushNotification.localNotification({
-        channelId: channelId,
-        title: title,
-        message: body,
-        playSound: true,
-        soundName: soundName, // Custom sound file name
-        importance: 'high',
-        priority: 'high',
-        vibrate: true,
-        vibration: 300,
-        largeIcon: 'ic_launcher', // App icon
-        smallIcon: 'ic_notification', // Small notification icon
-        bigText: body, // Expandable text
-        subText: notificationConfig?.icon || '🔔', // Small icon text
-        color: notificationConfig?.color || '#5D0829', // Notification color
-        data: data || {},
-        userInfo: {
-          notificationType: notificationType,
-          ...data
-        },
-        // iOS specific
-        alertAction: 'view',
-        category: notificationType,
-        // Android specific
-        autoCancel: true,
-        ongoing: false,
-        showWhen: true,
-        when: Date.now(),
-        usesChronometer: false,
-        chronometerDirection: 'up',
-        showTimestamp: true,
-        timestamp: Date.now()
-      });
+      // PushNotification.localNotification({
+      //   channelId: channelId,
+      //   title: title,
+      //   message: body,
+      //   playSound: true,
+      //   soundName: soundName, // Custom sound file name
+      //   importance: 'high',
+      //   priority: 'high',
+      //   vibrate: true,
+      //   vibration: 300,
+      //   largeIcon: 'ic_launcher', // App icon
+      //   smallIcon: 'ic_notification', // Small notification icon
+      //   bigText: body, // Expandable text
+      //   subText: notificationConfig?.icon || '🔔', // Small icon text
+      //   color: notificationConfig?.color || '#5D0829', // Notification color
+      //   data: data || {},
+      //   userInfo: {
+      //     notificationType: notificationType,
+      //     ...data
+      //   },
+      //   // iOS specific
+      //   alertAction: 'view',
+      //   category: notificationType,
+      //   // Android specific
+      //   autoCancel: true,
+      //   ongoing: false,
+      //   showWhen: true,
+      //   when: Date.now(),
+      //   usesChronometer: false,
+      //   chronometerDirection: 'up',
+      //   showTimestamp: true,
+      //   timestamp: Date.now()
+      // });
       
       console.log('✅ [FIREBASE] Native notification banner shown successfully');
     } catch (error) {
@@ -341,65 +352,65 @@ class FirebaseService {
   /**
    * Configure push notification channels (Android)
    */
-  configurePushNotifications() {
-    console.log('🔔 [FIREBASE] Configuring push notifications...');
+  // configurePushNotifications() {
+  //   console.log('🔔 [FIREBASE] Configuring push notifications...');
     
-    // Create main notification channel for Android
-    PushNotification.createChannel(
-      {
-        channelId: 'default',
-        channelName: 'Default Channel',
-        channelDescription: 'Default notification channel',
-        playSound: true,
-        soundName: 'default',
-        importance: 4,
-        vibrate: true,
-      },
-      (created) => console.log(`🔔 [FIREBASE] Default channel created: ${created}`)
-    );
+  //   // Create main notification channel for Android
+  //   PushNotification.createChannel(
+  //     {
+  //       channelId: 'default',
+  //       channelName: 'Default Channel',
+  //       channelDescription: 'Default notification channel',
+  //       playSound: true,
+  //       soundName: 'default',
+  //       importance: 4,
+  //       vibrate: true,
+  //     },
+  //     (created) => console.log(`🔔 [FIREBASE] Default channel created: ${created}`)
+  //   );
     
-    // Create specific channels for login and registration notifications
-    const loginChannels = [
-      {
-        id: 'login_approved',
-        name: '✅ Login Approved',
-        description: 'Notifications for approved login requests'
-      },
-      {
-        id: 'login_rejected', 
-        name: '❌ Login Rejected',
-        description: 'Notifications for rejected login requests'
-      },
-      {
-        id: 'login_request',
-        name: '🔐 Login Request',
-        description: 'Notifications for new login requests'
-      },
-      {
-        id: 'registration_status',
-        name: '👤 Registration Status',
-        description: 'Notifications for registration approvals and updates'
-      }
-    ];
+  //   // Create specific channels for login and registration notifications
+  //   const loginChannels = [
+  //     {
+  //       id: 'login_approved',
+  //       name: '✅ Login Approved',
+  //       description: 'Notifications for approved login requests'
+  //     },
+  //     {
+  //       id: 'login_rejected', 
+  //       name: '❌ Login Rejected',
+  //       description: 'Notifications for rejected login requests'
+  //     },
+  //     {
+  //       id: 'login_request',
+  //       name: '🔐 Login Request',
+  //       description: 'Notifications for new login requests'
+  //     },
+  //     {
+  //       id: 'registration_status',
+  //       name: '👤 Registration Status',
+  //       description: 'Notifications for registration approvals and updates'
+  //     }
+  //   ];
     
-    loginChannels.forEach(channel => {
-      PushNotification.createChannel(
-        {
-          channelId: channel.id,
-          channelName: channel.name,
-          channelDescription: channel.description,
-          playSound: true,
-          soundName: 'default',
-          importance: 4,
-          vibrate: true,
-        },
-        (created) => console.log(`🔔 [FIREBASE] Channel ${channel.id} created: ${created}`)
-      );
-    });
+  //   loginChannels.forEach(channel => {
+  //     PushNotification.createChannel(
+  //       {
+  //         channelId: channel.id,
+  //         channelName: channel.name,
+  //         channelDescription: channel.description,
+  //         playSound: true,
+  //         soundName: 'default',
+  //         importance: 4,
+  //         vibrate: true,
+  //       },
+  //       (created) => console.log(`🔔 [FIREBASE] Channel ${channel.id} created: ${created}`)
+  //     );
+  //   });
     
-    // Configure notification handlers
-    this.configureNotificationHandlers();
-  }
+  //   // Configure notification handlers
+  //   this.configureNotificationHandlers();
+  // }
 
   /**
    * Configure push notification handlers
@@ -408,44 +419,44 @@ class FirebaseService {
     console.log('🔔 [FIREBASE] Configuring notification handlers...');
     
     // Configure notification handlers
-    PushNotification.configure({
-      onRegister: function (token) {
-        console.log('🔔 [FIREBASE] Push notification token:', token);
-      },
+    // PushNotification.configure({
+    //   onRegister: function (token) {
+    //     console.log('🔔 [FIREBASE] Push notification token:', token);
+    //   },
       
-      onNotification: function (notification) {
-        console.log('🔔 [FIREBASE] Push notification received:', notification);
+    //   onNotification: function (notification) {
+    //     console.log('🔔 [FIREBASE] Push notification received:', notification);
         
-        // Handle notification tap
-        if (notification.userInteraction) {
-          console.log('🔔 [FIREBASE] Notification tapped:', notification);
+    //     // Handle notification tap
+    //     if (notification.userInteraction) {
+    //       console.log('🔔 [FIREBASE] Notification tapped:', notification);
           
-          // Navigate based on notification type
-          const notificationType = notification.data?.notificationType;
-          if (notificationType && this.onNotificationOpened) {
-            this.onNotificationOpened({
-              notification: {
-                title: notification.title,
-                body: notification.message
-              },
-              data: notification.data
-            });
-          }
-        }
+    //       // Navigate based on notification type
+    //       const notificationType = notification.data?.notificationType;
+    //       if (notificationType && this.onNotificationOpened) {
+    //         this.onNotificationOpened({
+    //           notification: {
+    //             title: notification.title,
+    //             body: notification.message
+    //           },
+    //           data: notification.data
+    //         });
+    //       }
+    //     }
         
-        // Required for iOS
-        notification.finish();
-      },
+    //     // Required for iOS
+    //     notification.finish();
+    //   },
       
-      permissions: {
-        alert: true,
-        badge: true,
-        sound: true,
-      },
+    //   permissions: {
+    //     alert: true,
+    //     badge: true,
+    //     sound: true,
+    //   },
       
-      popInitialNotification: true,
-      requestPermissions: true,
-    });
+    //   popInitialNotification: true,
+    //   requestPermissions: true,
+    // });
   }
 
   /**
