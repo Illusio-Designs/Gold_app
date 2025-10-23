@@ -25,12 +25,13 @@ router.post("/verify-otp", userController.verifyBusinessOTP);
 
 // Protected routes
 router.get("/", verifyToken, requireAdmin, userController.getAllUsers);
-router.get(
-  "/validate-session",
-  verifyToken,
-  userController.validateUserSession
-);
-router.post("/logout", verifyToken, userController.logoutUser);
+// COMMENTED OUT - Session management removed (no sessions needed)
+// router.get(
+//   "/validate-session",
+//   verifyToken,
+//   userController.validateUserSession
+// );
+// router.post("/logout", verifyToken, userController.logoutUser);
 router.post(
   "/upload-profile",
   verifyToken,
