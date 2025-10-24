@@ -13,7 +13,6 @@ import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScre
 
 import Toast from 'react-native-toast-message';
 // Removed client-side watermark overlay; backend already embeds watermark
-import SessionTimer from '../components/common/SessionTimer';
 
 type RootStackParamList = {
   Home: undefined;
@@ -146,7 +145,6 @@ const ProductDetail = () => {
               <Image source={require('../assets/img/common/creamback.png')} style={styles.backArrow} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Product Details</Text>
-            <SessionTimer size={50} textColor="#FCE2BF" borderColor="#FCE2BF" activeStrokeColor="#FCE2BF" />
           </View>
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error || 'Product not found'}</Text>
@@ -204,7 +202,6 @@ const ProductDetail = () => {
             <Image source={require('../assets/img/common/creamback.png')} style={styles.backArrow} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Product Details</Text>
-          <SessionTimer size={50} textColor="#FCE2BF" borderColor="#FCE2BF" activeStrokeColor="#FCE2BF" />
         </View>
         {/* Product Image Card */}
         <View style={styles.imageCard}>

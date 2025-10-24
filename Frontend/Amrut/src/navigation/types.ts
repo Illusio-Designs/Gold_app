@@ -4,8 +4,8 @@ export type RootStackParamList = {
   ShreenathjiScreen: undefined;
   FamilyTree: undefined;
   Register: undefined;
-  RequestForLogin: undefined;
   Login: undefined;
+  CategoryChoose: undefined;
   MainTabs: undefined;
   Product: undefined;
   ProductDetail: undefined;

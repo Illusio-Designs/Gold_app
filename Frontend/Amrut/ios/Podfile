@@ -26,8 +26,8 @@ target 'Amrut' do
     :path => config[:reactNativePath],
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
-    # Hermes is enabled by default. Disable by setting this flag to false.
-    :hermes_enabled => false,
+    # Hermes is enabled for better debugging support with Chrome DevTools
+    :hermes_enabled => true,
     # Enable hermes inspector to fix linking issues
     :fabric_enabled => false
   )

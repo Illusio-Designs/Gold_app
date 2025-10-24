@@ -22,7 +22,6 @@ import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
-import SessionValidationService from '../../services/SessionValidationService';
 // import messaging from '@react-native-firebase/messaging';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
@@ -204,41 +203,9 @@ const Login = () => {
         if (normalizedPhone.length > 10 && normalizedPhone.startsWith('91')) normalizedPhone = normalizedPhone.slice(-10);
         console.log('[MSG91] OTP verified successfully. Proceeding to backend session login with phone:', normalizedPhone);
         const loginResult = await verifyBusinessOTP(normalizedPhone); // only phone
+        
         console.log('[Backend] /users/verify-otp response:', loginResult);
         if (loginResult.token) {
-          // Store session expiry and duration in AsyncStorage
-          if (loginResult.sessionExpiry) {
-            await AsyncStorage.setItem('sessionExpiry', loginResult.sessionExpiry);
-            console.log('[Login] Session expiry set to:', loginResult.sessionExpiry);
-          }
-          
-          // Handle session duration - calculate remaining time from sessionExpiry
-          if (loginResult.sessionExpiry) {
-            const expiryTime = new Date(loginResult.sessionExpiry).getTime();
-            const now = Date.now();
-            const remainingMs = Math.max(0, expiryTime - now);
-            const remainingMinutes = Math.ceil(remainingMs / (60 * 1000));
-            
-            console.log('[Login] Debug session timing:');
-            console.log('  - Expiry time:', new Date(expiryTime).toISOString());
-            console.log('  - Current time:', new Date(now).toISOString());
-            console.log('  - Remaining ms:', remainingMs);
-            console.log('  - Remaining minutes:', remainingMinutes);
-            console.log('  - Backend remainingTime:', loginResult.remainingTime);
-            console.log('  - Backend sessionDurationMinutes:', loginResult.sessionDurationMinutes);
-            
-            await AsyncStorage.setItem('sessionDurationMinutes', remainingMinutes.toString());
-            
-            if (loginResult.remainingTime) {
-              console.log('[Login] Session resumed with remaining time:', remainingMinutes, 'minutes');
-            } else {
-              console.log('[Login] New session started with duration:', remainingMinutes, 'minutes');
-            }
-          } else if (loginResult.sessionDurationMinutes) {
-            await AsyncStorage.setItem('sessionDurationMinutes', loginResult.sessionDurationMinutes.toString());
-            console.log('[Login] New session started with duration:', loginResult.sessionDurationMinutes, 'minutes');
-          }
-          
           await AsyncStorage.setItem('accessToken', loginResult.token);
           const tokenCheck = await AsyncStorage.getItem('accessToken');
           console.log('[Login] Token after setItem:', tokenCheck);
@@ -253,42 +220,26 @@ const Login = () => {
               await AsyncStorage.setItem('userType', loginResult.user.type);
             }
             
-                      // Update Firebase service with user ID for targeted notifications
-          // Do this AFTER storing the access token
-          try {
-            // const firebaseService = require('../../services/firebaseService').default;
-            // await firebaseService.updateUserId(loginResult.user.id);
-            console.log('[Login] Firebase service updated with user ID:', loginResult.user.id);
-          } catch (error) {
-            console.error('[Login] Error updating Firebase service with user ID:', error);
-          }
-          }
-          
-          // Start session validation service
-          try {
-            await SessionValidationService.onUserLogin();
-          } catch (error) {
-            console.error('[Login] Error starting session validation service:', error);
+            // Update Firebase service with user ID for targeted notifications
+            // Do this AFTER storing the access token
+            try {
+              // const firebaseService = require('../../services/firebaseService').default;
+              // await firebaseService.updateUserId(loginResult.user.id);
+              console.log('[Login] Firebase service updated with user ID:', loginResult.user.id);
+            } catch (error) {
+              console.error('[Login] Error updating Firebase service with user ID:', error);
+            }
           }
           
-          // Show appropriate message based on whether it's a new session or resumed session
-          if (loginResult.remainingTime) {
-            Toast.show({ type: 'success', text1: 'Session Resumed', text2: 'Welcome back! Your session has been resumed.' });
-          } else {
-            Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
-          }
-          navigation.navigate('MainTabs');
+          Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
+          navigation.navigate('CategoryChoose');
         } else {
           // Show specific toast for backend error status
           const errMsg = loginResult.error ? loginResult.error.toLowerCase() : '';
           if (errMsg.includes('pending') || loginResult.error === 'Your login request is still pending approval.') {
-            Toast.show({ type: 'info', text1: 'Pending Approval', text2: 'Your login request is still pending approval.' });
+            Toast.show({ type: 'info', text1: 'Pending Approval', text2: 'Your account is still pending approval.' });
           } else if (errMsg.includes('not approved')) {
-            Toast.show({ type: 'error', text1: 'Not Approved', text2: 'Your login request is not approved. Please request again.' });
-          } else if (errMsg.includes('expired')) {
-            Toast.show({ type: 'error', text1: 'Session Expired', text2: 'Your session has expired. Please request login again.' });
-          } else if (errMsg.includes('request')) {
-            Toast.show({ type: 'error', text1: 'Login Request', text2: loginResult.error });
+            Toast.show({ type: 'error', text1: 'Not Approved', text2: 'Your account is not approved.' });
           } else {
             Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
           }
@@ -373,6 +324,7 @@ const Login = () => {
             <Text style={styles.registerText}>Register</Text>
           </TouchableOpacity>
         </View>
+       
         <CountryPickerModal
           visible={countryModalVisible}
           onClose={() => setCountryModalVisible(false)}

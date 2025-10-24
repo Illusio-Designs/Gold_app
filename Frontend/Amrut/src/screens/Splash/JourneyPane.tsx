@@ -40,7 +40,7 @@ const JourneyPane = ({ navigation }: Props) => {
       </View>
       <TouchableOpacity 
         style={styles.skipButton} 
-        onPress={() => navigation.replace('RequestForLogin')}
+        onPress={() => navigation.replace('Login')}
         activeOpacity={0.8}
       >
         <Text style={styles.skipButtonText}>Skip</Text>

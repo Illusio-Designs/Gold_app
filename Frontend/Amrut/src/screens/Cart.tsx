@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, RefreshControl } from 'react-native';
-import SessionTimer from '../components/common/SessionTimer';
 import CartItemCard from '../components/common/CartItemCard';
 import CustomHeader from '../components/common/CustomHeader';
 import Button from '../components/common/Button';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
-import { useTimer } from '../context/TimerContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import ScreenLoader from '../components/common/ScreenLoader';
@@ -15,7 +13,6 @@ import Toast from 'react-native-toast-message';
 const Cart = () => {
   const navigation = useNavigation<any>();
   const { cartItems, removeFromCart, getTotalQuantity, getTotalWeight, checkout, refreshCart } = useCart() as any;
-  const { forceRefreshTimer } = useTimer() as any;
   const [modalVisible, setModalVisible] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderResult, setOrderResult] = useState<{ success: boolean; message: string; orderIds?: number[] } | null>(null);
@@ -149,8 +146,6 @@ const Cart = () => {
       
       if (result.success) {
         setModalVisible(true);
-        // Force refresh timer to show new session
-        forceRefreshTimer();
         
         // Auto-close modal after 5 seconds
         setTimeout(() => {
@@ -201,7 +196,7 @@ const Cart = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="My Cart" timer={true} />
+      <CustomHeader title="My Cart" />
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         refreshControl={

@@ -32,7 +32,6 @@ type RootStackParamList = {
   ShreenathjiScreen: undefined;
   FamilyTree: undefined;
   Register: undefined;
-  RequestForLogin: undefined;
   Login: undefined;
   MainTabs: undefined;
   Product: undefined;
@@ -279,8 +278,8 @@ const Register = () => {
       setSuccess('Registration successful!');
       Toast.show({ type: 'success', text1: 'Success', text2: 'User registered successfully!' });
       setTimeout(() => {
-        console.log('Navigating to RequestForLogin');
-        navigation.navigate('RequestForLogin');
+        console.log('Navigating to Login');
+        navigation.navigate('Login');
       }, 1000);
     } catch (err: any) {
       setError(err.error || 'Registration failed.');

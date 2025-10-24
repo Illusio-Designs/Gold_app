@@ -9,7 +9,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
-import { logoutUser, getLatestVersion } from '../services/Api';
+import { getLatestVersion } from '../services/Api';
 import { useCart } from '../context/CartContext';
 // NotificationService removed as requested
 import { wp, hp } from '../utils/responsiveConfig';
@@ -258,14 +258,6 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      // Get the current token
-      const token = await AsyncStorage.getItem('accessToken');
-      
-      // Call backend logout API if we have a token
-      if (token) {
-        await logoutUser(token);
-      }
-      
       // Don't clear cart on logout - preserve for same user
       // Cart will only be cleared when a different user logs in
       
@@ -273,35 +265,31 @@ const Profile = () => {
       
       // Clear local storage
       await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('sessionExpiry');
-      await AsyncStorage.removeItem('sessionDurationMinutes');
       await AsyncStorage.removeItem('userId');
       
       // Navigate to login screen
       if ((navigation as any).reset) {
         (navigation as any).reset({
           index: 0,
-          routes: [{ name: 'RequestForLogin' }],
+          routes: [{ name: 'Login' }],
         });
       } else if ((navigation as any).navigate) {
-        (navigation as any).navigate('RequestForLogin');
+        (navigation as any).navigate('Login');
       }
     } catch (error) {
       console.error('[Profile] Logout error:', error);
-      // Even if backend logout fails, clear local data and redirect
+      // Even if data clearing fails, try to clear and redirect
       // Don't clear cart on logout - preserve for same user
       await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('sessionExpiry');
-      await AsyncStorage.removeItem('sessionDurationMinutes');
       await AsyncStorage.removeItem('userId');
       
       if ((navigation as any).reset) {
         (navigation as any).reset({
           index: 0,
-          routes: [{ name: 'RequestForLogin' }],
+          routes: [{ name: 'Login' }],
         });
       } else if ((navigation as any).navigate) {
-        (navigation as any).navigate('RequestForLogin');
+        (navigation as any).navigate('Login');
       }
     }
   };
@@ -313,7 +301,7 @@ const Profile = () => {
 
   return (
     <View style={styles.baseBg}>
-      <CustomHeader title="My Profile" timer={true} />
+      <CustomHeader title="My Profile" />
       <ProfilePhotoName
         photoSource={photoUri}
         cameraIconSource={require('../assets/img/profile/editprofile.png')}

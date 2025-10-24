@@ -218,26 +218,9 @@ export const getApprovedProductsForUser = async (userId, token) => {
   }
 };
 
-// ✅ Request login
-export const requestLogin = async (data, token) => {
-  try {
-    console.log('🔐 requestLogin data:', data);
-    const response = await axios.post(
-      `${BASE_URL}/login-requests`,
-      data,
-      token ? { headers: { Authorization: `Bearer ${token}` } } : {},
-    );
-    console.log('✅ requestLogin response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ requestLogin error:', error);
-    // Surface backend error for active requests
-    if (error.response && error.response.data && error.response.data.errors) {
-      throw { error: error.response.data.errors.map(e => e.error).join(', ') };
-    }
-    throw error.response?.data || { error: error.message };
-  }
-};
+
+// ✅ Check app update
+
 
 export const sendBusinessOTP = async (phoneNumber, countryCode) => {
   try {
@@ -279,7 +262,7 @@ export const verifyBusinessOTP = async phoneNumber => {
     } else {
       console.error('Error Message:', error.message);
     }
-    console.error('---------------------------------');
+    console.error('---------------------------------',error);
     throw error.response?.data || { error: error.message };
   }
 };
@@ -719,39 +702,6 @@ export const markAllNotificationsAsRead = async (userId, token) => {
   } catch (error) {
     console.error('❌ markAllNotificationsAsRead error:', error);
     throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Validate user session
-export const validateUserSession = async token => {
-  try {
-    const response = await axios.get(`${BASE_URL}/users/validate-session`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data;
-  } catch (error) {
-    console.error('❌ validateUserSession error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Logout user
-export const logoutUser = async token => {
-  try {
-    console.log('🚪 Logging out user...');
-    const response = await axios.post(
-      `${BASE_URL}/users/logout`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    );
-    console.log('✅ logoutUser response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ logoutUser error:', error);
-    // Don't throw error for logout - we want to clear local data anyway
-    return { success: false, error: error.message };
   }
 };
 

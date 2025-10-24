@@ -25,22 +25,12 @@ class NotificationService {
     try {
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('accessToken');
-      const sessionExpiry = await AsyncStorage.getItem('sessionExpiry');
 
-      // Check if user is authenticated and session is valid
-      if (userId && token && sessionExpiry) {
-        const expiryTime = new Date(sessionExpiry).getTime();
-        const currentTime = Date.now();
-        
-        if (currentTime < expiryTime) {
-          this.isAuthenticated = true;
-          console.log('[NotificationService] User authenticated, starting polling...');
-          await this.startPolling();
-        } else {
-          console.log('[NotificationService] Session expired, stopping polling');
-          this.isAuthenticated = false;
-          await this.stopPolling();
-        }
+      // Check if user is authenticated
+      if (userId && token) {
+        this.isAuthenticated = true;
+        console.log('[NotificationService] User authenticated, starting polling...');
+        await this.startPolling();
       } else {
         console.log('[NotificationService] User not authenticated, skipping notification service');
         this.isAuthenticated = false;

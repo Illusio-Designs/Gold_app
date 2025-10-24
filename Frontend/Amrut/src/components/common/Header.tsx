@@ -1,14 +1,10 @@
 import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-import SessionTimer from './SessionTimer';
 
 const Header = () => {
   return (
     <View style={styles.headerContainer}>
       <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
-      <View style={styles.timerWrapper}>
-        <SessionTimer size={45} />
-      </View>
     </View>
   );
 };

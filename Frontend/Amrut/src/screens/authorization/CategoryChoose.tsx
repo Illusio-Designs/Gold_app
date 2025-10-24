@@ -9,6 +9,7 @@ import ScreenLoader from '../../components/common/ScreenLoader';
 
 type RootStackParamList = {
   Login: undefined;
+  MainTabs: undefined;
   Product: { category: string };
 };
 
@@ -72,6 +73,8 @@ const CategoryChoose = () => {
     >
       <View style={styles.content}>
         <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
+        <Text style={styles.title}>Select Your Interests</Text>
+        <Text style={styles.subtitle}>Choose categories you're interested in to personalize your experience</Text>
         <View style={styles.form}>
           <View style={styles.dropdownWrapper}>
             <TouchableOpacity
@@ -126,7 +129,10 @@ const CategoryChoose = () => {
               </View>
             )}
           </View>
-          <Button onPress={() => navigation.navigate('Login')} title="Request for Login" style={{ marginTop: 24 }} textStyle={{ color: '#FCE2BF', fontFamily: 'Glorifydemo-BW3J3' }} />
+          <Button onPress={() => navigation.navigate('MainTabs')} title="Continue" style={{ marginTop: 24 }} textStyle={{ color: '#FCE2BF', fontFamily: 'Glorifydemo-BW3J3' }} />
+          <TouchableOpacity onPress={() => navigation.navigate('MainTabs')} style={{ marginTop: 16, alignSelf: 'center' }}>
+            <Text style={{ color: '#5D0829', fontSize: 14, textDecorationLine: 'underline' }}>Skip for now</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ImageBackground>
@@ -148,8 +154,25 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     alignSelf: 'center',
-    marginBottom: 32,
+    marginBottom: 16,
     marginTop: 32,
+  },
+  title: {
+    fontSize: 24,
+    color: '#5D0829',
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#5D0829',
+    fontFamily: 'Glorifydemo-BW3J3',
+    textAlign: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+    opacity: 0.8,
   },
   form: {
     width: '85%',

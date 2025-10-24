@@ -204,6 +204,7 @@ const Home = () => {
     getSliders,
     []
   );
+  
   console.log("slidersData:", slidersData);
   
   // Process sliders response and fix localhost URLs

@@ -12,7 +12,7 @@ const { width, height } = Dimensions.get('window');
 const FamilyTree = ({ navigation }: Props) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace('RequestForLogin');
+      navigation.replace('Login');
     }, 8000); // Changed from 3000 to 8000 (8 seconds)
     return () => clearTimeout(timer);
   }, [navigation]);
@@ -25,7 +25,7 @@ const FamilyTree = ({ navigation }: Props) => {
     >
       <TouchableOpacity 
         style={styles.skipButton} 
-        onPress={() => navigation.replace('RequestForLogin')}
+        onPress={() => navigation.replace('Login')}
         activeOpacity={0.8}
       >
         <Text style={styles.skipButtonText}>Skip</Text>
