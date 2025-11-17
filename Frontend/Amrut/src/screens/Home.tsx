@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { useRealtimeData } from '../hooks/useRealtimeData';
-import { getApprovedCategoriesForUser, getApprovedProductsForUser, getSliders } from '../services/Api';
+import { getApprovedCategoriesForUser, getApprovedProductsForUser, getCategories, getSliders } from '../services/Api';
 import { BASE_URL } from '../services/Api';
 import { getProductImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
@@ -88,41 +88,22 @@ const Home = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<any>(null);
 
-  // Fetch categories based on user authentication status
+  // Fetch categories for all users (no authentication required)
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
       setCategoriesError(null);
       
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Fetching approved categories for user:', userId);
-        console.log('[Home] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
-        
-        try {
-          const response = await getApprovedCategoriesForUser(userId, accessToken);
-          console.log('[Home] Approved categories response:', response);
-          
-          if (response && response.success && response.data && response.data.length > 0) {
-            setCategories(response.data);
-            console.log('[Home] Set approved categories:', response.data.length, 'categories');
-            console.log('[Home] Approved categories names:', response.data.map((cat: any) => cat.name));
-          } else {
-            console.log('[Home] No approved categories found - user may not have approved login request yet');
-            console.log('[Home] Setting empty categories array - user needs to request login first');
-            setCategories([]);
-          }
-        } catch (apiError: any) {
-          console.error('[Home] Error calling getApprovedCategoriesForUser:', apiError);
-          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty state');
-            setCategories([]);
-          } else {
-            console.log('[Home] Setting empty categories array due to API error');
-            setCategories([]);
-          }
-        }
+      console.log('[Home] Fetching all categories (guest/logged-in)');
+      const response = await getCategories();
+      console.log('[Home] Categories response:', response);
+      
+      if (response && response.success && response.data && response.data.length > 0) {
+        setCategories(response.data);
+        console.log('[Home] Set categories:', response.data.length, 'categories');
+        console.log('[Home] Category names:', response.data.map((cat: any) => cat.name));
       } else {
-        console.log('[Home] User not logged in - showing empty categories');
+        console.log('[Home] No categories found');
         setCategories([]);
       }
     } catch (err) {
@@ -134,15 +115,15 @@ const Home = () => {
     }
   };
 
-  // Fetch categories when component mounts or auth state changes
+  // Fetch categories when component mounts
   useEffect(() => {
     fetchCategories();
-  }, [isUserLoggedIn, userId, accessToken]);
+  }, []);
 
-  // Load products on mount and when auth state changes
+  // Load products on mount
   useEffect(() => {
     loadProducts();
-  }, [isUserLoggedIn, userId, accessToken]);
+  }, []);
   
   // Filter products when allProducts or selectedCategory changes
   useEffect(() => {
@@ -151,40 +132,21 @@ const Home = () => {
     }
   }, [allProducts]);
 
-  // Load products function
+  // Load products function - for all users (no authentication required)
   const loadProducts = async () => {
     try {
       setProductsLoading(true);
-      let response;
       
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Loading approved products for user:', userId);
-        try {
-          // Use filtered products for logged-in users
-          response = await getApprovedProductsForUser(userId, accessToken);
-          console.log('[Home] Approved products response:', response);
-          if (response.success && response.data && response.data.length > 0) {
-            setAllProducts(response.data); // Store all products
-            setProducts(response.data); // Initially show all products
-            console.log('[Home] Loaded approved products:', response.data.length);
-          } else {
-            console.log('[Home] No approved products found - user may not have approved login request yet');
-            setAllProducts([]);
-            setProducts([]);
-          }
-        } catch (apiError: any) {
-          console.error('[Home] Error calling getApprovedProductsForUser:', apiError);
-          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty products');
-            setProducts([]);
-          } else {
-            console.log('[Home] Setting empty products array due to API error');
-            setAllProducts([]);
-            setProducts([]);
-          }
-        }
+      console.log('[Home] Loading all products (guest/logged-in)');
+      const response = await getApprovedProductsForUser(userId, accessToken);
+      console.log('[Home] Products response:', response);
+      
+      if (response.success && response.data && response.data.length > 0) {
+        setAllProducts(response.data); // Store all products
+        setProducts(response.data); // Initially show all products
+        console.log('[Home] Loaded products:', response.data.length);
       } else {
-        console.log('[Home] User not logged in - showing empty products');
+        console.log('[Home] No products found');
         setAllProducts([]);
         setProducts([]);
       }
@@ -357,6 +319,7 @@ const Home = () => {
     
     console.log('[Home] Filtering products for category:', category);
     console.log('[Home] Total products available:', allProducts.length);
+    console.log('[Home] Sample product for debugging:', allProducts[0]);
     
     if (category === 'all') {
       filteredProducts = allProducts;
@@ -406,17 +369,34 @@ const Home = () => {
       
       console.log('[Home] Best products filtered:', filteredProducts.length);
     } else {
-      // Handle actual category names (like "antique buti", "cz ladies viti")
-      console.log('[Home] Filtering by actual category name:', category);
+      // Handle actual category selection - filter by category_id
+      console.log('[Home] Filtering by category name:', category);
       
-      filteredProducts = allProducts.filter((product: any) => {
-        const productCategoryName = product.category_name?.toLowerCase();
-        const selectedCategoryName = category.toLowerCase();
-        const matches = productCategoryName === selectedCategoryName;
-        
-        console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
-        return matches;
-      });
+      // Find the category object from categories array
+      const selectedCategoryObj = categories.find((cat: any) => 
+        cat.name.toLowerCase() === category.toLowerCase()
+      );
+      
+      console.log('[Home] Found category object:', selectedCategoryObj);
+      
+      if (selectedCategoryObj) {
+        // Filter products by category_id
+        filteredProducts = allProducts.filter((product: any) => {
+          const matches = product.category_id === selectedCategoryObj.id;
+          console.log('[Home] Product:', product.name, 'CategoryID:', product.category_id, 'Selected:', selectedCategoryObj.id, 'Matches:', matches);
+          return matches;
+        });
+      } else {
+        // Fallback to category name matching
+        filteredProducts = allProducts.filter((product: any) => {
+          const productCategoryName = product.category_name?.toLowerCase();
+          const selectedCategoryName = category.toLowerCase();
+          const matches = productCategoryName === selectedCategoryName;
+          
+          console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
+          return matches;
+        });
+      }
       
       console.log('[Home] Category-specific products filtered:', filteredProducts.length);
     }

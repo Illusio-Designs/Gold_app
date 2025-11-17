@@ -126,14 +126,8 @@ export const getCategories = async () => {
 // ✅ Get approved categories for logged-in user
 export const getApprovedCategoriesForUser = async (userId, token) => {
   try {
-    console.log(
-      '📂 getApprovedCategoriesForUser: Fetching for userId:',
-      userId,
-    );
-    const response = await axios.get(
-      `${BASE_URL}/login-requests/approved-categories/${userId}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    console.log('📂 getApprovedCategoriesForUser: Fetching all categories (no auth required)');
+    const response = await axios.get(`${BASE_URL}/categories`);
     console.log('📂 getApprovedCategoriesForUser response:', response.data);
     console.log(
       '📂 getApprovedCategoriesForUser response length:',
@@ -175,11 +169,10 @@ export const getApprovedCategoriesForUser = async (userId, token) => {
 // ✅ Get approved products for logged-in user (filtered by selected categories)
 export const getApprovedProductsForUser = async (userId, token) => {
   try {
-    console.log('📦 getApprovedProductsForUser: Fetching for userId:', userId);
-    const response = await axios.get(
-      `${BASE_URL}/login-requests/approved-products/${userId}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    console.log('📦 getApprovedProductsForUser: Fetching all products (no auth required)');
+    const response = await axios.get(`${BASE_URL}/products/`, {
+      headers: { Authorization: 'Bearer dummy-token-12345' }
+    });
     console.log('📦 getApprovedProductsForUser response:', response.data);
     console.log(
       '📦 getApprovedProductsForUser response length:',

@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, Ref
 import CartItemCard from '../components/common/CartItemCard';
 import CustomHeader from '../components/common/CustomHeader';
 import Button from '../components/common/Button';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import ScreenLoader from '../components/common/ScreenLoader';
 import Toast from 'react-native-toast-message';
+import LoginPromptModal from '../components/common/LoginPromptModal';
+import { useLoginPrompt } from '../hooks/useLoginPrompt';
 
 const Cart = () => {
   const navigation = useNavigation<any>();
@@ -17,9 +19,18 @@ const Cart = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderResult, setOrderResult] = useState<{ success: boolean; message: string; orderIds?: number[] } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const isFocused = useIsFocused();
+  const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
   
   console.log('[Cart] Rendering with cartItems:', cartItems);
   console.log('[Cart] Cart items length:', cartItems.length);
+
+  // Check if user is logged in whenever screen comes into focus
+  useEffect(() => {
+    if (isFocused) {
+      checkAndPromptLogin();
+    }
+  }, [isFocused]);
 
   // Cart data is managed by CartContext, no need for useRealtimeData
 
@@ -309,6 +320,14 @@ const Cart = () => {
 
       {/* Toast for notifications */}
       <Toast />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        visible={showLoginPrompt}
+        onClose={closeLoginPrompt}
+        title="Login Required"
+        message="Please login to view and manage your cart"
+      />
     </View>
   );
 };

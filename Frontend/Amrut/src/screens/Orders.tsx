@@ -8,6 +8,8 @@ import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, updateOrderStatus } from '../services/Api';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoginPromptModal from '../components/common/LoginPromptModal';
+import { useLoginPrompt } from '../hooks/useLoginPrompt';
 
 // Order status configuration
 const orderStatuses = {
@@ -32,6 +34,12 @@ const Orders = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
+
+  // Check if user is logged in when component mounts
+  useEffect(() => {
+    checkAndPromptLogin();
+  }, []);
 
   // Custom fetch function for orders that gets the authentication token
   const fetchOrdersWithToken = async () => {
@@ -411,6 +419,14 @@ const Orders = () => {
 
       {/* Toast for notifications */}
       <Toast />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        visible={showLoginPrompt}
+        onClose={closeLoginPrompt}
+        title="Login Required"
+        message="Please login to view your orders"
+      />
     </View>
   );
 };

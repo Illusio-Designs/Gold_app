@@ -16,6 +16,8 @@ import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import Toast from 'react-native-toast-message';
 import { useNavigationLoader } from '../context/NavigationContext';
+import LoginPromptModal from '../components/common/LoginPromptModal';
+import { useLoginPrompt } from '../hooks/useLoginPrompt';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +32,14 @@ const Profile = () => {
   const [userId, setUserId] = useState(null);
   const isFocused = useIsFocused();
   const { clearCartOnLogout } = useCart();
+  const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
+
+  // Check if user is logged in whenever screen comes into focus
+  useEffect(() => {
+    if (isFocused) {
+      checkAndPromptLogin();
+    }
+  }, [isFocused]);
 
   
   useEffect(() => {
@@ -355,6 +365,14 @@ const Profile = () => {
       
       {/* Toast for notifications */}
       <Toast />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        visible={showLoginPrompt}
+        onClose={closeLoginPrompt}
+        title="Login Required"
+        message="Please login to access your profile"
+      />
     </View>
   );
 };

@@ -68,37 +68,22 @@ const Collection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
-  // Fetch categories based on user authentication status
+  // Fetch categories for all users (no authentication required)
   const fetchCategories = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Collection] Fetching approved categories for user:', userId);
-        console.log('[Collection] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
-        
-        try {
-          const response = await getApprovedCategoriesForUser(userId, accessToken);
-          console.log('[Collection] Approved categories response:', response);
-          
-          if (response && response.success && response.data && response.data.length > 0) {
-            setCategories(response.data);
-            console.log('[Collection] Set approved categories:', response.data.length, 'categories');
-            console.log('[Collection] Approved categories names:', response.data.map((cat: any) => cat.name));
-          } else {
-            console.log('[Collection] No approved categories found - user may not have approved login request yet');
-            console.log('[Collection] Setting empty categories array - user needs to request login first');
-            setCategories([]);
-          }
-        } catch (apiError) {
-          console.error('[Collection] Error calling getApprovedCategoriesForUser:', apiError);
-          console.log('[Collection] Setting empty categories array due to API error');
-          setCategories([]);
-        }
+      console.log('[Collection] Fetching all categories (guest/logged-in)');
+      const response = await getApprovedCategoriesForUser(userId, accessToken);
+      console.log('[Collection] Categories response:', response);
+      
+      if (response && response.success && response.data && response.data.length > 0) {
+        setCategories(response.data);
+        console.log('[Collection] Set categories:', response.data.length, 'categories');
+        console.log('[Collection] Category names:', response.data.map((cat: any) => cat.name));
       } else {
-        console.log('[Collection] User not logged in - showing empty categories');
-        console.log('[Collection] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
+        console.log('[Collection] No categories found');
         setCategories([]);
       }
     } catch (err) {
@@ -110,10 +95,10 @@ const Collection = () => {
     }
   };
 
-  // Fetch categories when component mounts or auth state changes
+  // Fetch categories when component mounts
   useEffect(() => {
     fetchCategories();
-  }, [isUserLoggedIn, userId, accessToken]);
+  }, []);
 
   // Filter categories based on selected category from slider
   const filteredCategories = (categories || [])

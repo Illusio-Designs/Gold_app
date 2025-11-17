@@ -324,6 +324,14 @@ const Login = () => {
             <Text style={styles.registerText}>Register</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity 
+          style={styles.skipLoginButton} 
+          onPress={() => navigation.navigate('MainTabs')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.skipLoginText}>Skip Login</Text>
+        </TouchableOpacity>
        
         <CountryPickerModal
           visible={countryModalVisible}
@@ -431,6 +439,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Glorifydemo-BW3J3',
     textDecorationLine: 'underline',
     fontWeight:'bold',
+  },
+  skipLoginButton: {
+    marginTop: getResponsiveSpacing(20, 24, 28),
+    backgroundColor: 'rgba(93, 8, 41, 0.1)',
+    paddingHorizontal: getResponsiveSpacing(24, 28, 32),
+    paddingVertical: getResponsiveSpacing(12, 14, 16),
+    borderRadius: 25,
+    borderWidth: 1.5,
+    borderColor: '#5D0829',
+    alignSelf: 'center',
+    width: isSmallScreen() ? '80%' : isMediumScreen() ? '75%' : '70%',
+  },
+  skipLoginText: {
+    color: '#5D0829',
+    fontSize: getResponsiveFontSize(12, 14, 16),
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   loadingContainer: {
     height: 20,

@@ -129,35 +129,29 @@ const Product = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<any>(null);
 
-  // Load products based on user authentication and category
+  // Load products for all users (no authentication required)
   const loadProducts = async () => {
     try {
       setProductsLoading(true);
       setProductsError(null);
       
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Product] Loading approved products for user:', userId);
-        // For logged-in users, get all approved products and filter by category if needed
-        const response = await getApprovedProductsForUser(userId, accessToken);
+      console.log('[Product] Loading all products (guest/logged-in)');
+      const response = await getApprovedProductsForUser(userId, accessToken);
+      
+      if (response && response.success && response.data) {
+        let filteredProducts = response.data;
         
-        if (response && response.success && response.data) {
-          let filteredProducts = response.data;
-          
-          // If we have a specific category, filter by it
-          if (isValidCategoryId) {
-            filteredProducts = response.data.filter((product: Product) => product.category_id === categoryId);
-            console.log('[Product] Filtered products by category:', categoryId, 'Found:', filteredProducts.length);
-          }
-          
-          setProducts(filteredProducts);
-          console.log('[Product] Set approved products:', filteredProducts.length, 'products');
-        } else {
-          setProducts([]);
-          console.log('[Product] No approved products found');
+        // If we have a specific category, filter by it
+        if (isValidCategoryId) {
+          filteredProducts = response.data.filter((product: Product) => product.category_id === categoryId);
+          console.log('[Product] Filtered products by category:', categoryId, 'Found:', filteredProducts.length);
         }
+        
+        setProducts(filteredProducts);
+        console.log('[Product] Set products:', filteredProducts.length, 'products');
       } else {
-        console.log('[Product] User not logged in - showing empty products');
         setProducts([]);
+        console.log('[Product] No products found');
       }
     } catch (err) {
       console.error('[Product] Error loading products:', err);
@@ -168,12 +162,12 @@ const Product = () => {
     }
   };
 
-  // Load products when component mounts or dependencies change
+  // Load products when component mounts or category changes
   useEffect(() => {
     if (!resolvingCategory) {
       loadProducts();
     }
-  }, [isValidCategoryId, isUserLoggedIn, userId, accessToken, resolvingCategory]);
+  }, [isValidCategoryId, resolvingCategory]);
 
   // Filter products to exclude out-of-stock items and apply search
   const filteredProducts = (products || []).filter(p => {
