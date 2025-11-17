@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   activeLabelInside: {
     color: '#5D0829', // maroon
     fontSize: 12,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     marginTop: 2,
     textAlign: 'center',
@@ -178,13 +178,13 @@ const styles = StyleSheet.create({
   label: {
     color: '#FCE2BF',
     fontSize: 12,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginTop: 2,
   },
   activeLabel: {
     color: '#FCE2BF',
     fontSize: 12,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     marginTop: 2,
   },

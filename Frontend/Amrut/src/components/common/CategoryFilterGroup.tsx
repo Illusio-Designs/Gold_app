@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#5D0829',
     fontSize: 14,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   button: {
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   text: {
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: isSmallScreen() ? 12 : isMediumScreen() ? 14 : isLargeScreen() ? 18 : 14,
     fontWeight: '700',
   },

@@ -564,7 +564,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     marginBottom: getResponsiveSpacing(4, 6, 8),
     backgroundColor: '#fff',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   row: {
     flexDirection: 'row',
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   countryCode: {
     fontSize: getResponsiveFontSize(12, 14, 16),
     color: '#5D082980',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight:'bold'
   },
   dropdownWrapper: {
@@ -617,14 +617,14 @@ const styles = StyleSheet.create({
     height: getResponsiveSpacing(40, 44, 48),
     fontSize: getResponsiveFontSize(12, 14, 16),
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#A47C8C',
     paddingHorizontal: getResponsiveSpacing(10, 12, 14),
     paddingVertical: getResponsiveSpacing(8, 10, 12),
   },
   dropdownText: {
     fontSize: getResponsiveFontSize(14, 16, 18),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   dropdownArrow: {
     fontSize: getResponsiveFontSize(10, 12, 14),
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
     padding: getResponsiveSpacing(10, 12, 14),
     fontSize: getResponsiveFontSize(14, 16, 18),
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   phoneInput: {
     flex: 1,
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: getResponsiveFontSize(12, 14, 16),
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight:'bold'
   },
   cityStatePinInput: {
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: getResponsiveFontSize(11, 13, 15),
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#A47C8C',
     paddingHorizontal: getResponsiveSpacing(6, 8, 10),
     paddingVertical: getResponsiveSpacing(8, 10, 12),
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: getResponsiveFontSize(11, 13, 15),
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#A47C8C',
     paddingHorizontal: 5,
     paddingVertical: 0,
@@ -701,14 +701,14 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(11, 12, 13),
     marginBottom: getResponsiveSpacing(4, 6, 8),
     marginLeft: 5,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   requiredNote: {
     color: '#6B7280',
     fontSize: getResponsiveFontSize(12, 13, 14),
     textAlign: 'center',
     marginBottom: getResponsiveSpacing(8, 10, 12),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontStyle: 'italic',
   },
 });

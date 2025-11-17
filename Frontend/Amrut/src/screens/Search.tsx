@@ -62,8 +62,11 @@ const Search = () => {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Custom search function for real-time updates
-  const performSearchWithFilter = async (searchText: string, filter: string) => {
-    if (!searchText.trim()) {
+  const performSearchWithFilter = async (options: { query?: string; filter?: string }) => {
+    const searchText = options?.query || '';
+    const filter = options?.filter || 'All';
+    
+    if (!searchText || !searchText.trim()) {
       return { data: [] };
     }
 
@@ -93,7 +96,7 @@ const Search = () => {
   const { data: searchResponse, loading, error, refresh } = (useRealtimeData(
     'search',
     { query: search, filter: selectedFilter },
-    search ? (performSearchWithFilter as any) : undefined,
+    search ? performSearchWithFilter : undefined,
     [search, selectedFilter]
   ) as any);
 
@@ -402,7 +405,7 @@ const styles = StyleSheet.create({
   },
   filterTabText: {
     color: '#666',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(14, 16, 18),
     fontWeight: '500',
   },
@@ -417,7 +420,7 @@ const styles = StyleSheet.create({
   },
   recentTitle: {
     color: '#6B0D33',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(16, 18, 20),
     fontWeight: '700',
     marginBottom: getResponsiveSpacing(6, 8, 10),
@@ -441,7 +444,7 @@ const styles = StyleSheet.create({
   },
   recentTagText: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(12, 14, 16),
     fontWeight: '500',
     marginRight: getResponsiveSpacing(4, 5, 6),
@@ -497,7 +500,7 @@ const styles = StyleSheet.create({
   },
   typeBadgeText: {
     color: '#fff',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(10, 12, 14),
     fontWeight: '500',
   },
@@ -506,14 +509,14 @@ const styles = StyleSheet.create({
   },
   resultName: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(14, 16, 18),
     fontWeight: '600',
     marginBottom: getResponsiveSpacing(2, 3, 4),
   },
   resultDescription: {
     color: '#666',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(12, 14, 16),
     marginBottom: getResponsiveSpacing(2, 3, 4),
   },
@@ -522,21 +525,21 @@ const styles = StyleSheet.create({
   },
   productSku: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(11, 13, 15),
     fontWeight: '500',
     marginBottom: getResponsiveSpacing(1, 2, 3),
   },
   productCategory: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(11, 13, 15),
     fontWeight: '500',
     marginBottom: getResponsiveSpacing(1, 2, 3),
   },
   productWeight: {
     color: '#666',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(10, 12, 14),
   },
   errorContainer: {
@@ -548,7 +551,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(16, 18, 20),
     fontWeight: '600',
     textAlign: 'center',
@@ -562,7 +565,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     color: '#fff',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(14, 16, 18),
     fontWeight: '600',
     textAlign: 'center',
@@ -576,14 +579,14 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(16, 18, 20),
     fontWeight: '600',
     textAlign: 'center',
   },
   emptySubtext: {
     color: '#666',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(12, 14, 16),
     marginTop: getResponsiveSpacing(8, 10, 12),
     textAlign: 'center',

@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: getResponsiveSpacing(12, 14, 16),
     paddingVertical: getResponsiveSpacing(6, 8, 10),
     backgroundColor: '#fff',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     fontSize: getResponsiveFontSize(10, 12, 14),
     height: getResponsiveSpacing(44, 48, 52),
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(12, 14, 16),
     color: '#5D082980',
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   phoneInput: {
     flex: 1,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
   orContinueWithText: {
     marginHorizontal: getResponsiveSpacing(6, 8, 10),
     color: '#999999',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: getResponsiveFontSize(10, 12, 14),
   },
   registerRow: {
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   registerText: {
     color: '#5D0829',
     fontSize: getResponsiveFontSize(10, 12, 14),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textDecorationLine: 'underline',
     fontWeight:'bold',
   },
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   skipLoginText: {
     color: '#5D0829',
     fontSize: getResponsiveFontSize(12, 14, 16),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     textAlign: 'center',
   },

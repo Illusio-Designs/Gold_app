@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     color: '#6B0D33',
     fontSize: getResponsiveFontSize(22, 26, 30),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginLeft: getResponsiveSpacing(1, 2, 3),
   },
   timerCircle: {
@@ -289,27 +289,27 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(16, 18, 20),
     fontWeight: '700',
     textAlign: 'center',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   timerMin: {
     fontSize: getResponsiveFontSize(10, 12, 14),
     fontWeight: '400',
     color: '#6B0D33',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   errorText: {
     textAlign: 'center',
     fontSize: 16,
     color: '#dc2626',
     marginTop: 50,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   noCategoriesText: {
     textAlign: 'center',
     fontSize: 16,
     color: '#666',
     marginTop: 50,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   errorContainer: {
     flex: 1,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   emptyContainer: {
     flex: 1,
@@ -339,14 +339,14 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: '#666',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginBottom: 10,
   },
   emptySubtext: {
     fontSize: 14,
     color: '#999',
     textAlign: 'center',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   categoryFilterHeader: {
     flexDirection: 'row',
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   categoryFilterText: {
     fontSize: getResponsiveFontSize(14, 16, 18),
     color: '#333',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   categoryFilterName: {
     fontWeight: '700',
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: getResponsiveFontSize(14, 16, 18),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   loadingContainer: {
     flex: 1,
@@ -422,7 +422,7 @@ const productCardStyles = StyleSheet.create({
   },
   name: {
     color: '#6B0D33',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: isSmallScreen() ? wp('3.2%') : isMediumScreen() ? wp('3.7%') : wp('3.5%'),
     fontWeight: '700',
     marginTop: getResponsiveSpacing(4, 6, 8),
@@ -431,7 +431,7 @@ const productCardStyles = StyleSheet.create({
   description: {
     color: '#666',
     fontSize: isSmallScreen() ? wp('2.8%') : isMediumScreen() ? wp('3.2%') : wp('3%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginTop: getResponsiveSpacing(2, 3, 4),
     textAlign: 'center',
   },

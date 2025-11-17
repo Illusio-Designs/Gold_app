@@ -119,7 +119,7 @@ const sliderStyles = StyleSheet.create({
   },
   labelText: {
     color: '#6B0D33',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -199,8 +199,8 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
             <Text style={styles.label}>Weight</Text>
             {/* Slider removed. Add your custom slider or another solution here. */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 2, marginTop: 18, marginBottom: 10 }}>
-              <Text style={{ color: '#6B0D33', fontFamily: 'Glorifydemo-BW3J3', fontSize: 14, fontWeight: '700' }}>0gm</Text>
-              <Text style={{ color: '#6B0D33', fontFamily: 'Glorifydemo-BW3J3', fontSize: 14, fontWeight: '700' }}>10gm</Text>
+              <Text style={{ color: '#6B0D33', fontFamily: 'GlorifyDEMO', fontSize: 14, fontWeight: '700' }}>0gm</Text>
+              <Text style={{ color: '#6B0D33', fontFamily: 'GlorifyDEMO', fontSize: 14, fontWeight: '700' }}>10gm</Text>
             </View>
             <Text style={styles.label}>Size</Text>
             <View style={styles.optionsRow}>
@@ -273,27 +273,27 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   header: {
     color: '#6B0D33',
     fontSize: 26,
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   reset: {
     color: '#6B0D33',
     fontSize: 16,
     fontWeight: '400',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textDecorationLine: 'underline',
   },
   label: {
     color: '#6B0D33',
     fontSize: 18,
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginTop: 18,
     marginBottom: 8,
   },
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   weightLabel: {
     color: '#6B0D33',
     fontSize: 14,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   optionsRow: {
     flexDirection: 'row',
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 14,
     fontWeight: '700',
   },

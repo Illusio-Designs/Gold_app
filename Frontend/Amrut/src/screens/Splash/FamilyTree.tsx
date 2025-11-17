@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   skipButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     textAlign: 'center',
   },

@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     fontSize: getResponsiveFontSize(18, 22, 26),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     flex: 1,
     textAlign: 'center',
     marginLeft: -24,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     fontSize: getResponsiveFontSize(15, 17, 19),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     flex: 1,
   },
   menuArrow: {
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     fontSize: getResponsiveFontSize(12, 14, 16),
     fontWeight: '400',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     opacity: 0.7,
   },
 

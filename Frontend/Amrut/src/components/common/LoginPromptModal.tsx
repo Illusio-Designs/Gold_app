@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(20, 22, 24),
     fontWeight: '700',
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginBottom: getResponsiveSpacing(8, 10, 12),
     textAlign: 'center',
   },
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(16, 17, 18),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   registerButton: {
     backgroundColor: '#fff',
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     fontSize: getResponsiveFontSize(16, 17, 18),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   guestButton: {
     paddingVertical: getResponsiveSpacing(8, 10, 12),
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   guestButtonText: {
     color: '#999',
     fontSize: getResponsiveFontSize(13, 14, 15),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textDecorationLine: 'underline',
   },
 });

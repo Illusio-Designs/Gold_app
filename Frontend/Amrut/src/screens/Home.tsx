@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('7%'),
     marginTop: hp('2%'),
     marginBottom: hp('1.2%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   loadingContainer: {
     paddingVertical: 20,
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noSlidersContainer: {
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   noSlidersText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noProductsContainer: {
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   noProductsText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   errorContainer: {
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#6B0D33',
     fontSize: 18,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -583,7 +583,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
 });
@@ -613,7 +613,7 @@ const productCardStyles = StyleSheet.create({
   },
   name: {
     color: '#6B0D33',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: isSmallScreen() ? wp('3.2%') : isMediumScreen() ? wp('3.7%') : wp('3.5%'),
     fontWeight: '700',
     marginTop: isSmallScreen() ? hp('0.7%') : isMediumScreen() ? hp('1.2%') : isLargeScreen() ? hp('1.2%') : hp('1.2%'),

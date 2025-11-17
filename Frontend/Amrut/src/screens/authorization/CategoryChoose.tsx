@@ -129,7 +129,7 @@ const CategoryChoose = () => {
               </View>
             )}
           </View>
-          <Button onPress={() => navigation.navigate('MainTabs')} title="Continue" style={{ marginTop: 24 }} textStyle={{ color: '#FCE2BF', fontFamily: 'Glorifydemo-BW3J3' }} />
+          <Button onPress={() => navigation.navigate('MainTabs')} title="Continue" style={{ marginTop: 24 }} textStyle={{ color: '#FCE2BF', fontFamily: 'GlorifyDEMO' }} />
           <TouchableOpacity onPress={() => navigation.navigate('MainTabs')} style={{ marginTop: 16, alignSelf: 'center' }}>
             <Text style={{ color: '#5D0829', fontSize: 14, textDecorationLine: 'underline' }}>Skip for now</Text>
           </TouchableOpacity>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 24,
     paddingHorizontal: 20,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   dropdownButtonText: {
     fontSize: 16,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
   dropdownArrow: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     height: 36,
     borderWidth: 0,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 15,
     backgroundColor: 'transparent',
     paddingTop: 0,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: 'bold',
     marginTop: 2,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   itemRow: {
     flexDirection: 'row',
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
     lineHeight: 20,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
 });
 

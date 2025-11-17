@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '700',
     marginLeft: 2,
-    fontFamily: 'Glorifydemo-BW3J3'
+    fontFamily: 'GlorifyDEMO'
   },
 });
 

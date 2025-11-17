@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     color: '#F8D7C5',
     fontSize: 32,
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     letterSpacing: 1,
     zIndex: 2,
     flex: 1,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#5D0829',
     fontSize: 14,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
   dotsRow: {

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     color: '#FCE2BF',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 16,
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     color: '#C09E83',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 20,
     textShadowColor: 'rgba(0,0,0,0.3)',
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     color: '#C09E83',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     lineHeight: 24,
     textShadowColor: 'rgba(0,0,0,0.3)',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   skipButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
     textAlign: 'center',
   },

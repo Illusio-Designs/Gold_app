@@ -79,7 +79,7 @@ const styles=StyleSheet.create({
     marginTop: 24,
     color: '#C09E83',
     fontSize: 18,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     letterSpacing: 2,
     textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.3)',

@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#FCE2BF' ,
     fontSize: 20,
-    fontFamily: 'Glorifydemo-BW3J3', // Use your custom font if available
+    fontFamily: 'GlorifyDEMO', // Use your custom font if available
     letterSpacing: 1,
   },
 });

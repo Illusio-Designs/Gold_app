@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     marginBottom: 12,
     backgroundColor: '#fff',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
 });
 

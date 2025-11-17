@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     fontSize: 22,
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 40,
     top: 18,

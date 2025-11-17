@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: hp('2%'),
     marginBottom: hp('3%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '700',
     textAlign: 'center',
     color: '#5D0829',

@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(18, 22, 26),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     flex: 1,
     textAlign: 'center',
     marginLeft: -50, // visually center between icons
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(16, 20, 24),
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     flex: 1,
   },
   detailsSection: {
@@ -399,13 +399,13 @@ const styles = StyleSheet.create({
   detailLabel: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(12, 14, 16),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '400',
   },
   detailValue: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(12, 14, 16),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '600',
   },
   skuValue: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   otherChargesHeading: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(16, 20, 24),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '700',
     marginTop: getResponsiveSpacing(12, 15, 18),
     marginBottom: getResponsiveSpacing(10, 12, 14),
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
   inputPlaceholder: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(10, 12, 14),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '100',
   },
   addToCartBtn: {
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   addToCartText: {
     color: '#5D0829',
     fontSize: getResponsiveFontSize(18, 22, 26),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '700',
   },
   // Loading and Error states
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(14, 16, 18),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: getResponsiveSpacing(20, 25, 30),
   },
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#5D0829',
     fontSize: getResponsiveFontSize(14, 16, 18),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '600',
   },
 });

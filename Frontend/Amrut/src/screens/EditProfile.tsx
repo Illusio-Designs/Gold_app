@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
   countryCode: {
     fontSize: 14,
     color: '#5D082980',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
   phoneInput: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 14,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
   cityStatePinInput: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 13,
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#A47C8C',
     paddingHorizontal: 8,
     paddingVertical: 10,
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: 'bold',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#A47C8C',
     paddingHorizontal: 5,
     paddingVertical: 0,

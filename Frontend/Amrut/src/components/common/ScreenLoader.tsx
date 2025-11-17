@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: hp('2%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: '600',
     textAlign: 'center',
   },

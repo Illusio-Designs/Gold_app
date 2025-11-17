@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fff',
     fontSize: 20,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     color: '#5D0829',
     marginHorizontal: 4,
     fontWeight: 'bold',

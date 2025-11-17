@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(20, 24, 28),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   modalBody: {
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   modalMessage: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(14, 16, 18),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: getResponsiveSpacing(10, 12, 14),
   },
@@ -495,14 +495,14 @@ const styles = StyleSheet.create({
   orderIdsTitle: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(14, 16, 18),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: getResponsiveSpacing(5, 6, 7),
   },
   orderId: {
     color: '#FCE2BF',
     fontSize: getResponsiveFontSize(12, 14, 16),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   modalButton: {
