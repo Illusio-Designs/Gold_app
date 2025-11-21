@@ -27,7 +27,7 @@ target 'Amrut' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     # Hermes is enabled for better debugging support with Chrome DevTools
-    :hermes_enabled => true,
+    :hermes_enabled => false,
     # Enable hermes inspector to fix linking issues
     :fabric_enabled => false
   )
