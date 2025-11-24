@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.amrutkumargovinddasllp"
+    namespace "com.gold.amrutkumargovinddasllp"
     defaultConfig {
-        applicationId "com.amrutkumargovinddasllp"
+        applicationId "com.gold.amrutkumargovinddasllp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3
@@ -165,4 +165,5 @@ dependencies {
 }
 
 // Apply Google Services plugin
-apply plugin: 'com.google.gms.google-services'
+// Temporarily disabled - update google-services.json with new package name first
+// apply plugin: 'com.google.gms.google-services'
