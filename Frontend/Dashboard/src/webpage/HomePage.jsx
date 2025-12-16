@@ -455,8 +455,20 @@ const HomePage = () => {
           <div className="homepage-app-promo-content">
             <h2 className="homepage-app-promo-title">Exclusively available on our app</h2>
             <div className="homepage-app-store-buttons">
-              <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
-              <img src={googleplay} alt="Get it on Google Play" className="homepage-store-img" />
+              <a
+                href="https://apps.apple.com/in/app/amrutkumar-govinddas-llp/id6754066073"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
+              </a>
+              <a
+                href="http://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={googleplay} alt="Get it on Google Play" className="homepage-store-img" />
+              </a>
             </div>
           </div>
           <div className="homepage-app-mockup">

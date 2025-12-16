@@ -646,8 +646,13 @@ button {
   gap: 1rem;
 }
 
+.homepage-app-store-buttons a {
+  display: inline-block;
+}
+
 .homepage-store-img {
-  width: 47%;
+  width: 180px;
+  max-width: 100%;
   cursor: pointer;
   margin-top: -8%;
   margin-bottom: -18%;
@@ -1436,7 +1441,7 @@ button {
 
   /* Footer spacing */
   .homepage-footer-main {
-    padding: 12rem 5% 2rem;
+    padding: 15rem 5% 2rem;
   }
 
   .homepage-footer-content {
@@ -1578,10 +1583,6 @@ button {
 
   .homepage-app-promo-title {
     font-size: 26px;
-  }
-
-  .homepage-store-img {
-    width: 45%;
   }
 
   .homepage-footer-section h4 {
@@ -1769,13 +1770,6 @@ button {
     font-size: 22px;
   }
 
-  .homepage-store-img {
-    width: 43%;
-  }
-
-  .homepage-footer-main {
-    padding: 6rem 5% 0rem;
-  }
 
   .homepage-footer-content {
     padding: 0 5%;
@@ -1882,13 +1876,7 @@ button {
     font-size: 20px;
   }
 
-  .homepage-store-img {
-    width: 42%;
-  }
 
-  .homepage-footer-main {
-    padding: 10rem 5% 0rem;
-  }
 
   .homepage-footer-content {
     padding: 0 5%;
