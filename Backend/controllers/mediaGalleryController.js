@@ -143,6 +143,8 @@ async function bulkUploadMedia(req, res) {
   const results = [];
   const imageProcessingService = require("../services/imageProcessingService");
   const autoDetectionService = require("../services/autoDetectionService");
+  const ocrService = require("../services/ocrService");
+  const aiStudioService = require("../services/aiStudioService");
 
   for (let i = 0; i < req.files.length; i++) {
     const file = req.files[i];
@@ -161,11 +163,61 @@ async function bulkUploadMedia(req, res) {
       // Auto-detect image association
       if (file.mimetype.startsWith("image/")) {
         try {
-          console.log(`🔍 [AUTO-DETECT] Analyzing: ${file.originalname}`);
-          detectedAssociation =
-            await autoDetectionService.detectImageAssociation(
-              file.originalname
+          // Prefer OCR-based detection (tag/SKU inside image). Fallback to filename-based auto-detect.
+          let ocrSku = null;
+          let ocrCandidates = [];
+          try {
+            const ocr = await ocrService.extractTagNo(file.path, {
+              minLen: 3,
+              maxLen: 30,
+            });
+            ocrSku = ocr.tag;
+            ocrCandidates = ocr.candidates || [];
+          } catch (ocrErr) {
+            console.warn(
+              `⚠️ [OCR] OCR failed for ${file.originalname}:`,
+              ocrErr.message
             );
+          }
+
+          if (ocrSku) {
+            console.log(`🔍 [OCR] Detected SKU candidate: ${ocrSku}`);
+            const matchedProduct = await new Promise((resolve, reject) => {
+              db.query(
+                "SELECT id, name, sku FROM products WHERE sku = ? LIMIT 1",
+                [ocrSku],
+                (err, rows) => {
+                  if (err) return reject(err);
+                  resolve(rows && rows.length ? rows[0] : null);
+                }
+              );
+            });
+
+            if (matchedProduct) {
+              detectedAssociation = {
+                type: "product",
+                id: matchedProduct.id,
+                name: matchedProduct.name,
+                sku: matchedProduct.sku,
+                confidence: "high",
+                source: "ocr",
+                ocrCandidates,
+              };
+              console.log(
+                `✅ [OCR] Matched product by SKU: ${matchedProduct.sku} (${matchedProduct.name})`
+              );
+            } else {
+              console.log(
+                `⚠️ [OCR] SKU found (${ocrSku}) but no product matched. Falling back to filename detection.`
+              );
+            }
+          }
+
+          if (!detectedAssociation) {
+            console.log(`🔍 [AUTO-DETECT] Analyzing filename: ${file.originalname}`);
+            detectedAssociation =
+              await autoDetectionService.detectImageAssociation(file.originalname);
+          }
 
           if (detectedAssociation) {
             console.log(
@@ -177,11 +229,69 @@ async function bulkUploadMedia(req, res) {
               console.log(
                 `🖼️ [BULK UPLOAD] Processing as product image: ${file.originalname}`
               );
-              processedFilePath =
-                await imageProcessingService.processProductImage(
-                  file.path,
-                  file.filename
-                );
+              // Optional AI photoshoot enhancement (only if configured)
+              let inputPathForProcessing = file.path;
+              let inputFilenameForProcessing = file.filename;
+              let bgRemovedPath = null;
+
+              if (aiStudioService.isEnabled()) {
+                try {
+                  const baseUrl = getBaseUrl();
+                  const tempImageUrl = `${baseUrl}/uploads/temp/${file.filename}`;
+
+                  const tempDir = path.join(__dirname, "../uploads/temp");
+                  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+                  console.log(`✨ [AI STUDIO] Running background removal...`);
+                  bgRemovedPath = await aiStudioService.removeBackground(
+                    tempImageUrl,
+                    tempDir
+                  );
+
+                  const bgRemovedFilename = path.basename(bgRemovedPath);
+                  const bgRemovedUrl = `${baseUrl}/uploads/temp/${bgRemovedFilename}`;
+
+                  console.log(`✨ [AI STUDIO] Running studio generation...`);
+                  const studioPath = await aiStudioService.generateStudioImage(
+                    bgRemovedUrl,
+                    tempDir
+                  );
+
+                  inputPathForProcessing = studioPath;
+                  inputFilenameForProcessing = `${detectedAssociation.sku || "product"}-${Date.now()}.png`;
+
+                  // Cleanup original temp upload (since we won't process it)
+                  try {
+                    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                  } catch (cleanupErr) {
+                    console.warn(
+                      `⚠️ [AI STUDIO] Failed to cleanup original temp file:`,
+                      cleanupErr.message
+                    );
+                  }
+                } catch (aiErr) {
+                  console.warn(
+                    `⚠️ [AI STUDIO] AI enhancement failed for ${file.originalname}, falling back to normal pipeline:`,
+                    aiErr.message
+                  );
+                  inputPathForProcessing = file.path;
+                  inputFilenameForProcessing = file.filename;
+                } finally {
+                  // Cleanup bg-removed intermediate if it exists
+                  if (bgRemovedPath) {
+                    try {
+                      if (fs.existsSync(bgRemovedPath)) fs.unlinkSync(bgRemovedPath);
+                    } catch (e) {
+                      // ignore
+                    }
+                  }
+                }
+              }
+
+              processedFilePath = await imageProcessingService.processProductImage(
+                inputPathForProcessing,
+                inputFilenameForProcessing
+              );
               fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
 
               // Update product with new image and set status to active
@@ -265,11 +375,10 @@ async function bulkUploadMedia(req, res) {
               `❌ [AUTO-DETECT] No association found for: ${file.originalname}`
             );
             // Process as generic product image if no association found
-            processedFilePath =
-              await imageProcessingService.processProductImage(
-                file.path,
-                file.filename
-              );
+            processedFilePath = await imageProcessingService.processProductImage(
+              file.path,
+              file.filename
+            );
             fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
           }
         } catch (processError) {

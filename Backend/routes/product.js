@@ -50,15 +50,6 @@ router.post(
   upload.array("images", 5),
   productController.uploadProductImages
 );
-
-// Auto-attach a product image by reading SKU/tag via OCR
-router.post(
-  "/auto-image",
-  verifyToken,
-  requireAdmin,
-  upload.single("image"),
-  productController.uploadProductImageAutoAttach
-);
 router.get("/:productId/images", productController.getProductImages);
 router.delete(
   "/:productId/images/:imageIndex",
