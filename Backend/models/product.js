@@ -260,6 +260,12 @@ function getProductBySku(sku, callback) {
   });
 }
 
+// Get product by SKU for admin/automation (no status/stock filtering)
+function getProductBySkuAny(sku, callback) {
+  const sql = "SELECT * FROM products WHERE sku = ? LIMIT 1";
+  db.query(sql, [sku], callback);
+}
+
 // Update product stock status
 function updateProductStockStatus(productId, newStatus, callback) {
   const sql =
@@ -373,6 +379,7 @@ module.exports = {
   getAllProducts,
   getProductById,
   getProductBySku,
+  getProductBySkuAny,
   updateProduct,
   deleteProduct,
   getProductsByCategory,

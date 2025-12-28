@@ -3,6 +3,8 @@ const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
 const imageProcessingService = require("../services/imageProcessingService");
+const ocrService = require("../services/ocrService");
+const aiStudioService = require("../services/aiStudioService");
 
 const multer = require("multer");
 const xlsx = require("xlsx");
@@ -351,6 +353,152 @@ async function uploadProductImages(req, res) {
     res
       .status(500)
       .json({ error: "Image upload failed", details: err.message });
+  }
+}
+
+/**
+ * Upload a product image and auto-attach it by reading the tag/SKU via OCR.
+ *
+ * Flow:
+ * - OCR reads tagNo/SKU from ORIGINAL upload (req.file.path)
+ * - Find product by SKU in DB (no status filter)
+ * - OPTIONAL AI studio pipeline (bg remove + studio enhance) if Replicate is configured
+ * - Run existing watermark/webp pipeline
+ * - Attach processed image to product (products.image array)
+ */
+async function uploadProductImageAutoAttach(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const originalPath = req.file.path;
+  const originalFilename = req.file.filename;
+
+  try {
+    console.log("🔍 [AUTO OCR] Starting auto-attach for:", originalFilename);
+
+    // 1) OCR extract tag/SKU
+    const ocr = await ocrService.extractTagNo(originalPath, {
+      minLen: 3,
+      maxLen: 30,
+    });
+
+    const sku = ocr.tag;
+    if (!sku) {
+      return res.status(400).json({
+        error: "Could not detect tag/SKU from image (OCR failed)",
+        ocrCandidates: ocr.candidates,
+      });
+    }
+
+    console.log("🔍 [AUTO OCR] OCR candidates:", ocr.candidates);
+    console.log("✅ [AUTO OCR] Selected SKU:", sku);
+
+    // 2) Lookup product by SKU (admin, no status filter)
+    const product = await new Promise((resolve, reject) => {
+      productModel.getProductBySkuAny(sku, (err, results) => {
+        if (err) return reject(err);
+        resolve(results && results.length ? results[0] : null);
+      });
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        error: `No product found for SKU: ${sku}`,
+        sku,
+        ocrCandidates: ocr.candidates,
+      });
+    }
+
+    const productId = product.id;
+
+    // 3) Optional AI studio pipeline
+    // NOTE: We intentionally run AI BEFORE watermarking.
+    let inputForProcessingPath = originalPath;
+    let inputForProcessingFilename = originalFilename;
+
+    if (aiStudioService.isEnabled()) {
+      console.log("✨ [AI STUDIO] Enabled. Running bg-remove + studio generation...");
+
+      const workDir = path.join(__dirname, "../uploads/temp");
+      if (!fs.existsSync(workDir)) {
+        fs.mkdirSync(workDir, { recursive: true });
+      }
+
+      // Make the ORIGINAL file reachable via local static path
+      // Since /uploads is served statically, we can reference it by URL if BASE_URL is set.
+      const { getBaseUrl } = require("../config/environment");
+      const originalUrl = `${getBaseUrl()}/uploads/products/${path.basename(
+        originalPath
+      )}`;
+
+      // Replicate expects a URL; if your server is not publicly reachable, replace with a signed upload to a public store.
+      const bgRemovedPath = await aiStudioService.removeBackground(
+        originalUrl,
+        workDir
+      );
+
+      // For studio, feed the bg-removed image via a local URL too
+      // Save bgRemovedPath into /uploads/temp and reference that URL
+      const bgRemovedFilename = path.basename(bgRemovedPath);
+      const bgRemovedUrl = `${getBaseUrl()}/uploads/temp/${bgRemovedFilename}`;
+
+      const studioPath = await aiStudioService.generateStudioImage(
+        bgRemovedUrl,
+        workDir
+      );
+
+      inputForProcessingPath = studioPath;
+      inputForProcessingFilename = `${sku}-studio.png`;
+
+      // Cleanup original upload to avoid clutter (since processing will use studioPath)
+      try {
+        if (fs.existsSync(originalPath)) fs.unlinkSync(originalPath);
+      } catch (e) {
+        console.warn("⚠️ [AUTO OCR] Failed to cleanup original file:", e.message);
+      }
+    } else {
+      console.log(
+        "ℹ️ [AI STUDIO] Disabled (missing env). Using original upload for watermark/webp."
+      );
+    }
+
+    // 4) Watermark + WebP using existing pipeline
+    const processedPath = await imageProcessingService.processProductImage(
+      inputForProcessingPath,
+      inputForProcessingFilename
+    );
+    const outputFilename = path.basename(processedPath);
+
+    // 5) Attach image to product
+    await new Promise((resolve, reject) => {
+      productModel.addProductImage(productId, outputFilename, (err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+
+    // 6) Emit real-time update
+    productModel.getProductById(productId, (getErr, productResults) => {
+      if (!getErr && productResults && productResults.length > 0) {
+        socketService.notifyProductUpdate(productResults[0], "updated");
+      }
+    });
+
+    return res.json({
+      message: "Image auto-attached successfully",
+      sku,
+      productId,
+      image: outputFilename,
+      ai: aiStudioService.isEnabled(),
+      ocrCandidates: ocr.candidates,
+    });
+  } catch (error) {
+    console.error("❌ [AUTO OCR] Error:", error);
+    return res.status(500).json({ error: "Auto-attach failed", details: error.message });
+  } finally {
+    // If AI was disabled, original file is deleted by processProductImage()
+    // If AI was enabled, we delete original earlier and processProductImage deletes studioPath.
   }
 }
 
@@ -1413,6 +1561,7 @@ module.exports = {
   updateProduct,
   deleteProduct,
   uploadProductImages,
+  uploadProductImageAutoAttach,
   getProductImages,
   deleteProductImage,
   getProductsByCategory,
