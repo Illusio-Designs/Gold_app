@@ -39,7 +39,8 @@ const StackNavigation = () => {
       <CartProvider>
         <NavigationContainer ref={navigationRef}>
           <TimerProvider>
-            <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+            {/* Start app directly on Home (MainTabs) */}
+            <Stack.Navigator initialRouteName="MainTabs" screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Splash" component={Splash} />
               <Stack.Screen name="JourneyPane" component={JourneyPane} />
               <Stack.Screen name="ShreenathjiScreen" component={ShreenathjiScreen} />

@@ -21,6 +21,26 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Prevent stale data due to cached GET responses (browser/proxy).
+// This app expects "read-after-write" behavior after create/update/delete.
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const method = (config.method || "get").toLowerCase();
+    if (method === "get") {
+      // Cache-bust all GETs without changing server behavior.
+      config.params = { ...(config.params || {}), _ts: Date.now() };
+
+      // Ask intermediaries/browsers to revalidate.
+      config.headers = config.headers || {};
+      config.headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+      config.headers["Pragma"] = "no-cache";
+      config.headers["Expires"] = "0";
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor to handle 401 errors (token expired)
 axiosInstance.interceptors.response.use(
   (response) => response,

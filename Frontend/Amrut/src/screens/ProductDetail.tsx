@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Alert, Dimensions, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Alert, Dimensions, TextInput, Modal, Pressable } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getProductById } from '../services/Api';
 import { useCart } from '../context/CartContext';
@@ -36,6 +36,7 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+  const [imagePreviewVisible, setImagePreviewVisible] = useState(false);
 
   // Fetch product data when component mounts
   useEffect(() => {
@@ -208,12 +209,46 @@ const ProductDetail = () => {
         </View>
         {/* Product Image Card */}
         <View style={styles.imageCard}>
-          <Image 
-            source={getProductImage()} 
-            style={styles.productImage}
-            resizeMode="cover"
-          />
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setImagePreviewVisible(true)}
+          >
+            <Image 
+              source={getProductImage()} 
+              style={styles.productImage}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
         </View>
+
+        {/* Full-screen image preview (tap image to open) */}
+        <Modal
+          visible={imagePreviewVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setImagePreviewVisible(false)}
+        >
+          <View style={styles.imagePreviewBackdrop}>
+            <Pressable
+              style={{ flex: 1 }}
+              onPress={() => setImagePreviewVisible(false)}
+            >
+              <Image
+                source={getProductImage()}
+                style={styles.imagePreviewImage}
+                resizeMode="contain"
+              />
+            </Pressable>
+
+            <TouchableOpacity
+              style={styles.imagePreviewCloseBtn}
+              onPress={() => setImagePreviewVisible(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.imagePreviewCloseText}>×</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
         {/* Product Name and Quantity Selector */}
         <View style={styles.productRow}>
           <Text style={styles.productName}>{product.name || product.sku || 'Product Name'}</Text>
@@ -374,6 +409,33 @@ const styles = StyleSheet.create({
     width: isSmallScreen() ? wp('70%') : isMediumScreen() ? wp('75%') : wp('80%'),
     height: isSmallScreen() ? hp('25%') : isMediumScreen() ? hp('28%') : hp('30%'),
     borderRadius: 18,
+  },
+  // Full-screen image preview
+  imagePreviewBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+  },
+  imagePreviewCloseBtn: {
+    position: 'absolute',
+    top: isShortScreen() ? 40 : 55,
+    right: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(252,226,191,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  imagePreviewCloseText: {
+    color: '#FCE2BF',
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  imagePreviewImage: {
+    width: '100%',
+    height: '100%',
   },
   productRow: {
     flexDirection: 'row',

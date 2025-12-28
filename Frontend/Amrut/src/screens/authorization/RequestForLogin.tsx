@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Image, FlatList, ImageBackground, Text, TextInput } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image, ImageBackground, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,9 +23,6 @@ const RequestForLogin = () => {
   const [userExists, setUserExists] = useState(false);
   const [userId, setUserId] = useState<number | null>(null); // <-- add userId state
   const [categories, setCategories] = useState<{ id: number; name: string; description?: string; image?: string }[]>([]);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-  // Remove selectedCategory state
-  const [search, setSearch] = useState('');
   const [requestingLogin, setRequestingLogin] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<{ id: number; name: string; description?: string; image?: string }[]>([]);
@@ -48,13 +45,17 @@ const RequestForLogin = () => {
         if (response && response.success && response.data && Array.isArray(response.data)) {
           console.log(`✅ Loaded ${response.data.length} categories:`, response.data);
           setCategories(response.data);
+          // Remove the "choose category" step: auto-select all categories for the login request.
+          setSelectedCategories(response.data);
         } else {
           console.warn('❌ Invalid categories response format:', response);
           setCategories([]);
+          setSelectedCategories([]);
         }
       } catch (err) {
         console.error('❌ Error fetching categories:', err);
         setCategories([]);
+        setSelectedCategories([]);
       }
     };
     if (userExists) {
@@ -83,7 +84,7 @@ const RequestForLogin = () => {
         }, 1500);
         return;
       }
-      Toast.show({ type: 'success', text1: 'User found', text2: 'Please select a category.' });
+      Toast.show({ type: 'success', text1: 'User found', text2: 'You can now request login.' });
       // No need to fetch categories here, handled by useEffect
     } catch (err) {
       let errorMessage = 'Failed to check user.';
@@ -127,8 +128,9 @@ const RequestForLogin = () => {
   };
 
   const handleRequestLogin = async () => {
+    // Categories are auto-selected; if none are available, block.
     if (selectedCategories.length === 0) {
-      Toast.show({ type: 'error', text1: 'Error', text2: 'Please select at least one category.' });
+      Toast.show({ type: 'error', text1: 'Error', text2: 'No categories available right now.' });
       return;
     }
     setRequestingLogin(true);
@@ -247,68 +249,7 @@ const RequestForLogin = () => {
           {/* Category dropdown if user exists */}
           {userExists && (
             <>
-              <View style={styles.dropdownWrapper}>
-                <TouchableOpacity
-                  style={styles.dropdownButton}
-                  onPress={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.dropdownButtonText}>
-                    {selectedCategories.length === 0 ? 'Category' : selectedCategories.map(cat => cat.name).join(', ')}
-                  </Text>
-                  <Image
-                    source={require('../../assets/img/common/arrow.png')}
-                    style={[styles.dropdownArrow, categoryDropdownOpen && styles.dropdownArrowOpen]}
-                  />
-                </TouchableOpacity>
-                {categoryDropdownOpen && (
-                  <View style={styles.dropdownList}>
-                    <View style={styles.searchRow}>
-                      <Image
-                        source={require('../../assets/img/common/searchicon.png')}
-                        style={styles.searchIcon}
-                      />
-                      <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search"
-                        placeholderTextColor="#A47C8C"
-                        value={search}
-                        onChangeText={setSearch}
-                      />
-                      <TouchableOpacity onPress={() => setSearch('')}>
-                        <Text style={styles.clearSearch}>×</Text>
-                      </TouchableOpacity>
-                    </View>
-                    <FlatList
-                      data={categories.filter(cat => cat.name.toLowerCase().includes(search.toLowerCase()))}
-                      keyExtractor={item => item.id.toString()}
-                      renderItem={({ item }) => (
-                        <TouchableOpacity
-                          style={styles.itemRow}
-                          onPress={() => {
-                            setSelectedCategories(prev => {
-                              const exists = prev.find(cat => cat.id === item.id);
-                              if (exists) {
-                                return prev.filter(cat => cat.id !== item.id);
-                              } else {
-                                return [...prev, item];
-                              }
-                            });
-                          }}
-                        >
-                          <Text style={styles.itemText}>{item.name}</Text>
-                          <View style={[
-                            styles.checkboxOuter,
-                            selectedCategories.some(cat => cat.id === item.id) ? styles.checkboxOuterSelected : null
-                          ]}>
-                            {selectedCategories.some(cat => cat.id === item.id) ? <Text style={styles.tick}>✓</Text> : null}
-                          </View>
-                        </TouchableOpacity>
-                      )}
-                    />
-                  </View>
-                )}
-              </View>
+              {/* Category selection removed: app requests login for all categories */}
               <Button
                 onPress={handleRequestLogin}
                 title={requestingLogin ? 'Requesting...' : 'Request for Login'}
@@ -397,114 +338,6 @@ const styles = StyleSheet.create({
     height: 45,
     marginBottom: 0,
     marginTop: 16,
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    height: 44,
-  },
-  dropdownButtonText: {
-    fontSize: 16,
-    color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
-    fontWeight: 'bold',
-  },
-  dropdownArrow: {
-    width: 18,
-    height: 10,
-    tintColor: '#5D0829',
-    transform: [{ rotate: '0deg' }],
-  },
-  dropdownArrowOpen: {
-    transform: [{ rotate: '180deg' }],
-  },
-  dropdownList: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    borderWidth: 0.5,
-    borderColor: '#5D0829',
-    zIndex: 100,
-    padding: 12,
-  },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#5D0829',
-    marginBottom: 8,
-    paddingBottom: 0,
-    width: '95%',
-    alignSelf: 'center',
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 2,
-    marginTop: 3,
-    resizeMode: 'contain',
-    tintColor: '#5D0829',
-  },
-  searchInput: {
-    flex: 1,
-    height: 36,
-    borderWidth: 0,
-    color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
-    fontSize: 15,
-    backgroundColor: 'transparent',
-    paddingTop: 0,
-    fontWeight: 'bold',
-  },
-  clearSearch: {
-    fontSize: 18,
-    color: '#5D0829',
-    marginLeft: 10,
-    fontWeight: 'bold',
-    marginTop: 2,
-    fontFamily: 'Glorifydemo-BW3J3',
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 9,
-    paddingHorizontal: 2,
-    borderBottomWidth: 0,
-    borderBottomColor: '#eee',
-  },
-  itemText: {
-    flex: 1,
-    color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 5,
-    borderWidth: 1.5,
-    borderColor: '#5D0829',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  checkboxOuterSelected: {
-    backgroundColor: '#5D0829',
-    borderColor: '#5D0829',
-  },
-  tick: {
-    color: '#FCE2BF',
-    fontSize: 15,
-    fontWeight: '500',
-    textAlign: 'center',
-    lineHeight: 20,
-    fontFamily: 'Glorifydemo-BW3J3',
   },
   button: {
     backgroundColor: '#5D0829',
