@@ -6,6 +6,26 @@ axios.defaults.timeout = 10000; // 10 seconds timeout
 axios.defaults.retry = 2; // Retry failed requests
 axios.defaults.retryDelay = 1000; // Wait 1 second between retries
 
+// Prevent stale data due to cached GET responses (browser/proxy/CDN).
+// Mobile app expects "read-after-write" after admin updates.
+axios.interceptors.request.use(
+  config => {
+    const method = (config.method || 'get').toLowerCase();
+    if (method === 'get') {
+      // Cache-bust GETs without changing backend behavior
+      config.params = { ...(config.params || {}), _ts: Date.now() };
+
+      // Ask intermediaries to revalidate
+      config.headers = config.headers || {};
+      config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+      config.headers['Pragma'] = 'no-cache';
+      config.headers['Expires'] = '0';
+    }
+    return config;
+  },
+  error => Promise.reject(error),
+);
+
 // ✅ Fallback if API_URL is undefined
 export const BASE_URL = API_URL || 'http://172.20.10.10:3001/api';
 // Use your LAN IP if on physical device

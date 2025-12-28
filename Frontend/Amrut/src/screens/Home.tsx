@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/common/Header';
@@ -139,6 +139,12 @@ const Home = () => {
     fetchCategories();
   }, [isUserLoggedIn, userId, accessToken]);
 
+  // Keep latest fetch function for socket callbacks (avoid stale closures)
+  const fetchCategoriesRef = useRef(fetchCategories);
+  useEffect(() => {
+    fetchCategoriesRef.current = fetchCategories;
+  });
+
   // Load products on mount and when auth state changes
   useEffect(() => {
     loadProducts();
@@ -197,6 +203,12 @@ const Home = () => {
     }
   };
 
+  // Keep latest product loader for socket callbacks (avoid stale closures)
+  const loadProductsRef = useRef(loadProducts);
+  useEffect(() => {
+    loadProductsRef.current = loadProducts;
+  });
+
   // Use real-time data hook for sliders
   const slidersData: any = useRealtimeData(
     'sliders',
@@ -214,6 +226,12 @@ const Home = () => {
   const slidersLoading = slidersData?.loading || false;
   const slidersError = slidersData?.error || null;
   const refreshSliders = slidersData?.refresh || (() => {});
+
+  // Keep latest slider refresher for socket callbacks (avoid stale closures)
+  const refreshSlidersRef = useRef(refreshSliders);
+  useEffect(() => {
+    refreshSlidersRef.current = refreshSliders;
+  });
 
   // Categories are now managed by local state
   console.log('[Home] Current categories state:', categories);
@@ -234,17 +252,17 @@ const Home = () => {
     switch (action) {
       case 'created':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       case 'updated':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       case 'deleted':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       default:
@@ -261,22 +279,29 @@ const Home = () => {
     switch (action) {
       case 'created':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       case 'updated':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       case 'deleted':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       default:
         console.log('[Home] Unknown slider action:', action);
     }
+  };
+
+  // Handle real-time product updates from socket events
+  const handleRealTimeProductUpdate = (updateData: any) => {
+    console.log('[Home] Real-time product update received:', updateData);
+    // Refresh products silently (will re-apply current filters via existing effects)
+    loadProductsRef.current();
   };
 
   // Handle slider Show More button press
@@ -301,11 +326,15 @@ const Home = () => {
         
         // Listen for slider updates
         const sliderUpdateListenerId = SocketService.addEventListener('slider-update', handleRealTimeSliderUpdate);
+
+        // Listen for product updates (admin add/update/delete)
+        const productUpdateListenerId = SocketService.addEventListener('product-update', handleRealTimeProductUpdate);
         
         // Cleanup listeners on unmount
         return () => {
           SocketService.removeEventListener('category-update', categoryUpdateListenerId);
           SocketService.removeEventListener('slider-update', sliderUpdateListenerId);
+          SocketService.removeEventListener('product-update', productUpdateListenerId);
         };
       } catch (error) {
         console.error('[Home] Error setting up real-time updates:', error);
