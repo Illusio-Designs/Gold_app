@@ -33,6 +33,7 @@ import RealtimeNotificationService from "../../services/realtimeNotificationServ
 
 const SidebarLinks = [
   { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "Sliders", path: "/dashboard/sliders", icon: ImageIcon },
   { name: "Users", path: "/dashboard/users", icon: Users },
   { name: "Categories", path: "/dashboard/categories", icon: Layers },
   { name: "Products", path: "/dashboard/products", icon: Package },
@@ -40,7 +41,6 @@ const SidebarLinks = [
   { name: "Media Gallery", path: "/dashboard/media-gallery", icon: ImageIcon },
   { name: "App Versions", path: "/dashboard/app-versions", icon: Smartphone },
   { name: "App Icons", path: "/dashboard/app-icons", icon: Palette },
-  { name: "Sliders", path: "/dashboard/sliders", icon: ImageIcon },
 ];
 
 export default function DashboardLayout() {
