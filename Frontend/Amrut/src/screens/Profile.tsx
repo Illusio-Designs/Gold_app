@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking, PermissionsAndroid } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
 import CustomLoader from '../components/common/CustomLoader';
 import ScreenLoader from '../components/common/ScreenLoader';
-import { launchImageLibrary } from 'react-native-image-picker';
-import axios from 'axios';
+import { launchCamera } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
 import { getLatestVersion } from '../services/Api';
@@ -134,61 +133,119 @@ const Profile = () => {
 
   const handleCameraPress = async () => {
     console.log('[Profile] Camera button pressed');
-    launchImageLibrary(
-      { 
-        mediaType: 'photo', 
-        quality: 0.8,
-        includeBase64: false,
-        maxHeight: 2000,
-        maxWidth: 2000,
-      },
-      async (response) => {
-        console.log('[Profile] Image picker response:', response);
-        if (response.didCancel) {
-          console.log('[Profile] User cancelled image picker');
-          return;
-        }
-        if (response.errorCode) {
-          console.log('[Profile] Image picker error:', response.errorCode, response.errorMessage);
-          Alert.alert('Error', response.errorMessage || 'Failed to open gallery');
-          return;
-        }
-        if (response.assets && response.assets.length > 0) {
-          const asset = response.assets[0];
-          console.log('[Profile] Selected asset:', asset);
-          if (asset.uri) {
-            setUploading(true);
-            try {
-              const formData = new FormData();
-              formData.append('profile', {
-                uri: asset.uri,
-                name: asset.fileName || 'profile.jpg',
-                type: asset.type || 'image/jpeg',
-              });
 
-              // Use your backend's upload endpoint
-              const res = await axios.post(`${BASE_URL}/upload/profile`, formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                },
-              });
-
-              if (res.data && res.data.url) {
-                setPhotoUri({ uri: res.data.url });
-                Alert.alert('Success', 'Profile image updated!');
-              } else {
-                Alert.alert('Error', 'Upload failed');
-              }
-            } catch (err) {
-              console.log('[Profile] Upload error:', err);
-              Alert.alert('Error', 'Upload failed');
-            } finally {
-              setUploading(false);
-            }
-          }
+    // Ask permission on Android
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'Camera Permission',
+          message: 'We need camera access to update your profile photo.',
+          buttonPositive: 'OK',
+          buttonNegative: 'Cancel',
         }
+      );
+
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Permission required', 'Please allow camera permission to take a profile photo.');
+        return;
       }
-    );
+    }
+
+    const openCamera = () =>
+      new Promise((resolve) => {
+        launchCamera(
+          {
+            mediaType: 'photo',
+            quality: 0.85,
+            includeBase64: false,
+            saveToPhotos: false,
+            maxHeight: 2000,
+            maxWidth: 2000,
+            cameraType: 'back',
+          },
+          resolve
+        );
+      });
+
+    const response: any = await openCamera();
+    console.log('[Profile] Camera response:', response);
+
+    if (response?.didCancel) return;
+    if (response?.errorCode) {
+      Alert.alert('Error', response.errorMessage || 'Failed to open camera');
+      return;
+    }
+
+    const asset = response?.assets?.[0];
+    if (!asset?.uri) return;
+
+    // Upload via authenticated profile update so backend processes/stores correctly.
+    setUploading(true);
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const storedUserId = await AsyncStorage.getItem('userId');
+      const userStr = await AsyncStorage.getItem('user');
+
+      if (!token || !storedUserId) {
+        Alert.alert('Login required', 'Please login again to update your profile photo.');
+        return;
+      }
+      if (!userStr) {
+        Alert.alert('Error', 'User data not found. Please open Edit Profile once and try again.');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+      const { updateUserProfile, getUserById } = require('../services/Api');
+
+      const fileUri =
+        Platform.OS === 'ios' && !asset.uri.startsWith('file://')
+          ? `file://${asset.uri}`
+          : asset.uri;
+
+      const profileData: any = {
+        // Keep existing fields so we don't accidentally overwrite them with null
+        name: user.name,
+        email: user.email,
+        phone_number: user.phone_number,
+        address_line1: user.address_line1,
+        address_line2: user.address_line2,
+        landmark: user.landmark,
+        state: user.state,
+        city: user.city,
+        country: user.country,
+        gst_number: user.gst_number,
+        pan_number: user.pan_number,
+        business_name: user.business_name,
+        status: user.status,
+        remarks: user.remarks,
+        image: {
+          uri: fileUri,
+          name: asset.fileName || `profile_${Date.now()}.jpg`,
+          type: asset.type || 'image/jpeg',
+        },
+      };
+
+      await updateUserProfile(storedUserId, profileData, token);
+
+      // Re-fetch user so we use the processed filename from backend
+      const refreshed = await getUserById(storedUserId, token);
+      const refreshedUser = refreshed.user || refreshed;
+      await AsyncStorage.setItem('user', JSON.stringify(refreshedUser));
+      if (refreshedUser.image) {
+        const imgUrl = refreshedUser.image.startsWith('http')
+          ? refreshedUser.image
+          : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${refreshedUser.image}?t=${Date.now()}`;
+        setPhotoUri({ uri: imgUrl });
+      }
+      Toast.show({ type: 'success', text1: 'Profile updated', text2: 'Profile photo updated successfully.' });
+    } catch (err) {
+      console.log('[Profile] Profile photo update error:', err);
+      Alert.alert('Error', 'Failed to update profile photo');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleDeleteAccount = () => {
