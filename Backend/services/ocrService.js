@@ -18,11 +18,31 @@ class OcrService {
   async _getWorker() {
     if (!this._workerPromise) {
       this._workerPromise = (async () => {
-        const worker = await createWorker("eng");
+        // tesseract.js v7: createWorker() then loadLanguage/initialize.
+        const cachePath =
+          process.env.OCR_CACHE_PATH ||
+          path.join(__dirname, "../uploads/ocr-cache");
+        try {
+          fs.mkdirSync(cachePath, { recursive: true });
+        } catch (e) {
+          // ignore
+        }
+
+        const worker = await createWorker({
+          logger: process.env.OCR_DEBUG === "true" ? console.log : undefined,
+          cachePath,
+          langPath: process.env.OCR_LANG_PATH, // optional override
+        });
+
+        await worker.loadLanguage("eng");
+        await worker.initialize("eng");
+
         await worker.setParameters({
           // Only allow uppercase letters + digits
           tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
           preserve_interword_spaces: "1",
+          // Treat image as a single line (good for SKU/tag codes)
+          tessedit_pageseg_mode: "7",
         });
         return worker;
       })();
@@ -65,12 +85,9 @@ class OcrService {
     const worker = await this._getWorker();
     const preprocessed = await this.preprocessForOcr(inputPath);
 
-    // PSM 7 = treat image as a single text line (works well for tag codes)
     const {
       data: { text },
-    } = await worker.recognize(preprocessed, {
-      tessedit_pageseg_mode: "7",
-    });
+    } = await worker.recognize(preprocessed);
 
     const rawText = (text || "").toUpperCase();
 

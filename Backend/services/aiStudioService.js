@@ -66,6 +66,36 @@ class AiStudioService {
     return outputPath;
   }
 
+  _guessMimeTypeFromPath(filePath) {
+    const ext = path.extname(filePath || "").toLowerCase();
+    if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+    if (ext === ".png") return "image/png";
+    if (ext === ".webp") return "image/webp";
+    return "application/octet-stream";
+  }
+
+  async _toReplicateImageInput(inputImageUrlOrPath) {
+    if (!inputImageUrlOrPath) {
+      throw new Error("Missing input image");
+    }
+
+    // Replicate accepts public URLs or base64 data URIs for many models.
+    if (typeof inputImageUrlOrPath === "string" && /^https?:\/\//i.test(inputImageUrlOrPath)) {
+      return inputImageUrlOrPath;
+    }
+
+    // Treat as local file path
+    const localPath = inputImageUrlOrPath;
+    if (!fs.existsSync(localPath)) {
+      throw new Error(`Input image path not found: ${localPath}`);
+    }
+
+    const bytes = await fs.promises.readFile(localPath);
+    const mime = this._guessMimeTypeFromPath(localPath);
+    const b64 = bytes.toString("base64");
+    return `data:${mime};base64,${b64}`;
+  }
+
   async _writeBytesToFile(bytes, outputPath) {
     // bytes may be Buffer or Uint8Array
     await fs.promises.writeFile(outputPath, bytes);
@@ -92,6 +122,11 @@ class AiStudioService {
       return this._downloadToFile(url, outputPath);
     }
 
+    // Some outputs may be { url: "https://..." }
+    if (first && typeof first.url === "string") {
+      return this._downloadToFile(first.url, outputPath);
+    }
+
     if (Buffer.isBuffer(first) || first instanceof Uint8Array) {
       return this._writeBytesToFile(first, outputPath);
     }
@@ -103,13 +138,14 @@ class AiStudioService {
    * Run background removal model on Replicate.
    * Returns a local file path to the PNG cutout.
    */
-  async removeBackground(inputImageUrl, workDir) {
+  async removeBackground(inputImageUrlOrPath, workDir) {
     const replicate = await this._initClient();
     const model = process.env.REPLICATE_BG_REMOVE_MODEL || "bria/remove-background";
 
+    const image = await this._toReplicateImageInput(inputImageUrlOrPath);
     const output = await replicate.run(model, {
       input: {
-        image: inputImageUrl,
+        image,
       },
     });
 
@@ -121,7 +157,7 @@ class AiStudioService {
    * Generate a studio-enhanced image with white background.
    * Returns a local file path to the generated image (PNG/JPG depending on model).
    */
-  async generateStudioImage(inputImageUrl, workDir) {
+  async generateStudioImage(inputImageUrlOrPath, workDir) {
     const replicate = await this._initClient();
     const model =
       process.env.REPLICATE_STUDIO_MODEL || "stability-ai/stable-diffusion-3.5-large";
@@ -138,9 +174,10 @@ class AiStudioService {
     // We try with `image` first; if the schema rejects it, we retry without `image`.
     let output;
     try {
+      const image = await this._toReplicateImageInput(inputImageUrlOrPath);
       output = await replicate.run(model, {
         input: {
-          image: inputImageUrl,
+          image,
           prompt,
           cfg,
         },

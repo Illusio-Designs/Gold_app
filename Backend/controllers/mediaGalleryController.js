@@ -146,6 +146,20 @@ async function bulkUploadMedia(req, res) {
   const ocrService = require("../services/ocrService");
   const aiStudioService = require("../services/aiStudioService");
 
+  const aiEnabled = aiStudioService.isEnabled();
+  const aiMissing = [
+    !process.env.REPLICATE_API_TOKEN ? "REPLICATE_API_TOKEN" : null,
+    !process.env.REPLICATE_BG_REMOVE_MODEL ? "REPLICATE_BG_REMOVE_MODEL" : null,
+    !process.env.REPLICATE_STUDIO_MODEL ? "REPLICATE_STUDIO_MODEL" : null,
+  ].filter(Boolean);
+
+  if (!aiEnabled) {
+    console.warn(
+      "⚠️ [AI STUDIO] Disabled. Missing env:",
+      aiMissing.length ? aiMissing.join(", ") : "(unknown)"
+    );
+  }
+
   for (let i = 0; i < req.files.length; i++) {
     const file = req.files[i];
     try {
@@ -159,6 +173,15 @@ async function bulkUploadMedia(req, res) {
       let fileUrl = `/uploads/temp/${file.filename}`;
       let detectedAssociation = null;
       let updateResult = null;
+      let ocrMeta = { enabled: true, tag: null, candidates: [], error: null };
+      let aiMeta = {
+        enabled: aiEnabled,
+        missingEnv: aiMissing,
+        attempted: false,
+        bgRemovedPath: null,
+        studioPath: null,
+        error: null,
+      };
 
       // Auto-detect image association
       if (file.mimetype.startsWith("image/")) {
@@ -173,11 +196,14 @@ async function bulkUploadMedia(req, res) {
             });
             ocrSku = ocr.tag;
             ocrCandidates = ocr.candidates || [];
+            ocrMeta.tag = ocrSku;
+            ocrMeta.candidates = ocrCandidates;
           } catch (ocrErr) {
             console.warn(
               `⚠️ [OCR] OCR failed for ${file.originalname}:`,
               ocrErr.message
             );
+            ocrMeta.error = ocrErr.message;
           }
 
           if (ocrSku) {
@@ -234,28 +260,25 @@ async function bulkUploadMedia(req, res) {
               let inputFilenameForProcessing = file.filename;
               let bgRemovedPath = null;
 
-              if (aiStudioService.isEnabled()) {
+              if (aiEnabled) {
                 try {
-                  const baseUrl = getBaseUrl();
-                  const tempImageUrl = `${baseUrl}/uploads/temp/${file.filename}`;
-
+                  aiMeta.attempted = true;
                   const tempDir = path.join(__dirname, "../uploads/temp");
                   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
                   console.log(`✨ [AI STUDIO] Running background removal...`);
                   bgRemovedPath = await aiStudioService.removeBackground(
-                    tempImageUrl,
+                    file.path,
                     tempDir
                   );
-
-                  const bgRemovedFilename = path.basename(bgRemovedPath);
-                  const bgRemovedUrl = `${baseUrl}/uploads/temp/${bgRemovedFilename}`;
+                  aiMeta.bgRemovedPath = bgRemovedPath;
 
                   console.log(`✨ [AI STUDIO] Running studio generation...`);
                   const studioPath = await aiStudioService.generateStudioImage(
-                    bgRemovedUrl,
+                    bgRemovedPath,
                     tempDir
                   );
+                  aiMeta.studioPath = studioPath;
 
                   inputPathForProcessing = studioPath;
                   inputFilenameForProcessing = `${detectedAssociation.sku || "product"}-${Date.now()}.png`;
@@ -274,6 +297,7 @@ async function bulkUploadMedia(req, res) {
                     `⚠️ [AI STUDIO] AI enhancement failed for ${file.originalname}, falling back to normal pipeline:`,
                     aiErr.message
                   );
+                  aiMeta.error = aiErr.message;
                   inputPathForProcessing = file.path;
                   inputFilenameForProcessing = file.filename;
                 } finally {
@@ -405,6 +429,8 @@ async function bulkUploadMedia(req, res) {
         auto_detected: !!detectedAssociation,
         association: detectedAssociation,
         update_result: updateResult,
+        ocr: ocrMeta,
+        ai: aiMeta,
       };
 
       const sql = `
