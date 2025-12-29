@@ -6,7 +6,7 @@ import axios from "axios";
 
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? "/api" : "https://amrutkumargovinddasllp.com/api");
+  (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api");
 
 // Debug logging
 console.log(
