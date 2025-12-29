@@ -10,7 +10,7 @@ import CountryPickerModal from '../components/common/CountryPickerModal';
 import CityPickerModal from '../components/common/CityPickerModal';
 import { countryCities, cityToState } from '../data/cities';
 import { Country } from '../data/countries';
-import { launchImageLibrary, Asset } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary, Asset } from 'react-native-image-picker';
 import axios from 'axios';
 import { updateUserProfile, getUserById, BASE_URL } from '../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -196,37 +196,76 @@ const EditProfile = () => {
     setPinError(isValid ? '' : errorMsg);
   };
 
-  const handleCameraPress = () => {
+  const handleCameraPress = async () => {
     console.log('[EditProfile] Camera button pressed');
-    launchImageLibrary(
-      { 
-        mediaType: 'photo', 
-        quality: 0.8,
-        includeBase64: false,
-        maxHeight: 2000,
-        maxWidth: 2000,
-      },
-      (response) => {
-        console.log('[EditProfile] Image picker response:', response);
-        if (response.didCancel) {
-          console.log('[EditProfile] User cancelled image picker');
-          return;
-        }
-        if (response.errorCode) {
-          console.log('[EditProfile] Image picker error:', response.errorCode, response.errorMessage);
-          Alert.alert('Error', response.errorMessage || 'Failed to open gallery');
-          return;
-        }
-        if (response.assets && response.assets.length > 0) {
-          const asset = response.assets[0];
-          console.log('[EditProfile] Selected asset:', asset);
-          if (asset.uri) {
-            setPhotoUri({ uri: asset.uri });
-            setImageAsset(asset);
-          }
-        }
-      }
-    );
+
+    const showPicker = () => {
+      Alert.alert('Update Photo', 'Choose source', [
+        {
+          text: 'Camera',
+          onPress: async () => {
+            const response: any = await new Promise((resolve) => {
+              launchCamera(
+                {
+                  mediaType: 'photo',
+                  quality: 0.85,
+                  includeBase64: false,
+                  saveToPhotos: false,
+                  maxHeight: 2000,
+                  maxWidth: 2000,
+                  cameraType: 'back',
+                },
+                resolve
+              );
+            });
+
+            console.log('[EditProfile] Camera response:', response);
+            if (response?.didCancel) return;
+            if (response?.errorCode) {
+              Alert.alert('Error', response.errorMessage || 'Failed to open camera');
+              return;
+            }
+            const asset = response?.assets?.[0];
+            if (asset?.uri) {
+              setPhotoUri({ uri: asset.uri });
+              setImageAsset(asset);
+            }
+          },
+        },
+        {
+          text: 'Gallery',
+          onPress: async () => {
+            const response: any = await new Promise((resolve) => {
+              launchImageLibrary(
+                {
+                  mediaType: 'photo',
+                  quality: 0.85,
+                  includeBase64: false,
+                  maxHeight: 2000,
+                  maxWidth: 2000,
+                },
+                resolve
+              );
+            });
+
+            console.log('[EditProfile] Gallery response:', response);
+            if (response?.didCancel) return;
+            if (response?.errorCode) {
+              Alert.alert('Error', response.errorMessage || 'Failed to open gallery');
+              return;
+            }
+            const asset = response?.assets?.[0];
+            if (asset?.uri) {
+              setPhotoUri({ uri: asset.uri });
+              setImageAsset(asset);
+            }
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    };
+
+    showPicker();
   };
 
   const handleUpdateProfile = async () => {
@@ -255,9 +294,13 @@ const EditProfile = () => {
         // ...add other fields as needed
       };
       if (imageAsset) {
+        const fileUri =
+          Platform.OS === 'ios' && imageAsset.uri && !imageAsset.uri.startsWith('file://')
+            ? `file://${imageAsset.uri}`
+            : imageAsset.uri;
         profileData.image = {
-          uri: imageAsset.uri!,
-          name: imageAsset.fileName || 'profile.jpg',
+          uri: fileUri!,
+          name: imageAsset.fileName || `profile_${Date.now()}.jpg`,
           type: imageAsset.type || 'image/jpeg',
         } as any;
       }
