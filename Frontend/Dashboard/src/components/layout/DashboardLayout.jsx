@@ -17,7 +17,6 @@ import {
   Maximize,
   Minimize,
   Image as ImageIcon,
-  UserPlus,
   Smartphone,
   Palette,
 } from "lucide-react";
@@ -39,7 +38,6 @@ const SidebarLinks = [
   { name: "Products", path: "/dashboard/products", icon: Package },
   { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart },
   { name: "Media Gallery", path: "/dashboard/media-gallery", icon: ImageIcon },
-  { name: "Login Requests", path: "/dashboard/login-requests", icon: UserPlus },
   { name: "App Versions", path: "/dashboard/app-versions", icon: Smartphone },
   { name: "App Icons", path: "/dashboard/app-icons", icon: Palette },
   { name: "Sliders", path: "/dashboard/sliders", icon: ImageIcon },

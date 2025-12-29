@@ -563,19 +563,6 @@ export const getOrderStatistics = (token) =>
     })
     .then((r) => r.data);
 
-// LOGIN REQUESTS (Admin)
-export const getAllLoginRequests = (token) =>
-  axiosInstance
-    .get("/login-requests", { headers: { Authorization: `Bearer ${token}` } })
-    .then((r) => r.data);
-
-export const updateLoginRequest = (requestId, data, token) =>
-  axiosInstance
-    .patch(`/login-requests/${requestId}`, data, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
 // NOTIFICATIONS
 export const getAdminNotifications = (token) => {
   console.log(

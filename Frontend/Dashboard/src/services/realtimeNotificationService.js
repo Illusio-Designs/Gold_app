@@ -121,17 +121,6 @@ class RealtimeNotificationService {
     
     // Update notification count (trigger refresh)
     window.dispatchEvent(new CustomEvent('notification-updated'));
-    
-    // Also trigger a custom event for login requests specifically
-    if (notification.type === 'login_request' || notification.data?.notificationType === 'login_request') {
-      console.log('[RealtimeNotificationService] Dispatching login-request event');
-      window.dispatchEvent(new CustomEvent('login-request', {
-        detail: { 
-          phoneNumber: notification.data?.phoneNumber || notification.data?.userName || notification.user_name,
-          categoryIds: notification.data?.categoryIds || notification.data?.categoryIds || []
-        }
-      }));
-    }
   }
 
   // Filter out mobile-only notifications for dashboard
@@ -167,7 +156,6 @@ class RealtimeNotificationService {
     
     // Only show admin-relevant notifications
     const adminRelevantTypes = [
-      'login_request',
       'admin_notification',
       'system_alert',
       'user_registered'

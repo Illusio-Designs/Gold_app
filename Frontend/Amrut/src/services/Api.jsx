@@ -146,40 +146,8 @@ export const getCategories = async () => {
 // ✅ Get approved categories for logged-in user
 export const getApprovedCategoriesForUser = async (userId, token) => {
   try {
-    console.log('📂 getApprovedCategoriesForUser: Fetching all categories (no auth required)');
-    const response = await axios.get(`${BASE_URL}/categories`);
-    console.log('📂 getApprovedCategoriesForUser response:', response.data);
-    console.log(
-      '📂 getApprovedCategoriesForUser response length:',
-      response.data?.length,
-    );
-
-    // Check if response has data property or if it's directly an array
-    if (response.data && Array.isArray(response.data)) {
-      console.log(
-        '📂 getApprovedCategoriesForUser: Returning array data with',
-        response.data.length,
-        'categories',
-      );
-      return { success: true, data: response.data };
-    } else if (
-      response.data &&
-      response.data.data &&
-      Array.isArray(response.data.data)
-    ) {
-      console.log(
-        '📂 getApprovedCategoriesForUser: Returning nested data with',
-        response.data.data.length,
-        'categories',
-      );
-      return { success: true, data: response.data.data };
-    } else {
-      console.warn(
-        '📂 getApprovedCategoriesForUser: Unexpected response format:',
-        response.data,
-      );
-      return { success: false, data: [], error: 'Invalid response format' };
-    }
+    // With Request-for-Login removed, approved categories = all categories.
+    return await getCategories();
   } catch (error) {
     console.error('❌ getApprovedCategoriesForUser error:', error);
     throw error.response?.data || { error: error.message };
@@ -189,42 +157,18 @@ export const getApprovedCategoriesForUser = async (userId, token) => {
 // ✅ Get approved products for logged-in user (filtered by selected categories)
 export const getApprovedProductsForUser = async (userId, token) => {
   try {
-    console.log('📦 getApprovedProductsForUser: Fetching all products (no auth required)');
-    const response = await axios.get(`${BASE_URL}/products/`, {
-      headers: { Authorization: 'Bearer dummy-token-12345' }
-    });
+    // With Request-for-Login removed, approved products = all products.
+    const response = await axios.get(`${BASE_URL}/products/`);
     console.log('📦 getApprovedProductsForUser response:', response.data);
-    console.log(
-      '📦 getApprovedProductsForUser response length:',
-      response.data?.length,
-    );
 
-    // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
-      console.log(
-        '📦 getApprovedProductsForUser: Returning array data with',
-        response.data.length,
-        'products',
-      );
       return { success: true, data: response.data };
-    } else if (
-      response.data &&
-      response.data.data &&
-      Array.isArray(response.data.data)
-    ) {
-      console.log(
-        '📦 getApprovedProductsForUser: Returning nested data with',
-        response.data.data.length,
-        'products',
-      );
-      return { success: true, data: response.data.data };
-    } else {
-      console.warn(
-        '📦 getApprovedProductsForUser: Unexpected response format:',
-        response.data,
-      );
-      return { success: false, data: [], error: 'Invalid response format' };
     }
+    if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      return { success: true, data: response.data.data };
+    }
+    console.warn('📦 getApprovedProductsForUser: Unexpected response format:', response.data);
+    return { success: false, data: [], error: 'Invalid response format' };
   } catch (error) {
     console.error('❌ getApprovedProductsForUser error:', error);
     throw error.response?.data || { error: error.message };

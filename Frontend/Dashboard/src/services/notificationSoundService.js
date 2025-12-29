@@ -5,7 +5,6 @@ class NotificationSoundService {
   constructor() {
     this.sounds = {
       user_registration: '/sounds/registration.mp3',
-      login_request: '/sounds/login_request.mp3',
       new_order: '/sounds/order.mp3',
       default: '/sounds/notification.mp3'
     };

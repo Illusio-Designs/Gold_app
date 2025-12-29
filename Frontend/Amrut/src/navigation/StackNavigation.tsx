@@ -7,7 +7,6 @@ import JourneyPane from '../screens/Splash/JourneyPane';
 import ShreenathjiScreen from '../screens/Splash/ShreenathjiScreen';
 import FamilyTree from '../screens/Splash/FamilyTree';
 import Register from '../screens/authorization/Register';
-import RequestForLogin from '../screens/authorization/RequestForLogin';
 import Login from '../screens/authorization/Login';
 import Product from '../screens/Product';
 import ProductDetail from '../screens/ProductDetail';
@@ -34,7 +33,6 @@ const StackNavigation = () => {
             <Stack.Screen name="ShreenathjiScreen" component={ShreenathjiScreen} />
             <Stack.Screen name="FamilyTree" component={FamilyTree} />
             <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="RequestForLogin" component={RequestForLogin} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="MainTabs" component={BottomNavigation} />
             <Stack.Screen name="Product" component={Product} />

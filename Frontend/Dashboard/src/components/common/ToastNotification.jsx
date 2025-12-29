@@ -100,16 +100,6 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
             </button>
           )}
           
-          {(notification.type === 'login_request' || notification.data?.notificationType === 'login_request') && (
-            <button 
-              className="toast-action-btn"
-              onClick={handleAction}
-              title="View Login Requests"
-            >
-              <User size={16} />
-            </button>
-          )}
-          
           {(notification.type === 'new_order' || notification.data?.notificationType === 'new_order') && (
             <button 
               className="toast-action-btn"
