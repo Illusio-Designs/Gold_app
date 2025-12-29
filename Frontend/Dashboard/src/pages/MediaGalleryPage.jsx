@@ -129,6 +129,11 @@ const MediaGalleryPage = () => {
 
   const handleBulkFileSelect = (event) => {
     const files = Array.from(event.target.files);
+    console.log("📦 [BULK UPLOAD] Selected files:", files.map((f) => ({
+      name: f.name,
+      size: f.size,
+      type: f.type,
+    })));
     setBulkUploadFiles(files);
   };
 
@@ -149,22 +154,109 @@ const MediaGalleryPage = () => {
 
       formData.append("autoDetect", autoDetectEnabled.toString());
 
+      console.groupCollapsed("🚀 [BULK UPLOAD] Request");
+      console.log("autoDetectEnabled:", autoDetectEnabled);
+      console.log("files:", bulkUploadFiles.map((f) => f.name));
+      console.groupEnd();
+
       const response = await bulkUploadMediaFiles(formData, token);
 
-      if (response.success) {
-        setBulkUploadResults(response.data);
-        showSuccessToast(response.message);
-        
-        // Close modal and reload page after successful upload
-        setShowBulkUploadModal(false);
-        setBulkUploadFiles([]);
-        setBulkUploadResults([]);
-        
-        // Reload the page to show updated media gallery
-        window.location.reload();
+      console.groupCollapsed("✅ [BULK UPLOAD] Response (raw)");
+      console.log(response);
+      console.groupEnd();
+
+      // Backend may return either:
+      // - { success, message, data: [...] }
+      // - { message, files: [...], summary: {...} }
+      const files = response?.files || response?.data || [];
+      const summary = response?.summary || null;
+      const success =
+        typeof response?.success === "boolean"
+          ? response.success
+          : Array.isArray(files)
+            ? true
+            : false;
+
+      console.groupCollapsed("📊 [BULK UPLOAD] Parsed summary");
+      console.log("success:", success);
+      console.log("summary:", summary);
+      console.log("files count:", Array.isArray(files) ? files.length : 0);
+      console.groupEnd();
+
+      if (!Array.isArray(files)) {
+        showErrorToast("Bulk upload returned unexpected response format");
+        return;
       }
+
+      // Map backend results to the simple UI result shape + keep key debug details
+      const uiResults = files.map((r) => {
+        const attached =
+          r?.update_result?.type && r?.update_result?.id
+            ? `${r.update_result.type}#${r.update_result.id} (${r.update_result.name || ""})`
+            : r?.association?.type && r?.association?.id
+              ? `${r.association.type}#${r.association.id} (${r.association.name || ""})`
+              : null;
+
+        const ocrTag = r?.ocr?.tag || null;
+        const ocrErr = r?.ocr?.error || null;
+        const aiAttempted = !!r?.ai?.attempted;
+        const aiErr = r?.ai?.error || null;
+
+        const detailsParts = [];
+        if (attached) detailsParts.push(`Attached: ${attached}`);
+        else detailsParts.push("Attached: NO (no association)");
+        if (ocrTag) detailsParts.push(`OCR: ${ocrTag}`);
+        if (ocrErr) detailsParts.push(`OCR error: ${ocrErr}`);
+        if (r?.ai?.enabled === false && (r?.ai?.missingEnv?.length || r?.ai?.missingEnv)) {
+          detailsParts.push(
+            `AI disabled (missing env): ${
+              Array.isArray(r.ai.missingEnv) ? r.ai.missingEnv.join(", ") : r.ai.missingEnv
+            }`
+          );
+        } else if (aiAttempted) {
+          detailsParts.push(`AI attempted: yes`);
+          if (aiErr) detailsParts.push(`AI error: ${aiErr}`);
+        } else {
+          detailsParts.push(`AI attempted: no`);
+        }
+
+        return {
+          success: !!r?.success,
+          filename: r?.filename || r?.title || "unknown",
+          message: r?.success
+            ? `Processed OK. Output: ${r?.file_url || r?.fileUrl || "n/a"}`
+            : `Failed: ${r?.error || "unknown error"}`,
+          details: detailsParts.join(" | "),
+        };
+      });
+
+      console.groupCollapsed("🧾 [BULK UPLOAD] Per-file results");
+      uiResults.forEach((r) => {
+        console.log(
+          `${r.success ? "✅" : "❌"} ${r.filename} -> ${r.message}\n   ${r.details}`
+        );
+      });
+      console.groupEnd();
+
+      setBulkUploadResults(uiResults);
+
+      if (success) {
+        showSuccessToast(response?.message || "Bulk upload completed");
+      } else {
+        showErrorToast(response?.message || "Bulk upload finished with errors");
+      }
+
+      // Refresh the grid after upload (no hard reload)
+      setShowBulkUploadModal(false);
+      setBulkUploadFiles([]);
+      loadProcessedMediaItems();
     } catch (error) {
       console.error("Error in bulk upload:", error);
+      console.error("Bulk upload error details:", {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
       showErrorToast("Error uploading files");
     } finally {
       setBulkUploading(false);
