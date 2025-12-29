@@ -18,7 +18,9 @@ class OcrService {
   async _getWorker() {
     if (!this._workerPromise) {
       this._workerPromise = (async () => {
-        // tesseract.js v7: createWorker() then loadLanguage/initialize.
+        // tesseract.js createWorker signature (v2–v7):
+        // createWorker(langs = 'eng', oem, options, config)
+        // IMPORTANT: first arg must be a string/array of langs, not an options object.
         const cachePath =
           process.env.OCR_CACHE_PATH ||
           path.join(__dirname, "../uploads/ocr-cache");
@@ -28,14 +30,20 @@ class OcrService {
           // ignore
         }
 
-        const worker = await createWorker({
-          logger: process.env.OCR_DEBUG === "true" ? console.log : undefined,
-          cachePath,
-          langPath: process.env.OCR_LANG_PATH, // optional override
-        });
-
-        await worker.loadLanguage("eng");
-        await worker.initialize("eng");
+        const worker = await createWorker(
+          "eng",
+          undefined,
+          {
+            // tesseract.js expects logger to be a function (it calls logger(...) on progress)
+            logger:
+              process.env.OCR_DEBUG === "true"
+                ? (m) => console.log("[OCR]", m)
+                : () => {},
+            cachePath,
+            langPath: process.env.OCR_LANG_PATH, // optional override
+          },
+          {}
+        );
 
         await worker.setParameters({
           // Only allow uppercase letters + digits
