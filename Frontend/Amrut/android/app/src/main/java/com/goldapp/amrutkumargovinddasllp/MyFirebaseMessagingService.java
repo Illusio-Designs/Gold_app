@@ -1,4 +1,4 @@
-package com.gold.amrutkumargovinddasllp;
+package com.goldapp.amrutkumargovinddasllp;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -96,7 +96,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
             
             // Create intent to open app
-            Intent intent = new Intent(this, com.gold.amrutkumargovinddasllp.MainActivity.class);
+            Intent intent = new Intent(this, com.goldapp.amrutkumargovinddasllp.MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("notificationType", notificationType);
             intent.putExtra("data", remoteMessage.getData().toString());

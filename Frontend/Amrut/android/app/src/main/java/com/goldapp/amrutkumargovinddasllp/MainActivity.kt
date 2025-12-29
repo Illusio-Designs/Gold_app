@@ -1,4 +1,4 @@
-package com.gold.amrutkumargovinddasllp
+package com.goldapp.amrutkumargovinddasllp
 
 import android.os.Bundle
 import android.view.WindowManager

@@ -1,4 +1,4 @@
-package com.gold.amrutkumargovinddasllp
+package com.goldapp.amrutkumargovinddasllp
 
 import android.app.Application
 import com.facebook.react.PackageList
