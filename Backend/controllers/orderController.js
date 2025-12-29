@@ -4,6 +4,10 @@ const cartModel = require("../models/cart");
 const { notifyNewOrder } = require("../services/adminNotificationService");
 const socketService = require("../services/socketService");
 
+function isApprovedBusinessStatus(status) {
+  return String(status || "").toLowerCase() === "approved";
+}
+
 // Create new order
 function createOrder(req, res) {
   const {
@@ -344,51 +348,82 @@ function updateOrderStatus(req, res) {
       });
   }
 
-  orderModel.updateOrderStatus(id, status, (err, result) => {
-    if (err) {
-      console.error("Error updating order status:", err);
-      return res.status(500).json({ error: err.message });
+  // Admin-side rule:
+  // - If the business/user is not approved, block status changes EXCEPT "cancelled".
+  orderModel.getOrderById(id, (getErr, getResults) => {
+    if (getErr) {
+      console.error("Error getting order for status update:", getErr);
+      return res.status(500).json({ error: getErr.message });
     }
-    if (result.affectedRows === 0) {
+    if (!getResults || getResults.length === 0) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Get updated order details for real-time update
-    orderModel.getOrderById(id, (detailsErr, detailsResults) => {
-      if (detailsErr) {
-        console.error("Error getting updated order details:", detailsErr);
-        return res.status(500).json({ error: detailsErr.message });
+    const existingOrder = getResults[0];
+    const userStatus = existingOrder.user_status;
+    const userId = existingOrder.user_id;
+
+    if (status !== "cancelled" && !isApprovedBusinessStatus(userStatus)) {
+      return res.status(403).json({
+        error:
+          "Business is not approved. Approve the business first or cancel the order.",
+        code: "BUSINESS_NOT_APPROVED",
+        orderId: parseInt(id),
+        userId,
+        userStatus,
+        allowedStatuses: ["cancelled"],
+      });
+    }
+
+    orderModel.updateOrderStatus(id, status, (err, result) => {
+      if (err) {
+        console.error("Error updating order status:", err);
+        return res.status(500).json({ error: err.message });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Order not found" });
       }
 
-      if (detailsResults.length > 0) {
-        const updatedOrder = detailsResults[0];
+      // Get updated order details for real-time update
+      orderModel.getOrderById(id, (detailsErr, detailsResults) => {
+        if (detailsErr) {
+          console.error("Error getting updated order details:", detailsErr);
+          return res.status(500).json({ error: detailsErr.message });
+        }
 
-        // Emit real-time order status update
-        socketService.emitToAll("order-update", {
-          action: "status-updated",
-          order: updatedOrder,
-          timestamp: new Date().toISOString(),
-        });
+        if (detailsResults.length > 0) {
+          const updatedOrder = detailsResults[0];
 
-        // Emit specific update to the user's room
-        socketService.emitToRoom(
-          `user-${updatedOrder.business_user_id}`,
-          "order-status-updated",
-          {
+          // Emit real-time order status update
+          socketService.emitToAll("order-update", {
+            action: "status-updated",
             order: updatedOrder,
             timestamp: new Date().toISOString(),
-          }
-        );
+          });
 
-        res.json({
-          message: "Order status updated successfully",
-          order: updatedOrder,
-        });
-      } else {
-        res
-          .status(500)
-          .json({ error: "Failed to retrieve updated order details" });
-      }
+          // Emit specific update to the user's room
+          const roomUserId = updatedOrder.user_id || updatedOrder.business_user_id;
+          if (roomUserId) {
+            socketService.emitToRoom(
+              `user-${roomUserId}`,
+              "order-status-updated",
+              {
+                order: updatedOrder,
+                timestamp: new Date().toISOString(),
+              }
+            );
+          }
+
+          res.json({
+            message: "Order status updated successfully",
+            order: updatedOrder,
+          });
+        } else {
+          res
+            .status(500)
+            .json({ error: "Failed to retrieve updated order details" });
+        }
+      });
     });
   });
 }
@@ -421,6 +456,58 @@ function bulkUpdateOrderStatuses(req, res) {
       });
   }
 
+  // Same admin-side rule for bulk:
+  // - If status != "cancelled", all involved businesses must be approved.
+  if (status !== "cancelled") {
+    orderModel.getOrdersByIds(order_ids, (listErr, listRows) => {
+      if (listErr) {
+        console.error("Error checking orders for bulk status update:", listErr);
+        return res.status(500).json({ error: listErr.message });
+      }
+
+      const blocked = (listRows || []).filter(
+        (r) => !isApprovedBusinessStatus(r.user_status)
+      );
+
+      if (blocked.length > 0) {
+        return res.status(403).json({
+          error:
+            "One or more orders belong to businesses that are not approved. Approve them first or cancel the orders.",
+          code: "BUSINESS_NOT_APPROVED",
+          blockedOrders: blocked.map((b) => ({
+            orderId: b.order_id,
+            userId: b.user_id,
+            userStatus: b.user_status,
+          })),
+          allowedStatuses: ["cancelled"],
+        });
+      }
+
+      orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
+        if (err) {
+          console.error("Error bulk updating order statuses:", err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        // Emit real-time bulk update
+        socketService.emitToAll("order-update", {
+          action: "bulk-status-updated",
+          orderIds: order_ids,
+          status: status,
+          affectedRows: result.affectedRows,
+          timestamp: new Date().toISOString(),
+        });
+
+        res.json({
+          message: "Order statuses updated successfully",
+          affectedOrders: result.affectedRows,
+        });
+      });
+    });
+    return;
+  }
+
+  // Cancelling is always allowed.
   orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
     if (err) {
       console.error("Error bulk updating order statuses:", err);

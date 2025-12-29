@@ -101,6 +101,51 @@
   margin-top: 1px;
 }
 
+.user-status-badge {
+  margin-top: 4px;
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border: 1px solid #e0d0c0;
+  background: #faf7f4;
+  color: #5d0829;
+}
+
+.user-status-badge.approved {
+  border-color: rgba(76, 175, 80, 0.4);
+  background: rgba(76, 175, 80, 0.08);
+  color: #2e7d32;
+}
+
+.user-status-badge.pending {
+  border-color: rgba(255, 152, 0, 0.4);
+  background: rgba(255, 152, 0, 0.10);
+  color: #a35a00;
+}
+
+.user-status-badge.denied,
+.user-status-badge.rejected {
+  border-color: rgba(244, 67, 54, 0.4);
+  background: rgba(244, 67, 54, 0.10);
+  color: #b71c1c;
+}
+
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-guard {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* Status Update Select */
 .status-update-select {
   padding: 6px 10px;
