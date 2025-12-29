@@ -186,8 +186,8 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 function getAllOrders(callback) {
   const sql = `
     SELECT o.*, 
-           u.name as user_name, u.business_name,
-           p.name as product_name, p.image as product_image
+           u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status,
+           p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
     LEFT JOIN products p ON o.product_id = p.id
@@ -215,14 +215,29 @@ function getOrdersByUserId(userId, callback) {
 function getOrderById(id, callback) {
   const sql = `
     SELECT o.*, 
-           u.name as user_name, u.business_name, u.email, u.phone,
-           p.name as product_name, p.image as product_image, p.description
+           u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status,
+           p.name as product_name, p.sku as product_sku, p.image as product_image, p.description
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
     LEFT JOIN products p ON o.product_id = p.id
     WHERE o.id = ?
   `;
   db.query(sql, [id], callback);
+}
+
+// Get a set of orders with their user approval status (for bulk admin actions)
+function getOrdersByIds(orderIds, callback) {
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return callback(null, []);
+  }
+
+  const sql = `
+    SELECT o.id as order_id, o.user_id, u.status as user_status
+    FROM orders o
+    LEFT JOIN users u ON o.user_id = u.id
+    WHERE o.id IN (${orderIds.map(() => "?").join(",")})
+  `;
+  db.query(sql, orderIds, callback);
 }
 
 // Update order status (individual product status)
@@ -288,6 +303,7 @@ module.exports = {
   getAllOrders,
   getOrdersByUserId,
   getOrderById,
+  getOrdersByIds,
   updateOrderStatus,
   updateOrder,
   bulkUpdateOrderStatuses,

@@ -5,7 +5,8 @@ import {
   updateOrderStatus, 
   bulkUpdateOrderStatuses,
   getOrderStatistics,
-  getUserCart 
+  getUserCart,
+  updateUserStatus,
 } from '../services/adminApiService';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { isAuthenticated, getAdminToken } from '../utils/authUtils';
@@ -150,7 +151,44 @@ const OrdersPage = () => {
         navigate('/auth');
         return;
       }
+      if (error.response?.status === 403 && error.response?.data?.code === 'BUSINESS_NOT_APPROVED') {
+        const info = error.response.data;
+        showErrorToast(`Business not approved (status: ${info.userStatus}). Approve business first or cancel the order.`);
+        return;
+      }
       showErrorToast('Failed to update order status');
+    }
+  };
+
+  const handleApproveBusiness = async (userId) => {
+    try {
+      const token = getAdminToken();
+      if (!token) {
+        showErrorToast('Authentication token not found');
+        navigate('/auth');
+        return;
+      }
+
+      await updateUserStatus(userId, { status: 'approved' }, token);
+
+      // Update local state (unlock status updates for all orders by this user)
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          (order.user_id === userId || order.business_user_id === userId)
+            ? { ...order, user_status: 'approved' }
+            : order
+        )
+      );
+
+      showSuccessToast('Business approved successfully');
+    } catch (error) {
+      console.error('Error approving business:', error);
+      if (error.response?.status === 401) {
+        showErrorToast('Session expired. Please login again');
+        navigate('/auth');
+        return;
+      }
+      showErrorToast('Failed to approve business');
     }
   };
 
@@ -184,6 +222,16 @@ const OrdersPage = () => {
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
+        return;
+      }
+      if (error.response?.status === 403 && error.response?.data?.code === 'BUSINESS_NOT_APPROVED') {
+        const blocked = error.response?.data?.blockedOrders || [];
+        const msg = blocked.length
+          ? `Some orders belong to not-approved businesses. Approve first or cancel. Blocked: ${blocked
+              .map(b => `#${b.orderId}(${b.userStatus})`)
+              .join(', ')}`
+          : 'Some orders belong to not-approved businesses. Approve first or cancel.';
+        showErrorToast(msg);
         return;
       }
       showErrorToast('Failed to bulk update orders');
@@ -312,6 +360,11 @@ const OrdersPage = () => {
           <div className="user-name">{row.user_name || 'N/A'}</div>
           <div className="business-name">{row.business_name || 'N/A'}</div>
           <div className="user-phone">{row.user_phone || 'N/A'}</div>
+          {row.user_status && (
+            <div className={`user-status-badge ${String(row.user_status).toLowerCase()}`}>
+              {row.user_status}
+            </div>
+          )}
         </div>
       ),
     },
@@ -332,20 +385,49 @@ const OrdersPage = () => {
     {
       header: "Status",
       accessor: "status",
-      cell: (row) => (
-        <select
-          value={row.status}
-          onChange={(e) => handleStatusUpdate(row.id, e.target.value)}
-          className="status-update-select"
-          style={{ borderColor: getStatusColor(row.status) }}
-        >
-          {statusOptions.slice(1).map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      ),
+      cell: (row) => {
+        const userStatus = String(row.user_status || '').toLowerCase();
+        const isApproved = !userStatus || userStatus === 'approved';
+        const baseOptions = statusOptions.slice(1);
+        const allowedOptions = isApproved
+          ? baseOptions
+          : baseOptions.filter(opt => opt.value === 'cancelled' || opt.value === row.status);
+
+        return (
+          <div className="status-cell">
+            <select
+              value={row.status}
+              onChange={(e) => handleStatusUpdate(row.id, e.target.value)}
+              className="status-update-select"
+              style={{ borderColor: getStatusColor(row.status) }}
+            >
+              {allowedOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {!isApproved && (
+              <div className="status-guard">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleApproveBusiness(row.user_id || row.business_user_id)}
+                >
+                  Approve Business
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleStatusUpdate(row.id, 'cancelled')}
+                >
+                  Cancel Order
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       header: "Created",
@@ -362,7 +444,7 @@ const OrdersPage = () => {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => viewUserCart(row.business_user_id)}
+            onClick={() => viewUserCart(row.user_id || row.business_user_id)}
             title="View User Cart"
           >
             <ShoppingCart size={16} />
