@@ -87,7 +87,7 @@ const HomePage = () => {
         setCategoriesError(null);
         console.log("🔄 [HOMEPAGE] Fetching categories from API...");
         console.log("🔄 [HOMEPAGE] Environment:", import.meta.env.DEV ? "development" : "production");
-        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://amrutkumargovinddasllp.com/api"));
+        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api"));
         
         const apiCategories = await getPublicCategories();
         console.log("✅ [HOMEPAGE] Categories fetched:", apiCategories);
@@ -455,8 +455,20 @@ const HomePage = () => {
           <div className="homepage-app-promo-content">
             <h2 className="homepage-app-promo-title">Exclusively available on our app</h2>
             <div className="homepage-app-store-buttons">
-              <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
-              <img src={googleplay} alt="Get it on Google Play" className="homepage-store-img" />
+              <a
+                href="https://apps.apple.com/in/app/amrutkumar-govinddas-llp/id6754066073"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
+              </a>
+              <a
+                href="http://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img src={googleplay} alt="Get it on Google Play" className="homepage-store-img" />
+              </a>
             </div>
           </div>
           <div className="homepage-app-mockup">

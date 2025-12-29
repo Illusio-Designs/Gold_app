@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/common/Header';
@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { useRealtimeData } from '../hooks/useRealtimeData';
-import { getApprovedCategoriesForUser, getApprovedProductsForUser, getCategories, getSliders } from '../services/Api';
+import { getApprovedCategoriesForUser, getApprovedProductsForUser, getSliders } from '../services/Api';
 import { BASE_URL } from '../services/Api';
 import { getProductImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
@@ -88,22 +88,41 @@ const Home = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<any>(null);
 
-  // Fetch categories for all users (no authentication required)
+  // Fetch categories based on user authentication status
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
       setCategoriesError(null);
       
-      console.log('[Home] Fetching all categories (guest/logged-in)');
-      const response = await getCategories();
-      console.log('[Home] Categories response:', response);
-      
-      if (response && response.success && response.data && response.data.length > 0) {
-        setCategories(response.data);
-        console.log('[Home] Set categories:', response.data.length, 'categories');
-        console.log('[Home] Category names:', response.data.map((cat: any) => cat.name));
+      if (isUserLoggedIn && userId && accessToken) {
+        console.log('[Home] Fetching approved categories for user:', userId);
+        console.log('[Home] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
+        
+        try {
+          const response = await getApprovedCategoriesForUser(userId, accessToken);
+          console.log('[Home] Approved categories response:', response);
+          
+          if (response && response.success && response.data && response.data.length > 0) {
+            setCategories(response.data);
+            console.log('[Home] Set approved categories:', response.data.length, 'categories');
+            console.log('[Home] Approved categories names:', response.data.map((cat: any) => cat.name));
+          } else {
+            console.log('[Home] No approved categories found - user may not have approved login request yet');
+            console.log('[Home] Setting empty categories array - user needs to request login first');
+            setCategories([]);
+          }
+        } catch (apiError: any) {
+          console.error('[Home] Error calling getApprovedCategoriesForUser:', apiError);
+          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
+            console.log('[Home] User does not have approved login request yet - showing empty state');
+            setCategories([]);
+          } else {
+            console.log('[Home] Setting empty categories array due to API error');
+            setCategories([]);
+          }
+        }
       } else {
-        console.log('[Home] No categories found');
+        console.log('[Home] User not logged in - showing empty categories');
         setCategories([]);
       }
     } catch (err) {
@@ -115,15 +134,21 @@ const Home = () => {
     }
   };
 
-  // Fetch categories when component mounts
+  // Fetch categories when component mounts or auth state changes
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [isUserLoggedIn, userId, accessToken]);
 
-  // Load products on mount
+  // Keep latest fetch function for socket callbacks (avoid stale closures)
+  const fetchCategoriesRef = useRef(fetchCategories);
+  useEffect(() => {
+    fetchCategoriesRef.current = fetchCategories;
+  });
+
+  // Load products on mount and when auth state changes
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [isUserLoggedIn, userId, accessToken]);
   
   // Filter products when allProducts or selectedCategory changes
   useEffect(() => {
@@ -132,21 +157,40 @@ const Home = () => {
     }
   }, [allProducts]);
 
-  // Load products function - for all users (no authentication required)
+  // Load products function
   const loadProducts = async () => {
     try {
       setProductsLoading(true);
+      let response;
       
-      console.log('[Home] Loading all products (guest/logged-in)');
-      const response = await getApprovedProductsForUser(userId, accessToken);
-      console.log('[Home] Products response:', response);
-      
-      if (response.success && response.data && response.data.length > 0) {
-        setAllProducts(response.data); // Store all products
-        setProducts(response.data); // Initially show all products
-        console.log('[Home] Loaded products:', response.data.length);
+      if (isUserLoggedIn && userId && accessToken) {
+        console.log('[Home] Loading approved products for user:', userId);
+        try {
+          // Use filtered products for logged-in users
+          response = await getApprovedProductsForUser(userId, accessToken);
+          console.log('[Home] Approved products response:', response);
+          if (response.success && response.data && response.data.length > 0) {
+            setAllProducts(response.data); // Store all products
+            setProducts(response.data); // Initially show all products
+            console.log('[Home] Loaded approved products:', response.data.length);
+          } else {
+            console.log('[Home] No approved products found - user may not have approved login request yet');
+            setAllProducts([]);
+            setProducts([]);
+          }
+        } catch (apiError: any) {
+          console.error('[Home] Error calling getApprovedProductsForUser:', apiError);
+          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
+            console.log('[Home] User does not have approved login request yet - showing empty products');
+            setProducts([]);
+          } else {
+            console.log('[Home] Setting empty products array due to API error');
+            setAllProducts([]);
+            setProducts([]);
+          }
+        }
       } else {
-        console.log('[Home] No products found');
+        console.log('[Home] User not logged in - showing empty products');
         setAllProducts([]);
         setProducts([]);
       }
@@ -159,6 +203,12 @@ const Home = () => {
     }
   };
 
+  // Keep latest product loader for socket callbacks (avoid stale closures)
+  const loadProductsRef = useRef(loadProducts);
+  useEffect(() => {
+    loadProductsRef.current = loadProducts;
+  });
+
   // Use real-time data hook for sliders
   const slidersData: any = useRealtimeData(
     'sliders',
@@ -166,7 +216,6 @@ const Home = () => {
     getSliders,
     []
   );
-  
   console.log("slidersData:", slidersData);
   
   // Process sliders response and fix localhost URLs
@@ -177,6 +226,12 @@ const Home = () => {
   const slidersLoading = slidersData?.loading || false;
   const slidersError = slidersData?.error || null;
   const refreshSliders = slidersData?.refresh || (() => {});
+
+  // Keep latest slider refresher for socket callbacks (avoid stale closures)
+  const refreshSlidersRef = useRef(refreshSliders);
+  useEffect(() => {
+    refreshSlidersRef.current = refreshSliders;
+  });
 
   // Categories are now managed by local state
   console.log('[Home] Current categories state:', categories);
@@ -197,17 +252,17 @@ const Home = () => {
     switch (action) {
       case 'created':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       case 'updated':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       case 'deleted':
         // Refresh categories silently
-        fetchCategories();
+        fetchCategoriesRef.current();
         break;
         
       default:
@@ -224,22 +279,29 @@ const Home = () => {
     switch (action) {
       case 'created':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       case 'updated':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       case 'deleted':
         // Refresh sliders silently
-        refreshSliders();
+        refreshSlidersRef.current();
         break;
         
       default:
         console.log('[Home] Unknown slider action:', action);
     }
+  };
+
+  // Handle real-time product updates from socket events
+  const handleRealTimeProductUpdate = (updateData: any) => {
+    console.log('[Home] Real-time product update received:', updateData);
+    // Refresh products silently (will re-apply current filters via existing effects)
+    loadProductsRef.current();
   };
 
   // Handle slider Show More button press
@@ -264,11 +326,15 @@ const Home = () => {
         
         // Listen for slider updates
         const sliderUpdateListenerId = SocketService.addEventListener('slider-update', handleRealTimeSliderUpdate);
+
+        // Listen for product updates (admin add/update/delete)
+        const productUpdateListenerId = SocketService.addEventListener('product-update', handleRealTimeProductUpdate);
         
         // Cleanup listeners on unmount
         return () => {
           SocketService.removeEventListener('category-update', categoryUpdateListenerId);
           SocketService.removeEventListener('slider-update', sliderUpdateListenerId);
+          SocketService.removeEventListener('product-update', productUpdateListenerId);
         };
       } catch (error) {
         console.error('[Home] Error setting up real-time updates:', error);
@@ -319,7 +385,6 @@ const Home = () => {
     
     console.log('[Home] Filtering products for category:', category);
     console.log('[Home] Total products available:', allProducts.length);
-    console.log('[Home] Sample product for debugging:', allProducts[0]);
     
     if (category === 'all') {
       filteredProducts = allProducts;
@@ -369,34 +434,17 @@ const Home = () => {
       
       console.log('[Home] Best products filtered:', filteredProducts.length);
     } else {
-      // Handle actual category selection - filter by category_id
-      console.log('[Home] Filtering by category name:', category);
+      // Handle actual category names (like "antique buti", "cz ladies viti")
+      console.log('[Home] Filtering by actual category name:', category);
       
-      // Find the category object from categories array
-      const selectedCategoryObj = categories.find((cat: any) => 
-        cat.name.toLowerCase() === category.toLowerCase()
-      );
-      
-      console.log('[Home] Found category object:', selectedCategoryObj);
-      
-      if (selectedCategoryObj) {
-        // Filter products by category_id
-        filteredProducts = allProducts.filter((product: any) => {
-          const matches = product.category_id === selectedCategoryObj.id;
-          console.log('[Home] Product:', product.name, 'CategoryID:', product.category_id, 'Selected:', selectedCategoryObj.id, 'Matches:', matches);
-          return matches;
-        });
-      } else {
-        // Fallback to category name matching
-        filteredProducts = allProducts.filter((product: any) => {
-          const productCategoryName = product.category_name?.toLowerCase();
-          const selectedCategoryName = category.toLowerCase();
-          const matches = productCategoryName === selectedCategoryName;
-          
-          console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
-          return matches;
-        });
-      }
+      filteredProducts = allProducts.filter((product: any) => {
+        const productCategoryName = product.category_name?.toLowerCase();
+        const selectedCategoryName = category.toLowerCase();
+        const matches = productCategoryName === selectedCategoryName;
+        
+        console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
+        return matches;
+      });
       
       console.log('[Home] Category-specific products filtered:', filteredProducts.length);
     }
@@ -525,7 +573,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('7%'),
     marginTop: hp('2%'),
     marginBottom: hp('1.2%'),
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
   },
   loadingContainer: {
     paddingVertical: 20,
@@ -535,7 +583,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     textAlign: 'center',
   },
   noSlidersContainer: {
@@ -546,7 +594,7 @@ const styles = StyleSheet.create({
   noSlidersText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     textAlign: 'center',
   },
   noProductsContainer: {
@@ -557,7 +605,7 @@ const styles = StyleSheet.create({
   noProductsText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     textAlign: 'center',
   },
   errorContainer: {
@@ -570,7 +618,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#6B0D33',
     fontSize: 18,
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -583,7 +631,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     fontWeight: 'bold',
   },
 });
@@ -613,7 +661,7 @@ const productCardStyles = StyleSheet.create({
   },
   name: {
     color: '#6B0D33',
-    fontFamily: 'GlorifyDEMO',
+    fontFamily: 'Glorifydemo-BW3J3',
     fontSize: isSmallScreen() ? wp('3.2%') : isMediumScreen() ? wp('3.7%') : wp('3.5%'),
     fontWeight: '700',
     marginTop: isSmallScreen() ? hp('0.7%') : isMediumScreen() ? hp('1.2%') : isLargeScreen() ? hp('1.2%') : hp('1.2%'),

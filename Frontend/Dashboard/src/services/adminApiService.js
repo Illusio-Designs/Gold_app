@@ -6,7 +6,7 @@ import axios from "axios";
 
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? "/api" : "https://amrutkumargovinddasllp.com/api");
+  (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api");
 
 // Debug logging
 console.log(
@@ -20,6 +20,26 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
+
+// Prevent stale data due to cached GET responses (browser/proxy).
+// This app expects "read-after-write" behavior after create/update/delete.
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const method = (config.method || "get").toLowerCase();
+    if (method === "get") {
+      // Cache-bust all GETs without changing server behavior.
+      config.params = { ...(config.params || {}), _ts: Date.now() };
+
+      // Ask intermediaries/browsers to revalidate.
+      config.headers = config.headers || {};
+      config.headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+      config.headers["Pragma"] = "no-cache";
+      config.headers["Expires"] = "0";
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Response interceptor to handle 401 errors (token expired)
 axiosInstance.interceptors.response.use(

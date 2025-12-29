@@ -32,12 +32,36 @@ const corsOptions = {
     const allowedOrigins = getCorsOrigins();
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log("CORS blocked origin:", origin);
-      callback(new Error("Not allowed by CORS"));
+    // Allow exact matches from config
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    // Allow subdomains of your production domains (e.g. dashboard.*, www.*)
+    // Origin never contains a path, only scheme + host (+ optional port).
+    try {
+      const url = new URL(origin);
+      const host = url.hostname.toLowerCase();
+
+      const allowedBaseDomains = [
+        "amrutkumargovinddasllp.com",
+        "api.amrutkumargovinddasllp.com",
+      ];
+
+      const isAllowedDomain = allowedBaseDomains.some(
+        (d) => host === d || host.endsWith(`.${d}`)
+      );
+
+      if (isAllowedDomain) {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // If origin is not a valid URL, fall through to block.
+    }
+
+    console.log("CORS blocked origin:", origin);
+    console.log("CORS allowed origins:", allowedOrigins);
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -47,6 +71,10 @@ const corsOptions = {
     "Content-Type",
     "Accept",
     "Authorization",
+    // Allow cache-busting headers used by frontend clients
+    "Cache-Control",
+    "Pragma",
+    "Expires",
   ],
 };
 
