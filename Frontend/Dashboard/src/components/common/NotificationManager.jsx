@@ -114,11 +114,6 @@ const NotificationManager = ({ isDropdown = false, onNotificationUpdate }) => {
         navigate('/dashboard/users');
         break;
         
-      case 'login_request':
-        console.log('[NotificationManager] Navigating to login requests page...');
-        navigate('/dashboard/login-requests');
-        break;
-        
       case 'new_order':
         console.log('[NotificationManager] Navigating to orders page...');
         navigate('/dashboard/orders');

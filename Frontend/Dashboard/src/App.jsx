@@ -14,7 +14,6 @@ import ProductsPage from "./pages/ProductsPage";
 import UsersPage from "./pages/UsersPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import MediaGalleryPage from "./pages/MediaGalleryPage";
-import LoginRequestsPage from "./pages/LoginRequestsPage";
 import AppVersionsPage from "./pages/AppVersionsPage";
 import AppIconsPage from "./pages/AppIconsPage";
 import SliderPage from "./pages/SliderPage";
@@ -107,7 +106,6 @@ function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="orders" element={<OrdersPage />} />
             <Route path="media-gallery" element={<MediaGalleryPage />} />
-            <Route path="login-requests" element={<LoginRequestsPage />} />
             <Route path="app-versions" element={<AppVersionsPage />} />
             <Route path="app-icons" element={<AppIconsPage />} />
             <Route path="sliders" element={<SliderPage />} />

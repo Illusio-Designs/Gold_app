@@ -14,31 +14,11 @@ const ToastManager = () => {
       showToast(notification);
     };
 
-    const handleLoginRequest = (event) => {
-      console.log('[ToastManager] Received login-request event:', event.detail);
-      const { phoneNumber, categoryIds } = event.detail;
-      const notification = {
-        id: Date.now(),
-        title: 'New Login Request',
-        message: `User ${phoneNumber} has requested access to categories.`,
-        type: 'login_request',
-        created_at: new Date().toISOString(),
-        data: {
-          action: 'redirect_to_login_requests',
-          phoneNumber,
-          categoryIds
-        }
-      };
-      showToast(notification);
-    };
-
     // Listen for custom events
     window.addEventListener('show-toast', handleShowToast);
-    window.addEventListener('login-request', handleLoginRequest);
 
     return () => {
       window.removeEventListener('show-toast', handleShowToast);
-      window.removeEventListener('login-request', handleLoginRequest);
     };
   }, []);
 
@@ -77,11 +57,6 @@ const ToastManager = () => {
       case 'user_registration':
         console.log('[ToastManager] Navigating to users page...');
         navigate('/dashboard/users');
-        break;
-        
-      case 'login_request':
-        console.log('[ToastManager] Navigating to login requests page...');
-        navigate('/dashboard/login-requests');
         break;
         
       case 'new_order':
