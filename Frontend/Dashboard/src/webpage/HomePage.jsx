@@ -87,7 +87,7 @@ const HomePage = () => {
         setCategoriesError(null);
         console.log("🔄 [HOMEPAGE] Fetching categories from API...");
         console.log("🔄 [HOMEPAGE] Environment:", import.meta.env.DEV ? "development" : "production");
-        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://amrutkumargovinddasllp.com/api"));
+        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api"));
         
         const apiCategories = await getPublicCategories();
         console.log("✅ [HOMEPAGE] Categories fetched:", apiCategories);
