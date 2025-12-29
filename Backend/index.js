@@ -71,6 +71,10 @@ const corsOptions = {
     "Content-Type",
     "Accept",
     "Authorization",
+    // Allow cache-busting headers used by frontend clients
+    "Cache-Control",
+    "Pragma",
+    "Expires",
   ],
 };
 
