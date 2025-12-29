@@ -850,16 +850,13 @@ function getUserById(req, res) {
 }
 
 // Verify OTP for business user login
+// Simplified - all users get unlimited access (no time limitation or approval needed)
 async function verifyBusinessOTP(req, res) {
   const { phoneNumber } = req.body;
 
   if (!phoneNumber) {
     return res.status(400).json({ error: "Phone number is required" });
   }
-
-  // Special bypass for phone number 7600046416
-  const BYPASS_PHONE_NUMBER = "7600046416";
-  const isBypassUser = phoneNumber === BYPASS_PHONE_NUMBER;
 
   try {
     // Find the user by phone number
@@ -878,23 +875,34 @@ async function verifyBusinessOTP(req, res) {
 
         const user = results[0];
 
-        // Handle bypass user separately
-        if (isBypassUser) {
-          console.log(`[BYPASS] OTP verification for bypass user: ${BYPASS_PHONE_NUMBER}`);
-          return handleBypassUserOTP(user, res);
-        }
+        // All users treated equally - no approval check, unlimited access
+        console.log(`[Backend] OTP verified for user: ${user.id}`);
 
-        // Regular user flow - check if user is approved
-        if (user.status !== "approved") {
-          return res.status(403).json({
-            error: "Account not approved",
+        // Generate JWT token with unlimited duration
+        const token = jwt.sign(
+          {
+            id: user.id,
+            phone_number: user.phone_number,
+            type: user.type,
+          },
+          process.env.JWT_SECRET || "secretkey",
+          { expiresIn: "365d" } // 1 year - essentially unlimited
+        );
+
+        console.log("[Backend] Login successful with unlimited access");
+
+        return res.json({
+          message: "Login successful",
+          token,
+          user: {
+            id: user.id,
+            name: user.name,
+            phone_number: user.phone_number,
+            email: user.email,
+            type: user.type,
             status: user.status,
-            remarks: user.remarks,
-          });
-        }
-
-        // Continue with regular user verification flow
-        return handleRegularUserOTP(user, res);
+          },
+        });
       }
     );
   } catch (error) {
@@ -903,6 +911,8 @@ async function verifyBusinessOTP(req, res) {
   }
 }
 
+// COMMENTED OUT - No longer needed, all users now treated equally
+/*
 // Handle bypass user OTP verification
 async function handleBypassUserOTP(user, res) {
   try {
@@ -1210,7 +1220,10 @@ async function handleRegularUserOTP(user, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+*/
 
+// COMMENTED OUT - Session validation removed (no sessions needed)
+/*
 // Validate user session
 async function validateUserSession(req, res) {
   const userId = req.user.id;
@@ -1498,6 +1511,7 @@ async function logoutUser(req, res) {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+*/
 
 module.exports = {
   registerUser,
@@ -1510,7 +1524,8 @@ module.exports = {
   deleteUser,
   checkUserExists,
   getUserById,
-  verifyBusinessOTP,
-  validateUserSession,
-  logoutUser,
+  verifyBusinessOTP, // Simplified - no approval or session checks
+  // COMMENTED OUT - Session management removed (no sessions needed)
+  // validateUserSession,
+  // logoutUser,
 };

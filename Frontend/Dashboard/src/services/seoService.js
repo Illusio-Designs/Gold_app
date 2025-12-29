@@ -4,7 +4,7 @@ import axios from "axios";
 // Prioritize DEV mode - use /api for local development
 const BASE_URL = import.meta.env.DEV 
   ? "/api" 
-  : (import.meta.env.VITE_API_BASE_URL || "https://amrutkumargovinddasllp.com/api");
+  : (import.meta.env.VITE_API_BASE_URL || "https://api.amrutkumargovinddasllp.com/api");
 
 console.log("🔧 [SEO SERVICE] Configuration:", {
   VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,

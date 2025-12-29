@@ -9,7 +9,8 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
   charset: "utf8mb4",
   connectionLimit: 10,
-  acquireTimeout: 60000,
+  // mysql2 pool uses `acquireTimeout` only on some APIs; it triggers warnings in newer mysql2.
+  // Keeping config minimal avoids future hard errors.
   // Removed deprecated options: timeout, reconnect
 });
 

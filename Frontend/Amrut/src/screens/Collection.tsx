@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -98,6 +98,39 @@ const Collection = () => {
   // Fetch categories when component mounts
   useEffect(() => {
     fetchCategories();
+  }, []);
+
+  // Keep latest fetch function for socket callbacks (avoid stale closures)
+  const fetchCategoriesRef = useRef(fetchCategories);
+  useEffect(() => {
+    fetchCategoriesRef.current = fetchCategories;
+  });
+
+  // Listen for real-time category updates (admin add/update/delete)
+  useEffect(() => {
+    const setupRealTimeUpdates = async () => {
+      try {
+        const SocketService = require('../services/SocketService').default;
+        const categoryUpdateListenerId = SocketService.addEventListener(
+          'category-update',
+          () => fetchCategoriesRef.current(),
+        );
+
+        return () => {
+          SocketService.removeEventListener(
+            'category-update',
+            categoryUpdateListenerId,
+          );
+        };
+      } catch (error) {
+        console.error('[Collection] Error setting up real-time updates:', error);
+      }
+    };
+
+    const cleanup = setupRealTimeUpdates();
+    return () => {
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
+    };
   }, []);
 
   // Filter categories based on selected category from slider
