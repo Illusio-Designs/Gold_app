@@ -175,8 +175,10 @@ async function bulkUploadMedia(req, res) {
             ocrCandidates = ocr.candidates || [];
             ocrMeta.tag = ocrSku;
             ocrMeta.candidates = ocrCandidates;
+            ocrMeta.rawText = ocr.rawText ? ocr.rawText.substring(0, 200) : null; // Store first 200 chars for debugging
           } catch (ocrErr) {
             ocrMeta.error = ocrErr.message;
+            ocrMeta.rawText = null;
           }
 
           if (ocrSku) {
@@ -201,19 +203,8 @@ async function bulkUploadMedia(req, res) {
                 source: "ocr",
                 ocrCandidates,
               };
-            } else {
-              // Mark that we should create a product with this SKU
-              detectedAssociation = {
-                type: "product",
-                id: null, // Will be created
-                name: ocrSku,
-                sku: ocrSku,
-                confidence: "high",
-                source: "ocr_new",
-                ocrCandidates,
-                createNew: true, // Flag to create new product
-              };
             }
+            // If no product found, don't create one - just leave detectedAssociation as null
           }
 
           if (!detectedAssociation) {
@@ -285,39 +276,8 @@ async function bulkUploadMedia(req, res) {
               if (!fs.existsSync(processedFilePath)) {
               }
 
-              // Create or update product
-              if (detectedAssociation.createNew || !detectedAssociation.id) {
-                // Create new product with OCR-detected SKU
-                const createProductSql = `
-                  INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
-                  VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
-                `;
-                await new Promise((resolve, reject) => {
-                  db.query(
-                    createProductSql,
-                    [
-                      detectedAssociation.sku || detectedAssociation.name, // Use SKU as name
-                      detectedAssociation.sku || detectedAssociation.name,
-                      path.basename(processedFilePath),
-                    ],
-                    (err, result) => {
-                      if (err) {
-                        reject(err);
-                      } else {
-                        const newProductId = result.insertId;
-                        detectedAssociation.id = newProductId;
-                        updateResult = {
-                          type: "product",
-                          id: newProductId,
-                          name: detectedAssociation.sku || detectedAssociation.name,
-                          status: "active",
-                        };
-                        resolve();
-                      }
-                    }
-                  );
-                });
-              } else {
+              // Update existing product (only if product exists)
+              if (detectedAssociation.id) {
                 // Update existing product with new image and set status to active
                 const updateProductSql =
                   "UPDATE products SET image = ?, status = 'active' WHERE id = ?";
@@ -438,48 +398,8 @@ async function bulkUploadMedia(req, res) {
             if (!fs.existsSync(processedFilePath)) {
             }
 
-            // If OCR found a SKU but no product exists, create a new product
-            if (ocrMeta.tag && !detectedAssociation) {
-              const createProductSql = `
-                INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
-                VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
-              `;
-              try {
-                await new Promise((resolve, reject) => {
-                  db.query(
-                    createProductSql,
-                    [
-                      ocrMeta.tag, // Use SKU as name
-                      ocrMeta.tag,
-                      path.basename(processedFilePath),
-                    ],
-                    (err, result) => {
-                      if (err) {
-                        reject(err);
-                      } else {
-                        const newProductId = result.insertId;
-                        detectedAssociation = {
-                          type: "product",
-                          id: newProductId,
-                          name: ocrMeta.tag,
-                          sku: ocrMeta.tag,
-                          confidence: "high",
-                          source: "ocr_new",
-                        };
-                        updateResult = {
-                          type: "product",
-                          id: newProductId,
-                          name: ocrMeta.tag,
-                          status: "active",
-                        };
-                        resolve();
-                      }
-                    }
-                  );
-                });
-              } catch (createErr) {
-                }
-            }
+            // If OCR found a SKU but no product exists, don't create one
+            // Image will be saved without product association
           }
         } catch (processError) {
           // Continue with original file if processing fails

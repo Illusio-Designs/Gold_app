@@ -36,7 +36,7 @@ class OcrService {
             // tesseract.js expects logger to be a function (it calls logger(...) on progress)
             logger:
               process.env.OCR_DEBUG === "true"
-                ? (m) => : () => {},
+                ? (m) => {} : () => {},
             cachePath,
             langPath: process.env.OCR_LANG_PATH, // optional override
           },
@@ -47,8 +47,8 @@ class OcrService {
           // Only allow uppercase letters + digits
           tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
           preserve_interword_spaces: "1",
-          // Treat image as a single line (good for SKU/tag codes)
-          tessedit_pageseg_mode: "7",
+          // Use automatic page segmentation (better for multi-line tags)
+          tessedit_pageseg_mode: "6", // Uniform block of text
         });
         return worker;
       })();
@@ -62,15 +62,26 @@ class OcrService {
    * @returns {Promise<Buffer>}
    */
   async preprocessForOcr(inputPath) {
-    // OCR generally improves with larger, high-contrast text.
-    return sharp(inputPath)
-      .rotate() // auto-orient
-      .grayscale()
-      .normalize()
-      .resize({ width: 1600, withoutEnlargement: false })
-      .sharpen()
-      .threshold(170)
-      .toBuffer();
+    // Try multiple preprocessing strategies for better OCR accuracy
+    // Strategy 1: High contrast grayscale with threshold (best for black text on white)
+    try {
+      return await sharp(inputPath)
+        .rotate() // auto-orient
+        .resize({ width: 2400, withoutEnlargement: false }) // Larger size for better recognition
+        .greyscale() // Convert to grayscale
+        .normalize() // Improve contrast
+        .sharpen({ sigma: 1.5 }) // Enhance text edges
+        .threshold(128) // Binary threshold for high contrast
+        .toBuffer();
+    } catch (e) {
+      // Fallback to simpler preprocessing
+      return sharp(inputPath)
+        .rotate()
+        .resize({ width: 2000, withoutEnlargement: false })
+        .normalize()
+        .sharpen()
+        .toBuffer();
+    }
   }
 
   /**
@@ -91,40 +102,143 @@ class OcrService {
     const worker = await this._getWorker();
     const preprocessed = await this.preprocessForOcr(inputPath);
 
-    const {
+    // Try OCR with current settings
+    let {
       data: { text },
     } = await worker.recognize(preprocessed);
 
-    const rawText = (text || "").toUpperCase();
-    
-    : "${rawText.substring(0, 200)}"`);
+    // If no good results, try with different page segmentation mode
+    if (!text || text.trim().length < 3) {
+      await worker.setParameters({
+        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        preserve_interword_spaces: "1",
+        tessedit_pageseg_mode: "11", // Sparse text (try to find as much text as possible)
+      });
+      const result2 = await worker.recognize(preprocessed);
+      if (result2.data.text && result2.data.text.trim().length > text.trim().length) {
+        text = result2.data.text;
+      }
+      // Reset to original mode
+      await worker.setParameters({
+        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+        preserve_interword_spaces: "1",
+        tessedit_pageseg_mode: "6",
+      });
+    }
 
+    const rawText = (text || "").toUpperCase().trim();
+    
     // Clean + extract uppercase-alphanumeric tokens
+    // First, try to extract product codes (like NZ625, MG916) which are alphanumeric
     const cleaned = rawText.replace(/[^A-Z0-9]+/g, " ").trim();
     const tokens = cleaned.length ? cleaned.split(/\s+/g) : [];
 
-    : "none"}`);
-
-    const candidates = Array.from(
-      new Set(
-        tokens
-          .map((t) => t.trim())
-          .filter(Boolean)
-          .filter((t) => t.length >= minLen && t.length <= maxLen)
-      )
-    );
-
-    : ${candidates.length > 0 ? candidates.join(", ") : "none"}`);
-
-    // Prefer the longest candidate (often the full tag)
-    const tag = candidates.length
-      ? [...candidates].sort((a, b) => b.length - a.length)[0]
-      : null;
-
-    if (tag) {
-      `);
-    } else {
+    // Also try to extract codes that might have been split (e.g., "NZ 625" -> "NZ625")
+    const allTokens = [];
+    
+    // Add individual tokens that meet length requirements
+    tokens.forEach(token => {
+      if (token.length >= minLen && token.length <= maxLen) {
+        allTokens.push(token);
       }
+    });
+    
+    // Try combining adjacent short tokens (e.g., "NZ" + "625" = "NZ625")
+    // Also try combining tokens that look like they could be part of a product code
+    if (tokens.length > 1) {
+      for (let i = 0; i < tokens.length - 1; i++) {
+        const combined = tokens[i] + tokens[i + 1];
+        if (combined.length >= minLen && combined.length <= maxLen) {
+          allTokens.push(combined);
+        }
+        // Try combining 3 tokens if first two are short (e.g., "N" + "Z" + "625" = "NZ625")
+        if (i < tokens.length - 2) {
+          const combined3 = tokens[i] + tokens[i + 1] + tokens[i + 2];
+          if (combined3.length >= minLen && combined3.length <= maxLen) {
+            allTokens.push(combined3);
+          }
+        }
+      }
+    }
+    
+    // Also try to find patterns in the raw text directly (in case tokens are split weirdly)
+    // Look for patterns like "NZ625" or "MG916" in the raw text
+    const directPatterns = rawText.match(/[A-Z]{2,3}[0-9]{2,4}/g);
+    if (directPatterns) {
+      directPatterns.forEach(pattern => {
+        if (pattern.length >= minLen && pattern.length <= maxLen) {
+          allTokens.push(pattern);
+        }
+      });
+    }
+
+    const candidates = Array.from(new Set(allTokens));
+
+    // Filter out noise candidates (common OCR errors)
+    const noisePatterns = [
+      /^[0-9]+$/, // Pure numbers (likely weights, not SKUs)
+      /^[A-Z]{1,2}$/, // Very short letter-only codes
+      /^[0-9]{1,2}$/, // Very short numbers
+      /^[A-Z]{10,}$/, // Very long letter-only (likely OCR garbage)
+      /^[0-9]{10,}$/, // Very long numbers (likely OCR garbage)
+    ];
+    
+    const filteredCandidates = candidates.filter(c => {
+      // Remove noise patterns
+      if (noisePatterns.some(pattern => pattern.test(c))) {
+        return false;
+      }
+      // Remove candidates that are too repetitive (like "AAAA", "1111")
+      if (/^(.)\1{2,}$/.test(c)) {
+        return false;
+      }
+      return true;
+    });
+
+    // Score candidates based on how likely they are to be product codes
+    const scoredCandidates = filteredCandidates.map(c => {
+      let score = 0;
+      
+      // High score for patterns like NZ625 (2-3 letters + 2-4 numbers)
+      if (/^[A-Z]{2,3}[0-9]{2,4}$/.test(c)) {
+        score += 100;
+      }
+      // Medium score for patterns like MG916 (2 letters + 3 numbers)
+      else if (/^[A-Z]{1,3}[0-9]{2,7}$/.test(c)) {
+        score += 50;
+      }
+      // Lower score for other alphanumeric patterns
+      else if (/^[A-Z0-9]+$/.test(c) && c.length >= 4 && c.length <= 8) {
+        score += 20;
+      }
+      
+      // Bonus for length 5-6 (common SKU length)
+      if (c.length >= 5 && c.length <= 6) {
+        score += 10;
+      }
+      
+      // Penalty for very short or very long
+      if (c.length < 4 || c.length > 10) {
+        score -= 20;
+      }
+      
+      return { candidate: c, score };
+    });
+
+    // Sort by score (highest first), then by length
+    scoredCandidates.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return b.candidate.length - a.candidate.length;
+    });
+
+    // Select the best candidate
+    const tag = scoredCandidates.length > 0 
+      ? scoredCandidates[0].candidate 
+      : (filteredCandidates.length > 0 
+          ? filteredCandidates.sort((a, b) => b.length - a.length)[0]
+          : null);
 
     return { tag, rawText, candidates };
   }

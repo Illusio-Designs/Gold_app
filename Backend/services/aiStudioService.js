@@ -140,8 +140,8 @@ class AiStudioService {
     if (!enableBgRemoval) {
       // Return the original image path
       if (typeof inputImageUrlOrPath === "string" && !/^https?:\/\//i.test(inputImageUrlOrPath)) {
-        return inputImageUrlOrPath;
-      }
+      return inputImageUrlOrPath;
+    }
       // If it's a URL, download it first
       const imageData = await this._readImageData(inputImageUrlOrPath);
       const outPath = path.join(workDir, `bg-removed-${Date.now()}.png`);
