@@ -40,11 +40,6 @@ const MediaGalleryPage = () => {
     loadProcessedMediaItems();
   }, []); // Empty dependency array to run only once
 
-  // Memoize rendered media cards to prevent unnecessary re-renders
-  const renderedMediaCards = useMemo(() => {
-    return processedMediaItems.map((item) => renderProcessedMediaCard(item));
-  }, [processedMediaItems]);
-
   const loadProcessedMediaItems = async () => {
     // Prevent multiple simultaneous calls
     if (isLoading) {
@@ -311,6 +306,11 @@ const MediaGalleryPage = () => {
       </div>
     );
   }, [getFileUrl]);
+
+  // Memoize rendered media cards to prevent unnecessary re-renders
+  const renderedMediaCards = useMemo(() => {
+    return processedMediaItems.map((item) => renderProcessedMediaCard(item));
+  }, [processedMediaItems, renderProcessedMediaCard]);
 
   if (loading) {
     return (
