@@ -703,7 +703,6 @@ function debugDatabaseContents(req, res) {
                           },
                         };
 
-                        );
                         res.json({ success: true, debug: debugInfo });
                       }
                     );
@@ -852,8 +851,6 @@ function getMediaItemsWithProcessedImages(req, res) {
       return res.status(500).json({ error: err.message });
     }
 
-    );
-
     // If no results found, try a more flexible query
     if (results.length === 0) {
       const flexibleSql = `
@@ -922,8 +919,6 @@ function getMediaItemsWithProcessedImages(req, res) {
         if (flexErr) {
           return res.status(500).json({ error: flexErr.message });
         }
-
-        );
 
         // Process the flexible results
         const processedResults = flexResults.map((item) => {
