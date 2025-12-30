@@ -37,96 +37,39 @@ const MediaGalleryPage = () => {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    console.log("🔍 [FRONTEND] useEffect triggered - loading media items");
     loadProcessedMediaItems();
   }, []); // Empty dependency array to run only once
 
   // Memoize rendered media cards to prevent unnecessary re-renders
   const renderedMediaCards = useMemo(() => {
     return processedMediaItems.map((item) => renderProcessedMediaCard(item));
-  }, [processedMediaItems, renderProcessedMediaCard]);
+  }, [processedMediaItems]);
 
   const loadProcessedMediaItems = async () => {
     // Prevent multiple simultaneous calls
     if (isLoading) {
-      console.log("🔍 [FRONTEND] Already loading, skipping duplicate call");
       return;
     }
 
     try {
-      console.log("🔍 [FRONTEND] Starting to load processed media items...");
       setIsLoading(true);
       setLoading(true);
 
       const token = localStorage.getItem("admin_token");
-      console.log("🔍 [FRONTEND] Token exists:", !!token);
-      console.log(
-        "🔍 [FRONTEND] Token preview:",
-        token ? token.substring(0, 20) + "..." : "No token"
-      );
-
-      console.log(
-        "🔍 [FRONTEND] Making API call to getMediaItemsWithProcessedImages..."
-      );
-      console.log(
-        "🔍 [FRONTEND] Current environment:",
-        import.meta.env.DEV ? "development" : "production"
-      );
-      console.log(
-        "🔍 [FRONTEND] API Base URL:",
-        import.meta.env.VITE_API_BASE_URL
-      );
-
       const response = await getMediaItemsWithProcessedImages(token);
-
-      console.log("🔍 [FRONTEND] Raw API response:", response);
-      console.log("🔍 [FRONTEND] Response type:", typeof response);
-      console.log(
-        "🔍 [FRONTEND] Response keys:",
-        response ? Object.keys(response) : "No response"
-      );
-      console.log("🔍 [FRONTEND] Response items:", response?.items);
-      console.log("🔍 [FRONTEND] Response data:", response?.data);
-      console.log("🔍 [FRONTEND] Response success:", response?.success);
-      console.log("🔍 [FRONTEND] Response message:", response?.message);
-      console.log("🔍 [FRONTEND] Response count:", response?.count);
 
       // Check if response has items array (regardless of success field)
       if (response && Array.isArray(response.items)) {
-        console.log(
-          `✅ [FRONTEND] Found ${response.items.length} items in response.items`
-        );
-        console.log("🔍 [FRONTEND] Items details:", response.items);
         setProcessedMediaItems(response.items);
       } else if (response && Array.isArray(response.data)) {
-        console.log(
-          `✅ [FRONTEND] Found ${response.data.length} items in response.data`
-        );
-        console.log("🔍 [FRONTEND] Data details:", response.data);
         setProcessedMediaItems(response.data);
       } else {
-        console.log(
-          "⚠️ [FRONTEND] No items found in response, setting empty array"
-        );
-        console.log(
-          "🔍 [FRONTEND] Full response structure:",
-          JSON.stringify(response, null, 2)
-        );
         setProcessedMediaItems([]);
       }
     } catch (error) {
-      console.error(
-        "❌ [FRONTEND] Error loading processed media items:",
-        error
-      );
-      console.error("❌ [FRONTEND] Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      });
       setProcessedMediaItems([]);
+      showErrorToast("Failed to load media items");
     } finally {
-      console.log("🔍 [FRONTEND] Finished loading processed media items");
       setLoading(false);
       setIsLoading(false);
     }
@@ -134,11 +77,6 @@ const MediaGalleryPage = () => {
 
   const handleBulkFileSelect = (event) => {
     const files = Array.from(event.target.files);
-    console.log("📦 [BULK UPLOAD] Selected files:", files.map((f) => ({
-      name: f.name,
-      size: f.size,
-      type: f.type,
-    })));
     setBulkUploadFiles(files);
   };
 
@@ -159,16 +97,7 @@ const MediaGalleryPage = () => {
 
       formData.append("autoDetect", autoDetectEnabled.toString());
 
-      console.groupCollapsed("🚀 [BULK UPLOAD] Request");
-      console.log("autoDetectEnabled:", autoDetectEnabled);
-      console.log("files:", bulkUploadFiles.map((f) => f.name));
-      console.groupEnd();
-
       const response = await bulkUploadMediaFiles(formData, token);
-
-      console.groupCollapsed("✅ [BULK UPLOAD] Response (raw)");
-      console.log(response);
-      console.groupEnd();
 
       // Backend may return either:
       // - { success, message, data: [...] }
@@ -181,12 +110,6 @@ const MediaGalleryPage = () => {
           : Array.isArray(files)
             ? true
             : false;
-
-      console.groupCollapsed("📊 [BULK UPLOAD] Parsed summary");
-      console.log("success:", success);
-      console.log("summary:", summary);
-      console.log("files count:", Array.isArray(files) ? files.length : 0);
-      console.groupEnd();
 
       if (!Array.isArray(files)) {
         showErrorToast("Bulk upload returned unexpected response format");
@@ -235,14 +158,6 @@ const MediaGalleryPage = () => {
         };
       });
 
-      console.groupCollapsed("🧾 [BULK UPLOAD] Per-file results");
-      uiResults.forEach((r) => {
-        console.log(
-          `${r.success ? "✅" : "❌"} ${r.filename} -> ${r.message}\n   ${r.details}`
-        );
-      });
-      console.groupEnd();
-
       setBulkUploadResults(uiResults);
 
       if (success) {
@@ -256,12 +171,6 @@ const MediaGalleryPage = () => {
       setBulkUploadFiles([]);
       loadProcessedMediaItems();
     } catch (error) {
-      console.error("Error in bulk upload:", error);
-      console.error("Bulk upload error details:", {
-        message: error?.message,
-        response: error?.response?.data,
-        status: error?.response?.status,
-      });
       showErrorToast("Error uploading files");
     } finally {
       setBulkUploading(false);
@@ -293,7 +202,6 @@ const MediaGalleryPage = () => {
       // Close the delete modal
       setDeleteItem(null);
     } catch (error) {
-      console.error("Error deleting file:", error);
       showErrorToast("Failed to delete file");
     } finally {
       setDeleting(false);
@@ -309,17 +217,33 @@ const MediaGalleryPage = () => {
   const handleDebugDatabase = async () => {
     try {
       const token = localStorage.getItem("admin_token");
-      console.log("🔍 [FRONTEND] Debugging database contents...");
-      const debugInfo = await debugDatabaseContents(token);
-      console.log("🔍 [FRONTEND] Database debug info:", debugInfo);
+      await debugDatabaseContents(token);
       showSuccessToast("Database debug info logged to console");
     } catch (error) {
-      console.error("❌ [FRONTEND] Debug error:", error);
       showErrorToast("Failed to debug database");
     }
   };
 
-  const renderProcessedMediaCard = React.useCallback((item) => {
+  const getFileUrl = useCallback((type, filename) => {
+    if (!filename) {
+      return null;
+    }
+
+    // Use environment variable for image base URL
+    const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
+
+    // Check if filename already contains the full path
+    if (filename.startsWith("/uploads/")) {
+      // If it already has the full path, use it directly
+      return `${imageBaseUrl}${filename.replace('/uploads', '')}`;
+    } else {
+      // If it's just the filename, construct the path
+      const directory = type === "category" ? "categories" : "products";
+      return `${imageBaseUrl}/${directory}/${filename}`;
+    }
+  }, []);
+
+  const renderProcessedMediaCard = useCallback((item) => {
     // Use processed_image field from API response
     const imagePath = item.processed_image || item.image;
     const fileUrl = getFileUrl(item.type, imagePath);
@@ -352,21 +276,9 @@ const MediaGalleryPage = () => {
               src={fileUrl}
               alt={item.name}
               loading="lazy"
+              decoding="async"
               key={`${item.id}-${imagePath}`}
-              onLoad={() => {
-                // Only log once per unique image
-                if (!window.loadedImages) window.loadedImages = new Set();
-                if (!window.loadedImages.has(fileUrl)) {
-                  window.loadedImages.add(fileUrl);
-                  console.log(`[Dashboard] Processed image loaded:`, fileUrl);
-                }
-              }}
               onError={(e) => {
-                console.error(
-                  `[Dashboard] Processed image failed to load:`,
-                  fileUrl,
-                  e
-                );
                 // Try fallback URL with direct file access
                 const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
                 let fallbackUrl;
@@ -377,7 +289,6 @@ const MediaGalleryPage = () => {
                     item.type === "category" ? "categories" : "products"
                   }/${imagePath}`;
                 }
-                console.log(`[Dashboard] Trying fallback URL:`, fallbackUrl);
                 e.target.src = fallbackUrl;
               }}
             />
@@ -399,30 +310,7 @@ const MediaGalleryPage = () => {
         </div>
       </div>
     );
-  };
-
-  const getFileUrl = (type, filename) => {
-    if (!filename) {
-      return null;
-    }
-
-    // Use environment variable for image base URL
-    const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
-
-    // Check if filename already contains the full path
-    if (filename.startsWith("/uploads/")) {
-      // If it already has the full path, use it directly
-      const fullUrl = `${imageBaseUrl}${filename.replace('/uploads', '')}`;
-      console.log(`[Dashboard] Using full path URL: ${fullUrl}`);
-      return fullUrl;
-    } else {
-      // If it's just the filename, construct the path
-      const directory = type === "category" ? "categories" : "products";
-      const fullUrl = `${imageBaseUrl}/${directory}/${filename}`;
-      console.log(`[Dashboard] Constructed URL: ${fullUrl}`);
-      return fullUrl;
-    }
-  };
+  }, [getFileUrl]);
 
   if (loading) {
     return (

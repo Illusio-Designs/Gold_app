@@ -411,22 +411,6 @@ async function bulkUploadMedia(req, res) {
                   );
                 });
               }
-
-              // Track temp files for cleanup
-              const tempFilesToCleanup = [];
-              if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
-                tempFilesToCleanup.push(bgRemovedPath);
-              }
-              if (aiMeta.studioPath && aiMeta.studioPath.includes("/temp/")) {
-                tempFilesToCleanup.push(aiMeta.studioPath);
-              }
-              if (file.path && file.path.includes("/temp/")) {
-                tempFilesToCleanup.push(file.path);
-              }
-              if (tempFilesToCleanup.length > 0) {
-                if (!results[i]) results[i] = {};
-                results[i].tempFilesToCleanup = tempFilesToCleanup;
-              }
             } else if (detectedAssociation.type === "category") {
               console.log(
                 `🖼️ [BULK UPLOAD] Processing as category image: ${file.originalname}`
@@ -594,22 +578,6 @@ async function bulkUploadMedia(req, res) {
               } catch (createErr) {
                 console.warn(`⚠️ [BULK UPLOAD] Could not create product from OCR SKU:`, createErr.message);
               }
-            }
-
-            // Track temp files for cleanup
-            const tempFilesToCleanup = [];
-            if (bgRemovedPath && bgRemovedPath !== file.path && bgRemovedPath.includes("/temp/")) {
-              tempFilesToCleanup.push(bgRemovedPath);
-            }
-            if (aiMeta.studioPath && aiMeta.studioPath.includes("/temp/")) {
-              tempFilesToCleanup.push(aiMeta.studioPath);
-            }
-            if (file.path && file.path.includes("/temp/")) {
-              tempFilesToCleanup.push(file.path);
-            }
-            if (tempFilesToCleanup.length > 0) {
-              if (!results[i]) results[i] = {};
-              results[i].tempFilesToCleanup = tempFilesToCleanup;
             }
           }
         } catch (processError) {
@@ -1021,6 +989,9 @@ function getMediaItemsWithProcessedImages(req, res) {
         AND mg.file_url != 'null'
         AND (mg.file_url LIKE '%.webp' OR mg.file_url LIKE '%.jpg' OR mg.file_url LIKE '%.jpeg' OR mg.file_url LIKE '%.png')
         AND mg.file_url LIKE '/uploads/%'
+        AND mg.file_url NOT LIKE '%/temp/%'
+        AND mg.file_url NOT LIKE '%temp/%'
+        AND mg.category LIKE '%product%'
     ) as main_data
     
     ORDER BY created_at DESC
@@ -1128,6 +1099,9 @@ function getMediaItemsWithProcessedImages(req, res) {
           'media_gallery' as status
         FROM media_gallery mg
         WHERE mg.file_url IS NOT NULL
+          AND mg.file_url NOT LIKE '%/temp/%'
+          AND mg.file_url NOT LIKE '%temp/%'
+          AND mg.category LIKE '%product%'
         
         ORDER BY created_at DESC
       `;
