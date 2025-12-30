@@ -232,7 +232,7 @@ const Login = () => {
           }
           
           Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
-          navigation.navigate('CategoryChoose');
+          navigation.navigate('MainTabs');
         } else {
           // Show specific toast for backend error status
           const errMsg = loginResult.error ? loginResult.error.toLowerCase() : '';
