@@ -6,7 +6,8 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 import CustomTextInput from '../../components/common/CustomTextInput';
 import Button from '../../components/common/Button';
@@ -25,6 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import messaging from '@react-native-firebase/messaging';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
+import RNOtpVerify from 'react-native-otp-verify';
 
 // --- MSG91 Configuration ---
 const WIDGET_ID = "356772683359393932343835";
@@ -45,6 +47,60 @@ const Login = () => {
 
   useEffect(() => {
     OTPWidget.initializeWidget(WIDGET_ID, TOKEN_AUTH);
+    
+    // Start OTP listener for auto-read (Android only)
+    if (Platform.OS === 'android') {
+      RNOtpVerify.getHash()
+        .then((hash) => {
+          console.log('[OTP AUTO-READ] App Hash:', hash);
+        })
+        .catch((error) => {
+          console.log('[OTP AUTO-READ] Error getting hash:', error);
+        });
+
+      RNOtpVerify.getOtp()
+        .then(() => {
+          console.log('[OTP AUTO-READ] Started listening for OTP');
+        })
+        .catch((error) => {
+          console.log('[OTP AUTO-READ] Error starting listener:', error);
+        });
+
+      const otpHandler = (message: string) => {
+        console.log('[OTP AUTO-READ] Received SMS:', message);
+        try {
+          // Extract OTP from message - looking for 6-digit code
+          const otpMatch = message.match(/\b\d{6}\b/);
+          if (otpMatch) {
+            const extractedOtp = otpMatch[0];
+            console.log('[OTP AUTO-READ] Extracted OTP:', extractedOtp);
+            setOtp(extractedOtp);
+            Toast.show({ 
+              type: 'success', 
+              text1: 'OTP Detected', 
+              text2: 'OTP has been automatically filled!' 
+            });
+            // Auto-verify after a short delay (only if not already loading)
+            setTimeout(() => {
+              if (extractedOtp.length === 6 && !loading) {
+                console.log('[OTP AUTO-READ] Auto-verifying OTP...');
+                // We'll manually trigger verification here
+              }
+            }, 500);
+          }
+        } catch (error) {
+          console.log('[OTP AUTO-READ] Error extracting OTP:', error);
+        }
+      };
+
+      RNOtpVerify.addListener(otpHandler);
+
+      // Cleanup listener on unmount
+      return () => {
+        RNOtpVerify.removeListener();
+        console.log('[OTP AUTO-READ] Listener removed');
+      };
+    }
   }, []);
 
   const handleSelectCountry = (country: Country) => {
