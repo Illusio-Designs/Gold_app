@@ -2,8 +2,6 @@ const { db } = require("../config/db");
 
 // Script to clear a specific user's cart completely
 const clearUserCart = (userId) => {
-  console.log(`🧹 Clearing cart for user ID: ${userId}`);
-
   // First, let's see what's in the cart
   const checkSql = `
     SELECT ci.*, 
@@ -17,14 +15,10 @@ const clearUserCart = (userId) => {
 
   db.query(checkSql, [userId], (err, results) => {
     if (err) {
-      console.error("❌ Error checking cart:", err);
       return;
     }
 
-    console.log(`📋 Current cart items for user ${userId}:`, results);
-
     if (results.length === 0) {
-      console.log("✅ Cart is already empty");
       return;
     }
 
@@ -35,24 +29,15 @@ const clearUserCart = (userId) => {
 
     db.query(clearSql, [userId], (err, result) => {
       if (err) {
-        console.error("❌ Error clearing cart:", err);
         return;
       }
-
-      console.log(
-        `✅ Cleared ${result.affectedRows} items from cart for user ${userId}`
-      );
 
       // Verify the cart is empty
       db.query(checkSql, [userId], (err, verifyResults) => {
         if (err) {
-          console.error("❌ Error verifying cart:", err);
           return;
         }
 
-        console.log(
-          `✅ Verification: Cart now has ${verifyResults.length} items`
-        );
         process.exit(0);
       });
     });
@@ -63,8 +48,6 @@ const clearUserCart = (userId) => {
 const userId = process.argv[2];
 
 if (!userId) {
-  console.error("❌ Please provide a user ID");
-  console.log("Usage: node clearUserCart.js <userId>");
   process.exit(1);
 }
 

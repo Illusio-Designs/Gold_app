@@ -54,7 +54,6 @@ async function createNotification(req, res) {
       ],
       async (err, result) => {
         if (err) {
-          console.error("Error creating notification:", err);
           return res
             .status(500)
             .json({ error: "Failed to create notification" });
@@ -85,7 +84,6 @@ async function createNotification(req, res) {
             targetUsers,
             async (tokenErr, tokenResults) => {
               if (tokenErr) {
-                console.error("Error getting user tokens:", tokenErr);
                 return res
                   .status(500)
                   .json({ error: "Failed to get user tokens" });
@@ -108,7 +106,6 @@ async function createNotification(req, res) {
             "SELECT token FROM notification_tokens WHERE active = true";
           db.query(getAllTokensSql, async (tokenErr, tokenResults) => {
             if (tokenErr) {
-              console.error("Error getting all tokens:", tokenErr);
               return res
                 .status(500)
                 .json({ error: "Failed to get user tokens" });
@@ -134,17 +131,13 @@ async function createNotification(req, res) {
       }
     );
   } catch (error) {
-    console.error("Error in createNotification:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
 
 // Get user notifications
 function getUserNotifications(req, res) {
-  console.log("🔔 [CONTROLLER] getUserNotifications called:", {
-    userId: req.params.userId,
-    query: req.query,
-    timestamp: new Date().toISOString(),
+  .toISOString(),
   });
 
   const { userId } = req.params;
@@ -160,28 +153,13 @@ function getUserNotifications(req, res) {
     LIMIT ? OFFSET ?
   `;
 
-  console.log("🔔 [CONTROLLER] Querying notifications with params:", {
-    userId,
-    limit: parseInt(limit),
+  ,
     offset,
   });
   db.query(sql, [userId, parseInt(limit), offset], (err, results) => {
     if (err) {
-      console.error("❌ [CONTROLLER] Error getting user notifications:", err);
       return res.status(500).json({ error: "Failed to get notifications" });
     }
-
-    console.log("🔔 [CONTROLLER] Found notifications:", results.length);
-    console.log(
-      "🔔 [CONTROLLER] First notification:",
-      results[0]
-        ? {
-            id: results[0].id,
-            title: results[0].title,
-            type: results[0].type,
-          }
-        : "No notifications"
-    );
 
     res.json({
       notifications: results,
@@ -193,9 +171,7 @@ function getUserNotifications(req, res) {
 
 // Get unread count for a user
 function getUnreadCount(req, res) {
-  console.log("🔔 [CONTROLLER] getUnreadCount called:", {
-    userId: req.params.userId,
-    timestamp: new Date().toISOString(),
+  .toISOString(),
   });
 
   const { userId } = req.params;
@@ -207,21 +183,12 @@ function getUnreadCount(req, res) {
     WHERE un.user_id IS NULL
   `;
 
-  console.log("🔔 [CONTROLLER] Querying unread count for user:", userId);
   db.query(sql, [userId], (err, results) => {
     if (err) {
-      console.error("❌ [CONTROLLER] Error getting unread count:", err);
       return res.status(500).json({ error: "Failed to get unread count" });
     }
 
     const unreadCount = results[0].unread_count;
-    console.log(
-      "🔔 [CONTROLLER] Unread count for user:",
-      userId,
-      "=",
-      unreadCount
-    );
-
     res.json({ unreadCount });
   });
 }
@@ -238,7 +205,6 @@ function markAsRead(req, res) {
 
   db.query(sql, [userId, notificationId], (err, result) => {
     if (err) {
-      console.error("Error marking notification as read:", err);
       return res
         .status(500)
         .json({ error: "Failed to mark notification as read" });
@@ -263,7 +229,6 @@ function markAllAsRead(req, res) {
 
   db.query(sql, [userId, userId], (err, result) => {
     if (err) {
-      console.error("Error marking all notifications as read:", err);
       return res
         .status(500)
         .json({ error: "Failed to mark notifications as read" });
@@ -281,7 +246,6 @@ function deleteNotification(req, res) {
 
   db.query(sql, [notificationId], (err, result) => {
     if (err) {
-      console.error("Error deleting notification:", err);
       return res.status(500).json({ error: "Failed to delete notification" });
     }
 
@@ -295,25 +259,15 @@ function deleteNotification(req, res) {
 
 // Register FCM token for authenticated user
 function registerFCMToken(req, res) {
-  console.log("🔔 [FCM REGISTRATION] Starting FCM token registration...");
-  console.log("🔔 [FCM REGISTRATION] Request body:", req.body);
-  console.log("🔔 [FCM REGISTRATION] User from auth:", req.user);
-
   const { token, deviceType = "web" } = req.body;
   const userId = req.user.id; // From auth middleware
 
   if (!token) {
-    console.error("❌ [FCM REGISTRATION] No FCM token provided");
     return res.status(400).json({ error: "FCM token is required" });
   }
 
-  console.log("🔔 [FCM REGISTRATION] Registering token for user:", userId);
-  console.log(
-    "🔔 [FCM REGISTRATION] Token preview:",
-    token.substring(0, 20) + "..."
+  + "..."
   );
-  console.log("🔔 [FCM REGISTRATION] Device type:", deviceType);
-
   const sql = `
     INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
     VALUES (?, ?, ?, true, NOW())
@@ -326,15 +280,8 @@ function registerFCMToken(req, res) {
 
   db.query(sql, [userId, token, deviceType], (err, result) => {
     if (err) {
-      console.error("❌ [FCM REGISTRATION] Error registering FCM token:", err);
       return res.status(500).json({ error: "Failed to register FCM token" });
     }
-
-    console.log(
-      "✅ [FCM REGISTRATION] FCM token registered successfully for user:",
-      userId
-    );
-    console.log("✅ [FCM REGISTRATION] Database result:", result);
 
     res.json({ message: "FCM token registered successfully" });
   });
@@ -343,18 +290,13 @@ function registerFCMToken(req, res) {
 // Register FCM token for unauthenticated user
 function registerFCMTokenUnauth(req, res) {
   try {
-    console.log("🔔 [CONTROLLER] registerFCMTokenUnauth called");
-    console.log("🔔 [CONTROLLER] Request body:", req.body);
-
     const { token, deviceType = "mobile", userId = null } = req.body;
 
     if (!token) {
       return res.status(400).json({ error: "FCM token is required" });
     }
 
-    console.log("🔔 [CONTROLLER] Registering unauthenticated token:", {
-      userId: userId || "NULL",
-      token: token.substring(0, 20) + "...",
+    + "...",
       deviceType,
     });
 
@@ -370,13 +312,9 @@ function registerFCMTokenUnauth(req, res) {
 
     db.query(sql, [userId, token, deviceType], (err, result) => {
       if (err) {
-        console.error("❌ [CONTROLLER] Error registering FCM token:", err);
         return res.status(500).json({ error: "Failed to register FCM token" });
       }
 
-      console.log(
-        "✅ [CONTROLLER] Unauthenticated FCM token registered successfully"
-      );
       res.json({
         success: true,
         message: "FCM token registered successfully",
@@ -384,7 +322,6 @@ function registerFCMTokenUnauth(req, res) {
       });
     });
   } catch (error) {
-    console.error("❌ [CONTROLLER] Error in registerFCMTokenUnauth:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -408,25 +345,14 @@ function getStoredTokens(req, res) {
 
   sql += " ORDER BY created_at DESC";
 
-  console.log("🔍 [DEBUG] Querying tokens with SQL:", sql);
-  console.log("🔍 [DEBUG] Query parameters:", params);
-
   // Execute query
   db.query(sql, params, (err, results) => {
     if (err) {
-      console.error("❌ [DEBUG] Error getting stored tokens:", err);
       return res.status(500).json({ error: "Failed to get stored tokens" });
     }
 
-    console.log("🔍 [DEBUG] Found tokens:", results.length);
     if (results.length > 0) {
-      console.log("🔍 [DEBUG] First token:", {
-        id: results[0].id,
-        user_id: results[0].user_id,
-        device_type: results[0].device_type,
-        active: results[0].active,
-      });
-    }
+      }
 
     // If userId is provided, also check user info
     if (userId) {
@@ -434,17 +360,9 @@ function getStoredTokens(req, res) {
         "SELECT id, name, email, status, created_at FROM users WHERE id = ?";
       db.query(userSql, [userId], (userErr, userResults) => {
         if (userErr) {
-          console.error("❌ [DEBUG] Error getting user info:", userErr);
-        } else if (userResults.length > 0) {
+          } else if (userResults.length > 0) {
           const user = userResults[0];
-          console.log("🔍 [DEBUG] User info:", {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            status: user.status,
-            created_at: user.created_at,
-          });
-        }
+          }
 
         // Return token details with user info
         const formattedResults = results.map((t) => ({
@@ -502,7 +420,6 @@ function subscribeUserToTopic(req, res) {
 
   db.query(getTokenSql, [userId], async (err, results) => {
     if (err) {
-      console.error("Error getting user token:", err);
       return res.status(500).json({ error: "Failed to get user token" });
     }
 
@@ -539,7 +456,6 @@ function unsubscribeUserFromTopic(req, res) {
 
   db.query(getTokenSql, [userId], async (err, results) => {
     if (err) {
-      console.error("Error getting user token:", err);
       return res.status(500).json({ error: "Failed to get user token" });
     }
 

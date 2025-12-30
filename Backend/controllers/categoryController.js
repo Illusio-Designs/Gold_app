@@ -7,31 +7,18 @@ const { getBaseUrl } = require("../config/environment");
 // Get all categories (only active ones with images)
 function getAllCategories(req, res) {
   // For debugging, let's first check what we have in the database
-  console.log("🔍 [CATEGORIES] Getting all categories...");
-
   const sql =
     "SELECT * FROM categories WHERE status = 'active' AND image IS NOT NULL ORDER BY name";
-
-  console.log("🔍 [CATEGORIES] SQL Query:", sql);
 
   // First, let's check all categories to see what status values exist
   db.query(
     "SELECT id, name, status, image FROM categories ORDER BY name",
     (debugErr, debugResults) => {
       if (debugErr) {
-        console.error("❌ [CATEGORIES] Debug query error:", debugErr);
-      } else {
-        console.log(
-          "🔍 [CATEGORIES] All categories in database:",
-          debugResults
+        } else {
+        => c.status === "active")
         );
-        console.log(
-          "🔍 [CATEGORIES] Categories with status 'active':",
-          debugResults.filter((c) => c.status === "active")
-        );
-        console.log(
-          "🔍 [CATEGORIES] Categories with images:",
-          debugResults.filter((c) => c.image && c.image !== "null")
+        => c.image && c.image !== "null")
         );
       }
     }
@@ -41,8 +28,6 @@ function getAllCategories(req, res) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-
-    console.log("🔍 [CATEGORIES] Filtered results count:", results.length);
 
     // Process results to include processed image URLs
     const processedResults = results.map((category) => {
@@ -67,17 +52,11 @@ function getAllCategories(req, res) {
           // Use cleaned/watermarked image (highest priority)
           processedImageUrl = `${getBaseUrl()}/uploads/categories/${cleanedImageName}`;
           finalImageUrl = processedImageUrl;
-          console.log(
-            `[Backend] ✅ Using enhanced cleaned/watermarked category image: ${processedImageUrl}`
-          );
-        } else if (category.image.endsWith(".webp")) {
+          } else if (category.image.endsWith(".webp")) {
           // Fall back to existing processed .webp file
           processedImageUrl = originalImageUrl;
           finalImageUrl = processedImageUrl;
-          console.log(
-            `[Backend] Using existing processed category image: ${processedImageUrl}`
-          );
-        } else {
+          } else {
           // Convert to processed image path (.webp extension)
           const processedImageName = `${baseName}.webp`;
           const processedImagePath = path.join(
@@ -90,20 +69,11 @@ function getAllCategories(req, res) {
             // Use regular processed image
             processedImageUrl = `${getBaseUrl()}/uploads/categories/${processedImageName}`;
             finalImageUrl = processedImageUrl;
-            console.log(
-              `[Backend] ✅ Using processed category image: ${processedImageUrl}`
-            );
-          } else {
+            } else {
             // Processed image doesn't exist, fall back to original
             processedImageUrl = null;
             finalImageUrl = originalImageUrl;
-            console.log(
-              `[Backend] ⚠️ No processed category image found for: ${category.image}`
-            );
-            console.log(
-              `[Backend] 🔄 Falling back to original category image: ${originalImageUrl}`
-            );
-          }
+            }
         }
       }
 
@@ -117,23 +87,8 @@ function getAllCategories(req, res) {
     });
 
     // Add logging to debug category response
-    console.log(
-      "Total active categories with images found:",
-      processedResults.length
-    );
     processedResults.forEach((category, index) => {
-      console.log(`Category ${index + 1}:`, {
-        id: category.id,
-        name: category.name,
-        image: category.image,
-        processedImageUrl: category.processedImageUrl,
-        originalImageUrl: category.originalImageUrl,
-        finalImageUrl: category.imageUrl,
-        hasProcessedImage: category.hasProcessedImage,
-        description: category.description,
-        status: category.status,
       });
-    });
 
     res.json({
       success: true,
@@ -172,7 +127,6 @@ async function createCategory(req, res) {
     // Process image if uploaded
     let processedImage = image;
     if (image && req.file) {
-      console.log(`🖼️ [CATEGORY] Processing category image: ${image}`);
       const imageProcessingService = require("../services/imageProcessingService");
 
       try {
@@ -181,9 +135,7 @@ async function createCategory(req, res) {
           image
         );
         processedImage = path.basename(processedPath);
-        console.log(`✅ [CATEGORY] Image processed: ${processedImage}`);
-      } catch (processError) {
-        console.error(`❌ [CATEGORY] Image processing failed:`, processError);
+        } catch (processError) {
         // Continue with original image if processing fails
       }
     }
@@ -212,7 +164,6 @@ async function createCategory(req, res) {
       });
     });
   } catch (error) {
-    console.error("❌ [CATEGORY] Error creating category:", error);
     res.status(500).json({ error: "Failed to create category" });
   }
 }
@@ -232,7 +183,6 @@ async function updateCategory(req, res) {
 
     // Process image if uploaded
     if (image && req.file) {
-      console.log(`🖼️ [CATEGORY] Processing updated category image: ${image}`);
       const imageProcessingService = require("../services/imageProcessingService");
 
       try {
@@ -241,9 +191,7 @@ async function updateCategory(req, res) {
           image
         );
         processedImage = path.basename(processedPath);
-        console.log(`✅ [CATEGORY] Updated image processed: ${processedImage}`);
-      } catch (processError) {
-        console.error(`❌ [CATEGORY] Image processing failed:`, processError);
+        } catch (processError) {
         // Continue with original image if processing fails
       }
     }
@@ -278,7 +226,6 @@ async function updateCategory(req, res) {
       res.json({ message: "Category updated successfully" });
     });
   } catch (error) {
-    console.error("❌ [CATEGORY] Error updating category:", error);
     res.status(500).json({ error: "Failed to update category" });
   }
 }

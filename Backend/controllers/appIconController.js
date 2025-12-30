@@ -54,7 +54,6 @@ const createAppIcon = async (req, res) => {
         const uploadResult = await uploadToCloudinary(req.file.path, 'app-icons');
         icon_path = uploadResult.secure_url;
       } catch (uploadError) {
-        console.error('Icon upload error:', uploadError);
         return res.status(500).json({
           success: false,
           error: "Failed to upload icon file"
@@ -77,7 +76,6 @@ const createAppIcon = async (req, res) => {
 
     appIconModel.createAppIcon(iconData, (err, result) => {
       if (err) {
-        console.error('Create app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to create app icon"
@@ -106,7 +104,6 @@ const createAppIcon = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Create app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -119,7 +116,6 @@ const getAllAppIcons = async (req, res) => {
   try {
     appIconModel.getAllAppIcons((err, icons) => {
       if (err) {
-        console.error('Get all app icons error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to retrieve app icons"
@@ -132,7 +128,6 @@ const getAllAppIcons = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Get all app icons error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -147,7 +142,6 @@ const getAppIconById = async (req, res) => {
 
     appIconModel.getAppIconById(id, (err, icons) => {
       if (err) {
-        console.error('Get app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to retrieve app icon"
@@ -167,7 +161,6 @@ const getAppIconById = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Get app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -205,7 +198,6 @@ const updateAppIcon = async (req, res) => {
         const uploadResult = await uploadToCloudinary(req.file.path, 'app-icons');
         icon_path = uploadResult.secure_url;
       } catch (uploadError) {
-        console.error('Icon upload error:', uploadError);
         return res.status(500).json({
           success: false,
           error: "Failed to upload icon file"
@@ -227,7 +219,6 @@ const updateAppIcon = async (req, res) => {
 
     appIconModel.updateAppIcon(id, iconData, (err, result) => {
       if (err) {
-        console.error('Update app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to update app icon"
@@ -263,7 +254,6 @@ const updateAppIcon = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Update app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -278,7 +268,6 @@ const deleteAppIcon = async (req, res) => {
 
     appIconModel.deleteAppIcon(id, (err, result) => {
       if (err) {
-        console.error('Delete app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to delete app icon"
@@ -301,7 +290,6 @@ const deleteAppIcon = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Delete app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -316,7 +304,6 @@ const activateAppIcon = async (req, res) => {
 
     appIconModel.activateAppIcon(id, (err, result) => {
       if (err) {
-        console.error('Activate app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to activate app icon"
@@ -345,7 +332,6 @@ const activateAppIcon = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Activate app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -369,7 +355,6 @@ const getCurrentAppIcon = async (req, res) => {
 
     appIconModel.getCurrentAppIcon(platform, type, (err, icons) => {
       if (err) {
-        console.error('Get current app icon error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to retrieve current app icon"
@@ -389,7 +374,6 @@ const getCurrentAppIcon = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Get current app icon error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -413,7 +397,6 @@ const getActiveAppIcons = async (req, res) => {
 
     appIconModel.getActiveAppIcons(platform, (err, icons) => {
       if (err) {
-        console.error('Get active app icons error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to retrieve active app icons"
@@ -426,7 +409,6 @@ const getActiveAppIcons = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Get active app icons error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"
@@ -439,7 +421,6 @@ const getIconStats = async (req, res) => {
   try {
     appIconModel.getIconStats((err, stats) => {
       if (err) {
-        console.error('Get icon stats error:', err);
         return res.status(500).json({
           success: false,
           error: "Failed to retrieve icon statistics"
@@ -452,7 +433,6 @@ const getIconStats = async (req, res) => {
       });
     });
   } catch (error) {
-    console.error('Get icon stats error:', error);
     res.status(500).json({
       success: false,
       error: "Internal server error"

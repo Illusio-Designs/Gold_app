@@ -47,8 +47,6 @@ async function uploadToCloudinary(filePath, folder = 'app-icons') {
       format: result.format
     };
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    
     // Fallback to local storage
     return uploadToLocalStorage(filePath, folder);
   }
@@ -91,7 +89,6 @@ async function uploadToLocalStorage(filePath, folder = 'app-icons') {
       format: path.extname(filePath).substring(1)
     };
   } catch (error) {
-    console.error('Local storage upload error:', error);
     throw new Error('Failed to upload file');
   }
 }
@@ -122,7 +119,6 @@ async function deleteFromCloudinary(publicId, folder = 'app-icons') {
     const result = await cloudinary.uploader.destroy(publicId);
     return result;
   } catch (error) {
-    console.error('Delete error:', error);
     return { success: false, error: error.message };
   }
 }

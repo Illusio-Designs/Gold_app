@@ -19,16 +19,13 @@ class SocketService {
     });
 
     this.setupEventHandlers();
-    console.log('🔌 Socket.IO server initialized');
-  }
+    }
 
   /**
    * Setup Socket.IO event handlers
    */
   setupEventHandlers() {
     this.io.on('connection', (socket) => {
-      console.log(`🔌 Client connected: ${socket.id}`);
-      
       // Store client information
       this.connectedClients.set(socket.id, {
         id: socket.id,
@@ -43,8 +40,7 @@ class SocketService {
         if (client) {
           client.rooms.add(room);
         }
-        console.log(`🔌 Client ${socket.id} joined room: ${room}`);
-      });
+        });
 
       // Handle client leaving rooms
       socket.on('leave-room', (room) => {
@@ -53,19 +49,16 @@ class SocketService {
         if (client) {
           client.rooms.delete(room);
         }
-        console.log(`🔌 Client ${socket.id} left room: ${room}`);
-      });
+        });
 
       // Handle client disconnection
       socket.on('disconnect', () => {
-        console.log(`🔌 Client disconnected: ${socket.id}`);
         this.connectedClients.delete(socket.id);
       });
 
       // Handle authentication
       socket.on('authenticate', (data) => {
         // You can add authentication logic here
-        console.log(`🔌 Client ${socket.id} authenticated`);
         socket.emit('authenticated', { success: true });
       });
 
@@ -78,7 +71,6 @@ class SocketService {
           client.isAdmin = true;
           client.adminData = adminData;
         }
-        console.log(`🔌 Admin ${adminData?.name || 'Unknown'} joined admin room`);
         socket.emit('admin-room-joined', { success: true, room: 'admin' });
       });
 
@@ -92,7 +84,6 @@ class SocketService {
           client.userId = userData.id;
           client.userData = userData;
         }
-        console.log(`🔌 User ${userData.name || userData.id} joined user room: ${userRoom}`);
         socket.emit('user-room-joined', { success: true, room: userRoom });
       });
     });
@@ -106,8 +97,7 @@ class SocketService {
   emitToAll(event, data) {
     if (this.io) {
       this.io.emit(event, data);
-      console.log(`📡 Emitted ${event} to all clients`);
-    }
+      }
   }
 
   /**
@@ -119,8 +109,7 @@ class SocketService {
   emitToRoom(room, event, data) {
     if (this.io) {
       this.io.to(room).emit(event, data);
-      console.log(`📡 Emitted ${event} to room: ${room}`);
-    }
+      }
   }
 
   /**
@@ -132,8 +121,7 @@ class SocketService {
   emitToClient(socketId, event, data) {
     if (this.io) {
       this.io.to(socketId).emit(event, data);
-      console.log(`📡 Emitted ${event} to client: ${socketId}`);
-    }
+      }
   }
 
   /**
@@ -145,7 +133,7 @@ class SocketService {
   broadcastToOthers(socketId, event, data) {
     if (this.io) {
       this.io.to(socketId).emit(event, data);
-      console.log(`📡 Broadcasted ${event} to others (excluding ${socketId})`);
+      `);
     }
   }
 
@@ -222,8 +210,7 @@ class SocketService {
       type: 'user_registration'
     });
     
-    console.log(`🔌 [SOCKET] New user registration notification sent for: ${user.name}`);
-  }
+    }
 
   /**
    * Notify about user registration status change (approved/rejected)
@@ -246,7 +233,7 @@ class SocketService {
       type: 'registration_status_change'
     });
     
-    console.log(`🔌 [SOCKET] User registration status change notification sent for: ${userData.name} (${userData.status})`);
+    `);
   }
 
   /**
@@ -270,7 +257,7 @@ class SocketService {
       type: 'login_request_status_change'
     });
     
-    console.log(`🔌 [SOCKET] Login request status change notification sent for user ID: ${requestData.userId} (${requestData.status})`);
+    `);
   }
 
   /**

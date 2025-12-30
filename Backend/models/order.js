@@ -3,22 +3,15 @@ const productModel = require("./product");
 
 // Create new order with individual product status tracking
 function createOrder(order, callback) {
-  console.log("📦 [MODEL] createOrder called for product:", order.product_id);
-
   // First, check if product is available for order
   productModel.isProductAvailableForOrder(
     order.product_id,
     (err, isAvailable) => {
       if (err) {
-        console.error("❌ [MODEL] Error checking product availability:", err);
         return callback(err);
       }
 
       if (!isAvailable) {
-        console.error(
-          "❌ [MODEL] Product not available for order:",
-          order.product_id
-        );
         return callback(new Error("Product is not available for order"));
       }
 
@@ -27,10 +20,6 @@ function createOrder(order, callback) {
         order.product_id,
         (err, stockResult) => {
           if (err) {
-            console.error(
-              "❌ [MODEL] Error getting product stock status:",
-              err
-            );
             return callback(err);
           }
 
@@ -52,29 +41,19 @@ function createOrder(order, callback) {
 
           db.query(sql, values, (err, result) => {
             if (err) {
-              console.error("❌ [MODEL] Error creating order:", err);
               return callback(err);
             }
 
             const orderId = result.insertId;
-            console.log("✅ [MODEL] Order created successfully, ID:", orderId);
-
             // Update product stock status to 'out_of_stock'
             productModel.updateProductStockStatus(
               order.product_id,
               "out_of_stock",
               (err) => {
                 if (err) {
-                  console.error(
-                    "❌ [MODEL] Error updating product stock status:",
-                    err
-                  );
                   // Don't fail the order creation if stock update fails
                 } else {
-                  console.log(
-                    "✅ [MODEL] Product stock status updated to out_of_stock"
-                  );
-                }
+                  }
 
                 // Record stock history
                 const historyData = {
@@ -90,14 +69,9 @@ function createOrder(order, callback) {
 
                 productModel.recordStockHistory(historyData, (err) => {
                   if (err) {
-                    console.error(
-                      "❌ [MODEL] Error recording stock history:",
-                      err
-                    );
                     // Don't fail the order creation if history recording fails
                   } else {
-                    console.log("✅ [MODEL] Stock history recorded");
-                  }
+                    }
 
                   // Return the order result
                   callback(null, result);
@@ -113,12 +87,7 @@ function createOrder(order, callback) {
 
 // Create order from cart items (multiple products)
 function createOrderFromCart(userId, cartItems, orderDetails, callback) {
-  console.log("📦 [MODEL] createOrderFromCart called for user:", userId);
-  console.log("📦 [MODEL] Cart items count:", cartItems.length);
-  console.log("📦 [MODEL] Order details:", orderDetails);
-
-  console.log(
-    "📦 [MODEL] Starting to create orders for cart items (no transaction)"
+  "
   );
 
   const orderIds = [];
@@ -127,8 +96,6 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 
   // Create individual order for each cart item
   for (const cartItem of cartItems) {
-    console.log("📦 [MODEL] Processing cart item:", cartItem);
-
     const orderData = {
       user_id: userId,
       product_id: cartItem.product_id,
@@ -139,13 +106,9 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
       courier_company: orderDetails.courier_company || null,
     };
 
-    console.log("📦 [MODEL] Order data prepared:", orderData);
-
     // Create order for this product
-    console.log("📦 [MODEL] Creating order for product:", cartItem.product_id);
     createOrder(orderData, (err, result) => {
       if (err) {
-        console.error("❌ [MODEL] Error creating order:", err);
         hasError = true;
         completedCount++;
 
@@ -157,23 +120,13 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
           }
         }
       } else {
-        console.log(
-          "✅ [MODEL] Order created successfully, ID:",
-          result.insertId
-        );
         orderIds.push(result.insertId);
-        console.log("📦 [MODEL] Order ID added to list:", result.insertId);
-
         completedCount++;
 
         if (completedCount === cartItems.length) {
           if (hasError) {
             callback(new Error("Some orders failed to create"));
           } else {
-            console.log(
-              "✅ [MODEL] All orders created successfully:",
-              orderIds
-            );
             callback(null, orderIds);
           }
         }

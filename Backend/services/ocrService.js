@@ -26,12 +26,9 @@ class OcrService {
           path.join(__dirname, "../uploads/ocr-cache");
         try {
           fs.mkdirSync(cachePath, { recursive: true });
-          console.log(`📦 [OCR] Cache directory ready: ${cachePath}`);
-        } catch (e) {
-          console.warn(`⚠️ [OCR] Failed to create cache directory: ${e.message}`);
-        }
+          } catch (e) {
+          }
 
-        console.log(`🔧 [OCR] Initializing Tesseract worker...`);
         const worker = await createWorker(
           "eng",
           undefined,
@@ -39,8 +36,7 @@ class OcrService {
             // tesseract.js expects logger to be a function (it calls logger(...) on progress)
             logger:
               process.env.OCR_DEBUG === "true"
-                ? (m) => console.log("[OCR]", m)
-                : () => {},
+                ? (m) => : () => {},
             cachePath,
             langPath: process.env.OCR_LANG_PATH, // optional override
           },
@@ -54,7 +50,6 @@ class OcrService {
           // Treat image as a single line (good for SKU/tag codes)
           tessedit_pageseg_mode: "7",
         });
-        console.log(`✅ [OCR] Tesseract worker initialized successfully`);
         return worker;
       })();
     }
@@ -102,13 +97,13 @@ class OcrService {
 
     const rawText = (text || "").toUpperCase();
     
-    console.log(`📄 [OCR] Raw extracted text (first 200 chars): "${rawText.substring(0, 200)}"`);
+    : "${rawText.substring(0, 200)}"`);
 
     // Clean + extract uppercase-alphanumeric tokens
     const cleaned = rawText.replace(/[^A-Z0-9]+/g, " ").trim();
     const tokens = cleaned.length ? cleaned.split(/\s+/g) : [];
 
-    console.log(`🔤 [OCR] Extracted tokens: ${tokens.length > 0 ? tokens.join(", ") : "none"}`);
+    : "none"}`);
 
     const candidates = Array.from(
       new Set(
@@ -119,7 +114,7 @@ class OcrService {
       )
     );
 
-    console.log(`🎯 [OCR] Valid candidates (length ${minLen}-${maxLen}): ${candidates.length > 0 ? candidates.join(", ") : "none"}`);
+    : ${candidates.length > 0 ? candidates.join(", ") : "none"}`);
 
     // Prefer the longest candidate (often the full tag)
     const tag = candidates.length
@@ -127,10 +122,9 @@ class OcrService {
       : null;
 
     if (tag) {
-      console.log(`✅ [OCR] Selected tag: ${tag} (from ${candidates.length} candidates)`);
+      `);
     } else {
-      console.log(`⚠️ [OCR] No valid tag found. Raw text length: ${rawText.length}, Tokens: ${tokens.length}, Candidates: ${candidates.length}`);
-    }
+      }
 
     return { tag, rawText, candidates };
   }

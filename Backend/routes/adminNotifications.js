@@ -12,7 +12,6 @@ router.get('/stats', async (req, res) => {
       data: stats
     });
   } catch (error) {
-    console.error('Error getting admin notification stats:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get notification statistics'
@@ -35,7 +34,6 @@ router.get('/admin-clients', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting admin clients info:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get admin clients information'
@@ -61,7 +59,6 @@ router.post('/test-notification', (req, res) => {
       adminClientsCount: socketService.getAdminClientsCount()
     });
   } catch (error) {
-    console.error('Error sending test notification:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to send test notification'

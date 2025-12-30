@@ -28,8 +28,7 @@ try {
     credential: admin.credential.cert(serviceAccount),
     projectId: firebaseConfig.projectId,
   });
-  console.log('✅ [FIREBASE] Firebase Admin SDK initialized with service account credentials');
-}
+  }
 
 /**
  * Send notification to a specific user by FCM token
@@ -40,9 +39,7 @@ try {
  * @returns {Promise<Object>} - Firebase response
  */
 async function sendNotification(fcmToken, title, body, data = {}) {
-  console.log('🔥 [FIREBASE] Starting sendNotification:', {
-    fcmTokenLength: fcmToken ? fcmToken.length : 0,
-    fcmTokenPreview: fcmToken ? fcmToken.substring(0, 20) + '...' : 'null',
+  + '...' : 'null',
     title,
     body,
     dataKeys: Object.keys(data),
@@ -77,25 +74,12 @@ async function sendNotification(fcmToken, title, body, data = {}) {
       },
     };
 
-    console.log('🔥 [FIREBASE] Prepared message for sending:', {
-      hasToken: !!message.token,
-      notificationTitle: message.notification.title,
-      notificationBody: message.notification.body,
-      dataCount: Object.keys(message.data).length
+    .length
     });
 
     const response = await admin.messaging().send(message);
-    console.log('✅ [FIREBASE] Successfully sent notification:', {
-      response,
-      messageId: response
-    });
     return { success: true, messageId: response };
   } catch (error) {
-    console.error('❌ [FIREBASE] Error sending notification:', {
-      error: error.message,
-      code: error.code,
-      stack: error.stack
-    });
     return { success: false, error: error.message };
   }
 }
@@ -138,7 +122,6 @@ async function sendMulticastNotification(fcmTokens, title, body, data = {}) {
     };
 
     const response = await admin.messaging().sendMulticast(message);
-    console.log('Successfully sent multicast notification:', response);
     return {
       success: true,
       successCount: response.successCount,
@@ -146,7 +129,6 @@ async function sendMulticastNotification(fcmTokens, title, body, data = {}) {
       responses: response.responses,
     };
   } catch (error) {
-    console.error('Error sending multicast notification:', error);
     return { success: false, error: error.message };
   }
 }
@@ -189,10 +171,8 @@ async function sendTopicNotification(topic, title, body, data = {}) {
     };
 
     const response = await admin.messaging().send(message);
-    console.log('Successfully sent topic notification:', response);
     return { success: true, messageId: response };
   } catch (error) {
-    console.error('Error sending topic notification:', error);
     return { success: false, error: error.message };
   }
 }
@@ -206,10 +186,8 @@ async function sendTopicNotification(topic, title, body, data = {}) {
 async function subscribeToTopic(fcmToken, topic) {
   try {
     const response = await admin.messaging().subscribeToTopic(fcmToken, topic);
-    console.log('Successfully subscribed to topic:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('Error subscribing to topic:', error);
     return { success: false, error: error.message };
   }
 }
@@ -223,10 +201,8 @@ async function subscribeToTopic(fcmToken, topic) {
 async function unsubscribeFromTopic(fcmToken, topic) {
   try {
     const response = await admin.messaging().unsubscribeFromTopic(fcmToken, topic);
-    console.log('Successfully unsubscribed from topic:', response);
     return { success: true, response };
   } catch (error) {
-    console.error('Error unsubscribing from topic:', error);
     return { success: false, error: error.message };
   }
 }

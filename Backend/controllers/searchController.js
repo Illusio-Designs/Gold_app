@@ -113,7 +113,6 @@ function searchAll(req, res) {
     [searchTerm, searchTerm],
     (categoryErr, categories) => {
       if (categoryErr) {
-        console.error("Category search error:", categoryErr);
         return res.status(500).json({
           success: false,
           message: "Error searching categories",
@@ -126,7 +125,6 @@ function searchAll(req, res) {
         [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm],
         (productErr, products) => {
           if (productErr) {
-            console.error("Product search error:", productErr);
             return res.status(500).json({
               success: false,
               message: "Error searching products",
@@ -200,7 +198,6 @@ function searchCategories(req, res) {
 
   db.query(sql, [searchTerm, searchTerm], (err, results) => {
     if (err) {
-      console.error("Category search error:", err);
       return res.status(500).json({
         success: false,
         message: "Error searching categories",
@@ -316,7 +313,6 @@ function searchProducts(req, res) {
 
   db.query(sql, params, (err, results) => {
     if (err) {
-      console.error("Product search error:", err);
       return res.status(500).json({
         success: false,
         message: "Error searching products",

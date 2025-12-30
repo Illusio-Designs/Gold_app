@@ -2,8 +2,6 @@ const { db } = require("../config/db");
 
 // Add item to cart
 function addToCart(cartItem, callback) {
-  console.log("🛒 [MODEL] addToCart called with:", cartItem);
-
   const sql = `INSERT INTO cart_items (
     user_id, product_id, quantity, status, created_at
   ) VALUES (?, ?, ?, ?, NOW())
@@ -18,23 +16,16 @@ function addToCart(cartItem, callback) {
     cartItem.status || "pending",
   ];
 
-  console.log("🛒 [MODEL] SQL query:", sql);
-  console.log("🛒 [MODEL] Values:", values);
-
   db.query(sql, values, (err, result) => {
     if (err) {
-      console.error("❌ [MODEL] Database error in addToCart:", err);
-    } else {
-      console.log("✅ [MODEL] addToCart database result:", result);
-    }
+      } else {
+      }
     callback(err, result);
   });
 }
 
 // Get user's cart
 function getUserCart(userId, callback) {
-  console.log("🛒 [MODEL] getUserCart called for user:", userId);
-
   const sql = `
     SELECT ci.*, 
            p.name as product_name, p.image as product_image, p.sku as product_sku,
@@ -47,16 +38,10 @@ function getUserCart(userId, callback) {
     ORDER BY ci.created_at DESC
   `;
 
-  console.log("🛒 [MODEL] SQL query:", sql);
-  console.log("🛒 [MODEL] Values:", [userId]);
-
   db.query(sql, [userId], (err, results) => {
     if (err) {
-      console.error("❌ [MODEL] Database error in getUserCart:", err);
-    } else {
-      console.log("✅ [MODEL] getUserCart database result:", results);
-      console.log("✅ [MODEL] Results count:", results.length);
-    }
+      } else {
+      }
     callback(err, results);
   });
 }
@@ -81,22 +66,14 @@ function removeFromCart(cartItemId, callback) {
 
 // Clear user's cart
 function clearUserCart(userId, callback) {
-  console.log("🛒 [MODEL] clearUserCart called for user:", userId);
-
   const sql = `UPDATE cart_items SET 
     status = 'removed', updated_at = NOW() 
     WHERE user_id = ? AND status != 'removed'`;
 
-  console.log("🛒 [MODEL] SQL query:", sql);
-  console.log("🛒 [MODEL] Values:", [userId]);
-
   db.query(sql, [userId], (err, result) => {
     if (err) {
-      console.error("❌ [MODEL] Database error in clearUserCart:", err);
-    } else {
-      console.log("✅ [MODEL] clearUserCart database result:", result);
-      console.log("✅ [MODEL] Rows affected:", result.affectedRows);
-    }
+      } else {
+      }
     callback(err, result);
   });
 }

@@ -19,25 +19,20 @@ async function createDatabase() {
 
     connection.connect((err) => {
       if (err) {
-        console.error("❌ Error connecting to MySQL:", err.message);
         reject(err);
         return;
       }
-
-      console.log("✅ Connected to MySQL server");
 
       // Create database
       connection.query(
         `CREATE DATABASE IF NOT EXISTS \`${dbName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
         (err) => {
           if (err) {
-            console.error(`❌ Error creating database: ${err.message}`);
             connection.end();
             reject(err);
             return;
           }
 
-          console.log(`✅ Database '${dbName}' ensured`);
           connection.end();
           resolve();
         }
@@ -47,10 +42,7 @@ async function createDatabase() {
 }
 
 async function createTablesAndAdmin() {
-  console.log("🚀 Starting database setup...");
-
   // Step 0: Create database if it doesn't exist
-  console.log("🗄️  Creating database if it doesn't exist...");
   await createDatabase();
 
   // Table definitions in order of dependencies - Only essential tables for jewelry business
@@ -288,60 +280,40 @@ async function createTablesAndAdmin() {
 
   try {
     // Step 1: Create tables in dependency order
-    console.log("📋 Creating database tables...");
     for (const tableDef of tableDefinitions) {
       await executeQuery(tableDef.sql, `${tableDef.name} table ensured`);
     }
 
     // Step 2: Create default admin user
-    console.log("👤 Setting up default admin user...");
     await createDefaultAdmin();
 
     // Step 3: Create indexes for better performance
-    console.log("⚡ Creating database indexes...");
     await createIndexes();
 
     // Step 4: Update existing tables with new fields
-    console.log("🔄 Updating existing tables with new fields...");
     await updateExistingTables();
 
-    console.log("✅ Database setup completed successfully!");
-    console.log("\n📊 Database Summary:");
-    console.log("   • Users table (admin & business users)");
-    console.log("   • Categories table (product categories)");
-    console.log("   • Login Requests table (access management)");
-    console.log("   • Products table (jewelry items with images)");
-    console.log("   • Cart Items table (shopping cart with real-time sync)");
-    console.log("   • Orders table (business orders with total_amount)");
-    console.log("   • Product Stock History table (stock tracking & audit)");
-    console.log("   • Notifications table (push notifications)");
-    console.log("   • User Notifications table (read status tracking)");
-    console.log("   • Notification Tokens table (FCM tokens)");
-    console.log("   • App Versions table (version management)");
-    console.log("   • App Icons table (app icon management)");
-    console.log("   • Sliders table (banner/slider management)");
-    console.log("   • Media Gallery table (file management)");
-    console.log("\n🛒 Cart & Order System Features:");
-    console.log(
-      "   • Real-time cart synchronization between frontend & backend"
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    ");
+    "
     );
-    console.log("   • Product lookup by SKU for accurate cart management");
-    console.log("   • Individual product status tracking in orders");
-    console.log("   • Automatic cart clearing after successful order creation");
-    console.log(
-      "   • Product stock management (available/out_of_stock/reserved)"
-    );
-    console.log("   • Automatic stock status update after order placement");
-    console.log("\n🌐 API Endpoints Available:");
-    console.log("   • Cart: /api/cart/* (add, get, update, remove, clear)");
-    console.log("   • Orders: /api/orders/* (create, get, update, status)");
-    console.log("   • Products: /api/products/* (get, create, update, delete)");
-    console.log("   • Users: /api/users/* (register, login, profile)");
-    console.log("\n🔑 Default Admin Credentials:");
-    console.log("   • Email: Admin@admin.com");
-    console.log("   • Password: Admin@123");
-  } catch (error) {
-    console.error("❌ Error during database setup:", error);
+    ");
+    ");
+    ");
+    ");
+    } catch (error) {
     throw error;
   }
 }
@@ -351,10 +323,8 @@ async function executeQuery(sql, successMessage) {
   return new Promise((resolve, reject) => {
     db.query(sql, (err) => {
       if (err) {
-        console.error(`❌ Error executing query: ${err.message}`);
         reject(err);
       } else {
-        console.log(`✅ ${successMessage}`);
         resolve();
       }
     });
@@ -379,19 +349,15 @@ async function createDefaultAdmin() {
 
           db.query(insertAdmin, [hashedPassword], (err) => {
             if (err) {
-              console.error("❌ Error creating admin user:", err.message);
               reject(err);
             } else {
-              console.log("✅ Default admin user created");
               resolve();
             }
           });
         } catch (hashError) {
-          console.error("❌ Error hashing password:", hashError.message);
           reject(hashError);
         }
       } else {
-        console.log("ℹ️  Admin user already exists");
         resolve();
       }
     });
@@ -488,12 +454,10 @@ async function createIndexes() {
       if (!indexExists) {
         await executeQuery(index.sql, `Index ${index.name} created`);
       } else {
-        console.log(`ℹ️  Index ${index.name} already exists`);
-      }
+        }
     } catch (error) {
       // Index creation failed, log and continue
-      console.log(`ℹ️  Index ${index.name} creation failed: ${error.message}`);
-    }
+      }
   }
 }
 
@@ -522,8 +486,6 @@ function getTableNameFromIndex(indexName) {
 
 // Update existing tables with new fields
 async function updateExistingTables() {
-  console.log("🔄 Updating existing tables with new fields...");
-
   try {
     // Add stock_status field to products table if it doesn't exist
     const checkStockStatus = "SHOW COLUMNS FROM products LIKE 'stock_status'";
@@ -535,7 +497,6 @@ async function updateExistingTables() {
     });
 
     if (!hasStockStatus) {
-      console.log("🔧 Adding stock_status field to products table...");
       await executeQuery(
         "ALTER TABLE products ADD COLUMN stock_status ENUM('available', 'out_of_stock', 'reserved') DEFAULT 'available' AFTER status",
         "stock_status field added to products table"
@@ -547,13 +508,10 @@ async function updateExistingTables() {
         "Existing products updated with available stock status"
       );
     } else {
-      console.log("ℹ️  stock_status field already exists in products table");
-    }
+      }
 
-    console.log("✅ Table updates completed");
-  } catch (error) {
-    console.log(
-      `ℹ️  Table update failed (might already be updated): ${error.message}`
+    } catch (error) {
+    : ${error.message}`
     );
   }
 }
@@ -565,11 +523,9 @@ module.exports = createTablesAndAdmin;
 if (require.main === module) {
   createTablesAndAdmin()
     .then(() => {
-      console.log("🎉 Database setup completed!");
       process.exit(0);
     })
     .catch((error) => {
-      console.error("💥 Database setup failed:", error);
       process.exit(1);
     });
 }

@@ -148,26 +148,15 @@ function deleteProductImage(productId, imageIndex, callback) {
 
 // Get all products (only active ones)
 function getAllProducts(callback) {
-  console.log("🔍 [PRODUCTS] Getting all products...");
-
   // First, let's check all products to see what status values exist
   db.query(
     "SELECT id, name, status, stock_status FROM products ORDER BY created_at DESC",
     (debugErr, debugResults) => {
       if (debugErr) {
-        console.error("❌ [PRODUCTS] Debug query error:", debugErr);
-      } else {
-        console.log(
-          "🔍 [PRODUCTS] All products in database:",
-          debugResults.length
+        } else {
+        => p.status === "active").length
         );
-        console.log(
-          "🔍 [PRODUCTS] Products with status 'active':",
-          debugResults.filter((p) => p.status === "active").length
-        );
-        console.log(
-          "🔍 [PRODUCTS] Products with status 'draft':",
-          debugResults.filter((p) => p.status === "draft").length
+        => p.status === "draft").length
         );
       }
     }
@@ -176,13 +165,10 @@ function getAllProducts(callback) {
   const sql =
     "SELECT * FROM products WHERE status = 'active' ORDER BY created_at DESC";
 
-  console.log("🔍 [PRODUCTS] SQL Query:", sql);
   db.query(sql, (err, results) => {
     if (err) {
-      console.error("❌ [PRODUCTS] Database error:", err);
-    } else {
-      console.log("🔍 [PRODUCTS] Filtered results count:", results.length);
-    }
+      } else {
+      }
     callback(err, results);
   });
 }
@@ -230,31 +216,16 @@ function getProductsByCategory(categoryId, callback) {
 
 // Get product by SKU
 function getProductBySku(sku, callback) {
-  console.log("🔍 [MODEL] getProductBySku called with SKU:", sku);
-
   // For cart operations, we need to find the product regardless of stock status
   // Only check if the product is active (not draft) and available (not out of stock)
   const sql =
     "SELECT * FROM products WHERE sku = ? AND status = 'active' AND stock_status != 'out_of_stock'";
 
-  console.log("🔍 [MODEL] SQL query:", sql);
-  console.log("🔍 [MODEL] Values:", [sku]);
-
   db.query(sql, [sku], (err, results) => {
     if (err) {
-      console.error("❌ [MODEL] Database error in getProductBySku:", err);
-    } else {
-      console.log("✅ [MODEL] getProductBySku database result:", results);
-      console.log("✅ [MODEL] Results count:", results.length);
+      } else {
       if (results.length > 0) {
-        console.log("✅ [MODEL] Product found:", {
-          id: results[0].id,
-          name: results[0].name,
-          sku: results[0].sku,
-          status: results[0].status,
-          stock_status: results[0].stock_status,
-        });
-      }
+        }
     }
     callback(err, results);
   });
@@ -288,12 +259,6 @@ function isProductAvailableForOrder(productId, callback) {
       return callback(err);
     }
     const isAvailable = results.length > 0;
-    console.log("🔍 [MODEL] isProductAvailableForOrder check:", {
-      productId,
-      isAvailable,
-      status: results[0]?.status,
-      stock_status: results[0]?.stock_status,
-    });
     callback(null, isAvailable);
   });
 }
@@ -320,53 +285,28 @@ function recordStockHistory(historyData, callback) {
 
 // Get available products only (for frontend display)
 function getAvailableProducts(callback) {
-  console.log("🔍 [MODEL] getAvailableProducts called");
-
   // For frontend display, only show active products that are available (not out of stock)
   const sql =
     "SELECT * FROM products WHERE status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
-  console.log("🔍 [MODEL] SQL query:", sql);
-
   db.query(sql, (err, results) => {
     if (err) {
-      console.error("❌ [MODEL] Database error in getAvailableProducts:", err);
-    } else {
-      console.log(
-        "✅ [MODEL] getAvailableProducts database result count:",
-        results.length
-      );
-    }
+      } else {
+      }
     callback(err, results);
   });
 }
 
 // Get products by category (only available ones)
 function getAvailableProductsByCategory(categoryId, callback) {
-  console.log(
-    "🔍 [MODEL] getAvailableProductsByCategory called for category:",
-    categoryId
-  );
-
   // For frontend display by category, only show active products that are available (not out of stock)
   const sql =
     "SELECT * FROM products WHERE category_id = ? AND status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
-  console.log("🔍 [MODEL] SQL query:", sql);
-  console.log("🔍 [MODEL] Values:", [categoryId]);
-
   db.query(sql, [categoryId], (err, results) => {
     if (err) {
-      console.error(
-        "❌ [MODEL] Database error in getAvailableProductsByCategory:",
-        err
-      );
-    } else {
-      console.log(
-        "✅ [MODEL] getAvailableProductsByCategory database result count:",
-        results.length
-      );
-    }
+      } else {
+      }
     callback(err, results);
   });
 }

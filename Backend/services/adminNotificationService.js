@@ -40,45 +40,27 @@ const NOTIFICATION_TYPES = {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function sendAdminNotification(type, title, body, data = {}) {
-  console.log('🔔 [ADMIN NOTIFICATION] Starting sendAdminNotification:', {
-    type,
-    title,
-    body,
-    dataKeys: Object.keys(data),
+  ,
     timestamp: new Date().toISOString()
   });
 
   try {
     // Get admin user ID (assuming admin has ID 1)
     const adminUserId = 1;
-    console.log('🔔 [ADMIN NOTIFICATION] Admin user ID:', adminUserId);
-    
     // Get admin's FCM token
     const getAdminTokenSql = 'SELECT token FROM notification_tokens WHERE user_id = ? AND active = true LIMIT 1';
-    console.log('🔔 [ADMIN NOTIFICATION] Querying for admin FCM token...');
-    
     return new Promise((resolve, reject) => {
       db.query(getAdminTokenSql, [adminUserId], async (tokenErr, tokenResults) => {
         if (tokenErr) {
-          console.error('❌ [ADMIN NOTIFICATION] Error getting admin token:', tokenErr);
           reject({ success: false, error: 'Failed to get admin token' });
           return;
         }
 
-        console.log('🔔 [ADMIN NOTIFICATION] Token query results:', {
-          count: tokenResults.length,
-          hasResults: tokenResults.length > 0
-        });
-
         if (tokenResults.length === 0) {
-          console.log('⚠️ [ADMIN NOTIFICATION] No active FCM token found for admin');
-          console.log('🔍 [ADMIN NOTIFICATION] Checking all tokens in database...');
-          
           // Debug: Check all tokens in the database
           db.query('SELECT user_id, token, active, created_at FROM notification_tokens', (debugErr, debugResults) => {
             if (debugErr) {
-              console.error('❌ [ADMIN NOTIFICATION] Error checking all tokens:', debugErr);
-            }
+              }
           });
           
           resolve({ success: false, error: 'No admin token found' });
@@ -86,9 +68,7 @@ async function sendAdminNotification(type, title, body, data = {}) {
         }
 
         const adminToken = tokenResults[0].token;
-        console.log('✅ [ADMIN NOTIFICATION] Found admin FCM token:', {
-          tokenLength: adminToken.length,
-          tokenPreview: adminToken.substring(0, 20) + '...',
+        + '...',
           fullToken: adminToken
         });
         
@@ -105,12 +85,6 @@ async function sendAdminNotification(type, title, body, data = {}) {
           timestamp: new Date().toISOString()
         };
 
-        console.log('🔔 [ADMIN NOTIFICATION] Prepared notification data:', {
-          type,
-          sound: notificationData.sound,
-          icon: notificationData.icon,
-          color: notificationData.color,
-          dataKeys: Object.keys(notificationData)
         });
 
         // Create notification record in database
@@ -126,24 +100,15 @@ async function sendAdminNotification(type, title, body, data = {}) {
           LIMIT 1
         `;
 
-        console.log('🔔 [ADMIN NOTIFICATION] Checking for duplicate notifications...');
         db.query(checkDuplicateSql, [adminUserId, type], (duplicateErr, duplicateResults) => {
           if (duplicateErr) {
-            console.error('❌ [ADMIN NOTIFICATION] Error checking duplicates:', duplicateErr);
             // Continue anyway
           } else if (duplicateResults.length > 0) {
-            console.log('⚠️ [ADMIN NOTIFICATION] Duplicate notification detected, skipping...');
             resolve({ success: false, error: 'Duplicate notification prevented' });
             return;
           }
 
-          console.log('🔔 [ADMIN NOTIFICATION] Creating notification record in database...');
-          console.log('🔔 [ADMIN NOTIFICATION] Insert values:', {
-            user_id: adminUserId,
-            title,
-            body,
-            type,
-            data: JSON.stringify(notificationData),
+          ,
             created_at: new Date()
           });
           
@@ -156,21 +121,15 @@ async function sendAdminNotification(type, title, body, data = {}) {
             new Date()
           ], async (insertErr, insertResult) => {
             if (insertErr) {
-              console.error('❌ [ADMIN NOTIFICATION] Error creating notification record:', insertErr);
               reject({ success: false, error: 'Failed to create notification record' });
               return;
             }
 
             const notificationId = insertResult.insertId;
-            console.log('✅ [ADMIN NOTIFICATION] Notification record created with ID:', notificationId);
-
             // Send push notification to admin
-            console.log('🔔 [ADMIN NOTIFICATION] Sending push notification via Firebase...');
             try {
               const pushResult = await sendNotification(adminToken, title, body, notificationData);
-              console.log('✅ [ADMIN NOTIFICATION] Push notification sent successfully:', {
-                pushResult,
-                adminToken: adminToken.substring(0, 20) + '...'
+              + '...'
               });
               
               // Mark notification as unread for admin in user_notifications table
@@ -180,19 +139,13 @@ async function sendAdminNotification(type, title, body, data = {}) {
                 ON DUPLICATE KEY UPDATE read_at = NULL
               `;
               
-              console.log('🔔 [ADMIN NOTIFICATION] Marking notification as unread for admin...');
               db.query(markUnreadSql, [adminUserId, notificationId], (markErr) => {
                 if (markErr) {
-                  console.error('❌ [ADMIN NOTIFICATION] Error marking notification as unread:', markErr);
-                } else {
-                  console.log('✅ [ADMIN NOTIFICATION] Notification marked as unread successfully for admin');
-                }
+                  } else {
+                  }
               });
 
-              console.log(`🎉 [ADMIN NOTIFICATION] Admin notification sent successfully: ${type}`, {
-                notificationId,
-                pushResult,
-                adminToken: adminToken.substring(0, 20) + '...'
+              + '...'
               });
 
               resolve({
@@ -203,7 +156,6 @@ async function sendAdminNotification(type, title, body, data = {}) {
                 sound: notificationData.sound
               });
             } catch (pushError) {
-              console.error('❌ [ADMIN NOTIFICATION] Error sending push notification:', pushError);
               reject({ success: false, error: 'Failed to send push notification' });
             }
           });
@@ -211,7 +163,6 @@ async function sendAdminNotification(type, title, body, data = {}) {
       });
     });
   } catch (error) {
-    console.error('Error in sendAdminNotification:', error);
     throw error;
   }
 }
@@ -248,9 +199,7 @@ async function notifyUserRegistration(userData) {
       type: 'business',
       created_at: new Date().toISOString()
     });
-    console.log('🔌 [SOCKET] Real-time notification sent for new user registration:', userData.name);
-  } catch (socketError) {
-    console.error('❌ [SOCKET] Error sending real-time notification:', socketError);
+    } catch (socketError) {
     // Don't fail the main notification if socket fails
   }
 
@@ -263,8 +212,6 @@ async function notifyUserRegistration(userData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function notifyLoginRequest(loginRequestData) {
-  console.log('🔔 [ADMIN NOTIFICATION] notifyLoginRequest called with data:', loginRequestData);
-  
   const title = 'New Login Request';
   const body = `${loginRequestData.userName} has requested login access for ${loginRequestData.sessionTimeMinutes} minutes.`;
   
@@ -279,7 +226,6 @@ async function notifyLoginRequest(loginRequestData) {
     notificationType: 'login_request' // Ensure this is set for frontend compatibility
   };
 
-  console.log('🔔 [ADMIN NOTIFICATION] Prepared notification data:', data);
   return sendAdminNotification('login_request', title, body, data);
 }
 
@@ -336,9 +282,7 @@ async function notifyRegistrationStatusChange(userData) {
       remarks: userData.remarks || '',
       timestamp: new Date().toISOString()
     });
-    console.log('🔌 [SOCKET] Real-time registration status notification sent for user:', userData.name || userData.id);
-  } catch (socketError) {
-    console.error('❌ [SOCKET] Error sending real-time registration status notification:', socketError);
+    } catch (socketError) {
     // Don't fail the main notification if socket fails
   }
 
@@ -351,14 +295,6 @@ async function notifyRegistrationStatusChange(userData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function notifyLoginRequestStatusChange(requestData) {
-  console.log('🔔 [LOGIN STATUS CHANGE] Starting notification for status change:', {
-    requestId: requestData.id,
-    userId: requestData.userId,
-    status: requestData.status,
-    remarks: requestData.remarks,
-    sessionTimeMinutes: requestData.sessionTimeMinutes
-  });
-  
   const title = 'Login Request Status Updated';
   const body = `Your login request has been ${requestData.status}. ${requestData.remarks ? `Remarks: ${requestData.remarks}` : ''}`;
   
@@ -375,11 +311,6 @@ async function notifyLoginRequestStatusChange(requestData) {
   // Use a more specific notification type for status changes
   const notificationType = requestData.status === 'approved' ? 'login_approved' : 'login_rejected';
   
-  console.log('🔔 [LOGIN STATUS CHANGE] Prepared notification data:', {
-    title,
-    body,
-    notificationType,
-    dataKeys: Object.keys(data)
   });
   
   // Send FCM push notification first
@@ -395,9 +326,7 @@ async function notifyLoginRequestStatusChange(requestData) {
       userName: requestData.userName || 'User',
       timestamp: new Date().toISOString()
     });
-    console.log('🔌 [SOCKET] Real-time login request status notification sent for user:', requestData.userId);
-  } catch (socketError) {
-    console.error('❌ [SOCKET] Error sending real-time login request status notification:', socketError);
+    } catch (socketError) {
     // Don't fail the main notification if socket fails
   }
 
@@ -437,12 +366,7 @@ async function notifyOrderStatusChange(orderData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function sendUserNotification(userId, type, title, body, data = {}) {
-  console.log('🔔 [USER NOTIFICATION] Starting sendUserNotification:', {
-    userId,
-    type,
-    title,
-    body,
-    dataKeys: Object.keys(data),
+  ,
     timestamp: new Date().toISOString()
   });
 
@@ -457,48 +381,33 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
         ORDER BY user_id DESC, created_at DESC
         LIMIT 1
       `;
-      console.log('🔔 [USER NOTIFICATION] Querying for user FCM token (including unauthenticated for login notifications)...');
+      ...');
     } else {
       getTokensSql = `
         SELECT token FROM notification_tokens 
         WHERE user_id = ? AND active = true
       `;
-      console.log('🔔 [USER NOTIFICATION] Querying for user FCM token (authenticated only)...');
+      ...');
     }
 
     return new Promise((resolve, reject) => {
       db.query(getTokensSql, [userId], async (tokenErr, tokenResults) => {
         if (tokenErr) {
-          console.error('❌ [USER NOTIFICATION] Error getting tokens:', tokenErr);
           reject({ success: false, error: 'Failed to get tokens' });
           return;
         }
 
-                         console.log('🔔 [USER NOTIFICATION] Token query results:', {
-          count: tokenResults.length,
-          hasResults: tokenResults.length > 0,
-          results: tokenResults.map(t => ({
-            id: t.id,
-            user_id: t.user_id,
-            device_type: t.device_type,
-            active: t.active,
-            token_preview: t.token ? t.token.substring(0, 20) + '...' : 'null'
+                         + '...' : 'null'
           }))
         });
 
         if (tokenResults.length === 0) {
-          console.log('⚠️ [USER NOTIFICATION] No active FCM token found for user:', userId);
-          console.log('⚠️ [USER NOTIFICATION] This means the user has not registered their FCM token yet');
-          console.log('⚠️ [USER NOTIFICATION] User needs to open the mobile app to register their FCM token');
-          
           // For login notifications, try to find any unauthenticated token as fallback
           if (type === 'login_approved' || type === 'login_rejected') {
-            console.log('🔔 [USER NOTIFICATION] Trying to find unauthenticated token as fallback...');
             const fallbackSql = 'SELECT token FROM notification_tokens WHERE user_id IS NULL AND active = true ORDER BY created_at DESC LIMIT 1';
             
             db.query(fallbackSql, [], async (fallbackErr, fallbackResults) => {
               if (fallbackErr) {
-                console.error('❌ [USER NOTIFICATION] Error getting fallback token:', fallbackErr);
                 resolve({ 
                   success: false, 
                   error: 'No user token found',
@@ -509,7 +418,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
               }
               
               if (fallbackResults.length === 0) {
-                console.log('⚠️ [USER NOTIFICATION] No fallback token found either');
                 resolve({ 
                   success: false, 
                   error: 'No user token found',
@@ -521,7 +429,7 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
               
               // Use fallback token
               const fallbackToken = fallbackResults[0].token;
-              console.log('✅ [USER NOTIFICATION] Using fallback unauthenticated token:', fallbackToken.substring(0, 20) + '...');
+              + '...');
               
               // Continue with notification sending using fallback token
               const typeKey = (type || '').toString().toUpperCase();
@@ -538,10 +446,8 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
               
               try {
                 const pushResult = await sendNotification(fallbackToken, title, body, notificationData);
-                console.log('✅ [USER NOTIFICATION] Fallback notification sent successfully');
                 resolve({ success: true, pushResult, usedFallback: true });
               } catch (pushError) {
-                console.error('❌ [USER NOTIFICATION] Error sending fallback notification:', pushError);
                 resolve({ success: false, error: 'Failed to send fallback notification' });
               }
             });
@@ -559,7 +465,7 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
 
          // Get user's token (authenticated only)
          const userToken = tokenResults[0].token;
-         console.log('✅ [USER NOTIFICATION] Found FCM token (authenticated):', {
+         :', {
            tokenLength: userToken.length,
            tokenPreview: userToken.substring(0, 20) + '...',
            totalTokensFound: tokenResults.length
@@ -578,12 +484,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           timestamp: new Date().toISOString()
         };
 
-        console.log('🔔 [USER NOTIFICATION] Prepared notification data:', {
-          type,
-          sound: notificationData.sound,
-          icon: notificationData.icon,
-          color: notificationData.color,
-          dataKeys: Object.keys(notificationData)
         });
 
         // Create notification record in database
@@ -599,24 +499,15 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           LIMIT 1
         `;
 
-        console.log('🔔 [USER NOTIFICATION] Checking for duplicate notifications...');
         db.query(checkDuplicateSql, [userId, type], (duplicateErr, duplicateResults) => {
           if (duplicateErr) {
-            console.error('❌ [USER NOTIFICATION] Error checking duplicates:', duplicateErr);
             // Continue anyway
           } else if (duplicateResults.length > 0) {
-            console.log('⚠️ [USER NOTIFICATION] Duplicate notification detected, skipping...');
             resolve({ success: false, error: 'Duplicate notification prevented' });
             return;
           }
 
-          console.log('🔔 [USER NOTIFICATION] Creating notification record in database...');
-          console.log('🔔 [USER NOTIFICATION] Insert values:', {
-            user_id: userId,
-            title,
-            body,
-            type,
-            data: JSON.stringify(notificationData),
+          ,
             created_at: new Date()
           });
           
@@ -629,28 +520,15 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             new Date()
           ], async (insertErr, insertResult) => {
             if (insertErr) {
-              console.error('❌ [USER NOTIFICATION] Error creating notification record:', insertErr);
               reject({ success: false, error: 'Failed to create notification record' });
               return;
             }
 
             const notificationId = insertResult.insertId;
-            console.log('✅ [USER NOTIFICATION] Notification record created with ID:', notificationId);
-            console.log('✅ [USER NOTIFICATION] Database record details:', {
-              id: notificationId,
-              title,
-              body,
-              type,
-              data: notificationData
-            });
-
             // Send push notification to user
-            console.log('🔔 [USER NOTIFICATION] Sending push notification via Firebase...');
             try {
               const pushResult = await sendNotification(userToken, title, body, notificationData);
-              console.log('✅ [USER NOTIFICATION] Push notification sent successfully:', {
-                pushResult,
-                userToken: userToken.substring(0, 20) + '...'
+              + '...'
               });
 
               // Mark notification as unread for user
@@ -660,23 +538,16 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
                 ON DUPLICATE KEY UPDATE read_at = NULL
               `;
 
-              console.log('🔔 [USER NOTIFICATION] Marking notification as unread...');
               db.query(markUnreadSql, [userId, notificationId], (markErr) => {
                 if (markErr) {
-                  console.error('❌ [USER NOTIFICATION] Error marking notification as unread:', markErr);
-                } else {
-                  console.log('✅ [USER NOTIFICATION] Notification marked as unread successfully');
-                }
+                  } else {
+                  }
               });
 
-              console.log(`🎉 [USER NOTIFICATION] User notification sent successfully: ${type}`, {
-                notificationId,
-                pushResult,
-                userToken: userToken.substring(0, 20) + '...'
+              + '...'
               });
               resolve({ success: true, notificationId, pushResult });
             } catch (pushError) {
-              console.error('❌ [USER NOTIFICATION] Error sending push notification:', pushError);
               reject({ success: false, error: 'Failed to send push notification' });
             }
           });
@@ -684,7 +555,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
       });
     });
   } catch (error) {
-    console.error('❌ [USER NOTIFICATION] Unexpected error in sendUserNotification:', error);
     return { success: false, error: 'Internal server error' };
   }
 }
@@ -710,7 +580,6 @@ async function getAdminNotificationStats() {
 
     db.query(statsSql, [adminUserId], (err, results) => {
       if (err) {
-        console.error('Error getting notification stats:', err);
         reject(err);
         return;
       }

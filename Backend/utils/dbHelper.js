@@ -18,10 +18,6 @@ const executeQuery = (query, params = [], timeout = 10000) => {
       clearTimeout(queryTimeout);
       
       if (err) {
-        console.error('[DB Helper] Query error:', err);
-        console.error('[DB Helper] Query:', query);
-        console.error('[DB Helper] Params:', params);
-        
         // Handle specific database errors
         if (err.code === 'ETIMEDOUT') {
           reject(new Error('Database connection timeout. Please try again.'));
@@ -47,7 +43,6 @@ const checkConnection = () => {
   return new Promise((resolve) => {
     db.getConnection((err, connection) => {
       if (err) {
-        console.error('[DB Helper] Connection check failed:', err);
         resolve(false);
         return;
       }
@@ -55,7 +50,6 @@ const checkConnection = () => {
       connection.ping((pingErr) => {
         connection.release();
         if (pingErr) {
-          console.error('[DB Helper] Ping failed:', pingErr);
           resolve(false);
         } else {
           resolve(true);

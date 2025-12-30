@@ -11,11 +11,8 @@ const {
 
 // Public routes
 router.post("/register", upload.single("image"), async (req, res) => {
-  console.log("Register API called");
-  console.log("Request body:", req.body);
   if (req.file) {
-    console.log("Uploaded file:", req.file);
-  }
+    }
   userController.registerUser(req, res);
 });
 router.post("/admin/login", userController.adminLogin);

@@ -15,17 +15,11 @@ class EnhancedImageProcessingService {
 
     // Check if watermark file exists
     if (fs.existsSync(this.watermarkPath)) {
-      console.log("✅ Watermark file found:", this.watermarkPath);
-      console.log(
-        "✅ Watermark file size:",
-        fs.statSync(this.watermarkPath).size,
+      .size,
         "bytes"
       );
     } else {
-      console.error("❌ Watermark file not found:", this.watermarkPath);
-      console.error("❌ Current directory:", __dirname);
-      console.error("❌ Attempted path:", this.watermarkPath);
-    }
+      }
   }
 
   /**
@@ -35,8 +29,7 @@ class EnhancedImageProcessingService {
     Object.values(this.uploadDirs).forEach((dir) => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
-        console.log(`Created directory: ${dir}`);
-      }
+        }
     });
   }
 
@@ -50,16 +43,10 @@ class EnhancedImageProcessingService {
       // Get image metadata
       const metadata = await image.metadata();
 
-      console.log(
-        `🧹 Cleaning grey background for ${metadata.width}x${metadata.height} image`
-      );
-
       // Simple approach: Just return the original image for now
       // The complex background cleaning was causing failures
-      console.log(`✅ Background cleaning skipped to prevent failures`);
       return image;
     } catch (error) {
-      console.error("Error cleaning grey background:", error);
       // Return original image if cleaning fails
       return image;
     }
@@ -73,37 +60,16 @@ class EnhancedImageProcessingService {
    */
   async applyWatermark(image, opacity = 0.4) {
     try {
-      console.log(`🔍 [WATERMARK] Starting single watermark application`);
-
       // Check if watermark file exists
       if (!fs.existsSync(this.watermarkPath)) {
-        console.error(
-          `❌ [WATERMARK] Watermark file not found: ${this.watermarkPath}`
-        );
         return image;
       }
 
-      console.log(`✅ [WATERMARK] Watermark file found: ${this.watermarkPath}`);
-
       // Get image metadata
       const metadata = await image.metadata();
-      console.log(`🔍 [WATERMARK] Image metadata:`, {
-        width: metadata.width,
-        height: metadata.height,
-        format: metadata.format,
-        channels: metadata.channels,
-      });
-
       // Load watermark
       const watermark = sharp(this.watermarkPath);
       const watermarkMetadata = await watermark.metadata();
-      console.log(`🔍 [WATERMARK] Watermark metadata:`, {
-        width: watermarkMetadata.width,
-        height: watermarkMetadata.height,
-        format: watermarkMetadata.format,
-        channels: watermarkMetadata.channels,
-      });
-
       // Calculate appropriate watermark size - make it more visible
       const minWatermarkSize = 120; // Further increased minimum size for better visibility
       const maxWatermarkSize = 250; // Further increased maximum size for better visibility
@@ -117,30 +83,17 @@ class EnhancedImageProcessingService {
         (watermarkSize * watermarkMetadata.height) / watermarkMetadata.width
       );
 
-      console.log(
-        `🔍 [WATERMARK] Calculated watermark size: ${watermarkWidth}x${watermarkHeight} pixels`
-      );
-      console.log(
-        `🔍 [WATERMARK] Size constraints: min=${minWatermarkSize}, max=${maxWatermarkSize}, calculated=${percentageSize}`
-      );
-
       // Resize watermark to the calculated size
       const resizedWatermark = await watermark
         .resize(watermarkWidth, watermarkHeight)
         .png()
         .toBuffer();
 
-      console.log(`✅ [WATERMARK] Watermark resized successfully`);
-
       // Place single watermark centered for any image dimension
       const watermarkPosition = {
         x: Math.round((metadata.width - watermarkWidth) / 2),
         y: Math.round((metadata.height - watermarkHeight) / 2),
       };
-
-      console.log(
-        `🔍 [WATERMARK] Center watermark position: x=${watermarkPosition.x}, y=${watermarkPosition.y}`
-      );
 
       // Create composite array with single watermark
       const composites = [
@@ -153,21 +106,11 @@ class EnhancedImageProcessingService {
         },
       ];
 
-      console.log(`🔍 [WATERMARK] Applied single watermark`);
-      console.log(
-        `🔍 [WATERMARK] Watermark size: ${watermarkWidth}x${watermarkHeight}px`
-      );
-      console.log(`🔍 [WATERMARK] Opacity: ${opacity}`);
-
       // Apply watermark to the image
       const watermarkedImage = image.composite(composites);
 
-      console.log(
-        `✅ [WATERMARK] Single watermark application completed successfully`
-      );
       return watermarkedImage;
     } catch (error) {
-      console.error(`❌ [WATERMARK] Error applying watermark:`, error);
       // Return original image if watermarking fails
       return image;
     }
@@ -180,8 +123,6 @@ class EnhancedImageProcessingService {
    */
   async processExistingProductImage(imagePath) {
     try {
-      console.log(`🧹 Cleaning and processing image: ${imagePath}`);
-
       // Load the image
       let image = sharp(imagePath);
 
@@ -207,10 +148,8 @@ class EnhancedImageProcessingService {
         })
         .toFile(outputPath);
 
-      console.log(`✅ Cleaned and watermarked image saved: ${outputPath}`);
       return outputPath;
     } catch (error) {
-      console.error(`❌ Error processing image ${imagePath}:`, error);
       throw error;
     }
   }
@@ -223,11 +162,7 @@ class EnhancedImageProcessingService {
    */
   async processNewProductImage(inputPath, filename) {
     try {
-      console.log(`🆕 [ENHANCED] Processing new product image: ${filename}`);
-      console.log(`🆕 [ENHANCED] Input path: ${inputPath}`);
-      console.log(`🆕 [ENHANCED] Watermark path: ${this.watermarkPath}`);
-      console.log(
-        `🆕 [ENHANCED] Watermark exists: ${fs.existsSync(this.watermarkPath)}`
+      }`
       );
 
       // Handle filename - it might be just the filename or contain a path
@@ -244,50 +179,22 @@ class EnhancedImageProcessingService {
         `${originalName}.webp`
       );
 
-      console.log(`🆕 [ENHANCED] Clean filename: ${cleanFilename}`);
-      console.log(`🆕 [ENHANCED] Original name: ${originalName}`);
-      console.log(`🆕 [ENHANCED] Output path: ${outputPath}`);
-
       // Load image
       let image = sharp(inputPath);
-      console.log(`🆕 [ENHANCED] Image loaded successfully`);
-
       // Clean any potential grey backgrounds first
-      console.log(`🆕 [ENHANCED] Starting background cleaning...`);
       image = await this.cleanGreyBackground(image);
-      console.log(`🆕 [ENHANCED] Background cleaning completed`);
-
       // Apply watermark after cleaning
-      console.log(`🆕 [ENHANCED] Starting watermark application...`);
       try {
         image = await this.applyWatermark(image, 0.8); // Increased opacity to 0.8 for better visibility
-        console.log(
-          `🆕 [ENHANCED] Watermark application completed successfully`
-        );
-
         // Verify watermark was applied by checking if image is still a Sharp instance
         if (image && typeof image.composite === "function") {
-          console.log(
-            `🆕 [ENHANCED] Watermark verification: Image is still processable`
-          );
-        } else {
-          console.error(
-            `🆕 [ENHANCED] Watermark verification failed: Image is not processable`
-          );
+          } else {
           throw new Error(
             "Watermark verification failed - image is not processable"
           );
         }
       } catch (watermarkError) {
-        console.error(
-          `❌ [ENHANCED] Watermark application failed:`,
-          watermarkError
-        );
-        console.error(`❌ [ENHANCED] Watermark error details:`, {
-          message: watermarkError.message,
-          stack: watermarkError.stack,
-          watermarkPath: this.watermarkPath,
-          watermarkExists: fs.existsSync(this.watermarkPath),
+        ,
         });
         // Don't continue without watermark - throw the error
         throw new Error(
@@ -296,7 +203,6 @@ class EnhancedImageProcessingService {
       }
 
       // Save as WebP
-      console.log(`🆕 [ENHANCED] Saving as WebP...`);
       await image
         .webp({
           quality: 85,
@@ -304,10 +210,8 @@ class EnhancedImageProcessingService {
         })
         .toFile(outputPath);
 
-      console.log(`✅ [ENHANCED] New product image processed: ${outputPath}`);
       return outputPath;
     } catch (error) {
-      console.error(`❌ [ENHANCED] Error processing new product image:`, error);
       throw error;
     }
   }
@@ -318,18 +222,12 @@ class EnhancedImageProcessingService {
    */
   async cleanAllExistingProductImages() {
     try {
-      console.log(
-        "🧹 Starting cleanup and watermarking of all existing product images..."
-      );
-
       const productDir = this.uploadDirs.product;
       const files = fs.readdirSync(productDir);
       const imageFiles = files.filter(
         (file) =>
           /\.(jpg|jpeg|png|webp)$/i.test(file) && !file.includes("-cleaned")
       );
-
-      console.log(`Found ${imageFiles.length} images to clean and watermark`);
 
       const cleanedPaths = [];
 
@@ -339,16 +237,11 @@ class EnhancedImageProcessingService {
           const cleanedPath = await this.processExistingProductImage(imagePath);
           cleanedPaths.push(cleanedPath);
         } catch (error) {
-          console.error(`Failed to clean ${file}:`, error);
-        }
+          }
       }
 
-      console.log(
-        `✅ Cleaned and watermarked ${cleanedPaths.length} images successfully`
-      );
       return cleanedPaths;
     } catch (error) {
-      console.error("❌ Error during bulk cleanup:", error);
       throw error;
     }
   }

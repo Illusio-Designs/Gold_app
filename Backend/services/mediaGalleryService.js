@@ -99,14 +99,11 @@ class MediaGalleryService {
 
     // Automatically delete orphaned files
     if (orphaned.length > 0) {
-      console.log(`Found ${orphaned.length} orphaned files, deleting automatically...`);
       for (const file of orphaned) {
         try {
           fs.unlinkSync(file.path);
-          console.log(`Deleted orphaned file: ${file.filename}`);
-        } catch (error) {
-          console.error(`Failed to delete orphaned file: ${file.filename}`, error);
-        }
+          } catch (error) {
+          }
       }
     }
 
@@ -123,8 +120,7 @@ class MediaGalleryService {
         fs.unlinkSync(orphaned.path);
         deletedFiles.push(orphaned);
       } catch (error) {
-        console.error(`Failed to delete orphaned file: ${orphaned.path}`, error);
-      }
+        }
     }
 
     return deletedFiles;
@@ -156,10 +152,7 @@ class MediaGalleryService {
   async deleteFile(filePath) {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log(`[MediaGalleryService] Checking if file exists: ${filePath}`);
-        
         if (!fs.existsSync(filePath)) {
-          console.error(`[MediaGalleryService] File not found: ${filePath}`);
           reject(new Error(`File not found: ${filePath}`));
           return;
         }
@@ -169,17 +162,12 @@ class MediaGalleryService {
         const isCategory = filePath.includes('categories');
         const isProduct = filePath.includes('products');
         
-        console.log(`[MediaGalleryService] File type detected: ${isCategory ? 'category' : isProduct ? 'product' : 'unknown'}`);
-        
         // Delete file from filesystem
         fs.unlink(filePath, async (err) => {
           if (err) {
-            console.error(`[MediaGalleryService] Error deleting file: ${filePath}`, err);
             reject(err);
             return;
           }
-          
-          console.log(`[MediaGalleryService] File deleted successfully: ${filePath}`);
           
           try {
             // Update database to remove image reference
@@ -188,11 +176,9 @@ class MediaGalleryService {
               const updateQuery = 'UPDATE categories SET image = NULL WHERE image = ?';
               db.query(updateQuery, [filename], (dbErr, result) => {
                 if (dbErr) {
-                  console.error(`[MediaGalleryService] Database update error for category:`, dbErr);
                   // Still resolve since file was deleted
                   resolve({ success: true, path: filePath, dbUpdated: false });
                 } else {
-                  console.log(`[MediaGalleryService] Database updated for category: ${filename}`);
                   resolve({ success: true, path: filePath, dbUpdated: true });
                 }
               });
@@ -201,11 +187,9 @@ class MediaGalleryService {
               const updateQuery = 'UPDATE products SET image = NULL, status = "draft" WHERE image = ?';
               db.query(updateQuery, [filename], (dbErr, result) => {
                 if (dbErr) {
-                  console.error(`[MediaGalleryService] Database update error for product:`, dbErr);
                   // Still resolve since file was deleted
                   resolve({ success: true, path: filePath, dbUpdated: false });
                 } else {
-                  console.log(`[MediaGalleryService] Database updated for product: ${filename}, status changed to draft`);
                   resolve({ success: true, path: filePath, dbUpdated: true });
                 }
               });
@@ -214,14 +198,12 @@ class MediaGalleryService {
               resolve({ success: true, path: filePath, dbUpdated: false });
             }
           } catch (dbError) {
-            console.error(`[MediaGalleryService] Database operation error:`, dbError);
             // Still resolve since file was deleted
             resolve({ success: true, path: filePath, dbUpdated: false });
           }
         });
         
       } catch (error) {
-        console.error(`[MediaGalleryService] Unexpected error in deleteFile:`, error);
         reject(error);
       }
     });
@@ -247,86 +229,57 @@ class MediaGalleryService {
   async cleanupOrphanedDatabaseRecords() {
     return new Promise((resolve, reject) => {
       try {
-        console.log('🔧 [MediaGalleryService] Starting cleanup of orphaned database records...');
-        console.log('📁 [MediaGalleryService] Checking categories and products tables...');
-        
         let cleanedCount = 0;
         let categoryCleaned = 0;
         let productCleaned = 0;
         
         // Clean up categories table
-        console.log('📋 [MediaGalleryService] Querying categories table for images...');
         db.query('SELECT id, name, image FROM categories WHERE image IS NOT NULL', (err, categories) => {
           if (err) {
-            console.error('❌ [MediaGalleryService] Error querying categories:', err);
             reject(err);
             return;
           }
           
-          console.log(`📊 [MediaGalleryService] Found ${categories.length} categories with images`);
-          
           categories.forEach(category => {
             const imagePath = path.join(this.uploadDirs.category, category.image);
-            console.log(`🔍 [MediaGalleryService] Checking category "${category.name}" (ID: ${category.id}) - Image: ${category.image}`);
-            console.log(`📂 [MediaGalleryService] Full image path: ${imagePath}`);
-            
+            - Image: ${category.image}`);
             if (!fs.existsSync(imagePath)) {
-              console.log(`⚠️  [MediaGalleryService] Image file NOT FOUND for category "${category.name}" - Cleaning up database record`);
-              
               // Image file doesn't exist, remove from database
               db.query('UPDATE categories SET image = NULL WHERE id = ?', [category.id], (updateErr) => {
                 if (updateErr) {
-                  console.error(`❌ [MediaGalleryService] Error updating category ${category.id}:`, updateErr);
-                } else {
-                  console.log(`✅ [MediaGalleryService] Successfully cleaned up orphaned category image: ${category.image} (ID: ${category.id})`);
+                  } else {
+                  `);
                   cleanedCount++;
                   categoryCleaned++;
                 }
               });
             } else {
-              console.log(`✅ [MediaGalleryService] Image file EXISTS for category "${category.name}" - No cleanup needed`);
-            }
+              }
           });
           
           // Clean up products table
-          console.log('📋 [MediaGalleryService] Querying products table for images...');
           db.query('SELECT id, name, sku, image FROM products WHERE image IS NOT NULL', (err, products) => {
             if (err) {
-              console.error('❌ [MediaGalleryService] Error querying products:', err);
               reject(err);
               return;
             }
             
-            console.log(`📊 [MediaGalleryService] Found ${products.length} products with images`);
-            
             products.forEach(product => {
               const imagePath = path.join(this.uploadDirs.product, product.image);
-              console.log(`🔍 [MediaGalleryService] Checking product "${product.name}" (SKU: ${product.sku}, ID: ${product.id}) - Image: ${product.image}`);
-              console.log(`📂 [MediaGalleryService] Full image path: ${imagePath}`);
-              
+              - Image: ${product.image}`);
               if (!fs.existsSync(imagePath)) {
-                console.log(`⚠️  [MediaGalleryService] Image file NOT FOUND for product "${product.name}" - Cleaning up database record`);
-                
                 // Image file doesn't exist, remove from database
                 db.query('UPDATE products SET image = NULL WHERE id = ?', [product.id], (updateErr) => {
                   if (updateErr) {
-                    console.error(`❌ [MediaGalleryService] Error updating product ${product.id}:`, updateErr);
-                  } else {
-                    console.log(`✅ [MediaGalleryService] Successfully cleaned up orphaned product image: ${product.image} (ID: ${product.id})`);
+                    } else {
+                    `);
                     cleanedCount++;
                     productCleaned++;
                   }
                 });
               } else {
-                console.log(`✅ [MediaGalleryService] Image file EXISTS for product "${product.name}" - No cleanup needed`);
-              }
+                }
             });
-            
-            console.log('🎯 [MediaGalleryService] Cleanup summary:');
-            console.log(`   📊 Total records cleaned: ${cleanedCount}`);
-            console.log(`   📋 Categories cleaned: ${categoryCleaned}`);
-            console.log(`   📦 Products cleaned: ${productCleaned}`);
-            console.log(`✅ [MediaGalleryService] Cleanup completed successfully!`);
             
             resolve({ 
               success: true, 
@@ -339,7 +292,6 @@ class MediaGalleryService {
         });
         
       } catch (error) {
-        console.error('❌ [MediaGalleryService] Unexpected error in cleanupOrphanedDatabaseRecords:', error);
         reject(error);
       }
     });
