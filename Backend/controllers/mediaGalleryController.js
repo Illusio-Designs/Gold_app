@@ -175,12 +175,6 @@ async function bulkUploadMedia(req, res) {
             ocrCandidates = ocr.candidates || [];
             ocrMeta.tag = ocrSku;
             ocrMeta.candidates = ocrCandidates;
-            
-            if (ocrSku) {
-              || "none"})`);
-            } else {
-              "}", Candidates: ${ocrCandidates.length > 0 ? ocrCandidates.join(", ") : "none"}`);
-            }
           } catch (ocrErr) {
             ocrMeta.error = ocrErr.message;
           }
@@ -207,11 +201,7 @@ async function bulkUploadMedia(req, res) {
                 source: "ocr",
                 ocrCandidates,
               };
-              `
-              );
             } else {
-              but no product matched. Will create new product with this SKU.`
-              );
               // Mark that we should create a product with this SKU
               detectedAssociation = {
                 type: "product",
@@ -232,9 +222,6 @@ async function bulkUploadMedia(req, res) {
           }
 
           if (detectedAssociation) {
-            `
-            );
-
             // Process image based on detected type
             if (detectedAssociation.type === "product") {
               // Optional AI photoshoot enhancement (only if configured)
@@ -296,8 +283,6 @@ async function bulkUploadMedia(req, res) {
 
               // Verify file exists
               if (!fs.existsSync(processedFilePath)) {
-                } else {
-                `);
               }
 
               // Create or update product
@@ -451,13 +436,10 @@ async function bulkUploadMedia(req, res) {
             
             // Verify file exists
             if (!fs.existsSync(processedFilePath)) {
-              } else {
-              `);
             }
 
             // If OCR found a SKU but no product exists, create a new product
             if (ocrMeta.tag && !detectedAssociation) {
-              but no association. Creating new product...`);
               const createProductSql = `
                 INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
                 VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
@@ -519,12 +501,6 @@ async function bulkUploadMedia(req, res) {
         ocr: ocrMeta,
         ai: aiMeta,
       };
-
-      // Log OCR results for debugging
-      : "none"}`);
-      if (ocrMeta.tag) {
-        } else {
-        }
 
       const sql = `
         INSERT INTO media_gallery (title, file_url, file_type, category)
@@ -839,6 +815,16 @@ function getMediaItemsWithProcessedImages(req, res) {
         AND mg.file_url NOT LIKE '%/temp/%'
         AND mg.file_url NOT LIKE '%temp/%'
         AND mg.category LIKE '%product%'
+        AND NOT EXISTS (
+          SELECT 1 FROM products p 
+          WHERE p.image IS NOT NULL 
+            AND (p.image = mg.file_url OR p.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM categories c 
+          WHERE c.image IS NOT NULL 
+            AND (c.image = mg.file_url OR c.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
+        )
     ) as main_data
     
     ORDER BY created_at DESC
@@ -918,6 +904,16 @@ function getMediaItemsWithProcessedImages(req, res) {
           AND mg.file_url NOT LIKE '%/temp/%'
           AND mg.file_url NOT LIKE '%temp/%'
           AND mg.category LIKE '%product%'
+          AND NOT EXISTS (
+            SELECT 1 FROM products p 
+            WHERE p.image IS NOT NULL 
+              AND (p.image = mg.file_url OR p.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM categories c 
+            WHERE c.image IS NOT NULL 
+              AND (c.image = mg.file_url OR c.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
+          )
         
         ORDER BY created_at DESC
       `;
@@ -947,11 +943,32 @@ function getMediaItemsWithProcessedImages(req, res) {
           };
         });
 
+        // Deduplicate flexible results based on image filename/path
+        const seenImages = new Set();
+        const deduplicatedResults = processedResults.filter((item) => {
+          if (!item.processed_image) return false;
+          
+          // Extract filename from path (handle both full paths and just filenames)
+          const filename = item.processed_image.includes('/') 
+            ? item.processed_image.split('/').pop() 
+            : item.processed_image;
+          
+          // Create a unique key based on filename
+          const imageKey = filename.toLowerCase();
+          
+          if (seenImages.has(imageKey)) {
+            return false; // Skip duplicate
+          }
+          
+          seenImages.add(imageKey);
+          return true; // Keep this item
+        });
+
         res.json({
           success: true,
           message: "Processed media items retrieved successfully",
-          items: processedResults,
-          count: processedResults.length,
+          items: deduplicatedResults,
+          count: deduplicatedResults.length,
         });
       });
       return;
@@ -990,7 +1007,7 @@ function getMediaItemsWithProcessedImages(req, res) {
       );
     }
 
-    // Process results to include proper image URLs
+    // Process results to include proper image URLs and deduplicate
     const processedResults = results.map((item) => {
       let imageUrl = null;
 
@@ -1027,12 +1044,33 @@ function getMediaItemsWithProcessedImages(req, res) {
       };
     });
 
+    // Deduplicate results based on image filename/path
+    const seenImages = new Set();
+    const deduplicatedResults = processedResults.filter((item) => {
+      if (!item.processed_image) return false;
+      
+      // Extract filename from path (handle both full paths and just filenames)
+      const filename = item.processed_image.includes('/') 
+        ? item.processed_image.split('/').pop() 
+        : item.processed_image;
+      
+      // Create a unique key based on filename
+      const imageKey = filename.toLowerCase();
+      
+      if (seenImages.has(imageKey)) {
+        return false; // Skip duplicate
+      }
+      
+      seenImages.add(imageKey);
+      return true; // Keep this item
+    });
+
     // Return in the format expected by frontend
     res.json({
       success: true,
       message: "Processed media items retrieved successfully",
-      items: processedResults, // Changed from 'data' to 'items'
-      count: processedResults.length,
+      items: deduplicatedResults, // Use deduplicated results
+      count: deduplicatedResults.length,
     });
   });
 }

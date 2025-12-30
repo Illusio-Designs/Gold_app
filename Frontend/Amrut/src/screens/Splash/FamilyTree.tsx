@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, ImageBackground, Dimensions, TouchableOpacity, Text } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'FamilyTree'>;
@@ -11,7 +12,14 @@ const { width, height } = Dimensions.get('window');
 
 const FamilyTree = ({ navigation }: Props) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      // Mark onboarding as seen before navigating to Login
+      try {
+        await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+        console.log('🔔 [FAMILY TREE] Onboarding marked as seen');
+      } catch (error) {
+        console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
+      }
       navigation.replace('Login');
     }, 8000); // Changed from 3000 to 8000 (8 seconds)
     return () => clearTimeout(timer);
@@ -25,7 +33,16 @@ const FamilyTree = ({ navigation }: Props) => {
     >
       <TouchableOpacity 
         style={styles.skipButton} 
-        onPress={() => navigation.replace('Login')}
+        onPress={async () => {
+          // Mark onboarding as seen when user skips
+          try {
+            await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+            console.log('🔔 [FAMILY TREE] Onboarding marked as seen (skip)');
+          } catch (error) {
+            console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
+          }
+          navigation.replace('Login');
+        }}
         activeOpacity={0.8}
       >
         <Text style={styles.skipButtonText}>Skip</Text>

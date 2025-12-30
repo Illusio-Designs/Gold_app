@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, ImageBackground, Dimensions, TouchableOpacity, Text } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ShreenathjiScreen'>;
@@ -27,7 +28,16 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
     >
       <TouchableOpacity 
         style={styles.skipButton} 
-        onPress={() => navigation.replace('Login')}
+        onPress={async () => {
+          // Mark onboarding as seen when user skips
+          try {
+            await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+            console.log('🔔 [SHRENATHJI] Onboarding marked as seen (skip)');
+          } catch (error) {
+            console.error('❌ [SHRENATHJI] Error saving onboarding status:', error);
+          }
+          navigation.replace('Login');
+        }}
         activeOpacity={0.8}
       >
         <Text style={styles.skipButtonText}>Skip</Text>
