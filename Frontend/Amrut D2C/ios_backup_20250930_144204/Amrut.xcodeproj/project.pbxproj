@@ -1,0 +1,561 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		1A698629EBE44D78B3F2291E /* Montserrat-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B04EAE236954C62B5144FCE /* Montserrat-SemiBoldItalic.ttf */; };
+		1F7CB4359562FDD32B18ECD5 /* libPods-Amrut.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C9847B746B510C5D39F4923 /* libPods-Amrut.a */; };
+		37387EEB80F04F96B46BE8F5 /* Montserrat-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4B9CB70BF8774E91A948BFCF /* Montserrat-Italic.ttf */; };
+		3D2288A2C8344C8ABA2903C4 /* Montserrat-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E094CD4A35D24DAA934841BC /* Montserrat-ExtraLight.ttf */; };
+		3E2A5D267BC52E838C7E2977 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		4E89A7C32B874D1894A1B0CC /* Montserrat-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BEB403B6F99248FABD75CF7D /* Montserrat-BoldItalic.ttf */; };
+		58A96CD327734D77BF836C4E /* Montserrat-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6197952FC4524D1C978F2477 /* Montserrat-Light.ttf */; };
+		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
+		7B73FB7E74194FB28C223834 /* info.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8D8ED6CA20F84784B8371C8A /* info.txt */; };
+		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		83BC4F5923D3498DBADC2AE4 /* Montserrat-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1D52FFA4FF9A4E2CB90EB3AE /* Montserrat-ExtraBold.ttf */; };
+		A65AC90233D348C08184E9E7 /* Montserrat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C9D245F251F44283A83096AE /* Montserrat-Regular.ttf */; };
+		AF3F2AB17ED9488D879C2993 /* Montserrat-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8DE3D8D7E9D3451496193590 /* Montserrat-SemiBold.ttf */; };
+		B143944ED3004D488C75A1D1 /* Montserrat-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0E7B3F397E394C6E81FE9A58 /* Montserrat-ExtraBoldItalic.ttf */; };
+		B953D49BA3304E14894515FD /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6D56D4540F2E48A2AE711D10 /* Montserrat-Bold.ttf */; };
+		C17373A3CA794B6195DA1BEE /* Montserrat-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C5D009C3AF764557BC256350 /* Montserrat-ThinItalic.ttf */; };
+		CBA21BFA6CD4472DBAF48CE4 /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 811DEDE381F5484CB0D395B2 /* Montserrat-Medium.ttf */; };
+		D23C3FED3F4347BCB17E05C6 /* Montserrat-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DBEBA456822C4028890DD6C1 /* Montserrat-Thin.ttf */; };
+		D2909C78BE47475E81227F15 /* Montserrat-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 79FDA587A4774076801B4014 /* Montserrat-ExtraLightItalic.ttf */; };
+		D671CA4E5E1E4FFEAD505A66 /* Glorifydemo-BW3J3.otf in Resources */ = {isa = PBXBuildFile; fileRef = 26AC8BD480944E8D9D399178 /* Glorifydemo-BW3J3.otf */; };
+		DCA762DBAA5B479E9737FDC0 /* READ FIRST.txt in Resources */ = {isa = PBXBuildFile; fileRef = 03F6CA38AB0446EAB2BCE480 /* READ FIRST.txt */; };
+		E205590861124E2FA7A80D83 /* Montserrat-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F35B0519CDFB43FE9A37A1CF /* Montserrat-BlackItalic.ttf */; };
+		EA101CEC7B0A4FB9BD62A01E /* Montserrat-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 15E83A04EC3341D88FCD8780 /* Montserrat-LightItalic.ttf */; };
+		FEE4E450A11145418BE1B820 /* Montserrat-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6CE2152C554C4CC89E734437 /* Montserrat-MediumItalic.ttf */; };
+		FF4F6431BCCF450C8D0F7100 /* Montserrat-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F44FAF471BAF413C837C7F9E /* Montserrat-Black.ttf */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		02828178EB4F4286A35BCA89 /* Pods-Amrut.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Amrut.release.xcconfig"; path = "Target Support Files/Pods-Amrut/Pods-Amrut.release.xcconfig"; sourceTree = "<group>"; };
+		03F6CA38AB0446EAB2BCE480 /* READ FIRST.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "READ FIRST.txt"; path = "../src/assets/fonts/glorify-font/misc/READ FIRST.txt"; sourceTree = "<group>"; };
+		0C9847B746B510C5D39F4923 /* libPods-Amrut.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Amrut.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E7B3F397E394C6E81FE9A58 /* Montserrat-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraBoldItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* Amrut.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Amrut.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Amrut/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Amrut/Info.plist; sourceTree = "<group>"; };
+		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Amrut/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		15E83A04EC3341D88FCD8780 /* Montserrat-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-LightItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-LightItalic.ttf"; sourceTree = "<group>"; };
+		1D52FFA4FF9A4E2CB90EB3AE /* Montserrat-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraBold.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-ExtraBold.ttf"; sourceTree = "<group>"; };
+		26AC8BD480944E8D9D399178 /* Glorifydemo-BW3J3.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Glorifydemo-BW3J3.otf"; path = "../src/assets/fonts/glorify-font/Glorifydemo-BW3J3.otf"; sourceTree = "<group>"; };
+		4B9CB70BF8774E91A948BFCF /* Montserrat-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Italic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Italic.ttf"; sourceTree = "<group>"; };
+		6197952FC4524D1C978F2477 /* Montserrat-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Light.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Light.ttf"; sourceTree = "<group>"; };
+		6CE2152C554C4CC89E734437 /* Montserrat-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-MediumItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-MediumItalic.ttf"; sourceTree = "<group>"; };
+		6D56D4540F2E48A2AE711D10 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Bold.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Bold.ttf"; sourceTree = "<group>"; };
+		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Amrut/AppDelegate.swift; sourceTree = "<group>"; };
+		79FDA587A4774076801B4014 /* Montserrat-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraLightItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
+		811DEDE381F5484CB0D395B2 /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Medium.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Medium.ttf"; sourceTree = "<group>"; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Amrut/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8D8ED6CA20F84784B8371C8A /* info.txt */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = info.txt; path = "../src/assets/fonts/glorify-font/info.txt"; sourceTree = "<group>"; };
+		8DE3D8D7E9D3451496193590 /* Montserrat-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBold.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-SemiBold.ttf"; sourceTree = "<group>"; };
+		9B04EAE236954C62B5144FCE /* Montserrat-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBoldItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		BEB403B6F99248FABD75CF7D /* Montserrat-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-BoldItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-BoldItalic.ttf"; sourceTree = "<group>"; };
+		C5D009C3AF764557BC256350 /* Montserrat-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ThinItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-ThinItalic.ttf"; sourceTree = "<group>"; };
+		C9D245F251F44283A83096AE /* Montserrat-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Regular.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Regular.ttf"; sourceTree = "<group>"; };
+		D663E92320DA61818D635AC5 /* Pods-Amrut.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Amrut.debug.xcconfig"; path = "Target Support Files/Pods-Amrut/Pods-Amrut.debug.xcconfig"; sourceTree = "<group>"; };
+		DBEBA456822C4028890DD6C1 /* Montserrat-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Thin.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Thin.ttf"; sourceTree = "<group>"; };
+		E094CD4A35D24DAA934841BC /* Montserrat-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraLight.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-ExtraLight.ttf"; sourceTree = "<group>"; };
+		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F35B0519CDFB43FE9A37A1CF /* Montserrat-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-BlackItalic.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-BlackItalic.ttf"; sourceTree = "<group>"; };
+		F44FAF471BAF413C837C7F9E /* Montserrat-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Black.ttf"; path = "../src/assets/fonts/montserrat/Montserrat-Black.ttf"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F7CB4359562FDD32B18ECD5 /* libPods-Amrut.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13B07FAE1A68108700A75B9A /* Amrut */ = {
+			isa = PBXGroup;
+			children = (
+				13B07FB51A68108700A75B9A /* Images.xcassets */,
+				761780EC2CA45674006654EE /* AppDelegate.swift */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
+				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+			);
+			name = Amrut;
+			sourceTree = "<group>";
+		};
+		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
+				0C9847B746B510C5D39F4923 /* libPods-Amrut.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6FB26539604D41AB883DA55D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				26AC8BD480944E8D9D399178 /* Glorifydemo-BW3J3.otf */,
+				F44FAF471BAF413C837C7F9E /* Montserrat-Black.ttf */,
+				F35B0519CDFB43FE9A37A1CF /* Montserrat-BlackItalic.ttf */,
+				6D56D4540F2E48A2AE711D10 /* Montserrat-Bold.ttf */,
+				BEB403B6F99248FABD75CF7D /* Montserrat-BoldItalic.ttf */,
+				1D52FFA4FF9A4E2CB90EB3AE /* Montserrat-ExtraBold.ttf */,
+				0E7B3F397E394C6E81FE9A58 /* Montserrat-ExtraBoldItalic.ttf */,
+				E094CD4A35D24DAA934841BC /* Montserrat-ExtraLight.ttf */,
+				79FDA587A4774076801B4014 /* Montserrat-ExtraLightItalic.ttf */,
+				4B9CB70BF8774E91A948BFCF /* Montserrat-Italic.ttf */,
+				6197952FC4524D1C978F2477 /* Montserrat-Light.ttf */,
+				15E83A04EC3341D88FCD8780 /* Montserrat-LightItalic.ttf */,
+				811DEDE381F5484CB0D395B2 /* Montserrat-Medium.ttf */,
+				6CE2152C554C4CC89E734437 /* Montserrat-MediumItalic.ttf */,
+				C9D245F251F44283A83096AE /* Montserrat-Regular.ttf */,
+				8DE3D8D7E9D3451496193590 /* Montserrat-SemiBold.ttf */,
+				9B04EAE236954C62B5144FCE /* Montserrat-SemiBoldItalic.ttf */,
+				DBEBA456822C4028890DD6C1 /* Montserrat-Thin.ttf */,
+				C5D009C3AF764557BC256350 /* Montserrat-ThinItalic.ttf */,
+				8D8ED6CA20F84784B8371C8A /* info.txt */,
+				03F6CA38AB0446EAB2BCE480 /* READ FIRST.txt */,
+			);
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
+		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		83CBB9F61A601CBA00E9B192 = {
+			isa = PBXGroup;
+			children = (
+				13B07FAE1A68108700A75B9A /* Amrut */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				83CBBA001A601CBA00E9B192 /* Products */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				6FB26539604D41AB883DA55D /* Resources */,
+			);
+			indentWidth = 2;
+			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
+		};
+		83CBBA001A601CBA00E9B192 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				13B07F961A680F5B00A75B9A /* Amrut.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D663E92320DA61818D635AC5 /* Pods-Amrut.debug.xcconfig */,
+				02828178EB4F4286A35BCA89 /* Pods-Amrut.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		13B07F861A680F5B00A75B9A /* Amrut */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Amrut" */;
+			buildPhases = (
+				BF951B0299E8521C47B5C0AD /* [CP] Check Pods Manifest.lock */,
+				13B07F871A680F5B00A75B9A /* Sources */,
+				13B07F8C1A680F5B00A75B9A /* Frameworks */,
+				13B07F8E1A680F5B00A75B9A /* Resources */,
+				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				F0F2D0B81685CE56DAEF0D17 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Amrut;
+			productName = Amrut;
+			productReference = 13B07F961A680F5B00A75B9A /* Amrut.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		83CBB9F71A601CBA00E9B192 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1210;
+				TargetAttributes = {
+					13B07F861A680F5B00A75B9A = {
+						LastSwiftMigration = 1120;
+					};
+				};
+			};
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Amrut" */;
+			compatibilityVersion = "Xcode 12.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 83CBB9F61A601CBA00E9B192;
+			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				13B07F861A680F5B00A75B9A /* Amrut */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		13B07F8E1A680F5B00A75B9A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				3E2A5D267BC52E838C7E2977 /* PrivacyInfo.xcprivacy in Resources */,
+				D671CA4E5E1E4FFEAD505A66 /* Glorifydemo-BW3J3.otf in Resources */,
+				FF4F6431BCCF450C8D0F7100 /* Montserrat-Black.ttf in Resources */,
+				E205590861124E2FA7A80D83 /* Montserrat-BlackItalic.ttf in Resources */,
+				B953D49BA3304E14894515FD /* Montserrat-Bold.ttf in Resources */,
+				4E89A7C32B874D1894A1B0CC /* Montserrat-BoldItalic.ttf in Resources */,
+				83BC4F5923D3498DBADC2AE4 /* Montserrat-ExtraBold.ttf in Resources */,
+				B143944ED3004D488C75A1D1 /* Montserrat-ExtraBoldItalic.ttf in Resources */,
+				3D2288A2C8344C8ABA2903C4 /* Montserrat-ExtraLight.ttf in Resources */,
+				D2909C78BE47475E81227F15 /* Montserrat-ExtraLightItalic.ttf in Resources */,
+				37387EEB80F04F96B46BE8F5 /* Montserrat-Italic.ttf in Resources */,
+				58A96CD327734D77BF836C4E /* Montserrat-Light.ttf in Resources */,
+				EA101CEC7B0A4FB9BD62A01E /* Montserrat-LightItalic.ttf in Resources */,
+				CBA21BFA6CD4472DBAF48CE4 /* Montserrat-Medium.ttf in Resources */,
+				FEE4E450A11145418BE1B820 /* Montserrat-MediumItalic.ttf in Resources */,
+				A65AC90233D348C08184E9E7 /* Montserrat-Regular.ttf in Resources */,
+				AF3F2AB17ED9488D879C2993 /* Montserrat-SemiBold.ttf in Resources */,
+				1A698629EBE44D78B3F2291E /* Montserrat-SemiBoldItalic.ttf in Resources */,
+				D23C3FED3F4347BCB17E05C6 /* Montserrat-Thin.ttf in Resources */,
+				C17373A3CA794B6195DA1BEE /* Montserrat-ThinItalic.ttf in Resources */,
+				7B73FB7E74194FB28C223834 /* info.txt in Resources */,
+				DCA762DBAA5B479E9737FDC0 /* READ FIRST.txt in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/.xcode.env",
+			);
+			name = "Bundle React Native code and images";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+		};
+		BF951B0299E8521C47B5C0AD /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Amrut-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F0F2D0B81685CE56DAEF0D17 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Amrut/Pods-Amrut-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Amrut/Pods-Amrut-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Amrut/Pods-Amrut-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		13B07F871A680F5B00A75B9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		13B07F941A680F5B00A75B9A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D663E92320DA61818D635AC5 /* Pods-Amrut.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_BITCODE = NO;
+				INFOPLIST_FILE = Amrut/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Amrut;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		13B07F951A680F5B00A75B9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 02828178EB4F4286A35BCA89 /* Pods-Amrut.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = Amrut/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = Amrut;
+				SWIFT_VERSION = 5.0;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		83CBBA201A601CBA00E9B192 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
+					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
+					"\"$(inherited)\"",
+				);
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				USE_HERMES = false;
+			};
+			name = Debug;
+		};
+		83CBBA211A601CBA00E9B192 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
+					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
+					"\"$(inherited)\"",
+				);
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
+				SDKROOT = iphoneos;
+				USE_HERMES = false;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Amrut" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13B07F941A680F5B00A75B9A /* Debug */,
+				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Amrut" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83CBBA201A601CBA00E9B192 /* Debug */,
+				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
+}

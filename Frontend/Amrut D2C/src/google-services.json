@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "76051395970",
+    "project_id": "amrut-9cc5e",
+    "storage_bucket": "amrut-9cc5e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76051395970:android:f1bc7159f214eb6bb4cb9b",
+        "android_client_info": {
+          "package_name": "com.amrutkumargovinddasllp.IllusioDesigns"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbvnLum5aTvMEK3atPqJR7Hm2CdQqArvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
