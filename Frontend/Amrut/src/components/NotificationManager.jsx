@@ -107,8 +107,8 @@ const NotificationManager = ({ navigation, userId }) => {
           break;
           
         case 'login_request_status':
-          console.log('🔔 [NOTIFICATION MANAGER] Navigating to LoginRequests screen...');
-          navigation.navigate('LoginRequests', { 
+          console.log('🔔 [NOTIFICATION MANAGER] Login request status update received');
+          navigation.navigate('Login', { 
             refresh: true,
             requestId: data?.requestId,
             status: data?.status 

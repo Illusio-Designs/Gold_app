@@ -26,8 +26,8 @@ const StackNavigation = () => {
     <NavigationProvider>
       <CartProvider>
         <NavigationContainer ref={navigationRef}>
-          {/* Start app directly on Home (MainTabs) */}
-          <Stack.Navigator initialRouteName="MainTabs" screenOptions={{ headerShown: false }}>
+          {/* Start app on Splash screen */}
+          <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Splash" component={Splash} />
             <Stack.Screen name="JourneyPane" component={JourneyPane} />
             <Stack.Screen name="ShreenathjiScreen" component={ShreenathjiScreen} />
