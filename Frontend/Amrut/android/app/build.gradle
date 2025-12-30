@@ -165,5 +165,4 @@ dependencies {
 }
 
 // Apply Google Services plugin
-// Temporarily disabled - update google-services.json with new package name first
-// apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
