@@ -16,7 +16,7 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
     const timer = setTimeout(() => {
       console.log('🔔 [SHRENATHJI] Navigating to FamilyTree');
       navigation.replace('FamilyTree');
-    }, 8000); // Changed from 3000 to 8000 (8 seconds)
+    }, 5000); // 5 seconds
     return () => clearTimeout(timer);
   }, [navigation]);
 
@@ -36,7 +36,7 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
           } catch (error) {
             console.error('❌ [SHRENATHJI] Error saving onboarding status:', error);
           }
-          navigation.replace('Login');
+          navigation.replace('MainTabs');
         }}
         activeOpacity={0.8}
       >

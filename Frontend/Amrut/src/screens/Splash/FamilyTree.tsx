@@ -13,15 +13,15 @@ const { width, height } = Dimensions.get('window');
 const FamilyTree = ({ navigation }: Props) => {
   useEffect(() => {
     const timer = setTimeout(async () => {
-      // Mark onboarding as seen before navigating to Login
+      // Mark onboarding as seen before navigating to MainTabs
       try {
         await AsyncStorage.setItem('hasSeenOnboarding', 'true');
         console.log('🔔 [FAMILY TREE] Onboarding marked as seen');
       } catch (error) {
         console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
       }
-      navigation.replace('Login');
-    }, 8000); // Changed from 3000 to 8000 (8 seconds)
+      navigation.replace('MainTabs');
+    }, 5000); // 5 seconds
     return () => clearTimeout(timer);
   }, [navigation]);
 
@@ -41,7 +41,7 @@ const FamilyTree = ({ navigation }: Props) => {
           } catch (error) {
             console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
           }
-          navigation.replace('Login');
+          navigation.replace('MainTabs');
         }}
         activeOpacity={0.8}
       >

@@ -17,7 +17,7 @@ const JourneyPane = ({ navigation }: Props) => {
     const timer = setTimeout(() => {
       console.log('🔔 [JOURNEY] Navigating to ShreenathjiScreen');
       navigation.replace('ShreenathjiScreen');
-    }, 8000); // Changed from 3000 to 8000 (8 seconds)
+    }, 5000); // 5 seconds
     return () => clearTimeout(timer);
   }, [navigation]);
 
@@ -49,7 +49,7 @@ const JourneyPane = ({ navigation }: Props) => {
           } catch (error) {
             console.error('❌ [JOURNEY] Error saving onboarding status:', error);
           }
-          navigation.replace('Login');
+          navigation.replace('MainTabs');
         }}
         activeOpacity={0.8}
       >

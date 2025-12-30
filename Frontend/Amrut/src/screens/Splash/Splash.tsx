@@ -24,10 +24,10 @@ const Splash = ({ navigation }) => {
             navigation.replace('MainTabs');
           }, 3000);
         } else if (hasSeenOnboarding === 'true') {
-          console.log('🔔 [SPLASH] User has seen onboarding, navigating to Login');
-          // User has seen onboarding before, go directly to Login
+          console.log('🔔 [SPLASH] User has seen onboarding, navigating to MainTabs');
+          // User has seen onboarding before, go directly to MainTabs (skip login)
           setTimeout(() => {
-            navigation.replace('Login');
+            navigation.replace('MainTabs');
           }, 3000);
         } else {
           console.log('🔔 [SPLASH] First time user, navigating to onboarding');
