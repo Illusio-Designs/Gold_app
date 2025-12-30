@@ -147,16 +147,12 @@ async function bulkUploadMedia(req, res) {
   const aiStudioService = require("../services/aiStudioService");
 
   const aiEnabled = aiStudioService.isEnabled();
-  const aiMissing = [
-    !process.env.REPLICATE_API_TOKEN ? "REPLICATE_API_TOKEN" : null,
-    !process.env.REPLICATE_BG_REMOVE_MODEL ? "REPLICATE_BG_REMOVE_MODEL" : null,
-    !process.env.REPLICATE_STUDIO_MODEL ? "REPLICATE_STUDIO_MODEL" : null,
-  ].filter(Boolean);
+  const aiMissing = !process.env.GOOGLE_AI_API_KEY ? "GOOGLE_AI_API_KEY" : null;
 
   if (!aiEnabled) {
     console.warn(
       "⚠️ [AI STUDIO] Disabled. Missing env:",
-      aiMissing.length ? aiMissing.join(", ") : "(unknown)"
+      aiMissing || "(unknown)"
     );
   }
 
@@ -190,6 +186,7 @@ async function bulkUploadMedia(req, res) {
           let ocrSku = null;
           let ocrCandidates = [];
           try {
+            console.log(`🔍 [OCR] Starting OCR extraction for ${file.originalname}...`);
             const ocr = await ocrService.extractTagNo(file.path, {
               minLen: 3,
               maxLen: 30,
@@ -198,10 +195,17 @@ async function bulkUploadMedia(req, res) {
             ocrCandidates = ocr.candidates || [];
             ocrMeta.tag = ocrSku;
             ocrMeta.candidates = ocrCandidates;
+            
+            if (ocrSku) {
+              console.log(`✅ [OCR] Extracted tag: ${ocrSku} (candidates: ${ocrCandidates.join(", ") || "none"})`);
+            } else {
+              console.log(`ℹ️ [OCR] No tag found. Raw text: "${ocr.rawText || "(empty)"}", Candidates: ${ocrCandidates.length > 0 ? ocrCandidates.join(", ") : "none"}`);
+            }
           } catch (ocrErr) {
-            console.warn(
-              `⚠️ [OCR] OCR failed for ${file.originalname}:`,
-              ocrErr.message
+            console.error(
+              `❌ [OCR] OCR failed for ${file.originalname}:`,
+              ocrErr.message,
+              ocrErr.stack
             );
             ocrMeta.error = ocrErr.message;
           }
@@ -234,8 +238,19 @@ async function bulkUploadMedia(req, res) {
               );
             } else {
               console.log(
-                `⚠️ [OCR] SKU found (${ocrSku}) but no product matched. Falling back to filename detection.`
+                `⚠️ [OCR] SKU found (${ocrSku}) but no product matched. Will create new product with this SKU.`
               );
+              // Mark that we should create a product with this SKU
+              detectedAssociation = {
+                type: "product",
+                id: null, // Will be created
+                name: ocrSku,
+                sku: ocrSku,
+                confidence: "high",
+                source: "ocr_new",
+                ocrCandidates,
+                createNew: true, // Flag to create new product
+              };
             }
           }
 
@@ -259,11 +274,12 @@ async function bulkUploadMedia(req, res) {
               let inputPathForProcessing = file.path;
               let inputFilenameForProcessing = file.filename;
               let bgRemovedPath = null;
+              const tempDir = path.join(__dirname, "../uploads/temp");
+              const tempFilesToCleanup = []; // Track all temp files for cleanup
 
               if (aiEnabled) {
                 try {
                   aiMeta.attempted = true;
-                  const tempDir = path.join(__dirname, "../uploads/temp");
                   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
                   console.log(`✨ [AI STUDIO] Running background removal...`);
@@ -272,6 +288,9 @@ async function bulkUploadMedia(req, res) {
                     tempDir
                   );
                   aiMeta.bgRemovedPath = bgRemovedPath;
+                  if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
+                    tempFilesToCleanup.push(bgRemovedPath);
+                  }
 
                   console.log(`✨ [AI STUDIO] Running studio generation...`);
                   const studioPath = await aiStudioService.generateStudioImage(
@@ -279,18 +298,16 @@ async function bulkUploadMedia(req, res) {
                     tempDir
                   );
                   aiMeta.studioPath = studioPath;
+                  if (studioPath && studioPath.includes("/temp/")) {
+                    tempFilesToCleanup.push(studioPath);
+                  }
 
                   inputPathForProcessing = studioPath;
                   inputFilenameForProcessing = `${detectedAssociation.sku || "product"}-${Date.now()}.png`;
 
-                  // Cleanup original temp upload (since we won't process it)
-                  try {
-                    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-                  } catch (cleanupErr) {
-                    console.warn(
-                      `⚠️ [AI STUDIO] Failed to cleanup original temp file:`,
-                      cleanupErr.message
-                    );
+                  // Mark original temp upload for cleanup (don't delete immediately)
+                  if (file.path && file.path.includes("/temp/")) {
+                    tempFilesToCleanup.push(file.path);
                   }
                 } catch (aiErr) {
                   console.warn(
@@ -300,16 +317,14 @@ async function bulkUploadMedia(req, res) {
                   aiMeta.error = aiErr.message;
                   inputPathForProcessing = file.path;
                   inputFilenameForProcessing = file.filename;
-                } finally {
-                  // Cleanup bg-removed intermediate if it exists
-                  if (bgRemovedPath) {
-                    try {
-                      if (fs.existsSync(bgRemovedPath)) fs.unlinkSync(bgRemovedPath);
-                    } catch (e) {
-                      // ignore
-                    }
-                  }
                 }
+                // Don't cleanup here - track for later cleanup
+              }
+
+              // Store temp files for cleanup
+              if (tempFilesToCleanup.length > 0) {
+                if (!results[i]) results[i] = {};
+                results[i].tempFilesToCleanup = tempFilesToCleanup;
               }
 
               processedFilePath = await imageProcessingService.processProductImage(
@@ -318,35 +333,100 @@ async function bulkUploadMedia(req, res) {
               );
               fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
 
-              // Update product with new image and set status to active
-              const updateProductSql =
-                "UPDATE products SET image = ?, status = 'active' WHERE id = ?";
-              await new Promise((resolve, reject) => {
-                db.query(
-                  updateProductSql,
-                  [path.basename(processedFilePath), detectedAssociation.id],
-                  (err, result) => {
-                    if (err) {
-                      console.error(
-                        `❌ [BULK UPLOAD] Failed to update product:`,
-                        err
-                      );
-                      reject(err);
-                    } else {
-                      console.log(
-                        `✅ [BULK UPLOAD] Product updated with new image and set to active: ${detectedAssociation.name}`
-                      );
-                      updateResult = {
-                        type: "product",
-                        id: detectedAssociation.id,
-                        name: detectedAssociation.name,
-                        status: "active",
-                      };
-                      resolve();
+              // Verify file exists
+              if (!fs.existsSync(processedFilePath)) {
+                console.error(`❌ [BULK UPLOAD] Processed file does not exist: ${processedFilePath}`);
+              } else {
+                console.log(`✅ [BULK UPLOAD] Processed file verified: ${processedFilePath} (URL: ${fileUrl})`);
+              }
+
+              // Create or update product
+              if (detectedAssociation.createNew || !detectedAssociation.id) {
+                // Create new product with OCR-detected SKU
+                console.log(`🆕 [BULK UPLOAD] Creating new product with SKU: ${detectedAssociation.sku}`);
+                const createProductSql = `
+                  INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
+                  VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
+                `;
+                await new Promise((resolve, reject) => {
+                  db.query(
+                    createProductSql,
+                    [
+                      detectedAssociation.sku || detectedAssociation.name, // Use SKU as name
+                      detectedAssociation.sku || detectedAssociation.name,
+                      path.basename(processedFilePath),
+                    ],
+                    (err, result) => {
+                      if (err) {
+                        console.error(
+                          `❌ [BULK UPLOAD] Failed to create product:`,
+                          err
+                        );
+                        reject(err);
+                      } else {
+                        const newProductId = result.insertId;
+                        console.log(
+                          `✅ [BULK UPLOAD] Created new product with ID ${newProductId} and SKU ${detectedAssociation.sku || detectedAssociation.name}`
+                        );
+                        detectedAssociation.id = newProductId;
+                        updateResult = {
+                          type: "product",
+                          id: newProductId,
+                          name: detectedAssociation.sku || detectedAssociation.name,
+                          status: "active",
+                        };
+                        resolve();
+                      }
                     }
-                  }
-                );
-              });
+                  );
+                });
+              } else {
+                // Update existing product with new image and set status to active
+                const updateProductSql =
+                  "UPDATE products SET image = ?, status = 'active' WHERE id = ?";
+                await new Promise((resolve, reject) => {
+                  db.query(
+                    updateProductSql,
+                    [path.basename(processedFilePath), detectedAssociation.id],
+                    (err, result) => {
+                      if (err) {
+                        console.error(
+                          `❌ [BULK UPLOAD] Failed to update product:`,
+                          err
+                        );
+                        reject(err);
+                      } else {
+                        console.log(
+                          `✅ [BULK UPLOAD] Product updated with new image and set to active: ${detectedAssociation.name}`
+                        );
+                        updateResult = {
+                          type: "product",
+                          id: detectedAssociation.id,
+                          name: detectedAssociation.name,
+                          status: "active",
+                        };
+                        resolve();
+                      }
+                    }
+                  );
+                });
+              }
+
+              // Track temp files for cleanup
+              const tempFilesToCleanup = [];
+              if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
+                tempFilesToCleanup.push(bgRemovedPath);
+              }
+              if (aiMeta.studioPath && aiMeta.studioPath.includes("/temp/")) {
+                tempFilesToCleanup.push(aiMeta.studioPath);
+              }
+              if (file.path && file.path.includes("/temp/")) {
+                tempFilesToCleanup.push(file.path);
+              }
+              if (tempFilesToCleanup.length > 0) {
+                if (!results[i]) results[i] = {};
+                results[i].tempFilesToCleanup = tempFilesToCleanup;
+              }
             } else if (detectedAssociation.type === "category") {
               console.log(
                 `🖼️ [BULK UPLOAD] Processing as category image: ${file.originalname}`
@@ -399,11 +479,138 @@ async function bulkUploadMedia(req, res) {
               `❌ [AUTO-DETECT] No association found for: ${file.originalname}`
             );
             // Process as generic product image if no association found
+            // Optional AI photoshoot enhancement (only if configured)
+            let inputPathForProcessing = file.path;
+            let inputFilenameForProcessing = file.filename;
+            let bgRemovedPath = null;
+            const tempDir = path.join(__dirname, "../uploads/temp");
+            const tempFilesToCleanup = []; // Track all temp files for cleanup
+
+            if (aiEnabled) {
+              try {
+                aiMeta.attempted = true;
+                if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+
+                console.log(`✨ [AI STUDIO] Running background removal for unassociated image...`);
+                bgRemovedPath = await aiStudioService.removeBackground(
+                  file.path,
+                  tempDir
+                );
+                aiMeta.bgRemovedPath = bgRemovedPath;
+                if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
+                  tempFilesToCleanup.push(bgRemovedPath);
+                }
+
+                console.log(`✨ [AI STUDIO] Running studio generation for unassociated image...`);
+                const studioPath = await aiStudioService.generateStudioImage(
+                  bgRemovedPath,
+                  tempDir
+                );
+                aiMeta.studioPath = studioPath;
+                if (studioPath && studioPath.includes("/temp/")) {
+                  tempFilesToCleanup.push(studioPath);
+                }
+
+                inputPathForProcessing = studioPath;
+                inputFilenameForProcessing = `product-${Date.now()}.png`;
+
+                // Mark original temp upload for cleanup (don't delete immediately)
+                if (file.path && file.path.includes("/temp/")) {
+                  tempFilesToCleanup.push(file.path);
+                }
+              } catch (aiErr) {
+                console.warn(
+                  `⚠️ [AI STUDIO] AI enhancement failed for ${file.originalname}, falling back to normal pipeline:`,
+                  aiErr.message
+                );
+                aiMeta.error = aiErr.message;
+                inputPathForProcessing = file.path;
+                inputFilenameForProcessing = file.filename;
+              }
+              // Don't cleanup here - track for later cleanup
+            }
+
+            // Store temp files for cleanup
+            if (tempFilesToCleanup.length > 0) {
+              if (!results[i]) results[i] = {};
+              results[i].tempFilesToCleanup = tempFilesToCleanup;
+            }
+
             processedFilePath = await imageProcessingService.processProductImage(
-              file.path,
-              file.filename
+              inputPathForProcessing,
+              inputFilenameForProcessing
             );
             fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
+            
+            // Verify file exists
+            if (!fs.existsSync(processedFilePath)) {
+              console.error(`❌ [BULK UPLOAD] Processed file does not exist: ${processedFilePath}`);
+            } else {
+              console.log(`✅ [BULK UPLOAD] Processed file verified: ${processedFilePath} (URL: ${fileUrl})`);
+            }
+
+            // If OCR found a SKU but no product exists, create a new product
+            if (ocrMeta.tag && !detectedAssociation) {
+              console.log(`🆕 [BULK UPLOAD] OCR found SKU (${ocrMeta.tag}) but no association. Creating new product...`);
+              const createProductSql = `
+                INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
+                VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
+              `;
+              try {
+                await new Promise((resolve, reject) => {
+                  db.query(
+                    createProductSql,
+                    [
+                      ocrMeta.tag, // Use SKU as name
+                      ocrMeta.tag,
+                      path.basename(processedFilePath),
+                    ],
+                    (err, result) => {
+                      if (err) {
+                        console.error(`❌ [BULK UPLOAD] Failed to create product from OCR SKU:`, err);
+                        reject(err);
+                      } else {
+                        const newProductId = result.insertId;
+                        console.log(`✅ [BULK UPLOAD] Created new product with ID ${newProductId} and SKU ${ocrMeta.tag}`);
+                        detectedAssociation = {
+                          type: "product",
+                          id: newProductId,
+                          name: ocrMeta.tag,
+                          sku: ocrMeta.tag,
+                          confidence: "high",
+                          source: "ocr_new",
+                        };
+                        updateResult = {
+                          type: "product",
+                          id: newProductId,
+                          name: ocrMeta.tag,
+                          status: "active",
+                        };
+                        resolve();
+                      }
+                    }
+                  );
+                });
+              } catch (createErr) {
+                console.warn(`⚠️ [BULK UPLOAD] Could not create product from OCR SKU:`, createErr.message);
+              }
+            }
+
+            // Track temp files for cleanup
+            const tempFilesToCleanup = [];
+            if (bgRemovedPath && bgRemovedPath !== file.path && bgRemovedPath.includes("/temp/")) {
+              tempFilesToCleanup.push(bgRemovedPath);
+            }
+            if (aiMeta.studioPath && aiMeta.studioPath.includes("/temp/")) {
+              tempFilesToCleanup.push(aiMeta.studioPath);
+            }
+            if (file.path && file.path.includes("/temp/")) {
+              tempFilesToCleanup.push(file.path);
+            }
+            if (tempFilesToCleanup.length > 0) {
+              if (!results[i]) results[i] = {};
+              results[i].tempFilesToCleanup = tempFilesToCleanup;
+            }
           }
         } catch (processError) {
           console.error(
@@ -432,6 +639,17 @@ async function bulkUploadMedia(req, res) {
         ocr: ocrMeta,
         ai: aiMeta,
       };
+
+      // Log OCR results for debugging
+      console.log(`📝 [OCR SUMMARY] File: ${file.originalname}`);
+      console.log(`   - Tag found: ${ocrMeta.tag || "none"}`);
+      console.log(`   - Candidates: ${ocrMeta.candidates.length > 0 ? ocrMeta.candidates.join(", ") : "none"}`);
+      console.log(`   - Error: ${ocrMeta.error || "none"}`);
+      if (ocrMeta.tag) {
+        console.log(`   - ✅ OCR extracted SKU: ${ocrMeta.tag}`);
+      } else {
+        console.log(`   - ⚠️ OCR did not find any SKU/tag in image`);
+      }
 
       const sql = `
         INSERT INTO media_gallery (title, file_url, file_type, category)
@@ -489,24 +707,83 @@ async function bulkUploadMedia(req, res) {
 
   // Clean up temporary files after processing
   console.log("🧹 [BULK UPLOAD] Cleaning up temporary files...");
-  for (let i = 0; i < req.files.length; i++) {
-    const file = req.files[i];
-    try {
-      // Only delete if it's still in temp directory and processing was successful
-      if (file.path.includes("/temp/") && results[i] && results[i].success) {
-        const fs = require("fs");
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-          console.log(`✅ [CLEANUP] Deleted temporary file: ${file.path}`);
+  const tempDir = path.join(__dirname, "../uploads/temp");
+  const cleanedFiles = new Set(); // Track cleaned files to avoid duplicates
+
+  // Clean up files tracked in results
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    if (result && result.tempFilesToCleanup && Array.isArray(result.tempFilesToCleanup)) {
+      for (const tempFile of result.tempFilesToCleanup) {
+        if (tempFile && !cleanedFiles.has(tempFile)) {
+          try {
+            if (fs.existsSync(tempFile)) {
+              fs.unlinkSync(tempFile);
+              cleanedFiles.add(tempFile);
+              console.log(`✅ [CLEANUP] Deleted tracked temp file: ${tempFile}`);
+            }
+          } catch (cleanupError) {
+            console.warn(
+              `⚠️ [CLEANUP] Failed to delete tracked temp file ${tempFile}:`,
+              cleanupError.message
+            );
+          }
         }
       }
-    } catch (cleanupError) {
-      console.warn(
-        `⚠️ [CLEANUP] Failed to delete temporary file ${file.path}:`,
-        cleanupError.message
-      );
     }
   }
+
+  // Clean up original uploaded temp files
+  for (let i = 0; i < req.files.length; i++) {
+    const file = req.files[i];
+    if (file && file.path && !cleanedFiles.has(file.path)) {
+      try {
+        // Only delete if it's still in temp directory and processing was successful
+        if (file.path.includes("/temp/") && results[i] && results[i].success) {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+            cleanedFiles.add(file.path);
+            console.log(`✅ [CLEANUP] Deleted uploaded temp file: ${file.path}`);
+          }
+        }
+      } catch (cleanupError) {
+        console.warn(
+          `⚠️ [CLEANUP] Failed to delete temp file ${file.path}:`,
+          cleanupError.message
+        );
+      }
+    }
+  }
+
+  // Clean up any remaining temp files in temp directory (AI-generated files)
+  try {
+    if (fs.existsSync(tempDir)) {
+      const tempFiles = fs.readdirSync(tempDir);
+      const now = Date.now();
+      for (const tempFile of tempFiles) {
+        const tempFilePath = path.join(tempDir, tempFile);
+        if (!cleanedFiles.has(tempFilePath)) {
+          try {
+            const stats = fs.statSync(tempFilePath);
+            // Delete files older than 1 hour or AI-generated files
+            if (now - stats.mtimeMs > 3600000 || tempFile.includes("bg-removed") || tempFile.includes("studio-gemini") || tempFile.includes("studio-")) {
+              fs.unlinkSync(tempFilePath);
+              console.log(`✅ [CLEANUP] Deleted old/AI temp file: ${tempFilePath}`);
+            }
+          } catch (cleanupError) {
+            console.warn(
+              `⚠️ [CLEANUP] Failed to delete temp file ${tempFilePath}:`,
+              cleanupError.message
+            );
+          }
+        }
+      }
+    }
+  } catch (dirError) {
+    console.warn(`⚠️ [CLEANUP] Failed to read temp directory:`, dirError.message);
+  }
+
+  console.log(`✅ [CLEANUP] Cleanup completed. Cleaned ${cleanedFiles.size} files.`);
 
   res.json({
     message: "Bulk upload completed with auto-detection",
@@ -725,6 +1002,25 @@ function getMediaItemsWithProcessedImages(req, res) {
     FROM categories c
       WHERE c.image IS NOT NULL AND c.image != '' AND c.image != 'null'
         AND c.image LIKE '%.webp'
+    
+    UNION ALL
+    
+    SELECT 
+      'media_gallery' as type,
+      mg.id,
+      mg.title as name,
+      mg.file_url as processed_image,
+      mg.created_at,
+        NULL as category_name,
+        'media_gallery' as source,
+        NULL as product_status,
+        NULL as category_status
+    FROM media_gallery mg
+      WHERE mg.file_url IS NOT NULL 
+        AND mg.file_url != '' 
+        AND mg.file_url != 'null'
+        AND (mg.file_url LIKE '%.webp' OR mg.file_url LIKE '%.jpg' OR mg.file_url LIKE '%.jpeg' OR mg.file_url LIKE '%.png')
+        AND mg.file_url LIKE '/uploads/%'
     ) as main_data
     
     ORDER BY created_at DESC

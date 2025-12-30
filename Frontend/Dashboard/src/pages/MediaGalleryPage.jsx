@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Image,
   Trash2,
@@ -40,6 +40,11 @@ const MediaGalleryPage = () => {
     console.log("🔍 [FRONTEND] useEffect triggered - loading media items");
     loadProcessedMediaItems();
   }, []); // Empty dependency array to run only once
+
+  // Memoize rendered media cards to prevent unnecessary re-renders
+  const renderedMediaCards = useMemo(() => {
+    return processedMediaItems.map((item) => renderProcessedMediaCard(item));
+  }, [processedMediaItems, renderProcessedMediaCard]);
 
   const loadProcessedMediaItems = async () => {
     // Prevent multiple simultaneous calls
@@ -314,7 +319,7 @@ const MediaGalleryPage = () => {
     }
   };
 
-  const renderProcessedMediaCard = (item) => {
+  const renderProcessedMediaCard = React.useCallback((item) => {
     // Use processed_image field from API response
     const imagePath = item.processed_image || item.image;
     const fileUrl = getFileUrl(item.type, imagePath);
@@ -346,9 +351,16 @@ const MediaGalleryPage = () => {
             <img
               src={fileUrl}
               alt={item.name}
-              onLoad={() =>
-                console.log(`[Dashboard] Processed image loaded:`, fileUrl)
-              }
+              loading="lazy"
+              key={`${item.id}-${imagePath}`}
+              onLoad={() => {
+                // Only log once per unique image
+                if (!window.loadedImages) window.loadedImages = new Set();
+                if (!window.loadedImages.has(fileUrl)) {
+                  window.loadedImages.add(fileUrl);
+                  console.log(`[Dashboard] Processed image loaded:`, fileUrl);
+                }
+              }}
               onError={(e) => {
                 console.error(
                   `[Dashboard] Processed image failed to load:`,
@@ -452,7 +464,7 @@ const MediaGalleryPage = () => {
       {/* Media Grid */}
       <div className="media-grid">
         {processedMediaItems.length > 0 ? (
-          processedMediaItems.map((item) => renderProcessedMediaCard(item))
+          renderedMediaCards
         ) : (
           <div className="empty-state">
             <Image size={48} />
