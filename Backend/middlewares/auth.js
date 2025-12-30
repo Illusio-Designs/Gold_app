@@ -73,8 +73,7 @@ function requireApprovedBusiness(req, res, next) {
     }
 
     if (isBypassUser) {
-      console.log('[Auth] Bypass user detected in requireApprovedBusiness - allowing access');
-    }
+      }
 
     next();
   });
@@ -90,8 +89,7 @@ function optionalAuth(req, res, next) {
       req.user = decoded;
     } catch (error) {
       // Token is invalid, but we don't fail the request
-      console.log('Invalid token in optional auth:', error.message);
-    }
+      }
   }
 
   next();

@@ -10,12 +10,9 @@ class AutoDetectionService {
   // Auto-detect image type and association based on filename
   async detectImageAssociation(filename) {
     const nameWithoutExt = path.parse(filename).name;
-    console.log(`🔍 [AUTO-DETECT] Analyzing filename: "${nameWithoutExt}"`);
-    
     // Try to detect by SKU pattern first (products)
     const skuMatch = await this.detectBySku(nameWithoutExt);
     if (skuMatch) {
-      console.log(`✅ [AUTO-DETECT] High confidence SKU match: ${skuMatch.sku}`);
       return {
         type: 'product',
         id: skuMatch.id,
@@ -28,7 +25,6 @@ class AutoDetectionService {
     // Try to detect by product name
     const productMatch = await this.detectByProductName(nameWithoutExt);
     if (productMatch) {
-      console.log(`✅ [AUTO-DETECT] Medium confidence product name match: ${productMatch.name}`);
       return {
         type: 'product',
         id: productMatch.id,
@@ -41,7 +37,6 @@ class AutoDetectionService {
     // Try to detect by category name
     const categoryMatch = await this.detectByCategoryName(nameWithoutExt);
     if (categoryMatch) {
-      console.log(`✅ [AUTO-DETECT] Medium confidence category match: ${categoryMatch.name}`);
       return {
         type: 'category',
         id: categoryMatch.id,
@@ -53,7 +48,6 @@ class AutoDetectionService {
     // Try fuzzy matching for products
     const fuzzyProductMatch = await this.fuzzyMatchProduct(nameWithoutExt);
     if (fuzzyProductMatch) {
-      console.log(`✅ [AUTO-DETECT] Low confidence fuzzy product match: ${fuzzyProductMatch.name}`);
       return {
         type: 'product',
         id: fuzzyProductMatch.id,
@@ -66,7 +60,6 @@ class AutoDetectionService {
     // Try fuzzy matching for categories
     const fuzzyCategoryMatch = await this.fuzzyMatchCategory(nameWithoutExt);
     if (fuzzyCategoryMatch) {
-      console.log(`✅ [AUTO-DETECT] Low confidence fuzzy category match: ${fuzzyCategoryMatch.name}`);
       return {
         type: 'category',
         id: fuzzyCategoryMatch.id,
@@ -78,11 +71,9 @@ class AutoDetectionService {
     // If no match found, try to guess based on filename patterns
     const guessedType = this.guessTypeFromFilename(nameWithoutExt);
     if (guessedType) {
-      console.log(`🔍 [AUTO-DETECT] Guessing type based on filename pattern: ${guessedType.type}`);
       return guessedType;
     }
 
-    console.log(`❌ [AUTO-DETECT] No match found for filename: "${nameWithoutExt}"`);
     return null;
   }
 

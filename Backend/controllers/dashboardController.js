@@ -87,7 +87,6 @@ function getDashboardStats(req, res) {
       [today],
       (todayOrdersErr, todayOrdersResults) => {
         if (todayOrdersErr) {
-          console.error("Error fetching today's orders:", todayOrdersErr);
           return res.status(500).json({ error: "Database error" });
         }
 
@@ -95,7 +94,6 @@ function getDashboardStats(req, res) {
           approvedUsersQuery,
           (approvedUsersErr, approvedUsersResults) => {
             if (approvedUsersErr) {
-              console.error("Error fetching approved users:", approvedUsersErr);
               return res.status(500).json({ error: "Database error" });
             }
 
@@ -103,10 +101,6 @@ function getDashboardStats(req, res) {
               totalProductsQuery,
               (totalProductsErr, totalProductsResults) => {
                 if (totalProductsErr) {
-                  console.error(
-                    "Error fetching total products:",
-                    totalProductsErr
-                  );
                   return res.status(500).json({ error: "Database error" });
                 }
 
@@ -114,10 +108,6 @@ function getDashboardStats(req, res) {
                   totalCategoriesQuery,
                   (totalCategoriesErr, totalCategoriesResults) => {
                     if (totalCategoriesErr) {
-                      console.error(
-                        "Error fetching total categories:",
-                        totalCategoriesErr
-                      );
                       return res.status(500).json({ error: "Database error" });
                     }
 
@@ -125,10 +115,6 @@ function getDashboardStats(req, res) {
                       recentOrdersQuery,
                       (recentOrdersErr, recentOrdersResults) => {
                         if (recentOrdersErr) {
-                          console.error(
-                            "Error fetching recent orders:",
-                            recentOrdersErr
-                          );
                           return res
                             .status(500)
                             .json({ error: "Database error" });
@@ -138,10 +124,6 @@ function getDashboardStats(req, res) {
                           monthlyRevenueQuery,
                           (monthlyRevenueErr, monthlyRevenueResults) => {
                             if (monthlyRevenueErr) {
-                              console.error(
-                                "Error fetching monthly revenue:",
-                                monthlyRevenueErr
-                              );
                               return res
                                 .status(500)
                                 .json({ error: "Database error" });
@@ -151,10 +133,6 @@ function getDashboardStats(req, res) {
                               topProductsQuery,
                               (topProductsErr, topProductsResults) => {
                                 if (topProductsErr) {
-                                  console.error(
-                                    "Error fetching top products:",
-                                    topProductsErr
-                                  );
                                   return res
                                     .status(500)
                                     .json({ error: "Database error" });
@@ -243,7 +221,6 @@ function getDashboardStats(req, res) {
       }
     );
   } catch (error) {
-    console.error("Dashboard stats error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -277,7 +254,6 @@ function getTodayOrders(req, res) {
 
     db.query(query, [today], (err, results) => {
       if (err) {
-        console.error("Error fetching today's orders:", err);
         return res.status(500).json({ error: "Database error" });
       }
 
@@ -287,7 +263,6 @@ function getTodayOrders(req, res) {
       });
     });
   } catch (error) {
-    console.error("Today orders error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -308,7 +283,6 @@ function getQuickStats(req, res) {
 
     db.query(query, [today, today], (err, results) => {
       if (err) {
-        console.error("Error fetching quick stats:", err);
         return res.status(500).json({ error: "Database error" });
       }
 
@@ -326,7 +300,6 @@ function getQuickStats(req, res) {
       });
     });
   } catch (error) {
-    console.error("Quick stats error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }

@@ -59,10 +59,6 @@ function createLoginRequest(req, res) {
         const getUserSql = "SELECT name, phone_number FROM users WHERE id = ?";
         db.query(getUserSql, [userId], async (userErr, userResults) => {
           if (userErr) {
-            console.error(
-              "Error getting user details for notification:",
-              userErr
-            );
             return;
           }
 
@@ -77,17 +73,9 @@ function createLoginRequest(req, res) {
             };
 
             await notifyLoginRequest(loginRequestData);
-            console.log(
-              "Admin notification sent for login request:",
-              loginRequestData.userName
-            );
-          }
+            }
         });
       } catch (notificationError) {
-        console.error(
-          "Error sending admin notification for login request:",
-          notificationError
-        );
         // Don't fail the login request if notification fails
       }
 
@@ -131,12 +119,7 @@ function updateLoginRequest(req, res) {
   const { requestId } = req.params;
   const { status, sessionTimeMinutes } = req.body;
 
-  console.log(
-    `[updateLoginRequest] Starting update for request ID: ${requestId}, status: ${status}`
-  );
-
   if (!status || !["approved", "rejected"].includes(status)) {
-    console.log(`[updateLoginRequest] Invalid status: ${status}`);
     return res
       .status(400)
       .json({ error: "Valid status (approved/rejected) is required" });
@@ -147,9 +130,6 @@ function updateLoginRequest(req, res) {
     status === "approved" &&
     (!sessionTimeMinutes || sessionTimeMinutes <= 0)
   ) {
-    console.log(
-      `[updateLoginRequest] Missing or invalid session time: ${sessionTimeMinutes}`
-    );
     return res.status(400).json({
       error:
         "Session time in minutes is required when approving a login request",
@@ -161,8 +141,6 @@ function updateLoginRequest(req, res) {
     session_start_time: status === "approved" ? new Date() : null,
     session_time_minutes: status === "approved" ? sessionTimeMinutes : null,
   };
-
-  console.log(`[updateLoginRequest] Update data:`, updateData);
 
   const sql = `
     UPDATE login_requests 
@@ -180,45 +158,27 @@ function updateLoginRequest(req, res) {
     ],
     (err, result) => {
       if (err) {
-        console.error(`[updateLoginRequest] Database error:`, err);
         return res.status(500).json({ error: "Error updating login request" });
       }
 
       if (result.affectedRows === 0) {
-        console.log(
-          `[updateLoginRequest] No rows affected for request ID: ${requestId}`
-        );
         return res.status(404).json({ error: "Login request not found" });
       }
-
-      console.log(
-        `[updateLoginRequest] Successfully updated request ID: ${requestId}`
-      );
 
       // Get user details from the login request
       const getUserSql = "SELECT user_id FROM login_requests WHERE id = ?";
       db.query(getUserSql, [requestId], (userErr, userResults) => {
         if (userErr) {
-          console.error(`[updateLoginRequest] Error getting user ID:`, userErr);
           return;
         }
 
         if (userResults.length === 0) {
-          console.log(
-            `[updateLoginRequest] No user found for request ID: ${requestId}`
-          );
           return;
         }
 
         const userId = userResults[0].user_id;
-        console.log(`[updateLoginRequest] Found user ID: ${userId}`);
-
         // If status is rejected, invalidate all active sessions for this user
         if (status === "rejected") {
-          console.log(
-            `[updateLoginRequest] Rejection detected - invalidating active sessions for user ID: ${userId}`
-          );
-
           // Update all active login requests to 'expired' status
           const invalidateSessionsSql = `
           UPDATE login_requests 
@@ -234,15 +194,8 @@ function updateLoginRequest(req, res) {
             [userId],
             (invalidateErr, invalidateResult) => {
               if (invalidateErr) {
-                console.error(
-                  `[updateLoginRequest] Error invalidating sessions:`,
-                  invalidateErr
-                );
-              } else {
-                console.log(
-                  `[updateLoginRequest] Invalidated ${invalidateResult.affectedRows} active sessions for user ID: ${userId}`
-                );
-              }
+                } else {
+                }
             }
           );
         }
@@ -251,23 +204,14 @@ function updateLoginRequest(req, res) {
         const getUserNameSql = "SELECT name FROM users WHERE id = ?";
         db.query(getUserNameSql, [userId], async (nameErr, nameResults) => {
           if (nameErr) {
-            console.error(
-              `[updateLoginRequest] Error getting user name:`,
-              nameErr
-            );
             return;
           }
 
           if (nameResults.length === 0) {
-            console.log(
-              `[updateLoginRequest] No user name found for user ID: ${userId}`
-            );
             return;
           }
 
           const userName = nameResults[0].name;
-          console.log(`[updateLoginRequest] User name: ${userName}`);
-
           // Create user notification based on status
           let userNotificationData;
           let fcmTitle, fcmMessage;
@@ -304,16 +248,7 @@ function updateLoginRequest(req, res) {
           }
 
           if (userNotificationData) {
-            console.log(
-              `[updateLoginRequest] Creating database notification:`,
-              userNotificationData
-            );
-
             // Send notification to user using the proper service
-            console.log(
-              `[updateLoginRequest] Attempting to send notification to user ID: ${userId}`
-            );
-
             try {
               // Prepare notification data for the service
               const notificationData = {
@@ -329,32 +264,16 @@ function updateLoginRequest(req, res) {
                 businessName: "Amrut Jewels", // Add business name for consistency
               };
 
-              console.log(
-                `[updateLoginRequest] Sending notification with data:`,
-                notificationData
-              );
-
               // Send notification using the proper service
               const notificationResult = await notifyLoginRequestStatusChange(
                 notificationData
               );
-              console.log(
-                `[updateLoginRequest] Notification sent successfully to user ID: ${userId}:`,
-                notificationResult
-              );
-            } catch (notificationError) {
-              console.error(
-                `[updateLoginRequest] Error sending notification to user ID: ${userId}:`,
-                notificationError
-              );
-            }
+              } catch (notificationError) {
+              }
           }
         });
       });
 
-      console.log(
-        `[updateLoginRequest] Sending success response for request ID: ${requestId}`
-      );
       res.json({
         message: `Login request ${status} successfully`,
         sessionTimeMinutes: updateData.session_time_minutes,
@@ -366,33 +285,14 @@ function updateLoginRequest(req, res) {
 // Get approved and active categories for a user (only their requested categories)
 function getApprovedCategoriesForUser(req, res) {
   const userId = req.params.userId;
-  console.log(
-    "[getApprovedCategoriesForUser] Fetching categories for userId:",
-    userId
-  );
-  console.log("[getApprovedCategoriesForUser] Request user:", req.user);
-  console.log("[getApprovedCategoriesForUser] Request headers:", req.headers);
-
   // Get the most recent approved request for this user
   const checkSql = `SELECT * FROM login_requests WHERE user_id = ? AND status = 'logged_in' ORDER BY created_at DESC LIMIT 1`;
-  console.log(
-    "[getApprovedCategoriesForUser] Checking approved login request for user:",
-    userId
-  );
-
   db.query(checkSql, [userId], (checkErr, checkResults) => {
     if (checkErr) {
-      console.error(
-        "[getApprovedCategoriesForUser] Error checking login requests:",
-        checkErr
-      );
       return res.status(500).json({ error: checkErr.message });
     }
 
     if (checkResults.length === 0) {
-      console.log(
-        "[getApprovedCategoriesForUser] No approved login request found"
-      );
       return res.status(403).json({
         error: "No approved login request found",
         message: "User login request is not approved yet",
@@ -400,33 +300,19 @@ function getApprovedCategoriesForUser(req, res) {
     }
 
     const approvedRequest = checkResults[0];
-    console.log(
-      "[getApprovedCategoriesForUser] Approved request found:",
-      approvedRequest.id
-    );
-
     // Parse the requested categories from the approved request
     let requestedCategories = [];
     try {
       if (approvedRequest.category_ids) {
         requestedCategories = JSON.parse(approvedRequest.category_ids);
-        console.log(
-          "[getApprovedCategoriesForUser] User requested categories:",
-          requestedCategories
-        );
-      }
+        }
     } catch (parseError) {
-      console.error(
-        "[getApprovedCategoriesForUser] Error parsing requested categories:",
-        parseError
-      );
       return res
         .status(500)
         .json({ error: "Error parsing requested categories" });
     }
 
     if (requestedCategories.length === 0) {
-      console.log("[getApprovedCategoriesForUser] No categories requested");
       return res.status(400).json({
         error: "No categories were requested",
         message: "User did not request any specific categories",
@@ -436,36 +322,13 @@ function getApprovedCategoriesForUser(req, res) {
     // Fetch only the requested categories that are active
     const placeholders = requestedCategories.map(() => "?").join(",");
     const categorySql = `SELECT * FROM categories WHERE id IN (${placeholders}) AND status = 'active' ORDER BY name`;
-    console.log(
-      "[getApprovedCategoriesForUser] Fetching active categories:",
-      requestedCategories
-    );
-    console.log("[getApprovedCategoriesForUser] SQL Query:", categorySql);
-    console.log(
-      "[getApprovedCategoriesForUser] SQL Parameters:",
-      requestedCategories
-    );
-
     db.query(
       categorySql,
       requestedCategories,
       (categoryErr, categoryResults) => {
         if (categoryErr) {
-          console.error(
-            "[getApprovedCategoriesForUser] Error fetching categories:",
-            categoryErr
-          );
           return res.status(500).json({ error: categoryErr.message });
         }
-
-        console.log(
-          "[getApprovedCategoriesForUser] Active categories found:",
-          categoryResults.length
-        );
-        console.log(
-          "[getApprovedCategoriesForUser] Raw category results:",
-          categoryResults
-        );
 
         // Process results to include processed image URLs
         const processedResults = categoryResults.map((category) => {
@@ -520,29 +383,15 @@ function getApprovedCategoriesForUser(req, res) {
 // Get products filtered by user's approved categories (only their requested categories)
 function getApprovedProductsForUser(req, res) {
   const userId = req.params.userId;
-  console.log(
-    "[getApprovedProductsForUser] Fetching products for userId:",
-    userId
-  );
-  console.log("[getApprovedProductsForUser] Request user:", req.user);
-  console.log("[getApprovedProductsForUser] Request headers:", req.headers);
-
   // First get the user's approved categories
   const checkSql = `SELECT * FROM login_requests WHERE user_id = ? AND status = 'logged_in' ORDER BY created_at DESC LIMIT 1`;
 
   db.query(checkSql, [userId], (checkErr, checkResults) => {
     if (checkErr) {
-      console.error(
-        "[getApprovedProductsForUser] Error checking login requests:",
-        checkErr
-      );
       return res.status(500).json({ error: checkErr.message });
     }
 
     if (checkResults.length === 0) {
-      console.log(
-        "[getApprovedProductsForUser] No approved login request found"
-      );
       return res.status(403).json({
         error: "No approved login request found",
         message: "User login request is not approved yet",
@@ -550,33 +399,19 @@ function getApprovedProductsForUser(req, res) {
     }
 
     const approvedRequest = checkResults[0];
-    console.log(
-      "[getApprovedProductsForUser] Approved request found:",
-      approvedRequest.id
-    );
-
     // Parse the requested categories from the approved request
     let requestedCategories = [];
     try {
       if (approvedRequest.category_ids) {
         requestedCategories = JSON.parse(approvedRequest.category_ids);
-        console.log(
-          "[getApprovedProductsForUser] User requested categories:",
-          requestedCategories
-        );
-      }
+        }
     } catch (parseError) {
-      console.error(
-        "[getApprovedProductsForUser] Error parsing requested categories:",
-        parseError
-      );
       return res
         .status(500)
         .json({ error: "Error parsing requested categories" });
     }
 
     if (requestedCategories.length === 0) {
-      console.log("[getApprovedProductsForUser] No categories requested");
       return res.status(400).json({
         error: "No categories were requested",
         message: "User did not request any specific categories",
@@ -596,21 +431,10 @@ function getApprovedProductsForUser(req, res) {
       ORDER BY p.created_at DESC
     `;
 
-    console.log(
-      "[getApprovedProductsForUser] Fetching products for categories:",
-      requestedCategories
-    );
-
     db.query(productSql, requestedCategories, (err, results) => {
       if (err) {
-        console.error("[getApprovedProductsForUser] Database error:", err);
         return res.status(500).json({ error: err.message });
       }
-
-      console.log(
-        "[getApprovedProductsForUser] Active products found:",
-        results.length
-      );
 
       res.json({
         success: true,

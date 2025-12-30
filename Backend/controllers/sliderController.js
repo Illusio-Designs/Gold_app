@@ -7,9 +7,6 @@ function createSlider(req, res) {
   const { title, category_id } = req.body;
   const image = req.file ? req.file.filename : null;
 
-  console.log("Slider creation request:", { title, category_id, image });
-  console.log("Request body:", req.body);
-
   if (!title || !image) {
     return res.status(400).json({ error: "Title and image are required" });
   }
@@ -19,7 +16,6 @@ function createSlider(req, res) {
   const categoryId = category_id && category_id !== "" ? category_id : null;
   db.query(sql, [title, image, categoryId], (err, result) => {
     if (err) {
-      console.error("Database error:", err);
       if (err.code === "ER_NO_REFERENCED_ROW_2") {
         return res.status(400).json({ error: "Invalid category selected" });
       }

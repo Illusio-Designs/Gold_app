@@ -79,32 +79,22 @@ router.post(
         return res.status(400).json({ error: "Excel file is required" });
       }
 
-      console.log("🔍 [DEBUG EXCEL] Debug Excel file structure");
-      console.log("🔍 [DEBUG EXCEL] File:", req.file.filename);
-      console.log("🔍 [DEBUG EXCEL] File path:", req.file.path);
-      console.log("🔍 [DEBUG EXCEL] File size:", req.file.size, "bytes");
-
       // Read the Excel file
       const xlsx = require("xlsx");
       const workbook = xlsx.readFile(req.file.path);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
 
-      console.log("🔍 [DEBUG EXCEL] Workbook sheets:", workbook.SheetNames);
-      console.log("🔍 [DEBUG EXCEL] Using sheet:", sheetName);
-
       // Convert to JSON
       const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-      console.log("🔍 [DEBUG EXCEL] Total rows in Excel:", data.length);
-      console.log("🔍 [DEBUG EXCEL] All data:", JSON.stringify(data, null, 2));
+      );
 
       // Clean up uploaded file
       const fs = require("fs");
       if (fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
-        console.log("🔍 [DEBUG EXCEL] Uploaded file cleaned up");
-      }
+        }
 
       res.json({
         message: "Excel file structure analyzed",
@@ -119,8 +109,6 @@ router.post(
         },
       });
     } catch (error) {
-      console.error("❌ [DEBUG EXCEL] Error analyzing Excel file:", error);
-
       // Clean up uploaded file on error
       if (req.file && require("fs").existsSync(req.file.path)) {
         require("fs").unlinkSync(req.file.path);

@@ -85,36 +85,19 @@ function deleteImage(filename, uploadType = "profile") {
  */
 async function applyTiledWatermark(imageBuffer, watermarkPath) {
   try {
-    console.log('🔍 [WATERMARK] Starting single watermark application');
-    
     // Check if watermark file exists
     if (!fs.existsSync(watermarkPath)) {
-      console.error(`❌ [WATERMARK] Watermark file not found: ${watermarkPath}`);
       return imageBuffer;
     }
-    
-    console.log(`✅ [WATERMARK] Watermark file found: ${watermarkPath}`);
     
     // Load the image
     let image = sharp(imageBuffer);
     
     // Get image metadata
     const metadata = await image.metadata();
-    console.log(`🔍 [WATERMARK] Image metadata:`, {
-      width: metadata.width,
-      height: metadata.height,
-      format: metadata.format
-    });
-    
     // Load watermark
     const watermark = sharp(watermarkPath);
     const watermarkMetadata = await watermark.metadata();
-    console.log(`🔍 [WATERMARK] Watermark metadata:`, {
-      width: watermarkMetadata.width,
-      height: watermarkMetadata.height,
-      format: watermarkMetadata.format
-    });
-    
     // Calculate appropriate watermark size - not too large, not too small
     const minWatermarkSize = 400; // Increased minimum size for better visibility
     const maxWatermarkSize = 600; // Increased maximum size for better visibility
@@ -123,23 +106,17 @@ async function applyTiledWatermark(imageBuffer, watermarkPath) {
     const watermarkWidth = Math.round(watermarkSize);
     const watermarkHeight = Math.round((watermarkSize * watermarkMetadata.height) / watermarkMetadata.width);
     
-    console.log(`🔍 [WATERMARK] Calculated watermark size: ${watermarkWidth}x${watermarkHeight} pixels`);
-    
     // Resize watermark to the calculated size
     const resizedWatermark = await watermark
       .resize(watermarkWidth, watermarkHeight)
       .png()
       .toBuffer();
     
-    console.log(`✅ [WATERMARK] Watermark resized successfully`);
-
     // Place single watermark centered for any image dimension
     const watermarkPosition = {
       x: Math.round((metadata.width - watermarkWidth) / 2),
       y: Math.round((metadata.height - watermarkHeight) / 2)
     };
-    
-    console.log(`🔍 [WATERMARK] Center watermark position: x=${watermarkPosition.x}, y=${watermarkPosition.y}`);
     
     // Create composite array with single watermark
     const composites = [{
@@ -150,19 +127,13 @@ async function applyTiledWatermark(imageBuffer, watermarkPath) {
       opacity: 0.4
     }];
     
-    console.log(`🔍 [WATERMARK] Applied single watermark`);
-    console.log(`🔍 [WATERMARK] Watermark size: ${watermarkWidth}x${watermarkHeight}px`);
-    
     // Apply watermark to the image
     const watermarkedImage = image.composite(composites);
-    
-    console.log(`✅ [WATERMARK] Single watermark application completed successfully`);
     
     // Return the watermarked image as buffer
     return await watermarkedImage.toBuffer();
     
   } catch (error) {
-    console.error(`❌ [WATERMARK] Error applying watermark:`, error);
     // Return original image if watermarking fails
     return imageBuffer;
   }
@@ -175,7 +146,6 @@ function deleteOldImageIfChanged(oldFilename, newFilename, uploadType = "profile
       deleteImage(oldFilename, uploadType);
       return true;
     } catch (err) {
-      console.warn('Failed to delete old image:', err);
       return false;
     }
   }

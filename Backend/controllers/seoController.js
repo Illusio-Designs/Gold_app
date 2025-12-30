@@ -5,8 +5,6 @@ const getSEOByPageUrl = (req, res) => {
   try {
     const { page_url } = req.query;
 
-    console.log(`🔍 [SEO] Fetching SEO data for: ${page_url}`);
-
     // Hardcoded SEO data for each page
     const seoDataMap = {
       '/': {
@@ -64,7 +62,6 @@ const getSEOByPageUrl = (req, res) => {
 
     if (!seoData) {
       // Return default SEO data if page not found
-      console.log(`⚠️ [SEO] No SEO data found for: ${page_url}, returning default`);
       return res.status(200).json({
         id: 0,
         page_url: page_url,
@@ -79,11 +76,9 @@ const getSEOByPageUrl = (req, res) => {
       });
     }
 
-    console.log(`✅ [SEO] Returning SEO data for: ${page_url}`);
     return res.status(200).json(seoData);
 
   } catch (error) {
-    console.error('❌ [SEO] Error fetching SEO data:', error);
     return res.status(500).json({
       success: false,
       message: 'Error fetching SEO data',

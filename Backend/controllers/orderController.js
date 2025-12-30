@@ -49,7 +49,6 @@ function createOrder(req, res) {
 
   orderModel.createOrder(orderData, async (err, result) => {
     if (err) {
-      console.error("Error creating order:", err);
       return res.status(500).json({ error: err.message });
     }
 
@@ -58,7 +57,6 @@ function createOrder(req, res) {
       result.insertId,
       async (detailsErr, detailsResults) => {
         if (detailsErr) {
-          console.error("Error getting order details:", detailsErr);
           return res.status(500).json({ error: detailsErr.message });
         }
 
@@ -79,16 +77,8 @@ function createOrder(req, res) {
             };
 
             await notifyNewOrder(notificationData);
-            console.log(
-              "Admin notification sent for new order:",
-              notificationData.id
-            );
-          } catch (notificationError) {
-            console.error(
-              "Error sending admin notification for new order:",
-              notificationError
-            );
-          }
+            } catch (notificationError) {
+            }
 
           // Emit real-time order update
           socketService.emitToAll("order-update", {
@@ -122,69 +112,41 @@ function createOrder(req, res) {
 
 // Create order from cart (multiple products)
 function createOrderFromCart(req, res) {
-  console.log("📦 [BACKEND] createOrderFromCart called with:", req.body);
-  console.log("📦 [BACKEND] Headers:", req.headers);
-
   const { user_id, remark, courier_company } = req.body;
 
   if (!user_id) {
-    console.error("❌ [BACKEND] Missing user_id in createOrderFromCart");
     return res.status(400).json({ error: "User ID is required" });
   }
 
-  console.log("📦 [BACKEND] Creating order from cart for user:", user_id);
-
   // Get user's cart items
-  console.log("🛒 [BACKEND] Getting user cart for user:", user_id);
   cartModel.getUserCart(user_id, (cartErr, cartResults) => {
     if (cartErr) {
-      console.error("❌ [BACKEND] Error getting user cart:", cartErr);
       return res.status(500).json({ error: cartErr.message });
     }
 
-    console.log(
-      "🛒 [BACKEND] User cart retrieved, items count:",
-      cartResults.length
-    );
-    console.log("🛒 [BACKEND] Cart items:", cartResults);
-
     if (cartResults.length === 0) {
-      console.error("❌ [BACKEND] Cart is empty for user:", user_id);
       return res.status(400).json({ error: "Cart is empty" });
     }
 
     const orderDetails = { remark, courier_company };
-    console.log("📦 [BACKEND] Order details prepared:", orderDetails);
-
     // Create orders from cart items
-    console.log("📦 [BACKEND] Calling createOrderFromCart model function");
     orderModel.createOrderFromCart(
       user_id,
       cartResults,
       orderDetails,
       (err, orderIds) => {
         if (err) {
-          console.error("❌ [BACKEND] Error creating orders from cart:", err);
           return res.status(500).json({ error: err.message });
         }
 
-        console.log(
-          "✅ [BACKEND] Orders created successfully, orderIds:",
-          orderIds
-        );
-
         // Clear user's cart after successful order creation
-        console.log("🛒 [BACKEND] Clearing user cart after order creation");
         cartModel.clearUserCart(user_id, (clearErr) => {
           if (clearErr) {
-            console.error("❌ [BACKEND] Error clearing cart:", clearErr);
             // Don't fail the order creation if cart clearing fails
           } else {
-            console.log("✅ [BACKEND] User cart cleared successfully");
-          }
+            }
 
           // Emit real-time updates
-          console.log("🔄 [BACKEND] Emitting order-update to all clients");
           socketService.emitToAll("order-update", {
             action: "orders-created-from-cart",
             userId: parseInt(user_id),
@@ -193,10 +155,6 @@ function createOrderFromCart(req, res) {
           });
 
           // Emit specific update to the user's room
-          console.log(
-            "🔄 [BACKEND] Emitting orders-created-from-cart to user room:",
-            `user-${user_id}`
-          );
           socketService.emitToRoom(
             `user-${user_id}`,
             "orders-created-from-cart",
@@ -206,7 +164,6 @@ function createOrderFromCart(req, res) {
             }
           );
 
-          console.log("✅ [BACKEND] Sending success response to client");
           res.status(201).json({
             message: "Orders created successfully from cart",
             orderIds: orderIds,
@@ -222,7 +179,6 @@ function createOrderFromCart(req, res) {
 function getAllOrders(req, res) {
   orderModel.getAllOrders((err, results) => {
     if (err) {
-      console.error("Error getting orders:", err);
       return res.status(500).json({ error: err.message });
     }
     res.json(results);
@@ -239,7 +195,6 @@ function getOrdersByUserId(req, res) {
 
   orderModel.getOrdersByUserId(user_id, (err, results) => {
     if (err) {
-      console.error("Error getting user orders:", err);
       return res.status(500).json({ error: err.message });
     }
     res.json({
@@ -260,7 +215,6 @@ function getCurrentUserOrders(req, res) {
 
   orderModel.getOrdersByUserId(userId, (err, results) => {
     if (err) {
-      console.error("Error getting current user orders:", err);
       return res.status(500).json({ error: err.message });
     }
 
@@ -313,7 +267,6 @@ function getOrderById(req, res) {
   const { id } = req.params;
   orderModel.getOrderById(id, (err, results) => {
     if (err) {
-      console.error("Error getting order by ID:", err);
       return res.status(500).json({ error: err.message });
     }
     if (results.length === 0) {
@@ -352,7 +305,6 @@ function updateOrderStatus(req, res) {
   // - If the business/user is not approved, block status changes EXCEPT "cancelled".
   orderModel.getOrderById(id, (getErr, getResults) => {
     if (getErr) {
-      console.error("Error getting order for status update:", getErr);
       return res.status(500).json({ error: getErr.message });
     }
     if (!getResults || getResults.length === 0) {
@@ -377,7 +329,6 @@ function updateOrderStatus(req, res) {
 
     orderModel.updateOrderStatus(id, status, (err, result) => {
       if (err) {
-        console.error("Error updating order status:", err);
         return res.status(500).json({ error: err.message });
       }
       if (result.affectedRows === 0) {
@@ -387,7 +338,6 @@ function updateOrderStatus(req, res) {
       // Get updated order details for real-time update
       orderModel.getOrderById(id, (detailsErr, detailsResults) => {
         if (detailsErr) {
-          console.error("Error getting updated order details:", detailsErr);
           return res.status(500).json({ error: detailsErr.message });
         }
 
@@ -461,7 +411,6 @@ function bulkUpdateOrderStatuses(req, res) {
   if (status !== "cancelled") {
     orderModel.getOrdersByIds(order_ids, (listErr, listRows) => {
       if (listErr) {
-        console.error("Error checking orders for bulk status update:", listErr);
         return res.status(500).json({ error: listErr.message });
       }
 
@@ -485,7 +434,6 @@ function bulkUpdateOrderStatuses(req, res) {
 
       orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
         if (err) {
-          console.error("Error bulk updating order statuses:", err);
           return res.status(500).json({ error: err.message });
         }
 
@@ -510,7 +458,6 @@ function bulkUpdateOrderStatuses(req, res) {
   // Cancelling is always allowed.
   orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
     if (err) {
-      console.error("Error bulk updating order statuses:", err);
       return res.status(500).json({ error: err.message });
     }
 
@@ -561,7 +508,6 @@ function updateOrder(req, res) {
 
   orderModel.updateOrder(id, orderData, (err, result) => {
     if (err) {
-      console.error("Error updating order:", err);
       return res.status(500).json({ error: err.message });
     }
     if (result.affectedRows === 0) {
@@ -571,7 +517,6 @@ function updateOrder(req, res) {
     // Get updated order details for real-time update
     orderModel.getOrderById(id, (detailsErr, detailsResults) => {
       if (detailsErr) {
-        console.error("Error getting updated order details:", detailsErr);
         return res.status(500).json({ error: detailsErr.message });
       }
 
@@ -613,7 +558,6 @@ function deleteOrder(req, res) {
   const { id } = req.params;
   orderModel.deleteOrder(id, (err, result) => {
     if (err) {
-      console.error("Error deleting order:", err);
       return res.status(500).json({ error: err.message });
     }
     if (result.affectedRows === 0) {
@@ -635,7 +579,6 @@ function deleteOrder(req, res) {
 function getOrderStatistics(req, res) {
   orderModel.getOrderStatistics((err, results) => {
     if (err) {
-      console.error("Error getting order statistics:", err);
       return res.status(500).json({ error: err.message });
     }
     res.json(results[0]);
@@ -647,7 +590,6 @@ function downloadOrderPDF(req, res) {
   const { id } = req.params;
   orderModel.getOrderById(id, (err, results) => {
     if (err) {
-      console.error("Error getting order for PDF:", err);
       return res.status(500).json({ error: err.message });
     }
     if (results.length === 0) {

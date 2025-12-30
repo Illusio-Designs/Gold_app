@@ -25,7 +25,6 @@ function checkAppUpdate(req, res) {
     currentVersionCode,
     (err, results) => {
       if (err) {
-        console.error("Error checking app update:", err);
         return res.status(500).json({ error: "Internal server error" });
       }
 
@@ -81,7 +80,6 @@ function getLatestVersion(req, res) {
 
   appVersionModel.getLatestVersion(platform, (err, results) => {
     if (err) {
-      console.error("Error getting latest version:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -143,7 +141,6 @@ function createAppVersion(req, res) {
 
   appVersionModel.createAppVersion(versionData, (err, result) => {
     if (err) {
-      console.error("Error creating app version:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -169,7 +166,6 @@ function createAppVersion(req, res) {
 function getAllVersions(req, res) {
   appVersionModel.getAllVersions((err, results) => {
     if (err) {
-      console.error("Error getting all versions:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -187,7 +183,6 @@ function getVersionsByPlatform(req, res) {
 
   appVersionModel.getVersionsByPlatform(platform, (err, results) => {
     if (err) {
-      console.error("Error getting versions by platform:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -232,7 +227,6 @@ function updateAppVersion(req, res) {
 
   appVersionModel.updateAppVersion(id, versionData, (err, result) => {
     if (err) {
-      console.error("Error updating app version:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
@@ -262,7 +256,6 @@ function deleteAppVersion(req, res) {
 
     appVersionModel.deleteAppVersion(id, (err, result) => {
       if (err) {
-        console.error("Error deleting app version:", err);
         return res.status(500).json({ error: "Internal server error" });
       }
 
@@ -298,7 +291,6 @@ function activateVersion(req, res) {
       id,
       (deactivateErr) => {
         if (deactivateErr) {
-          console.error("Error deactivating other versions:", deactivateErr);
           return res.status(500).json({ error: "Internal server error" });
         }
 
@@ -309,7 +301,6 @@ function activateVersion(req, res) {
           versionData,
           (updateErr, result) => {
             if (updateErr) {
-              console.error("Error activating version:", updateErr);
               return res.status(500).json({ error: "Internal server error" });
             }
 

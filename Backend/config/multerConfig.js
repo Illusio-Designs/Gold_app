@@ -22,25 +22,14 @@ const storage = multer.diskStorage({
     let uploadDir = uploadDirs.profile; // default
 
     // Multer destination configuration
-    console.log("=== MULTER DESTINATION DEBUG ===");
-    console.log("- File fieldname:", file.fieldname);
-    console.log("- File originalname:", file.originalname);
-    console.log("- File mimetype:", file.mimetype);
-    console.log("- Request baseUrl:", req.baseUrl);
-    console.log("- Request path:", req.path);
-    console.log("- Request method:", req.method);
-    console.log("- Request URL:", req.url);
-
     if (file.fieldname === "image" && req.baseUrl.includes("/products")) {
       uploadDir = uploadDirs.product;
-      console.log("- Using products directory:", uploadDir);
-    } else if (
+      } else if (
       file.fieldname === "image" &&
       req.baseUrl.includes("/categories")
     ) {
       uploadDir = uploadDirs.category;
-      console.log("- Using category directory:", uploadDir);
-    } else if (
+      } else if (
       (file.fieldname === "image" || file.fieldname === "images") &&
       req.baseUrl.includes("/media-gallery")
     ) {
@@ -49,17 +38,14 @@ const storage = multer.diskStorage({
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }
-      console.log("- Using media gallery temp directory:", uploadDir);
-    } else if (
+      } else if (
       file.fieldname === "image" &&
       (req.baseUrl.includes("/users") || req.path.includes("/users"))
     ) {
       // For user profile uploads
       uploadDir = uploadDirs.profile;
-      console.log("- Using profile directory for user upload:", uploadDir);
-    } else {
-      console.log("- Using default profile directory:", uploadDir);
-    }
+      } else {
+      }
 
     cb(null, uploadDir);
   },
@@ -156,16 +142,9 @@ const excelStorage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  console.log("=== MULTER FILE FILTER DEBUG ===");
-  console.log("- File fieldname:", file.fieldname);
-  console.log("- File mimetype:", file.mimetype);
-  console.log("- File originalname:", file.originalname);
-
   if (file.mimetype.startsWith("image/")) {
-    console.log("- File accepted by filter");
     cb(null, true);
   } else {
-    console.log("- File rejected by filter - not an image");
     cb(new Error("Only image files are allowed!"), false);
   }
 };

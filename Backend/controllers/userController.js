@@ -30,10 +30,7 @@ async function registerUser(req, res) {
     remarks: req.body.remarks,
   };
   if (user.type === "business") {
-    console.log(
-      `Registering business user: Name=${user.name}, Phone=${user.phone_number}`
-    );
-  }
+    }
   try {
     // Check for duplicate email or phone number
     db.query(
@@ -66,22 +63,13 @@ async function registerUser(req, res) {
                 [result.insertId, req.body.device_fcm_token],
                 (linkErr) => {
                   if (linkErr) {
-                    console.warn(
-                      "[REGISTER] Failed to link explicit device token to user:",
-                      linkErr.message
-                    );
-                  } else {
-                    console.log(
-                      "[REGISTER] Linked explicit device token to user:",
-                      result.insertId
-                    );
-                  }
+                    } else {
+                    }
                 }
               );
             }
           } catch (e) {
-            console.warn("[REGISTER] Error in explicit device token link");
-          }
+            }
 
           // Send notification to admin for business user registration
           if (user.type === "business") {
@@ -94,15 +82,7 @@ async function registerUser(req, res) {
                 phone_number: user.phone_number,
               };
               await notifyUserRegistration(userData);
-              console.log(
-                "Admin notification sent for user registration:",
-                userData.name
-              );
-            } catch (notificationError) {
-              console.error(
-                "Error sending admin notification for user registration:",
-                notificationError
-              );
+              } catch (notificationError) {
               // Don't fail the registration if notification fails
             }
           }
@@ -119,38 +99,19 @@ async function registerUser(req, res) {
             `;
             db.query(selectSql, [], (selErr, selRows) => {
               if (selErr) {
-                console.warn(
-                  "[REGISTER] Failed to select latest unauth token:",
-                  selErr.message
-                );
-              } else if (selRows && selRows.length > 0) {
+                } else if (selRows && selRows.length > 0) {
                 const tokenRowId = selRows[0].id;
                 const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
                 db.query(updateSql, [newUserId, tokenRowId], (updErr) => {
                   if (updErr) {
-                    console.warn(
-                      "[REGISTER] Failed to link unauth token to user:",
-                      updErr.message
-                    );
-                  } else {
-                    console.log(
-                      "[REGISTER] Linked latest unauth mobile token to user:",
-                      newUserId
-                    );
-                  }
+                    } else {
+                    }
                 });
               } else {
-                console.log(
-                  "[REGISTER] No unauth mobile token found to link at registration time"
-                );
-              }
+                }
             });
           } catch (linkErr) {
-            console.warn(
-              "[REGISTER] Error while linking unauth token to new user:",
-              linkErr.message
-            );
-          }
+            }
 
           res.status(201).json({
             message: "User registered successfully",
@@ -191,8 +152,6 @@ async function adminLogin(req, res) {
 
       // Admin login - return token without creating session
       // Sessions should only be created from approved login requests
-      console.log("[Backend] Admin login successful for user:", user.id);
-
       res.json({
         message: "Login successful",
         token,
@@ -252,16 +211,13 @@ async function businessLogin(req, res) {
 
       // For bypass user, auto-create an approved login request with all active categories
       if (isBypassUser) {
-        console.log(`[BYPASS] Creating auto-approved login request for user: ${BYPASS_PHONE_NUMBER}`);
-
         // First, expire any existing login requests for this user
         db.query(
           'UPDATE login_requests SET status = "expired" WHERE user_id = ? AND status IN ("pending", "approved", "logged_in")',
           [user.id],
           (updateErr) => {
             if (updateErr) {
-              console.error('[BYPASS] Error expiring existing requests:', updateErr);
-            }
+              }
           }
         );
 
@@ -270,12 +226,10 @@ async function businessLogin(req, res) {
           'SELECT id FROM categories WHERE status = "active"',
           (catErr, catResults) => {
             if (catErr) {
-              console.error('[BYPASS] Error fetching active categories:', catErr);
               // Continue with empty categories if error
               createBypassLoginRequest([]);
             } else {
               const allCategoryIds = catResults.map(cat => cat.id);
-              console.log(`[BYPASS] Found ${allCategoryIds.length} active categories`);
               createBypassLoginRequest(allCategoryIds);
             }
           }
@@ -298,10 +252,8 @@ async function businessLogin(req, res) {
             [user.id, categoryIdsJson],
             (insertErr, insertResult) => {
               if (insertErr) {
-                console.error('[BYPASS] Error creating auto-approved login request:', insertErr);
-              } else {
-                console.log(`[BYPASS] Created auto-approved login request with ID: ${insertResult.insertId}`);
-                console.log(`[BYPASS] User has unlimited access (999999 minutes) to all ${categoryIds.length} active categories`);
+                } else {
+                to all ${categoryIds.length} active categories`);
               }
             }
           );
@@ -309,10 +261,8 @@ async function businessLogin(req, res) {
       }
 
       // Business login - return token
-      console.log("[Backend] Business login successful for user:", user.id);
       if (isBypassUser) {
-        console.log("[BYPASS] Bypass user logged in with unlimited access to all categories");
-      }
+        }
 
       res.json({
         message: "Login successful",
@@ -332,64 +282,32 @@ async function businessLogin(req, res) {
 // Update business user status and remarks
 async function updateUserStatus(req, res) {
   try {
-    console.log("=== USER STATUS UPDATE DEBUG ===");
-    console.log("Request params:", req.params);
-    console.log("Request body:", req.body);
-    console.log("Request headers:", req.headers);
-
     const { userId } = req.params;
     const { status, remarks } = req.body;
 
     // Validate required parameters
     if (!userId) {
-      console.error("❌ [USER STATUS UPDATE] Missing userId parameter");
       return res.status(400).json({ error: "User ID is required" });
     }
 
     if (!status) {
-      console.error("❌ [USER STATUS UPDATE] Missing status parameter");
       return res.status(400).json({ error: "Status is required" });
     }
 
     if (!["pending", "approved", "rejected", "denied"].includes(status)) {
-      console.error("❌ [USER STATUS UPDATE] Invalid status:", status);
       return res.status(400).json({ error: "Invalid status" });
     }
 
-    console.log(
-      `🔄 [USER STATUS UPDATE] Updating user ${userId} status to: ${status}`
-    );
-
     // Update user status in database
-    console.log(
-      `🔄 [USER STATUS UPDATE] Executing database query with params:`,
-      [status, remarks, userId]
-    );
-
     db.query(
       'UPDATE users SET status = ?, remarks = ? WHERE id = ? AND type = "business"',
       [status, remarks, userId],
       async (err, result) => {
         if (err) {
-          console.error(`❌ [USER STATUS UPDATE] Database error:`, err);
-          console.error(`❌ [USER STATUS UPDATE] Error details:`, {
-            code: err.code,
-            errno: err.errno,
-            sqlState: err.sqlState,
-            sqlMessage: err.sqlMessage,
-          });
           return res.status(500).json({ error: err.message });
         }
 
-        console.log(
-          `✅ [USER STATUS UPDATE] User status updated successfully:`,
-          result
-        );
-
         if (result.affectedRows === 0) {
-          console.warn(
-            `⚠️ [USER STATUS UPDATE] No rows affected. User might not exist or not be a business user.`
-          );
           return res
             .status(404)
             .json({ error: "User not found or not a business user" });
@@ -397,9 +315,6 @@ async function updateUserStatus(req, res) {
 
         // Send notification to user about status change
         try {
-          console.log(
-            `🔔 [USER STATUS UPDATE] Attempting to send notification...`
-          );
           const {
             notifyRegistrationStatusChange,
           } = require("../services/adminNotificationService");
@@ -410,67 +325,23 @@ async function updateUserStatus(req, res) {
             [userId],
             async (userErr, userResults) => {
               if (userErr) {
-                console.error(
-                  `❌ [USER STATUS UPDATE] Error fetching user data:`,
-                  userErr
-                );
-              } else if (userResults.length > 0) {
+                } else if (userResults.length > 0) {
                 const userData = userResults[0];
-                console.log(
-                  `🔔 [USER STATUS UPDATE] Sending notification to user:`,
-                  userData
-                );
-
                 try {
-                  console.log(
-                    `🔔 [USER STATUS UPDATE] Calling notifyRegistrationStatusChange with userData:`,
-                    userData
-                  );
                   const notificationResult =
                     await notifyRegistrationStatusChange(userData);
-                  console.log(
-                    `✅ [USER STATUS UPDATE] Notification sent successfully:`,
-                    notificationResult
-                  );
-
                   // Check if notification was actually sent
                   if (notificationResult && notificationResult.success) {
-                    console.log(
-                      `✅ [USER STATUS UPDATE] Notification confirmed sent to user ${userId}`
-                    );
-                  } else {
-                    console.error(
-                      `❌ [USER STATUS UPDATE] Notification failed for user ${userId}:`,
-                      notificationResult
-                    );
-                  }
-                } catch (notificationError) {
-                  console.error(
-                    `❌ [USER STATUS UPDATE] Error sending notification:`,
-                    notificationError
-                  );
-                  console.error(
-                    `❌ [USER STATUS UPDATE] Notification error details:`,
-                    {
-                      message: notificationError.message,
-                      stack: notificationError.stack,
-                      name: notificationError.name,
+                    } else {
                     }
-                  );
+                } catch (notificationError) {
                   // Don't fail the request if notification fails
                 }
               } else {
-                console.error(
-                  `❌ [USER STATUS UPDATE] No user data found for ID: ${userId}`
-                );
-              }
+                }
             }
           );
         } catch (notificationError) {
-          console.error(
-            `❌ [USER STATUS UPDATE] Error in notification process:`,
-            notificationError
-          );
           // Don't fail the request if notification fails
         }
 
@@ -482,30 +353,16 @@ async function updateUserStatus(req, res) {
       }
     );
   } catch (error) {
-    console.error(`❌ [USER STATUS UPDATE] Unexpected error:`, error);
-    console.error(`❌ [USER STATUS UPDATE] Error details:`, {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-    });
     res.status(500).json({ error: "Internal server error" });
   }
 }
 
 // Get all users
 function getAllUsers(req, res) {
-  console.log("=== GET ALL USERS DEBUG ===");
-  console.log("Request headers:", req.headers);
-  console.log("Request method:", req.method);
-  console.log("Request URL:", req.url);
-
   db.query("SELECT * FROM users WHERE type = 'business'", (err, results) => {
     if (err) {
-      console.error("❌ [GET ALL USERS] Database error:", err);
       return res.status(500).json({ error: err.message });
     }
-    console.log("✅ [GET ALL USERS] Found", results.length, "business users");
-    console.log("✅ [GET ALL USERS] Users data:", results);
     res.json(results);
   });
 }
@@ -549,7 +406,6 @@ async function createUser(req, res) {
 
         // Original file is automatically deleted by the service
       } catch (imageError) {
-        console.error("Image processing error:", imageError);
         // Continue without image if processing fails
       }
     }
@@ -586,7 +442,6 @@ async function createUser(req, res) {
 
     createUserModel(user, (err, result) => {
       if (err) {
-        console.error("Database error in createUser:", err);
         return res.status(500).json({ error: err.message });
       }
       res.status(201).json({
@@ -595,7 +450,6 @@ async function createUser(req, res) {
       });
     });
   } catch (error) {
-    console.error("Unexpected error in createUser:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -603,7 +457,6 @@ async function createUser(req, res) {
 // Update user
 async function updateUser(req, res) {
   try {
-    console.log("Request headers:", req.headers);
     // Only allow non-admins to update their own profile
     if (req.user.type !== "admin" && req.user.id != req.params.id) {
       return res
@@ -613,19 +466,8 @@ async function updateUser(req, res) {
     const { id } = req.params;
 
     // Log incoming request for debugging
-    console.log("--- Profile Update Request ---");
-    console.log("Params:", req.params);
-    console.log("Body:", req.body);
-    console.log("File:", req.file);
-    console.log("Files:", req.files);
-    console.log("Content-Type:", req.headers["content-type"]);
-    console.log("Request method:", req.method);
-    console.log("Request URL:", req.url);
     if (!req.file) {
-      console.warn(
-        'No file received in updateUser. Check if the image field is named "image" and sent as multipart/form-data.'
       );
-      console.warn("Available body fields:", Object.keys(req.body));
     }
 
     // Validate required fields
@@ -676,11 +518,9 @@ async function updateUser(req, res) {
               fs.unlinkSync(oldImagePath);
             }
           } catch (err) {
-            console.warn("Failed to delete old image:", err);
-          }
+            }
         }
       } catch (imageError) {
-        console.error("Image processing error:", imageError);
         // Continue without image if processing fails
       }
     }
@@ -721,8 +561,6 @@ async function updateUser(req, res) {
     });
 
     // Log updateData for debugging
-    console.log("Update Data:", updateData);
-
     // Build SQL query dynamically
     const fields = Object.keys(updateData)
       .map((key) => `${key} = ?`)
@@ -734,16 +572,11 @@ async function updateUser(req, res) {
 
     db.query(sql, values, (err, result) => {
       if (err) {
-        console.error("Database error in updateUser:", err);
         return res.status(500).json({ error: err.message });
       }
-      console.log("✅ [UPDATE USER] Database update result:", result);
-      console.log("✅ [UPDATE USER] Affected rows:", result.affectedRows);
-      console.log("✅ [UPDATE USER] Changed rows:", result.changedRows);
       res.json({ message: "User updated successfully" });
     });
   } catch (error) {
-    console.error("Unexpected error in updateUser:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -754,7 +587,6 @@ function deleteUser(req, res) {
 
   db.query("DELETE FROM users WHERE id = ?", [id], (err, result) => {
     if (err) {
-      console.error("Database error in deleteUser:", err);
       return res.status(500).json({ error: err.message });
     }
     if (result.affectedRows === 0) {
@@ -769,17 +601,9 @@ async function checkUserExists(req, res) {
   const { phone_number, phoneNumber, email } = req.body;
   const phone = phone_number || phoneNumber; // Support both formats
 
-  console.log("[checkUserExists] Request received:", {
-    phone_number,
-    phoneNumber,
-    email,
-    phone,
-  });
-
   // First check if database is connected
   const isConnected = await checkConnection();
   if (!isConnected) {
-    console.error("[checkUserExists] Database not connected");
     return res.status(503).json({
       error: "Database service unavailable. Please try again.",
       retry: true,
@@ -801,17 +625,8 @@ async function checkUserExists(req, res) {
     return res.status(400).json({ error: "Phone number or email required" });
   }
 
-  console.log(
-    "[checkUserExists] Executing query:",
-    query,
-    "with params:",
-    params
-  );
-
   try {
     const results = await executeQuery(query, params, 10000); // 10 second timeout
-
-    console.log("[checkUserExists] Query results:", results);
 
     if (results.length > 0) {
       return res.json({
@@ -829,7 +644,6 @@ async function checkUserExists(req, res) {
     }
     return res.json({ exists: false });
   } catch (error) {
-    console.error("[checkUserExists] Database error:", error);
     return res.status(500).json({
       error: error.message || "Database connection error. Please try again.",
       retry: true,
@@ -865,7 +679,6 @@ async function verifyBusinessOTP(req, res) {
       [phoneNumber],
       async (err, results) => {
         if (err) {
-          console.error("Database error:", err);
           return res.status(500).json({ error: "Database error" });
         }
 
@@ -876,8 +689,6 @@ async function verifyBusinessOTP(req, res) {
         const user = results[0];
 
         // All users treated equally - no approval check, unlimited access
-        console.log(`[Backend] OTP verified for user: ${user.id}`);
-
         // Generate JWT token with unlimited duration
         const token = jwt.sign(
           {
@@ -888,8 +699,6 @@ async function verifyBusinessOTP(req, res) {
           process.env.JWT_SECRET || "secretkey",
           { expiresIn: "365d" } // 1 year - essentially unlimited
         );
-
-        console.log("[Backend] Login successful with unlimited access");
 
         return res.json({
           message: "Login successful",
@@ -906,7 +715,6 @@ async function verifyBusinessOTP(req, res) {
       }
     );
   } catch (error) {
-    console.error("OTP verification error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -935,7 +743,6 @@ async function handleBypassUserOTP(user, res) {
           [user.id, categoryIdsJson],
           (insertErr, insertResult) => {
             if (insertErr) {
-              console.error('[BYPASS] Error creating session:', insertErr);
               return res.status(500).json({ error: 'Failed to create bypass session' });
             }
 
@@ -956,8 +763,6 @@ async function handleBypassUserOTP(user, res) {
               { expiresIn: `${sessionDurationMinutes}m` }
             );
 
-            console.log('[BYPASS] Session created successfully with unlimited access to all categories');
-
             return res.json({
               message: "Login successful (bypass)",
               token,
@@ -976,7 +781,6 @@ async function handleBypassUserOTP(user, res) {
       }
     );
   } catch (error) {
-    console.error('[BYPASS] Error in bypass user flow:', error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -999,7 +803,6 @@ async function handleRegularUserOTP(user, res) {
           [user.id],
           (activeSessionErr, activeSessionResults) => {
             if (activeSessionErr) {
-              console.error("Active session query error:", activeSessionErr);
               return res.status(500).json({ error: "Database error" });
             }
 
@@ -1019,23 +822,8 @@ async function handleRegularUserOTP(user, res) {
               );
 
               // Session resumption logic
-              console.log(
-                "  - Session start time:",
-                activeSession.session_start_time
               );
-              console.log(
-                "  - Session duration minutes:",
-                activeSession.session_time_minutes
               );
-              console.log(
-                "  - Calculated end time:",
-                sessionEndTime.toISOString()
-              );
-              console.log("  - Current time:", now.toISOString());
-              console.log("  - Remaining seconds:", remainingTimeSeconds);
-              console.log(
-                "  - Remaining minutes:",
-                Math.ceil(remainingTimeSeconds / 60)
               );
 
               // Generate JWT token with existing session info
@@ -1076,15 +864,8 @@ async function handleRegularUserOTP(user, res) {
               [user.id],
               (cleanupErr, cleanupResult) => {
                 if (cleanupErr) {
-                  console.error("Session cleanup error:", cleanupErr);
-                } else if (cleanupResult.affectedRows > 0) {
-                  console.log(
-                    "[Backend] Cleaned up",
-                    cleanupResult.affectedRows,
-                    "expired sessions for user:",
-                    user.id
-                  );
-                }
+                  } else if (cleanupResult.affectedRows > 0) {
+                  }
 
                 // Continue with checking for approved login requests
                 // If no active session, check for approved login request to create new session
@@ -1099,10 +880,6 @@ async function handleRegularUserOTP(user, res) {
                   [user.id],
                   (approvedErr, approvedResults) => {
                     if (approvedErr) {
-                      console.error(
-                        "Approved login request query error:",
-                        approvedErr
-                      );
                       return res.status(500).json({ error: "Database error" });
                     }
 
@@ -1112,27 +889,11 @@ async function handleRegularUserOTP(user, res) {
                       const sessionDurationMinutes =
                         approvedRequest.session_time_minutes;
 
-                      console.log(
-                        "[Backend] Updating approved request to logged_in:"
-                      );
-                      console.log(
-                        "  - Approved request ID:",
-                        approvedRequest.id
-                      );
-                      console.log(
-                        "  - Session duration minutes:",
-                        sessionDurationMinutes
-                      );
-
                       // Validate session duration
                       if (
                         !sessionDurationMinutes ||
                         sessionDurationMinutes <= 0
                       ) {
-                        console.error(
-                          "[Backend] Invalid session duration:",
-                          sessionDurationMinutes
-                        );
                         return res.status(400).json({
                           error:
                             "Invalid session duration. Please contact administrator.",
@@ -1156,19 +917,10 @@ async function handleRegularUserOTP(user, res) {
                         ],
                         (updateErr, updateResult) => {
                           if (updateErr) {
-                            console.error(
-                              "Failed to update request to logged_in:",
-                              updateErr
-                            );
                             return res
                               .status(500)
                               .json({ error: "Failed to update session" });
                           }
-
-                          console.log(
-                            "[Backend] Updated request to logged_in with ID:",
-                            approvedRequest.id
-                          );
 
                           // Generate JWT token with session info
                           const token = jwt.sign(
@@ -1200,10 +952,6 @@ async function handleRegularUserOTP(user, res) {
                       );
                     } else {
                       // No approved login request found
-                      console.error(
-                        "[Backend] No approved login request found for user:",
-                        user.id
-                      );
                       return res.status(400).json({
                         error:
                           "No approved login request found. Please request login access first.",
@@ -1216,7 +964,6 @@ async function handleRegularUserOTP(user, res) {
           }
         );
   } catch (error) {
-    console.error("Regular user OTP verification error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -1228,9 +975,6 @@ async function handleRegularUserOTP(user, res) {
 async function validateUserSession(req, res) {
   const userId = req.user.id;
 
-  console.log("[Backend] validateUserSession called with userId:", userId);
-  console.log("[Backend] req.user:", req.user);
-
   try {
     // First, verify the user exists and get their phone number for bypass check
     db.query(
@@ -1238,12 +982,10 @@ async function validateUserSession(req, res) {
       [userId],
       (userErr, userResults) => {
         if (userErr) {
-          console.error("User verification error:", userErr);
           return res.status(500).json({ error: "Database error" });
         }
 
         if (userResults.length === 0) {
-          console.error("[Backend] User not found in database for ID:", userId);
           return res.status(401).json({
             error: "User not found",
             action: "force_logout",
@@ -1251,23 +993,12 @@ async function validateUserSession(req, res) {
         }
 
         const user = userResults[0];
-        console.log("[Backend] User found:", user);
-
         // Special bypass for phone number 7600046416
         const BYPASS_PHONE_NUMBER = "7600046416";
         const isBypassUser = user.phone_number === BYPASS_PHONE_NUMBER;
 
-        console.log("[Backend] Phone number check:", {
-          userPhoneNumber: user.phone_number,
-          bypassPhoneNumber: BYPASS_PHONE_NUMBER,
-          isBypassUser: isBypassUser,
-          phoneNumberType: typeof user.phone_number,
-          bypassNumberType: typeof BYPASS_PHONE_NUMBER
-        });
-
         // Check if user status is valid (skip for bypass user)
         if (!isBypassUser && user.status !== "approved") {
-          console.error("[Backend] User status is not approved:", user.status);
           return res.status(401).json({
             error: "User account not approved",
             action: "force_logout",
@@ -1275,13 +1006,10 @@ async function validateUserSession(req, res) {
         }
 
         if (isBypassUser) {
-          console.log("[Backend] Bypass user validation - skipping status check");
-        }
+          }
 
         // For bypass user, handle session differently
         if (isBypassUser) {
-          console.log("[Backend] Bypass user session validation - ensuring unlimited access");
-
           // For bypass user, just check for any logged_in session (ignore expiry)
           db.query(
             `SELECT lr.*
@@ -1293,13 +1021,10 @@ async function validateUserSession(req, res) {
             [userId],
             (err, results) => {
               if (err) {
-                console.error("Bypass session validation error:", err);
                 return res.status(500).json({ error: "Database error" });
               }
 
               if (results.length === 0) {
-                console.log("[Backend] No bypass session found, creating emergency session");
-
                 // Create emergency unlimited session for bypass user
                 db.query(
                   'SELECT id FROM categories WHERE status = "active"',
@@ -1318,14 +1043,11 @@ async function validateUserSession(req, res) {
                       [userId, categoryIdsJson],
                       (insertErr, insertResult) => {
                         if (insertErr) {
-                          console.error('[Backend] Emergency bypass session creation failed:', insertErr);
                           return res.status(500).json({ error: 'Failed to create bypass session' });
                         }
 
                         const sessionStartTime = new Date();
                         const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
-
-                        console.log('[Backend] Emergency bypass session created successfully');
 
                         return res.json({
                           valid: true,
@@ -1343,17 +1065,13 @@ async function validateUserSession(req, res) {
 
                 // If session doesn't have unlimited time, update it
                 if (session.session_time_minutes !== 999999) {
-                  console.log("[Backend] Updating bypass session to unlimited time");
-
                   db.query(
                     "UPDATE login_requests SET session_time_minutes = 999999, session_start_time = NOW() WHERE id = ?",
                     [session.id],
                     (updateErr) => {
                       if (updateErr) {
-                        console.error("[Backend] Failed to update bypass session:", updateErr);
-                      } else {
-                        console.log("[Backend] Bypass session updated to unlimited time");
-                      }
+                        } else {
+                        }
                     }
                   );
                 }
@@ -1361,10 +1079,7 @@ async function validateUserSession(req, res) {
                 const sessionStartTime = new Date();
                 const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
 
-                console.log("[Backend] Valid bypass session found:", {
-                  sessionId: session.id,
-                  sessionDuration: 999999,
-                  sessionEndTime: sessionEndTime.toISOString(),
+                ,
                 });
 
                 res.json({
@@ -1391,11 +1106,8 @@ async function validateUserSession(req, res) {
             [userId],
             (err, results) => {
               if (err) {
-                console.error("Session validation error:", err);
                 return res.status(500).json({ error: "Database error" });
               }
-
-              console.log("[Backend] Session query results:", results);
 
               if (results.length === 0) {
                 // No active session found - check if there are expired sessions and clean them up
@@ -1407,15 +1119,8 @@ async function validateUserSession(req, res) {
                   [userId],
                   (cleanupErr, cleanupResult) => {
                     if (cleanupErr) {
-                      console.error("Session cleanup error:", cleanupErr);
-                    } else if (cleanupResult.affectedRows > 0) {
-                      console.log(
-                        "[Backend] Cleaned up",
-                        cleanupResult.affectedRows,
-                        "expired sessions for user:",
-                        userId
-                      );
-                    }
+                      } else if (cleanupResult.affectedRows > 0) {
+                      }
 
                     // Return session expired response
                     return res.status(401).json({
@@ -1432,19 +1137,10 @@ async function validateUserSession(req, res) {
                 const BYPASS_PHONE_NUMBER = "7600046416";
                 const isBypassUserInSession = user.phone_number === BYPASS_PHONE_NUMBER;
 
-                console.log("[Backend] Regular session validation for user:", {
-                  userId: userId,
-                  userPhoneNumber: user.phone_number,
-                  isBypassUser: isBypassUserInSession,
-                  sessionTimeMinutes: session.session_time_minutes,
-                  sessionId: session.id
-                });
-
                 // If this is a bypass user but somehow ended up in regular validation,
                 // override the session duration to be unlimited
                 let sessionDuration = session.session_time_minutes;
                 if (isBypassUserInSession && session.session_time_minutes !== 999999) {
-                  console.log("[Backend] WARNING: Bypass user detected in regular validation path, correcting session duration");
                   sessionDuration = 999999;
                 }
 
@@ -1453,11 +1149,7 @@ async function validateUserSession(req, res) {
                   sessionEndTime.getMinutes() + sessionDuration
                 );
 
-                console.log("[Backend] Valid session found:", {
-                  sessionId: session.id,
-                  sessionStartTime: session.session_start_time,
-                  sessionDuration: sessionDuration,
-                  sessionEndTime: sessionEndTime.toISOString(),
+                ,
                   isBypassUserFallback: isBypassUserInSession
                 });
 
@@ -1474,7 +1166,6 @@ async function validateUserSession(req, res) {
       }
     );
   } catch (error) {
-    console.error("Session validation error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -1495,11 +1186,9 @@ async function logoutUser(req, res) {
       [userId],
       (err, result) => {
         if (err) {
-          console.error("Logout error:", err);
           return res.status(500).json({ error: "Database error" });
         }
 
-        console.log("[Backend] User logged out, session status updated");
         res.json({
           message: "Logout successful",
           updatedSessions: result.affectedRows,
@@ -1507,7 +1196,6 @@ async function logoutUser(req, res) {
       }
     );
   } catch (error) {
-    console.error("Logout error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }

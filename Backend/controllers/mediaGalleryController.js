@@ -58,9 +58,7 @@ function deleteFile(req, res) {
 
     const fullPath = path.join(__dirname, "../uploads", filePath);
     fs.unlink(fullPath, (unlinkErr) => {
-      if (unlinkErr) {
-        console.error("Error deleting file:", unlinkErr);
-      }
+      // File deletion attempted
     });
 
     res.json({ message: "File deleted successfully" });
@@ -136,10 +134,6 @@ async function bulkUploadMedia(req, res) {
     return res.status(400).json({ error: "No files uploaded" });
   }
 
-  console.log(
-    `🚀 [BULK UPLOAD] Processing ${req.files.length} files with auto-detection`
-  );
-
   const results = [];
   const imageProcessingService = require("../services/imageProcessingService");
   const autoDetectionService = require("../services/autoDetectionService");
@@ -149,22 +143,9 @@ async function bulkUploadMedia(req, res) {
   const aiEnabled = aiStudioService.isEnabled();
   const aiMissing = !process.env.GOOGLE_AI_API_KEY ? "GOOGLE_AI_API_KEY" : null;
 
-  if (!aiEnabled) {
-    console.warn(
-      "⚠️ [AI STUDIO] Disabled. Missing env:",
-      aiMissing || "(unknown)"
-    );
-  }
-
   for (let i = 0; i < req.files.length; i++) {
     const file = req.files[i];
     try {
-      console.log(
-        `🔄 [BULK UPLOAD] Processing file ${i + 1}/${req.files.length}: ${
-          file.originalname
-        }`
-      );
-
       let processedFilePath = file.path; // Default to temp path
       let fileUrl = `/uploads/temp/${file.filename}`;
       let detectedAssociation = null;
@@ -186,7 +167,6 @@ async function bulkUploadMedia(req, res) {
           let ocrSku = null;
           let ocrCandidates = [];
           try {
-            console.log(`🔍 [OCR] Starting OCR extraction for ${file.originalname}...`);
             const ocr = await ocrService.extractTagNo(file.path, {
               minLen: 3,
               maxLen: 30,
@@ -197,21 +177,15 @@ async function bulkUploadMedia(req, res) {
             ocrMeta.candidates = ocrCandidates;
             
             if (ocrSku) {
-              console.log(`✅ [OCR] Extracted tag: ${ocrSku} (candidates: ${ocrCandidates.join(", ") || "none"})`);
+              || "none"})`);
             } else {
-              console.log(`ℹ️ [OCR] No tag found. Raw text: "${ocr.rawText || "(empty)"}", Candidates: ${ocrCandidates.length > 0 ? ocrCandidates.join(", ") : "none"}`);
+              "}", Candidates: ${ocrCandidates.length > 0 ? ocrCandidates.join(", ") : "none"}`);
             }
           } catch (ocrErr) {
-            console.error(
-              `❌ [OCR] OCR failed for ${file.originalname}:`,
-              ocrErr.message,
-              ocrErr.stack
-            );
             ocrMeta.error = ocrErr.message;
           }
 
           if (ocrSku) {
-            console.log(`🔍 [OCR] Detected SKU candidate: ${ocrSku}`);
             const matchedProduct = await new Promise((resolve, reject) => {
               db.query(
                 "SELECT id, name, sku FROM products WHERE sku = ? LIMIT 1",
@@ -233,12 +207,10 @@ async function bulkUploadMedia(req, res) {
                 source: "ocr",
                 ocrCandidates,
               };
-              console.log(
-                `✅ [OCR] Matched product by SKU: ${matchedProduct.sku} (${matchedProduct.name})`
+              `
               );
             } else {
-              console.log(
-                `⚠️ [OCR] SKU found (${ocrSku}) but no product matched. Will create new product with this SKU.`
+              but no product matched. Will create new product with this SKU.`
               );
               // Mark that we should create a product with this SKU
               detectedAssociation = {
@@ -255,21 +227,16 @@ async function bulkUploadMedia(req, res) {
           }
 
           if (!detectedAssociation) {
-            console.log(`🔍 [AUTO-DETECT] Analyzing filename: ${file.originalname}`);
             detectedAssociation =
               await autoDetectionService.detectImageAssociation(file.originalname);
           }
 
           if (detectedAssociation) {
-            console.log(
-              `✅ [AUTO-DETECT] Detected: ${detectedAssociation.type} - ${detectedAssociation.name} (${detectedAssociation.confidence} confidence)`
+            `
             );
 
             // Process image based on detected type
             if (detectedAssociation.type === "product") {
-              console.log(
-                `🖼️ [BULK UPLOAD] Processing as product image: ${file.originalname}`
-              );
               // Optional AI photoshoot enhancement (only if configured)
               let inputPathForProcessing = file.path;
               let inputFilenameForProcessing = file.filename;
@@ -282,7 +249,6 @@ async function bulkUploadMedia(req, res) {
                   aiMeta.attempted = true;
                   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-                  console.log(`✨ [AI STUDIO] Running background removal...`);
                   bgRemovedPath = await aiStudioService.removeBackground(
                     file.path,
                     tempDir
@@ -292,7 +258,6 @@ async function bulkUploadMedia(req, res) {
                     tempFilesToCleanup.push(bgRemovedPath);
                   }
 
-                  console.log(`✨ [AI STUDIO] Running studio generation...`);
                   const studioPath = await aiStudioService.generateStudioImage(
                     bgRemovedPath,
                     tempDir
@@ -310,10 +275,6 @@ async function bulkUploadMedia(req, res) {
                     tempFilesToCleanup.push(file.path);
                   }
                 } catch (aiErr) {
-                  console.warn(
-                    `⚠️ [AI STUDIO] AI enhancement failed for ${file.originalname}, falling back to normal pipeline:`,
-                    aiErr.message
-                  );
                   aiMeta.error = aiErr.message;
                   inputPathForProcessing = file.path;
                   inputFilenameForProcessing = file.filename;
@@ -335,15 +296,13 @@ async function bulkUploadMedia(req, res) {
 
               // Verify file exists
               if (!fs.existsSync(processedFilePath)) {
-                console.error(`❌ [BULK UPLOAD] Processed file does not exist: ${processedFilePath}`);
-              } else {
-                console.log(`✅ [BULK UPLOAD] Processed file verified: ${processedFilePath} (URL: ${fileUrl})`);
+                } else {
+                `);
               }
 
               // Create or update product
               if (detectedAssociation.createNew || !detectedAssociation.id) {
                 // Create new product with OCR-detected SKU
-                console.log(`🆕 [BULK UPLOAD] Creating new product with SKU: ${detectedAssociation.sku}`);
                 const createProductSql = `
                   INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
                   VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
@@ -358,16 +317,9 @@ async function bulkUploadMedia(req, res) {
                     ],
                     (err, result) => {
                       if (err) {
-                        console.error(
-                          `❌ [BULK UPLOAD] Failed to create product:`,
-                          err
-                        );
                         reject(err);
                       } else {
                         const newProductId = result.insertId;
-                        console.log(
-                          `✅ [BULK UPLOAD] Created new product with ID ${newProductId} and SKU ${detectedAssociation.sku || detectedAssociation.name}`
-                        );
                         detectedAssociation.id = newProductId;
                         updateResult = {
                           type: "product",
@@ -390,15 +342,8 @@ async function bulkUploadMedia(req, res) {
                     [path.basename(processedFilePath), detectedAssociation.id],
                     (err, result) => {
                       if (err) {
-                        console.error(
-                          `❌ [BULK UPLOAD] Failed to update product:`,
-                          err
-                        );
                         reject(err);
                       } else {
-                        console.log(
-                          `✅ [BULK UPLOAD] Product updated with new image and set to active: ${detectedAssociation.name}`
-                        );
                         updateResult = {
                           type: "product",
                           id: detectedAssociation.id,
@@ -412,9 +357,6 @@ async function bulkUploadMedia(req, res) {
                 });
               }
             } else if (detectedAssociation.type === "category") {
-              console.log(
-                `🖼️ [BULK UPLOAD] Processing as category image: ${file.originalname}`
-              );
               processedFilePath =
                 await imageProcessingService.processCategoryImage(
                   file.path,
@@ -433,15 +375,8 @@ async function bulkUploadMedia(req, res) {
                   [path.basename(processedFilePath), detectedAssociation.id],
                   (err, result) => {
                     if (err) {
-                      console.error(
-                        `❌ [BULK UPLOAD] Failed to update category:`,
-                        err
-                      );
                       reject(err);
                     } else {
-                      console.log(
-                        `✅ [BULK UPLOAD] Category updated with new image and set to active: ${detectedAssociation.name}`
-                      );
                       updateResult = {
                         type: "category",
                         id: detectedAssociation.id,
@@ -455,13 +390,7 @@ async function bulkUploadMedia(req, res) {
               });
             }
 
-            console.log(
-              `✅ [BULK UPLOAD] Image processed and associated: ${fileUrl}`
-            );
-          } else {
-            console.log(
-              `❌ [AUTO-DETECT] No association found for: ${file.originalname}`
-            );
+            } else {
             // Process as generic product image if no association found
             // Optional AI photoshoot enhancement (only if configured)
             let inputPathForProcessing = file.path;
@@ -475,7 +404,6 @@ async function bulkUploadMedia(req, res) {
                 aiMeta.attempted = true;
                 if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
-                console.log(`✨ [AI STUDIO] Running background removal for unassociated image...`);
                 bgRemovedPath = await aiStudioService.removeBackground(
                   file.path,
                   tempDir
@@ -485,7 +413,6 @@ async function bulkUploadMedia(req, res) {
                   tempFilesToCleanup.push(bgRemovedPath);
                 }
 
-                console.log(`✨ [AI STUDIO] Running studio generation for unassociated image...`);
                 const studioPath = await aiStudioService.generateStudioImage(
                   bgRemovedPath,
                   tempDir
@@ -503,10 +430,6 @@ async function bulkUploadMedia(req, res) {
                   tempFilesToCleanup.push(file.path);
                 }
               } catch (aiErr) {
-                console.warn(
-                  `⚠️ [AI STUDIO] AI enhancement failed for ${file.originalname}, falling back to normal pipeline:`,
-                  aiErr.message
-                );
                 aiMeta.error = aiErr.message;
                 inputPathForProcessing = file.path;
                 inputFilenameForProcessing = file.filename;
@@ -528,14 +451,13 @@ async function bulkUploadMedia(req, res) {
             
             // Verify file exists
             if (!fs.existsSync(processedFilePath)) {
-              console.error(`❌ [BULK UPLOAD] Processed file does not exist: ${processedFilePath}`);
-            } else {
-              console.log(`✅ [BULK UPLOAD] Processed file verified: ${processedFilePath} (URL: ${fileUrl})`);
+              } else {
+              `);
             }
 
             // If OCR found a SKU but no product exists, create a new product
             if (ocrMeta.tag && !detectedAssociation) {
-              console.log(`🆕 [BULK UPLOAD] OCR found SKU (${ocrMeta.tag}) but no association. Creating new product...`);
+              but no association. Creating new product...`);
               const createProductSql = `
                 INSERT INTO products (name, sku, image, status, stock_status, created_at, updated_at)
                 VALUES (?, ?, ?, 'active', 'available', NOW(), NOW())
@@ -551,11 +473,9 @@ async function bulkUploadMedia(req, res) {
                     ],
                     (err, result) => {
                       if (err) {
-                        console.error(`❌ [BULK UPLOAD] Failed to create product from OCR SKU:`, err);
                         reject(err);
                       } else {
                         const newProductId = result.insertId;
-                        console.log(`✅ [BULK UPLOAD] Created new product with ID ${newProductId} and SKU ${ocrMeta.tag}`);
                         detectedAssociation = {
                           type: "product",
                           id: newProductId,
@@ -576,22 +496,14 @@ async function bulkUploadMedia(req, res) {
                   );
                 });
               } catch (createErr) {
-                console.warn(`⚠️ [BULK UPLOAD] Could not create product from OCR SKU:`, createErr.message);
-              }
+                }
             }
           }
         } catch (processError) {
-          console.error(
-            `❌ [BULK UPLOAD] Image processing failed for ${file.originalname}:`,
-            processError
-          );
           // Continue with original file if processing fails
         }
       } else {
-        console.log(
-          `📁 [BULK UPLOAD] Non-image file, skipping processing: ${file.originalname}`
-        );
-      }
+        }
 
       // Save to media gallery for tracking
       const fileData = {
@@ -609,15 +521,10 @@ async function bulkUploadMedia(req, res) {
       };
 
       // Log OCR results for debugging
-      console.log(`📝 [OCR SUMMARY] File: ${file.originalname}`);
-      console.log(`   - Tag found: ${ocrMeta.tag || "none"}`);
-      console.log(`   - Candidates: ${ocrMeta.candidates.length > 0 ? ocrMeta.candidates.join(", ") : "none"}`);
-      console.log(`   - Error: ${ocrMeta.error || "none"}`);
+      : "none"}`);
       if (ocrMeta.tag) {
-        console.log(`   - ✅ OCR extracted SKU: ${ocrMeta.tag}`);
-      } else {
-        console.log(`   - ⚠️ OCR did not find any SKU/tag in image`);
-      }
+        } else {
+        }
 
       const sql = `
         INSERT INTO media_gallery (title, file_url, file_type, category)
@@ -635,7 +542,6 @@ async function bulkUploadMedia(req, res) {
           ],
           (err, result) => {
             if (err) {
-              console.error("❌ [BULK UPLOAD] Database error:", err);
               results[i] = {
                 error: err.message,
                 filename: file.originalname,
@@ -643,10 +549,6 @@ async function bulkUploadMedia(req, res) {
               };
               reject(err);
             } else {
-              console.log(
-                "✅ [BULK UPLOAD] File saved to media gallery:",
-                fileData.title
-              );
               results[i] = {
                 id: result.insertId,
                 filename: file.originalname,
@@ -659,10 +561,6 @@ async function bulkUploadMedia(req, res) {
         );
       });
     } catch (error) {
-      console.error(
-        `❌ [BULK UPLOAD] Error processing file ${file.originalname}:`,
-        error
-      );
       results[i] = {
         error: error.message,
         filename: file.originalname,
@@ -671,10 +569,7 @@ async function bulkUploadMedia(req, res) {
     }
   }
 
-  console.log("🎉 [BULK UPLOAD] All files processed:", results.length);
-
   // Clean up temporary files after processing
-  console.log("🧹 [BULK UPLOAD] Cleaning up temporary files...");
   const tempDir = path.join(__dirname, "../uploads/temp");
   const cleanedFiles = new Set(); // Track cleaned files to avoid duplicates
 
@@ -688,14 +583,9 @@ async function bulkUploadMedia(req, res) {
             if (fs.existsSync(tempFile)) {
               fs.unlinkSync(tempFile);
               cleanedFiles.add(tempFile);
-              console.log(`✅ [CLEANUP] Deleted tracked temp file: ${tempFile}`);
-            }
+              }
           } catch (cleanupError) {
-            console.warn(
-              `⚠️ [CLEANUP] Failed to delete tracked temp file ${tempFile}:`,
-              cleanupError.message
-            );
-          }
+            }
         }
       }
     }
@@ -711,15 +601,10 @@ async function bulkUploadMedia(req, res) {
           if (fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
             cleanedFiles.add(file.path);
-            console.log(`✅ [CLEANUP] Deleted uploaded temp file: ${file.path}`);
-          }
+            }
         }
       } catch (cleanupError) {
-        console.warn(
-          `⚠️ [CLEANUP] Failed to delete temp file ${file.path}:`,
-          cleanupError.message
-        );
-      }
+        }
     }
   }
 
@@ -736,22 +621,14 @@ async function bulkUploadMedia(req, res) {
             // Delete files older than 1 hour or AI-generated files
             if (now - stats.mtimeMs > 3600000 || tempFile.includes("bg-removed") || tempFile.includes("studio-gemini") || tempFile.includes("studio-")) {
               fs.unlinkSync(tempFilePath);
-              console.log(`✅ [CLEANUP] Deleted old/AI temp file: ${tempFilePath}`);
-            }
+              }
           } catch (cleanupError) {
-            console.warn(
-              `⚠️ [CLEANUP] Failed to delete temp file ${tempFilePath}:`,
-              cleanupError.message
-            );
-          }
+            }
         }
       }
     }
   } catch (dirError) {
-    console.warn(`⚠️ [CLEANUP] Failed to read temp directory:`, dirError.message);
-  }
-
-  console.log(`✅ [CLEANUP] Cleanup completed. Cleaned ${cleanedFiles.size} files.`);
+    }
 
   res.json({
     message: "Bulk upload completed with auto-detection",
@@ -788,12 +665,9 @@ function getAvailableItems(req, res) {
 
 // Debug endpoint to check database contents
 function debugDatabaseContents(req, res) {
-  console.log("🔍 [DEBUG] Checking database contents...");
-
   // Check products table
   db.query("SELECT COUNT(*) as count FROM products", (err, productsCount) => {
     if (err) {
-      console.error("❌ [DEBUG] Products count error:", err);
       return res.status(500).json({ error: err.message });
     }
 
@@ -802,7 +676,6 @@ function debugDatabaseContents(req, res) {
       "SELECT COUNT(*) as count FROM categories",
       (err, categoriesCount) => {
         if (err) {
-          console.error("❌ [DEBUG] Categories count error:", err);
           return res.status(500).json({ error: err.message });
         }
 
@@ -811,7 +684,6 @@ function debugDatabaseContents(req, res) {
           "SELECT COUNT(*) as count FROM media_gallery",
           (err, mediaCount) => {
             if (err) {
-              console.error("❌ [DEBUG] Media gallery count error:", err);
               return res.status(500).json({ error: err.message });
             }
 
@@ -820,7 +692,6 @@ function debugDatabaseContents(req, res) {
               "SELECT id, name, image, status FROM products WHERE image IS NOT NULL LIMIT 5",
               (err, products) => {
                 if (err) {
-                  console.error("❌ [DEBUG] Products sample error:", err);
                   return res.status(500).json({ error: err.message });
                 }
 
@@ -828,7 +699,6 @@ function debugDatabaseContents(req, res) {
                   "SELECT id, name, image, status FROM categories WHERE image IS NOT NULL LIMIT 5",
                   (err, categories) => {
                     if (err) {
-                      console.error("❌ [DEBUG] Categories sample error:", err);
                       return res.status(500).json({ error: err.message });
                     }
 
@@ -836,10 +706,6 @@ function debugDatabaseContents(req, res) {
                       "SELECT id, title, file_url, category FROM media_gallery LIMIT 5",
                       (err, media) => {
                         if (err) {
-                          console.error(
-                            "❌ [DEBUG] Media gallery sample error:",
-                            err
-                          );
                           return res.status(500).json({ error: err.message });
                         }
 
@@ -861,9 +727,6 @@ function debugDatabaseContents(req, res) {
                           },
                         };
 
-                        console.log(
-                          "🔍 [DEBUG] Database contents:",
-                          JSON.stringify(debugInfo, null, 2)
                         );
                         res.json({ success: true, debug: debugInfo });
                       }
@@ -881,26 +744,14 @@ function debugDatabaseContents(req, res) {
 
 // Get media items with actual processed images from products, categories, and media_gallery tables
 function getMediaItemsWithProcessedImages(req, res) {
-  console.log("🔍 [MEDIA GALLERY] Fetching processed images...");
-  console.log(
-    "🔍 [DEBUG] Database name:",
-    process.env.DB_NAME || "amrutjewels"
-  );
-  console.log("🔍 [DEBUG] Database host:", process.env.DB_HOST);
-  console.log("🔍 [DEBUG] Database user:", process.env.DB_USER);
-
   // First, let's check what data actually exists with more flexible conditions
-  console.log("🔍 [DEBUG] Checking what data exists in live database...");
-
   // Check products with any image data
   db.query(
     "SELECT id, name, image, status FROM products WHERE image IS NOT NULL LIMIT 10",
     (err, productsWithImages) => {
       if (err) {
-        console.error("❌ [DEBUG] Products with images query failed:", err);
-      } else {
-        console.log("🔍 [DEBUG] Products with images:", productsWithImages);
-      }
+        } else {
+        }
     }
   );
 
@@ -909,10 +760,8 @@ function getMediaItemsWithProcessedImages(req, res) {
     "SELECT id, name, image, status FROM categories WHERE image IS NOT NULL LIMIT 10",
     (err, categoriesWithImages) => {
       if (err) {
-        console.error("❌ [DEBUG] Categories with images query failed:", err);
-      } else {
-        console.log("🔍 [DEBUG] Categories with images:", categoriesWithImages);
-      }
+        } else {
+        }
     }
   );
 
@@ -921,10 +770,8 @@ function getMediaItemsWithProcessedImages(req, res) {
     "SELECT id, title, file_url, category FROM media_gallery LIMIT 10",
     (err, mediaGallery) => {
       if (err) {
-        console.error("❌ [DEBUG] Media gallery query failed:", err);
-      } else {
-        console.log("🔍 [DEBUG] Media gallery:", mediaGallery);
-      }
+        } else {
+        }
     }
   );
 
@@ -997,63 +844,32 @@ function getMediaItemsWithProcessedImages(req, res) {
     ORDER BY created_at DESC
   `;
 
-  console.log("🔍 [DEBUG] Full SQL query:");
-  console.log(sql);
-  console.log("🔍 [DEBUG] Query length:", sql.length);
-
   // First, let's test a simple query to make sure database connection works
-  console.log("🔍 [DEBUG] Testing basic database connection...");
   db.query("SELECT COUNT(*) as count FROM products", (testErr, testResults) => {
     if (testErr) {
-      console.error("❌ [DEBUG] Basic database test failed:", testErr);
-    } else {
-      console.log("✅ [DEBUG] Basic database test successful:", testResults);
-    }
+      } else {
+      }
   });
 
   // Test the specific products query
-  console.log("🔍 [DEBUG] Testing products query...");
   db.query(
     "SELECT id, name, image, status FROM products WHERE image IS NOT NULL AND image != ''",
     (prodErr, prodResults) => {
       if (prodErr) {
-        console.error("❌ [DEBUG] Products query failed:", prodErr);
-      } else {
-        console.log("✅ [DEBUG] Products query successful:", prodResults);
-      }
+        } else {
+        }
     }
   );
 
-  console.log("🔍 [DEBUG] About to execute main query...");
   db.query(sql, (err, results) => {
-    console.log("🔍 [DEBUG] Query execution completed");
-
     if (err) {
-      console.error("❌ [MEDIA GALLERY] Database error:", err);
-      console.error("❌ [MEDIA GALLERY] Error details:", {
-        code: err.code,
-        errno: err.errno,
-        sqlState: err.sqlState,
-        sqlMessage: err.sqlMessage,
-        stack: err.stack,
-      });
       return res.status(500).json({ error: err.message });
     }
 
-    console.log(
-      `📊 [MEDIA GALLERY] Found ${results.length} items from database`
-    );
-    console.log(
-      "📋 [MEDIA GALLERY] Raw results:",
-      JSON.stringify(results, null, 2)
     );
 
     // If no results found, try a more flexible query
     if (results.length === 0) {
-      console.log(
-        "🔍 [DEBUG] No results with strict conditions, trying flexible query..."
-      );
-
       const flexibleSql = `
         SELECT 
           'product' as type,
@@ -1106,19 +922,11 @@ function getMediaItemsWithProcessedImages(req, res) {
         ORDER BY created_at DESC
       `;
 
-      console.log("🔍 [DEBUG] Trying flexible query...");
       db.query(flexibleSql, (flexErr, flexResults) => {
         if (flexErr) {
-          console.error("❌ [MEDIA GALLERY] Flexible query error:", flexErr);
           return res.status(500).json({ error: flexErr.message });
         }
 
-        console.log(
-          `📊 [MEDIA GALLERY] Flexible query found ${flexResults.length} items`
-        );
-        console.log(
-          "📋 [MEDIA GALLERY] Flexible results:",
-          JSON.stringify(flexResults, null, 2)
         );
 
         // Process the flexible results
@@ -1139,9 +947,6 @@ function getMediaItemsWithProcessedImages(req, res) {
           };
         });
 
-        console.log(
-          `✅ [MEDIA GALLERY] Processed ${processedResults.length} items`
-        );
         res.json({
           success: true,
           message: "Processed media items retrieved successfully",
@@ -1154,17 +959,13 @@ function getMediaItemsWithProcessedImages(req, res) {
 
     // If no results, let's debug what's in the database
     if (results.length === 0) {
-      console.log("🔍 [DEBUG] No results found, checking individual tables...");
-
       // Check products table
       db.query(
         "SELECT id, name, image, status FROM products LIMIT 5",
         (err, products) => {
           if (err) {
-            console.error("❌ [DEBUG] Error checking products:", err);
-          } else {
-            console.log("📋 [DEBUG] Sample products:", products);
-          }
+            } else {
+            }
         }
       );
 
@@ -1173,10 +974,8 @@ function getMediaItemsWithProcessedImages(req, res) {
         "SELECT id, name, image, status FROM categories LIMIT 5",
         (err, categories) => {
           if (err) {
-            console.error("❌ [DEBUG] Error checking categories:", err);
-          } else {
-            console.log("📋 [DEBUG] Sample categories:", categories);
-          }
+            } else {
+            }
         }
       );
 
@@ -1185,10 +984,8 @@ function getMediaItemsWithProcessedImages(req, res) {
         "SELECT id, title, file_url, category FROM media_gallery LIMIT 5",
         (err, media) => {
           if (err) {
-            console.error("❌ [DEBUG] Error checking media_gallery:", err);
-          } else {
-            console.log("📋 [DEBUG] Sample media_gallery:", media);
-          }
+            } else {
+            }
         }
       );
     }
@@ -1229,11 +1026,6 @@ function getMediaItemsWithProcessedImages(req, res) {
         hasProcessedImage: !!item.processed_image,
       };
     });
-
-    console.log(
-      `✅ [MEDIA GALLERY] Processed ${processedResults.length} items`
-    );
-    console.log("📋 [MEDIA GALLERY] Processed results:", processedResults);
 
     // Return in the format expected by frontend
     res.json({

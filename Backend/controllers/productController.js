@@ -29,27 +29,14 @@ async function createProduct(req, res) {
     // Process uploaded image if present
     if (req.file) {
       try {
-        console.log(
-          `🔄 [PRODUCT] Processing image for new product: ${req.file.filename}`
-        );
         // Use the new image processing service with watermark
         const processedPath = await imageProcessingService.processProductImage(
           req.file.path,
           req.file.filename
         );
         imageFilename = path.basename(processedPath);
-        console.log(
-          `✅ [PRODUCT] Image processed successfully: ${imageFilename}`
-        );
-
         // Original file is automatically deleted by the service
       } catch (imageError) {
-        console.error("❌ [PRODUCT] Image processing error:", imageError);
-        console.error("❌ [PRODUCT] Image processing error details:", {
-          message: imageError.message,
-          stack: imageError.stack,
-          filename: req.file.filename,
-        });
         // Don't continue without proper image processing - return error
         return res.status(500).json({
           error: "Image processing failed",
@@ -82,7 +69,6 @@ async function createProduct(req, res) {
 
     productModel.createProduct(product, (err, result) => {
       if (err) {
-        console.error("Database error in createProduct:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -101,7 +87,6 @@ async function createProduct(req, res) {
       });
     });
   } catch (error) {
-    console.error("Unexpected error in createProduct:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -140,20 +125,15 @@ function getProductBySku(req, res) {
     return res.status(400).json({ error: "SKU is required" });
   }
 
-  console.log("🔍 [BACKEND] getProductBySku called with SKU:", sku);
-
   productModel.getProductBySku(sku, (err, results) => {
     if (err) {
-      console.error("❌ [BACKEND] Error getting product by SKU:", err);
       return res.status(500).json({ error: err.message });
     }
 
     if (results.length === 0) {
-      console.log("❌ [BACKEND] No product found with SKU:", sku);
       return res.status(404).json({ error: "Product not found" });
     }
 
-    console.log("✅ [BACKEND] Product found by SKU:", results[0]);
     res.json(results[0]);
   });
 }
@@ -163,7 +143,6 @@ function getProductById(req, res) {
   const { id } = req.params;
   productModel.getProductById(id, (err, result) => {
     if (err) {
-      console.error("Product fetch error:", err);
       return res.status(500).json({
         success: false,
         message: "Error fetching product",
@@ -221,27 +200,14 @@ async function updateProduct(req, res) {
     // Process uploaded image if present
     if (req.file) {
       try {
-        console.log(
-          `🔄 [PRODUCT] Processing image for product update: ${req.file.filename}`
-        );
         // Use the new image processing service with watermark
         const processedPath = await imageProcessingService.processProductImage(
           req.file.path,
           req.file.filename
         );
         imageFilename = path.basename(processedPath);
-        console.log(
-          `✅ [PRODUCT] Image processed successfully: ${imageFilename}`
-        );
-
         // Original file is automatically deleted by the service
       } catch (imageError) {
-        console.error("❌ [PRODUCT] Image processing error:", imageError);
-        console.error("❌ [PRODUCT] Image processing error details:", {
-          message: imageError.message,
-          stack: imageError.stack,
-          filename: req.file.filename,
-        });
         // Don't continue without proper image processing - return error
         return res.status(500).json({
           error: "Image processing failed",
@@ -272,7 +238,6 @@ async function updateProduct(req, res) {
 
     productModel.updateProduct(id, product, (err, result) => {
       if (err) {
-        console.error("Database error:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -287,7 +252,6 @@ async function updateProduct(req, res) {
       res.json({ message: "Product updated successfully" });
     });
   } catch (error) {
-    console.error("Product update error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -386,31 +350,19 @@ function deleteProductImage(req, res) {
 function getProductsByCategory(req, res) {
   const { categoryId } = req.params;
 
-  console.log(
-    `[Backend] getProductsByCategory called with categoryId:`,
-    categoryId
-  );
-  console.log(`[Backend] categoryId type:`, typeof categoryId);
-
   // First, let's check if the category exists and is active
   const categoryCheckSql =
     "SELECT id, name, status FROM categories WHERE id = ?";
   db.query(categoryCheckSql, [categoryId], (categoryErr, categoryResults) => {
     if (categoryErr) {
-      console.error(`[Backend] Error checking category:`, categoryErr);
       return res.status(500).json({ error: categoryErr.message });
     }
 
-    console.log(`[Backend] Category check results:`, categoryResults);
-
     if (categoryResults.length === 0) {
-      console.log(`[Backend] Category not found with ID:`, categoryId);
       return res.status(404).json({ error: "Category not found" });
     }
 
     const category = categoryResults[0];
-    console.log(`[Backend] Category found:`, category);
-
     // Now let's check all products for this category (including draft ones for debugging)
     const allProductsSql =
       "SELECT id, name, sku, status, category_id FROM products WHERE category_id = ?";
@@ -419,17 +371,8 @@ function getProductsByCategory(req, res) {
       [categoryId],
       (allProductsErr, allProductsResults) => {
         if (allProductsErr) {
-          console.error(
-            `[Backend] Error checking all products:`,
-            allProductsErr
-          );
           return res.status(500).json({ error: allProductsErr.message });
         }
-
-        console.log(
-          `[Backend] All products for category ${categoryId}:`,
-          allProductsResults
-        );
 
         // Check if this is a frontend request (no admin token)
         const isFrontendRequest =
@@ -443,7 +386,6 @@ function getProductsByCategory(req, res) {
 
         getProductsFunction(categoryId, (err, results) => {
           if (err) {
-            console.error(`[Backend] Error in getProductsByCategory:`, err);
             return res.status(500).json({ error: err.message });
           }
 
@@ -470,17 +412,11 @@ function getProductsByCategory(req, res) {
                 // Use cleaned/watermarked image (highest priority)
                 processedImageUrl = `${getBaseUrl()}/uploads/products/${cleanedImageName}`;
                 finalImageUrl = processedImageUrl;
-                console.log(
-                  `[Backend] ✅ Using enhanced cleaned/watermarked image: ${processedImageUrl}`
-                );
-              } else if (product.image.endsWith(".webp")) {
+                } else if (product.image.endsWith(".webp")) {
                 // Fall back to existing processed .webp file
                 processedImageUrl = originalImageUrl;
                 finalImageUrl = processedImageUrl;
-                console.log(
-                  `[Backend] Using existing processed image: ${processedImageUrl}`
-                );
-              } else {
+                } else {
                 // Convert to processed image path (.webp extension)
                 const processedImageName = `${baseName}.webp`;
                 const processedImagePath = path.join(
@@ -493,20 +429,11 @@ function getProductsByCategory(req, res) {
                   // Use regular processed image
                   processedImageUrl = `${getBaseUrl()}/uploads/products/${processedImageName}`;
                   finalImageUrl = processedImageUrl;
-                  console.log(
-                    `[Backend] ✅ Using processed image: ${processedImageUrl}`
-                  );
-                } else {
+                  } else {
                   // Processed image doesn't exist, fall back to original
                   processedImageUrl = null;
                   finalImageUrl = originalImageUrl;
-                  console.log(
-                    `[Backend] ⚠️ No processed image found for: ${product.image}`
-                  );
-                  console.log(
-                    `[Backend] 🔄 Falling back to original image: ${originalImageUrl}`
-                  );
-                }
+                  }
               }
             }
 
@@ -519,22 +446,8 @@ function getProductsByCategory(req, res) {
             };
           });
 
-          console.log(
-            `[Backend] Active products found for category ${categoryId}:`,
-            processedResults.length
-          );
           processedResults.forEach((product, index) => {
-            console.log(`[Backend] Product ${index + 1}:`, {
-              id: product.id,
-              name: product.name,
-              sku: product.sku,
-              image: product.image,
-              processedImageUrl: product.processedImageUrl,
-              originalImageUrl: product.originalImageUrl,
-              finalImageUrl: product.imageUrl,
-              hasProcessedImage: product.hasProcessedImage,
             });
-          });
 
           res.json(processedResults);
         });
@@ -550,27 +463,17 @@ async function importFromExcel(req, res) {
       return res.status(400).json({ error: "Excel file is required" });
     }
 
-    console.log("🔍 [EXCEL IMPORT] Excel import started");
-    console.log("🔍 [EXCEL IMPORT] File:", req.file.filename);
-    console.log("🔍 [EXCEL IMPORT] File path:", req.file.path);
-    console.log("🔍 [EXCEL IMPORT] File size:", req.file.size, "bytes");
-
     // Read the Excel file
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
-    console.log("🔍 [EXCEL IMPORT] Workbook sheets:", workbook.SheetNames);
-    console.log("🔍 [EXCEL IMPORT] Using sheet:", sheetName);
-
     // Convert to JSON
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-    console.log("🔍 [EXCEL IMPORT] Total rows in Excel:", data.length);
-    console.log("🔍 [EXCEL IMPORT] First few rows:", data.slice(0, 3));
+    );
 
     if (data.length < 2) {
-      console.log("❌ [EXCEL IMPORT] Excel file is empty or has no data rows");
       return res
         .status(400)
         .json({ error: "Excel file is empty or has no data rows" });
@@ -578,15 +481,10 @@ async function importFromExcel(req, res) {
 
     // Get headers (first row)
     const headers = data[0];
-    console.log("🔍 [EXCEL IMPORT] Headers found:", headers);
-    console.log("🔍 [EXCEL IMPORT] Headers count:", headers.length);
-
     // Debug: Show exact header names and their positions
-    console.log("🔍 [EXCEL IMPORT] Detailed header analysis:");
     headers.forEach((header, index) => {
       if (header) {
-        console.log(
-          `🔍 [EXCEL IMPORT] Header ${index}: "${header}" (type: ${typeof header})`
+        `
         );
       }
     });
@@ -649,63 +547,28 @@ async function importFromExcel(req, res) {
     const columnIndices = {};
     const missingColumns = [];
 
-    console.log("🔍 [EXCEL IMPORT] Searching for required columns...");
-
     for (const mapping of requiredColumnMappings) {
       const index = findColumn(mapping.names);
       if (index !== -1) {
         columnIndices[mapping.key] = index;
-        console.log(
-          `✅ [EXCEL IMPORT] Found column "${mapping.key}" at index ${index}: "${headers[index]}"`
-        );
-
         // Special debugging for stamp column
         if (mapping.key === "stamp") {
-          console.log(`🔍 [EXCEL IMPORT] STAMP COLUMN DEBUG:`);
-          console.log(
-            `🔍 [EXCEL IMPORT] - Expected names: ${mapping.names.join(", ")}`
+          }`
           );
-          console.log(`🔍 [EXCEL IMPORT] - Found at index: ${index}`);
-          console.log(`🔍 [EXCEL IMPORT] - Header value: "${headers[index]}"`);
-          console.log(
-            `🔍 [EXCEL IMPORT] - Header type: ${typeof headers[index]}`
-          );
-          console.log(
-            `🔍 [EXCEL IMPORT] - Header length: ${
-              headers[index] ? headers[index].length : "null"
-            }`
-          );
-        }
+          }
       } else {
         missingColumns.push(mapping.names[0]); // Use first name for error message
-        console.log(
-          `❌ [EXCEL IMPORT] Missing column "${mapping.key}". Tried names:`,
-          mapping.names
-        );
-
         // Special debugging for missing stamp column
         if (mapping.key === "stamp") {
-          console.log(`🔍 [EXCEL IMPORT] STAMP COLUMN MISSING DEBUG:`);
-          console.log(
-            `🔍 [EXCEL IMPORT] - Tried to find: ${mapping.names.join(", ")}`
+          }`
           );
-          console.log(`🔍 [EXCEL IMPORT] - Available headers:`, headers);
-          console.log(
-            `🔍 [EXCEL IMPORT] - Header types:`,
-            headers.map((h) => typeof h)
+          => typeof h)
           );
         }
       }
     }
 
-    console.log("🔍 [EXCEL IMPORT] Final column mapping:", columnIndices);
-
     if (missingColumns.length > 0) {
-      console.log(
-        "❌ [EXCEL IMPORT] Missing required columns:",
-        missingColumns
-      );
-      console.log("❌ [EXCEL IMPORT] Available headers:", headers);
       return res.status(400).json({
         error: `Missing required columns: ${missingColumns.join(
           ", "
@@ -715,8 +578,6 @@ async function importFromExcel(req, res) {
 
     // Process data rows (skip header)
     const dataRows = data.slice(1);
-    console.log("🔍 [EXCEL IMPORT] Processing", dataRows.length, "data rows");
-
     const results = {
       categoriesCreated: 0,
       categoriesUpdated: 0,
@@ -728,31 +589,21 @@ async function importFromExcel(req, res) {
     // Group by category name (Item Name)
     const categoryGroups = {};
 
-    console.log("🔍 [EXCEL IMPORT] Grouping products by category...");
-
     for (let i = 0; i < dataRows.length; i++) {
       const row = dataRows[i];
       const rowNumber = i + 2; // Excel row number (1-based + header)
 
       try {
         const itemName = row[columnIndices.itemName];
-        console.log(
-          `🔍 [EXCEL IMPORT] Row ${rowNumber}: Item Name = "${itemName}"`
-        );
-
         if (!itemName) {
           const errorMsg = `Row ${rowNumber}: Item Name is required`;
-          console.log(`❌ [EXCEL IMPORT] ${errorMsg}`);
           results.errors.push(errorMsg);
           continue;
         }
 
         if (!categoryGroups[itemName]) {
           categoryGroups[itemName] = [];
-          console.log(
-            `🔍 [EXCEL IMPORT] Created new category group: "${itemName}"`
-          );
-        }
+          }
 
         const productData = {
           row: row,
@@ -761,24 +612,16 @@ async function importFromExcel(req, res) {
         };
 
         categoryGroups[itemName].push(productData);
-        console.log(
-          `🔍 [EXCEL IMPORT] Added product to category "${itemName}" (Row ${rowNumber})`
+        `
         );
       } catch (error) {
         const errorMsg = `Row ${rowNumber}: ${error.message}`;
-        console.log(`❌ [EXCEL IMPORT] ${errorMsg}`);
         results.errors.push(errorMsg);
       }
     }
 
-    console.log(
-      "🔍 [EXCEL IMPORT] Category groups created:",
-      Object.keys(categoryGroups)
     );
-    console.log(
-      "🔍 [EXCEL IMPORT] Products per category:",
-      Object.fromEntries(
-        Object.entries(categoryGroups).map(([name, products]) => [
+    .map(([name, products]) => [
           name,
           products.length,
         ])
@@ -786,71 +629,35 @@ async function importFromExcel(req, res) {
     );
 
     // Create/Update categories and products
-    console.log("🔍 [EXCEL IMPORT] Starting category and product creation...");
-
     for (const [categoryName, products] of Object.entries(categoryGroups)) {
       try {
-        console.log(
-          `🔍 [EXCEL IMPORT] Processing category: "${categoryName}" with ${products.length} products`
-        );
-
         // Check if category already exists
         const existingCategory = await findOrCreateCategory(categoryName);
         const categoryId = existingCategory.id;
 
-        console.log(
-          `🔍 [EXCEL IMPORT] Category "${categoryName}" - ID: ${categoryId}, Is New: ${existingCategory.isNew}`
-        );
-
         if (existingCategory.isNew) {
           results.categoriesCreated++;
-          console.log(
-            `✅ [EXCEL IMPORT] Category "${categoryName}" created successfully`
-          );
-        } else {
+          } else {
           results.categoriesUpdated++;
-          console.log(
-            `✅ [EXCEL IMPORT] Category "${categoryName}" updated successfully`
-          );
-        }
+          }
 
         // Create/Update products for this category
-        console.log(
-          `🔍 [EXCEL IMPORT] Processing ${products.length} products for category "${categoryName}"`
-        );
-
         for (const productData of products) {
           try {
-            console.log(
-              `🔍 [EXCEL IMPORT] Processing product row ${productData.rowNumber} for category "${categoryName}"`
-            );
-
             await createOrUpdateProduct(productData, categoryId);
 
             if (productData.isUpdated) {
               results.productsUpdated++;
-              console.log(
-                `✅ [EXCEL IMPORT] Product row ${productData.rowNumber} updated successfully`
-              );
-            } else {
+              } else {
               results.productsCreated++;
-              console.log(
-                `✅ [EXCEL IMPORT] Product row ${productData.rowNumber} created successfully`
-              );
-            }
+              }
           } catch (error) {
             const errorMsg = `Row ${productData.rowNumber}: ${error.message}`;
-            console.log(
-              `❌ [EXCEL IMPORT] Product creation failed: ${errorMsg}`
-            );
             results.errors.push(errorMsg);
           }
         }
       } catch (error) {
         const errorMsg = `Category "${categoryName}": ${error.message}`;
-        console.log(
-          `❌ [EXCEL IMPORT] Category processing failed: ${errorMsg}`
-        );
         results.errors.push(errorMsg);
       }
     }
@@ -858,25 +665,17 @@ async function importFromExcel(req, res) {
     // Clean up uploaded file
     if (fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
-      console.log("🔍 [EXCEL IMPORT] Uploaded file cleaned up");
-    }
-
-    console.log("🎉 [EXCEL IMPORT] Excel import completed successfully");
-    console.log("📊 [EXCEL IMPORT] Final results:", results);
+      }
 
     res.json({
       message: "Excel import completed successfully",
       results: results,
     });
   } catch (error) {
-    console.error("❌ [EXCEL IMPORT] Excel import error:", error);
-    console.error("❌ [EXCEL IMPORT] Error stack:", error.stack);
-
     // Clean up uploaded file on error
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
-      console.log("🔍 [EXCEL IMPORT] Uploaded file cleaned up after error");
-    }
+      }
 
     res.status(500).json({ error: "Failed to import Excel file" });
   }
@@ -885,58 +684,30 @@ async function importFromExcel(req, res) {
 // Find existing category or create new one
 function findOrCreateCategory(name) {
   return new Promise((resolve, reject) => {
-    console.log(`🔍 [CATEGORY] Searching for category: "${name}"`);
-
     // First, try to find existing category
     const findSql = "SELECT id FROM categories WHERE name = ?";
-    console.log(`🔍 [CATEGORY] SQL Query: ${findSql} with params: [${name}]`);
-
     db.query(findSql, [name], (err, results) => {
       if (err) {
-        console.error(
-          `❌ [CATEGORY] Database error finding category "${name}":`,
-          err
-        );
         reject(err);
         return;
       }
 
-      console.log(`🔍 [CATEGORY] Database results for "${name}":`, results);
-
       if (results.length > 0) {
         // Category exists, return it
         const categoryId = results[0].id;
-        console.log(
-          `✅ [CATEGORY] Category "${name}" found with ID: ${categoryId}`
-        );
         resolve({ id: categoryId, isNew: false });
       } else {
         // Category doesn't exist, create it
-        console.log(
-          `🔍 [CATEGORY] Category "${name}" not found, creating new one...`
-        );
-
         const createSql = `
           INSERT INTO categories (name, status, created_at, updated_at) 
           VALUES (?, 'draft', NOW(), NOW())
         `;
 
-        console.log(
-          `🔍 [CATEGORY] SQL Insert: ${createSql} with params: [${name}]`
-        );
-
         db.query(createSql, [name], (err, result) => {
           if (err) {
-            console.error(
-              `❌ [CATEGORY] Database error creating category "${name}":`,
-              err
-            );
             reject(err);
           } else {
             const newCategoryId = result.insertId;
-            console.log(
-              `✅ [CATEGORY] Category "${name}" created successfully with ID: ${newCategoryId}`
-            );
             resolve({ id: newCategoryId, isNew: true });
           }
         });
@@ -952,12 +723,6 @@ function createOrUpdateProduct(productData, categoryId) {
     const indices = productData.indices;
     const rowNumber = productData.rowNumber;
 
-    console.log(
-      `🔍 [PRODUCT] Processing product row ${rowNumber} for category ID ${categoryId}`
-    );
-    console.log(`🔍 [PRODUCT] Raw row data:`, row);
-    console.log(`🔍 [PRODUCT] Column indices:`, indices);
-
     // Extract product data according to new mapping
     const sku = row[indices.tgno] || "";
     const rawPurity = row[indices.stamp] || "";
@@ -971,47 +736,9 @@ function createOrUpdateProduct(productData, categoryId) {
     const purity = rawPurity ? rawPurity.toString().trim() : "";
 
     // Enhanced debugging for purity/stamp field
-    console.log(`🔍 [PRODUCT] Row ${rowNumber} - Purity/Stamp debugging:`);
-    console.log(`🔍 [PRODUCT] - indices.stamp value: ${indices.stamp}`);
-    console.log(`🔍 [PRODUCT] - row[indices.stamp] raw value: "${rawPurity}"`);
-    console.log(`🔍 [PRODUCT] - Final purity value: "${purity}"`);
-    console.log(`🔍 [PRODUCT] - Column mapping for stamp:`, {
-      key: "stamp",
-      expectedNames: [
-        "Stamp",
-        "STAMP",
-        "stamp",
-        "Stmp",
-        "STMP",
-        "stmp",
-        "Purity",
-        "PURITY",
-        "purity",
-        "Karat",
-        "KARAT",
-        "karat",
-        "K",
-        "k",
-      ],
-      foundIndex: indices.stamp,
-      headerName: row[indices.stamp] ? "Found" : "Not found",
-    });
-
-    console.log(`🔍 [PRODUCT] Extracted product data:`, {
-      sku,
-      purity,
-      pieces,
-      grossWeight,
-      netWeight,
-      size,
-      mrp,
-      categoryId,
-    });
-
     // Validate required fields
     if (!sku) {
       const errorMsg = "SKU (Tgno) is required";
-      console.log(`❌ [PRODUCT] Row ${rowNumber}: ${errorMsg}`);
       reject(new Error(errorMsg));
       return;
     }
@@ -1019,51 +746,34 @@ function createOrUpdateProduct(productData, categoryId) {
     // Additional validation for data integrity
     if (pieces < 0) {
       const errorMsg = "Pieces cannot be negative";
-      console.log(`❌ [PRODUCT] Row ${rowNumber}: ${errorMsg}`);
       reject(new Error(errorMsg));
       return;
     }
 
     if (grossWeight < 0 || netWeight < 0) {
       const errorMsg = "Weight values cannot be negative";
-      console.log(`❌ [PRODUCT] Row ${rowNumber}: ${errorMsg}`);
       reject(new Error(errorMsg));
       return;
     }
 
     if (mrp < 0) {
       const errorMsg = "MRP cannot be negative";
-      console.log(`❌ [PRODUCT] Row ${rowNumber}: ${errorMsg}`);
       reject(new Error(errorMsg));
       return;
     }
 
-    console.log(`🔍 [PRODUCT] Data validation passed for row ${rowNumber}`);
-    console.log(
-      `🔍 [PRODUCT] Checking if product with SKU "${sku}" already exists...`
-    );
-
     // First, check if product with this SKU already exists
     const checkSql = "SELECT id FROM products WHERE sku = ?";
-    console.log(`🔍 [PRODUCT] SQL Query: ${checkSql} with params: [${sku}]`);
-
     db.query(checkSql, [sku], (err, results) => {
       if (err) {
-        console.error(
-          `❌ [PRODUCT] Database error checking SKU "${sku}":`,
-          err
-        );
         reject(err);
         return;
       }
 
-      console.log(`🔍 [PRODUCT] Database results for SKU "${sku}":`, results);
-
       if (results.length > 0) {
         // Product exists, update it
         const existingProductId = results[0].id;
-        console.log(
-          `🔍 [PRODUCT] Product with SKU "${sku}" exists (ID: ${existingProductId}), updating...`
+        , updating...`
         );
 
         const updateSql = `
@@ -1092,30 +802,16 @@ function createOrUpdateProduct(productData, categoryId) {
           mrp,
           sku,
         ];
-        console.log(
-          `🔍 [PRODUCT] SQL Update: ${updateSql} with params:`,
-          updateValues
-        );
-
         db.query(updateSql, updateValues, (err, result) => {
           if (err) {
-            console.error(
-              `❌ [PRODUCT] Database error updating product "${sku}":`,
-              err
-            );
             reject(err);
           } else {
-            console.log(`✅ [PRODUCT] Product "${sku}" updated successfully`);
             productData.isUpdated = true;
             resolve(result);
           }
         });
       } else {
         // Product doesn't exist, create it
-        console.log(
-          `🔍 [PRODUCT] Product with SKU "${sku}" doesn't exist, creating new one...`
-        );
-
         const insertSql = `
           INSERT INTO products (
             name, sku, purity, pieces, gross_weight, net_weight, size, mark_amount,
@@ -1136,28 +832,11 @@ function createOrUpdateProduct(productData, categoryId) {
           mrp,
           categoryId,
         ];
-        console.log(
-          `🔍 [PRODUCT] SQL Insert: ${insertSql} with params:`,
-          insertValues
-        );
-
         db.query(insertSql, insertValues, (err, result) => {
           if (err) {
-            console.error(
-              `❌ [PRODUCT] Database error creating product "${sku}":`,
-              err
-            );
-            console.error(`❌ [PRODUCT] Error details:`, {
-              code: err.code,
-              sqlMessage: err.sqlMessage,
-              sqlState: err.sqlState,
-            });
             reject(err);
           } else {
             const newProductId = result.insertId;
-            console.log(
-              `✅ [PRODUCT] Product "${sku}" created successfully with ID: ${newProductId}`
-            );
             productData.isUpdated = false;
             resolve(result);
           }
@@ -1169,17 +848,12 @@ function createOrUpdateProduct(productData, categoryId) {
 
 // Add watermarks to existing products
 async function addWatermarksToExistingProducts(req, res) {
-  console.log("🚀 Starting watermark addition to existing products...");
-
   try {
     // Get all products from database
     productModel.getAllProducts((err, products) => {
       if (err) {
-        console.error("❌ Error fetching products:", err);
         return res.status(500).json({ error: err.message });
       }
-
-      console.log(`📦 Found ${products.length} products to process`);
 
       let processedCount = 0;
       let errorCount = 0;
@@ -1188,16 +862,13 @@ async function addWatermarksToExistingProducts(req, res) {
       // Process each product
       products.forEach(async (product) => {
         if (!product.image) {
-          console.log(
-            `⚠️ Product ${product.id} (${product.name}) has no image, skipping...`
+          has no image, skipping...`
           );
           processedCount++;
           return;
         }
 
         try {
-          console.log(`🔄 Processing product ${product.id}: ${product.name}`);
-
           // Check if image file exists
           const imagePath = path.join(
             __dirname,
@@ -1206,18 +877,12 @@ async function addWatermarksToExistingProducts(req, res) {
           );
 
           if (!fs.existsSync(imagePath)) {
-            console.log(
-              `⚠️ Image file not found for product ${product.id}: ${imagePath}`
-            );
             processedCount++;
             return;
           }
 
           // Check if image already has watermark (look for .webp extension)
           if (product.image.endsWith(".webp")) {
-            console.log(
-              `✅ Product ${product.id} already has processed image: ${product.image}`
-            );
             processedCount++;
             successCount++;
             return;
@@ -1237,15 +902,8 @@ async function addWatermarksToExistingProducts(req, res) {
             { image: newImageName },
             (updateErr) => {
               if (updateErr) {
-                console.error(
-                  `❌ Error updating product ${product.id}:`,
-                  updateErr
-                );
                 errorCount++;
               } else {
-                console.log(
-                  `✅ Successfully processed product ${product.id}: ${product.image} → ${newImageName}`
-                );
                 successCount++;
               }
 
@@ -1253,12 +911,6 @@ async function addWatermarksToExistingProducts(req, res) {
 
               // Check if all products are processed
               if (processedCount === products.length) {
-                console.log("\n🎉 Watermark processing completed!");
-                console.log(`📊 Summary:`);
-                console.log(`   - Total products: ${products.length}`);
-                console.log(`   - Successfully processed: ${successCount}`);
-                console.log(`   - Errors: ${errorCount}`);
-
                 res.json({
                   message: "Watermark processing completed",
                   summary: {
@@ -1271,7 +923,6 @@ async function addWatermarksToExistingProducts(req, res) {
             }
           );
         } catch (error) {
-          console.error(`❌ Error processing product ${product.id}:`, error);
           errorCount++;
           processedCount++;
 
@@ -1289,7 +940,6 @@ async function addWatermarksToExistingProducts(req, res) {
       });
     });
   } catch (error) {
-    console.error("❌ Fatal error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -1342,7 +992,6 @@ function updateProductStockStatus(req, res) {
 
       productModel.recordStockHistory(historyData, (historyErr) => {
         if (historyErr) {
-          console.error("Error recording stock history:", historyErr);
           // Don't fail the request if history recording fails
         }
 

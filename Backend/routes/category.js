@@ -14,14 +14,12 @@ const storage = multer.diskStorage({
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-    console.log(`📁 [CATEGORY] Uploading to: ${uploadDir}`);
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const filename =
       file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-    console.log(`📁 [CATEGORY] Generated filename: ${filename}`);
     cb(null, filename);
   },
 });

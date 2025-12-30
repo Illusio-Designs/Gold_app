@@ -59,8 +59,6 @@ const corsOptions = {
       // If origin is not a valid URL, fall through to block.
     }
 
-    console.log("CORS blocked origin:", origin);
-    console.log("CORS allowed origins:", allowedOrigins);
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
@@ -115,7 +113,6 @@ app.use("/api/seo", seoRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
   res.status(500).json({ error: "Internal server error" });
 });
 
@@ -133,31 +130,22 @@ let serverStarted = false;
 // Start server with database setup
 async function startServer() {
   if (serverStarted) {
-    console.log("⚠️ Server already started, skipping...");
     return;
   }
 
   try {
-    console.log("🚀 Starting server with database setup...");
-
     // Try database setup, but don't fail if it doesn't work
     try {
     await createTablesAndAdmin();
     } catch (dbError) {
-      console.warn("⚠️ Database setup failed, but server will continue:", dbError.message);
-    }
+      }
 
     // Start the server even if database failed
     app.listen(PORT, HOST, () => {
       serverStarted = true;
-      console.log(`✅ Server running on http://${HOST}:${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-      console.log(`CORS Origins: ${getCorsOrigins().join(", ")}`);
-      console.log("🎉 Server is ready to accept requests!");
-      console.log("📄 SEO endpoint available at: /api/seo");
-    });
+      .join(", ")}`);
+      });
   } catch (error) {
-    console.error("❌ Failed to start server:", error);
     process.exit(1);
   }
 }

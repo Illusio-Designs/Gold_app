@@ -58,10 +58,9 @@ class AiStudioService {
         const name = m.name || m.displayName || '';
         return name.replace(/^models\//, ''); // Remove "models/" prefix if present
       });
-      console.log(`📋 [GEMINI] Available models (${modelNames.length}):`, modelNames);
+      :`, modelNames);
       return modelNames;
     } catch (error) {
-      console.warn(`⚠️ [GEMINI] Could not list models:`, error.message);
       // Return empty array on error
       return [];
     }
@@ -78,13 +77,11 @@ class AiStudioService {
       if (availableModels.length > 0) {
         // Extract just the model name (remove "models/" prefix if present)
         const modelName = availableModels[0].replace(/^models\//, '');
-        console.log(`✅ [GEMINI] Using first available model: ${modelName}`);
         const model = genAI.getGenerativeModel({ model: modelName });
         return { model, modelName };
       }
     } catch (listError) {
-      console.warn(`⚠️ [GEMINI] Could not list models, trying defaults:`, listError.message);
-    }
+      }
 
     // If listing failed, try common model names (excluding gemini-pro which doesn't work in v1beta)
     // Remove duplicates and filter
@@ -101,12 +98,10 @@ class AiStudioService {
     
     for (const modelName of modelNamesToTry) {
       try {
-        console.log(`🔍 [GEMINI] Trying model: ${modelName}`);
         const model = genAI.getGenerativeModel({ model: modelName });
         // Model initialization doesn't throw, so we'll test it with an actual call
         return { model, modelName };
       } catch (error) {
-        console.warn(`⚠️ [GEMINI] Model ${modelName} failed to initialize:`, error.message);
         lastError = error;
         continue;
       }
@@ -143,7 +138,6 @@ class AiStudioService {
     const enableBgRemoval = process.env.ENABLE_BG_REMOVAL === "true";
     
     if (!enableBgRemoval) {
-      console.log(`ℹ️ [AI STUDIO] Background removal disabled. Using original image.`);
       // Return the original image path
       if (typeof inputImageUrlOrPath === "string" && !/^https?:\/\//i.test(inputImageUrlOrPath)) {
         return inputImageUrlOrPath;
@@ -156,7 +150,6 @@ class AiStudioService {
     }
 
     try {
-      console.log(`🎨 [AI STUDIO] Performing simple background removal with Sharp...`);
       const imageData = await this._readImageData(inputImageUrlOrPath);
       
       // Simple approach: convert to white background
@@ -168,10 +161,8 @@ class AiStudioService {
 
       const outPath = path.join(workDir, `bg-removed-${Date.now()}.png`);
       await fs.promises.writeFile(outPath, processed);
-      console.log(`✅ [AI STUDIO] Background removal completed: ${outPath}`);
       return outPath;
     } catch (error) {
-      console.warn(`⚠️ [AI STUDIO] Background removal failed, using original:`, error.message);
       // Fallback to original
       const imageData = await this._readImageData(inputImageUrlOrPath);
       const outPath = path.join(workDir, `bg-removed-${Date.now()}.png`);
@@ -194,7 +185,6 @@ class AiStudioService {
       model = result.model;
       modelName = result.modelName;
     } catch (error) {
-      console.warn(`⚠️ [GEMINI] Could not get working model, using base prompt:`, error.message);
       return basePrompt;
     }
     
@@ -217,7 +207,6 @@ Please analyze the image and create a highly detailed, specific prompt that:
 
 Return ONLY the enhanced prompt, nothing else.`;
 
-        console.log(`🔍 [GEMINI] Analyzing image and enhancing prompt...`);
         const result = await model.generateContent([
           enhancementPrompt,
           {
@@ -231,17 +220,15 @@ Return ONLY the enhanced prompt, nothing else.`;
       const response = await result.response;
       const enhancedPrompt = response.text().trim();
       
-      console.log(`✅ [GEMINI] Enhanced prompt generated with ${modelName} (${enhancedPrompt.length} chars)`);
+      `);
       return enhancedPrompt || basePrompt; // Fallback to base prompt if empty
     } catch (error) {
-      console.warn(`⚠️ [GEMINI] Model ${modelName} failed:`, error.message);
       lastError = error;
     }
     
     // If failed, return base prompt
     if (lastError) {
-      console.warn(`⚠️ [GEMINI] Failed to enhance prompt, using base prompt. Error:`, lastError?.message);
-    }
+      }
     return basePrompt;
   }
 
@@ -256,18 +243,13 @@ Return ONLY the enhanced prompt, nothing else.`;
       "High-end studio product photoshoot of the same jewelry item, centered, clean white background, softbox lighting, realistic soft shadow under the item, ultra sharp, photorealistic, no text, no watermark, no extra objects, keep exact shape and design. Enhance details, reduce noise, improve clarity and contrast, true-to-life colors, keep same framing (no zoom, no crop).";
 
     try {
-      console.log(`🎨 [GEMINI] Starting studio image generation...`);
-      
       // Prioritize image generation (Nano Banana models)
       const useImageGen = process.env.GEMINI_USE_IMAGE_GEN !== "false";
       
       if (useImageGen) {
         try {
-          console.log(`🎨 [GEMINI] Attempting direct image generation with Nano Banana...`);
           return await this._generateImageWithGenAI(inputImageUrlOrPath, basePrompt, workDir);
         } catch (genAIError) {
-          console.warn(`⚠️ [GEMINI] Image generation with Nano Banana failed:`, genAIError.message);
-          console.log(`🔄 [GEMINI] Falling back to analysis-based enhancement...`);
           // Fall through to analysis-based approach
         }
       }
@@ -275,7 +257,6 @@ Return ONLY the enhanced prompt, nothing else.`;
       // Fallback: Use analysis + Sharp enhancement (only if image generation disabled or failed)
       return await this._generateImageWithAnalysis(inputImageUrlOrPath, basePrompt, workDir);
     } catch (error) {
-      console.error(`❌ [GEMINI] Error in studio image generation:`, error);
       if (error?.message?.includes("API_KEY")) {
         throw new Error("Gemini authentication failed. Please check your GOOGLE_AI_API_KEY");
       }
@@ -310,8 +291,6 @@ Return ONLY the enhanced prompt, nothing else.`;
     // For image generation, we need to describe what we want, not just transform
     const imageGenPrompt = `Create a professional studio product photoshoot image of this jewelry item: ${basePrompt}. Keep the exact same jewelry item, maintain its shape, design, and details. Only improve the photography quality, lighting, and background.`;
 
-    console.log(`🎨 [GEMINI] Generating image with Nano Banana models...`);
-    
     // Try image generation models (Nano Banana models)
     const imageGenModels = [
       process.env.GEMINI_IMAGE_GEN_MODEL,
@@ -323,8 +302,6 @@ Return ONLY the enhanced prompt, nothing else.`;
     let lastError = null;
     for (const modelName of imageGenModels) {
       try {
-        console.log(`🔍 [GEMINI] Trying image generation model: ${modelName}`);
-        
         // Try with image input first (for image-to-image generation)
         let response;
         try {
@@ -347,7 +324,6 @@ Return ONLY the enhanced prompt, nothing else.`;
           });
         } catch (imgError) {
           // If image input fails, try text-only (some models may not support image input)
-          console.warn(`⚠️ [GEMINI] Model ${modelName} rejected image input, trying text-only:`, imgError.message);
           response = await ai.models.generateContent({
             model: modelName,
             contents: imageGenPrompt,
@@ -361,7 +337,6 @@ Return ONLY the enhanced prompt, nothing else.`;
               const buffer = Buffer.from(part.inlineData.data, "base64");
               const outPath = path.join(workDir, `studio-gemini-${Date.now()}.webp`);
               await fs.promises.writeFile(outPath, buffer);
-              console.log(`✅ [GEMINI] Image generated successfully: ${outPath}`);
               return outPath;
             }
           }
@@ -369,7 +344,6 @@ Return ONLY the enhanced prompt, nothing else.`;
 
         throw new Error("No image data in response");
       } catch (error) {
-        console.warn(`⚠️ [GEMINI] Model ${modelName} failed:`, error.message);
         lastError = error;
         continue;
       }
@@ -382,7 +356,7 @@ Return ONLY the enhanced prompt, nothing else.`;
    * Generate image using analysis + Sharp enhancement (fallback)
    */
   async _generateImageWithAnalysis(inputImageUrlOrPath, basePrompt, workDir) {
-    console.log(`🎨 [GEMINI] Using analysis-based enhancement (fallback)...`);
+    ...`);
     
     const genAI = await this._initGeminiClient();
     const imageData = await this._readImageData(inputImageUrlOrPath);
@@ -413,7 +387,6 @@ Return ONLY a JSON object with these keys: brightness, contrast, saturation, sha
       throw new Error(`Could not get working Gemini model: ${error.message}`);
     }
 
-    console.log(`🔍 [GEMINI] Analyzing image with model: ${modelName}...`);
     const result = await model.generateContent([
       analysisPrompt,
       {
@@ -425,8 +398,6 @@ Return ONLY a JSON object with these keys: brightness, contrast, saturation, sha
     ]);
 
     const response = await result.response;
-    console.log(`✅ [GEMINI] Successfully analyzed image with model: ${modelName}`);
-    
     let enhancementParams = {
       brightness: 10,
       contrast: 15,
@@ -442,13 +413,10 @@ Return ONLY a JSON object with these keys: brightness, contrast, saturation, sha
       const jsonText = jsonMatch ? jsonMatch[1] : responseText;
       const parsed = JSON.parse(jsonText);
       enhancementParams = { ...enhancementParams, ...parsed };
-      console.log(`✅ [GEMINI] Enhancement parameters:`, enhancementParams);
-    } catch (parseError) {
-      console.warn(`⚠️ [GEMINI] Could not parse enhancement parameters, using defaults:`, parseError.message);
-    }
+      } catch (parseError) {
+      }
 
     // Apply enhancements using Sharp
-    console.log(`✨ [AI STUDIO] Applying enhancements to image...`);
     let processed = sharp(imageData);
 
     if (enhancementParams.brightness) {
@@ -480,7 +448,6 @@ Return ONLY a JSON object with these keys: brightness, contrast, saturation, sha
     const enhancedImage = await processed.webp({ quality: 95 }).toBuffer();
     const outPath = path.join(workDir, `studio-gemini-${Date.now()}.webp`);
     await fs.promises.writeFile(outPath, enhancedImage);
-    console.log(`✅ [GEMINI] Studio image enhanced and saved: ${outPath}`);
     return outPath;
   }
 }
