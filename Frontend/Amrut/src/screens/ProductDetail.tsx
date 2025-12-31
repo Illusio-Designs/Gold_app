@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, Alert, Dimensions, TextInput, Modal, Pressable } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProductById } from '../services/Api';
 import { useCart } from '../context/CartContext';
 import CustomHeader from '../components/common/CustomHeader';
@@ -28,6 +29,7 @@ const ProductDetail = () => {
   const route = useRoute();
   const navigation = useNavigation<any>();
   const { addToCart } = useCart();
+  const insets = useSafeAreaInsets();
   
   // @ts-ignore
   const productId = route.params?.productId;
@@ -186,7 +188,12 @@ const ProductDetail = () => {
         colors={["#43051D", "#5D0829"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={styles.gradientBg}
+        style={[
+          styles.gradientBg,
+          { 
+            height: height - (getResponsiveSpacing(60, 70, 80) + Math.max(insets.bottom, 10))
+          }
+        ]}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity 
@@ -319,7 +326,13 @@ const ProductDetail = () => {
       </LinearGradient>
               {/* Add to Cart Button at the bottom */}
         <TouchableOpacity 
-          style={styles.addToCartBtn}
+          style={[
+            styles.addToCartBtn,
+            { 
+              paddingBottom: Math.max(insets.bottom, 10),
+              height: getResponsiveSpacing(60, 70, 80) + Math.max(insets.bottom, 10)
+            }
+          ]}
           onPress={() => {
             addToCart({
               image: getProductImage(),
