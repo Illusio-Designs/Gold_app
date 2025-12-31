@@ -1,5 +1,6 @@
 package com.goldapp.amrutkumargovinddasllp
 
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import com.facebook.react.ReactActivity
@@ -10,9 +11,14 @@ import com.facebook.react.defaults.DefaultReactActivityDelegate
 class MainActivity : ReactActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+    super.onCreate(null)
     // Prevent screenshots and screen recording
     window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+    
+    // Enable edge-to-edge mode for proper safe area handling
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      window.setDecorFitsSystemWindows(false)
+    }
   }
 
   /**
