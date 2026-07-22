@@ -823,104 +823,6 @@ function createOrUpdateProduct(productData, categoryId) {
     });
   });
 }
-
-// Add watermarks to existing products
-async function addWatermarksToExistingProducts(req, res) {
-  try {
-    // Get all products from database
-    productModel.getAllProducts((err, products) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-
-      let processedCount = 0;
-      let errorCount = 0;
-      let successCount = 0;
-
-      // Process each product
-      products.forEach(async (product) => {
-        if (!product.image) {
-          processedCount++;
-          return;
-        }
-
-        try {
-          // Check if image file exists
-          const imagePath = path.join(
-            __dirname,
-            "../uploads/products",
-            product.image
-          );
-
-          if (!fs.existsSync(imagePath)) {
-            processedCount++;
-            return;
-          }
-
-          // Check if image already has watermark (look for .webp extension)
-          if (product.image.endsWith(".webp")) {
-            processedCount++;
-            successCount++;
-            return;
-          }
-
-          // Process image with watermark
-          const processedPath =
-            await imageProcessingService.processProductImage(
-              imagePath,
-              product.image
-            );
-          const newImageName = path.basename(processedPath);
-
-          // Update product in database with new image name
-          productModel.updateProduct(
-            product.id,
-            { image: newImageName },
-            (updateErr) => {
-              if (updateErr) {
-                errorCount++;
-              } else {
-                successCount++;
-              }
-
-              processedCount++;
-
-              // Check if all products are processed
-              if (processedCount === products.length) {
-                res.json({
-                  message: "Watermark processing completed",
-                  summary: {
-                    total: products.length,
-                    successful: successCount,
-                    errors: errorCount,
-                  },
-                });
-              }
-            }
-          );
-        } catch (error) {
-          errorCount++;
-          processedCount++;
-
-          if (processedCount === products.length) {
-            res.json({
-              message: "Watermark processing completed with errors",
-              summary: {
-                total: products.length,
-                successful: successCount,
-                errors: errorCount,
-              },
-            });
-          }
-        }
-      });
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Stock management functions
 function updateProductStockStatus(req, res) {
   const { id } = req.params;
   const { stock_status, notes } = req.body;
@@ -1042,7 +944,6 @@ module.exports = {
   deleteProductImage,
   getProductsByCategory,
   importFromExcel,
-  addWatermarksToExistingProducts,
   updateProductStockStatus,
   getProductStockStatus,
   getProductStockHistory,
