@@ -2,29 +2,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 9px 16px;
+  border-radius: 9px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #c09e83;
+  transition: all var(--transition);
+  border: 1px solid var(--brand);
   gap: 8px;
   outline: none;
   position: relative;
-  background: #5d0829;
-  color: #fce2bf;
+  background: var(--brand);
+  color: var(--brand-cream);
   white-space: nowrap;
 }
 
-.common-button:focus {
+.common-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #c09e83;
+  box-shadow: 0 0 0 3px rgba(192, 158, 131, 0.28);
+}
+
+.common-button.primary {
+  background: var(--brand);
+  color: var(--brand-cream);
+  border-color: var(--brand);
 }
 
 .common-button.primary:hover {
-  background: linear-gradient(90deg, #fce2bf 0%, #c09e83 100%);
-  color: #5d0829;
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: var(--brand-cream);
   transform: translateY(-1px);
 }
 
@@ -33,15 +40,15 @@
 }
 
 .common-button.secondary {
-  background: #fce2bf;
-  border: 1px solid #c09e83;
-  color: #5d0829;
+  background: var(--surface-muted);
+  border: 1px solid var(--brand-gold);
+  color: var(--brand);
 }
 
 .common-button.secondary:hover {
-  background: #c09e83;
-  border-color: #5d0829;
-  color: #fce2bf;
+  background: var(--surface-sunken);
+  border-color: var(--brand-gold);
+  color: var(--brand);
   transform: translateY(-1px);
 }
 
@@ -50,15 +57,15 @@
 }
 
 .common-button.danger {
-  background: #fff0f0;
-  color: #5d0829;
-  border: 1px solid #c09e83;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid var(--brand-gold);
 }
 
 .common-button.danger:hover {
-  background: #c09e83;
-  border-color: #5d0829;
-  color: #fff0f0;
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
   transform: translateY(-1px);
 }
 
@@ -76,7 +83,7 @@
 .common-button.small {
   padding: 6px 12px;
   font-size: 13px;
-  min-width: 80px;
+  min-width: 72px;
 }
 
 .common-button.large {
@@ -87,17 +94,25 @@
 
 /* Icon button styles */
 .common-button.icon-only {
-  padding: 8px;
-  min-width: auto;
-  border-radius: 8px;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 9px;
 }
 
 .common-button.icon-only.small {
-  padding: 6px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
 }
 
 .common-button.icon-only.large {
-  padding: 12px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  padding: 0;
 }
 
 /* Loading state */
@@ -113,7 +128,7 @@
   height: 16px;
   border: 2px solid;
   border-radius: 50%;
-  border-color: #c09e83 transparent transparent;
+  border-color: var(--brand-cream) transparent transparent;
   animation: button-loading 0.8s linear infinite;
 }
 
@@ -127,52 +142,56 @@
 }
 
 .btn {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 1px solid #c09e83;
+  padding: 9px 20px;
+  border-radius: 9px;
+  border: 1px solid var(--brand);
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: all var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #5d0829;
-  color: #fce2bf;
+  background: var(--brand);
+  color: var(--brand-cream);
   white-space: nowrap;
 }
 
 .btn-primary-dark {
-  background-color: #5d0829;
-  color: #fce2bf;
-  border-color: #c09e83;
+  background-color: var(--brand);
+  color: var(--brand-cream);
+  border-color: var(--brand);
 }
 .btn-primary-dark:hover {
-  background: linear-gradient(90deg, #fce2bf 0%, #c09e83 100%);
-  color: #5d0829;
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  color: var(--brand-cream);
+  transform: translateY(-1px);
 }
 
 .btn-outline {
-  background-color: #fce2bf;
-  color: #5d0829;
-  border-color: #c09e83;
+  background-color: var(--surface-muted);
+  color: var(--brand);
+  border-color: var(--brand-gold);
 }
 .btn-outline:hover {
-  background-color: #c09e83;
-  color: #fce2bf;
+  background-color: var(--surface-sunken);
+  color: var(--brand);
+  border-color: var(--brand-gold);
 }
 
 .btn-danger {
-  background-color: #fff0f0;
-  color: #5d0829;
-  border-color: #c09e83;
+  background-color: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--brand-gold);
 }
 .btn-danger:hover {
-  background-color: #c09e83;
-  color: #fff0f0;
+  background-color: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
 }
 
 .btn-sm {
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 6px 14px;
+  font-size: 13px;
 }
