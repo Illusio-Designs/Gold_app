@@ -123,9 +123,11 @@ function generateOrderPDF(order, stream) {
   y += 18;
   const cImg = M;
   const cName = M + 58; // text after a 46px thumb
-  const cSku = M + 320;
-  const cQty = M + 440;
-  const qtyW = contentW - (cQty - M);
+  const cSku = M + 260;
+  const cQty = M + 380;
+  // Right-aligned QTY column, kept 12px clear of the table's right edge so it
+  // never clips against the border.
+  const qtyW = contentW - (cQty - M) - 12;
 
   // Header row
   doc.rect(M, y, contentW, 26).fill(BRAND);
