@@ -114,6 +114,12 @@ jobs:
           # does not support TLS.
           protocol: ftps
           port: 21
+          # Give the FTP control socket more room before giving up. The shared
+          # cPanel host occasionally answers slowly (especially when several
+          # deploys queue back-to-back through the concurrency group), and the
+          # 30s default has intermittently thrown "Timeout (control socket)".
+          # 120s makes those transient blips retry-recover instead of failing.
+          timeout: 120000
           local-dir: ./Backend/
           server-dir: ${{ secrets.FTP_REMOTE_DIR }}
           # Never upload these. uploads/ is excluded so runtime-uploaded images
