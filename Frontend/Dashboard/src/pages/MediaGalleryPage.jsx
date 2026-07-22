@@ -3,8 +3,6 @@ import {
   Image,
   Trash2,
   Download,
-  AlertTriangle,
-  FileImage,
   Package,
   Layers,
   Upload,
@@ -27,9 +25,6 @@ const MediaGalleryPage = () => {
   const [bulkUploadFiles, setBulkUploadFiles] = useState([]);
   const [bulkUploading, setBulkUploading] = useState(false);
   const [bulkUploadResults, setBulkUploadResults] = useState([]);
-
-  // Auto-detection states
-  const [autoDetectEnabled, setAutoDetectEnabled] = useState(true);
 
   // Delete states
   const [deleteItem, setDeleteItem] = useState(null);
@@ -89,75 +84,41 @@ const MediaGalleryPage = () => {
         formData.append("images", file);
       });
 
-      formData.append("autoDetect", autoDetectEnabled.toString());
-
       const response = await bulkUploadMediaFiles(formData, token);
 
-      // Backend may return either:
-      // - { success, message, data: [...] }
-      // - { message, files: [...], summary: {...} }
-      const files = response?.files || response?.data || [];
+      // Backend returns { message, summary: { total, assigned, rejected }, results: [...] }
+      // where each result is { file, success, productName, productId, image, matchedBy }
+      // or { file, success: false, reason }.
+      const results = response?.results || [];
       const summary = response?.summary || null;
-      const success =
-        typeof response?.success === "boolean"
-          ? response.success
-          : Array.isArray(files)
-            ? true
-            : false;
 
-      if (!Array.isArray(files)) {
-        showErrorToast("Bulk upload returned unexpected response format");
+      if (!Array.isArray(results)) {
+        showErrorToast("Upload returned an unexpected response format");
         return;
       }
 
-      // Map backend results to the simple UI result shape + keep key debug details
-      const uiResults = files.map((r) => {
-        const attached =
-          r?.update_result?.type && r?.update_result?.id
-            ? `${r.update_result.type}#${r.update_result.id} (${r.update_result.name || ""})`
-            : r?.association?.type && r?.association?.id
-              ? `${r.association.type}#${r.association.id} (${r.association.name || ""})`
-              : null;
-
-        const ocrTag = r?.ocr?.tag || null;
-        const ocrErr = r?.ocr?.error || null;
-        const aiAttempted = !!r?.ai?.attempted;
-        const aiErr = r?.ai?.error || null;
-
-        const detailsParts = [];
-        if (attached) detailsParts.push(`Attached: ${attached}`);
-        else detailsParts.push("Attached: NO (no association)");
-        if (ocrTag) detailsParts.push(`OCR: ${ocrTag}`);
-        if (ocrErr) detailsParts.push(`OCR error: ${ocrErr}`);
-        if (r?.ai?.enabled === false && (r?.ai?.missingEnv?.length || r?.ai?.missingEnv)) {
-          detailsParts.push(
-            `AI disabled (missing env): ${
-              Array.isArray(r.ai.missingEnv) ? r.ai.missingEnv.join(", ") : r.ai.missingEnv
+      const uiResults = results.map((r) => ({
+        success: !!r?.success,
+        filename: r?.file || "unknown",
+        message: r?.success
+          ? `Assigned to ${r.productName || `product #${r.productId}`}${
+              r.matchedBy ? ` · matched by ${r.matchedBy}` : ""
             }`
-          );
-        } else if (aiAttempted) {
-          detailsParts.push(`AI attempted: yes`);
-          if (aiErr) detailsParts.push(`AI error: ${aiErr}`);
-        } else {
-          detailsParts.push(`AI attempted: no`);
-        }
-
-        return {
-          success: !!r?.success,
-          filename: r?.filename || r?.title || "unknown",
-          message: r?.success
-            ? `Processed OK. Output: ${r?.file_url || r?.fileUrl || "n/a"}`
-            : `Failed: ${r?.error || "unknown error"}`,
-          details: detailsParts.join(" | "),
-        };
-      });
+          : `Skipped: ${r?.reason || "no matching product for the file name"}`,
+      }));
 
       setBulkUploadResults(uiResults);
 
-      if (success) {
-        showSuccessToast(response?.message || "Bulk upload completed");
+      const assigned = summary ? summary.assigned : uiResults.filter((r) => r.success).length;
+      const total = summary ? summary.total : uiResults.length;
+      const rejected = summary ? summary.rejected : total - assigned;
+      const summaryMsg = `Assigned ${assigned}/${total} image(s)${
+        rejected ? `, ${rejected} skipped` : ""
+      }`;
+      if (assigned > 0) {
+        showSuccessToast(response?.message || summaryMsg);
       } else {
-        showErrorToast(response?.message || "Bulk upload finished with errors");
+        showErrorToast(response?.message || summaryMsg);
       }
 
       // Refresh the grid after upload (no hard reload)
@@ -205,7 +166,6 @@ const MediaGalleryPage = () => {
   const resetBulkUploadForm = () => {
     setBulkUploadFiles([]);
     setBulkUploadResults([]);
-    setAutoDetectEnabled(true);
   };
 
   const getFileUrl = useCallback((type, filename) => {
@@ -237,11 +197,11 @@ const MediaGalleryPage = () => {
           <div className="media-type-badge">
             {item.type === "category" && <Layers size={16} />}
             {item.type === "product" && <Package size={16} />}
-            <span>{item.type.replace("_", " ")}</span>
+            <span>{item.type?.replace("_", " ")}</span>
             <span className="watermark-badge">💧 Watermarked</span>
           </div>
           <div className="media-actions">
-            <a href={fileUrl} download className="action-btn">
+            <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
               <Download size={16} />
             </a>
             <button
@@ -370,21 +330,6 @@ const MediaGalleryPage = () => {
 
             <div className="modal-body">
               <div className="form-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={autoDetectEnabled}
-                    onChange={(e) => setAutoDetectEnabled(e.target.checked)}
-                  />
-                  Enable Auto-Detection
-                </label>
-                <small>
-                  Automatically detect image type and association based on
-                  filename
-                </small>
-              </div>
-
-              <div className="form-group">
                 <label>Select Images (Max 20 files)</label>
                 <input
                   type="file"
@@ -401,7 +346,7 @@ const MediaGalleryPage = () => {
                     </p>
                     <ul>
                       {bulkUploadFiles.map((file, index) => (
-                        <li key={index}>{file.name}</li>
+                        <li key={`${file.name}-${index}`}>{file.name}</li>
                       ))}
                     </ul>
                   </div>
@@ -410,12 +355,15 @@ const MediaGalleryPage = () => {
 
               <div className="upload-info">
                 <p>
-                  <strong>Processing:</strong>
+                  <strong>How it works:</strong>
                 </p>
                 <ul>
-                  <li>Product images will be automatically watermarked</li>
-                  <li>All images will be converted to WebP format</li>
-                  <li>Images will be optimized for web use</li>
+                  <li>
+                    Each image is assigned to a product by its <strong>file name</strong>{" "}
+                    (matched to the product SKU or name)
+                  </li>
+                  <li>Files whose name matches no product are skipped</li>
+                  <li>Assigned images are watermarked and converted to WebP</li>
                 </ul>
               </div>
             </div>
@@ -449,7 +397,7 @@ const MediaGalleryPage = () => {
           <div className="results-grid">
             {bulkUploadResults.map((result, index) => (
               <div
-                key={index}
+                key={`${result.filename}-${index}`}
                 className={`result-item ${
                   result.success ? "success" : "error"
                 }`}
@@ -461,11 +409,6 @@ const MediaGalleryPage = () => {
                   <span className="filename">{result.filename}</span>
                 </div>
                 <p className="result-message">{result.message}</p>
-                {result.details && (
-                  <div className="result-details">
-                    <strong>Details:</strong> {result.details}
-                  </div>
-                )}
               </div>
             ))}
           </div>
