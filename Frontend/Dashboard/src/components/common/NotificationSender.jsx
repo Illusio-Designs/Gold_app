@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { sendNotification, getUsers, getStoredTokens } from '../../services/adminApiService';
+import { sendNotification, getUsers } from '../../services/adminApiService';
 import '../../styles/common/NotificationSender.css';
 
 const NotificationSender = ({ onNotificationSent }) => {

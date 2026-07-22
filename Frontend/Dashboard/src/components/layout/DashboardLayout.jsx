@@ -25,7 +25,7 @@ import dashboardLogo from "../../assests/dashboardlogo.png";
 import NotificationManager from "../common/NotificationManager";
 import ToastManager from "../common/ToastManager";
 import RealTimeNotifications from "../RealTimeNotifications";
-import { getUnreadCount, getStoredTokens } from "../../services/adminApiService";
+import { getUnreadCount } from "../../services/adminApiService";
 import { logout, getAdminToken } from "../../utils/authUtils";
 import { initializeFirebaseMessaging, isFirebaseSupported } from "../../services/firebaseService";
 import notificationSoundService from "../../services/notificationSoundService";
@@ -65,32 +65,10 @@ export default function DashboardLayout() {
   };
 
   useEffect(() => {
-    // Debug function to check current state
-    const debugFirebaseState = async () => {
-      const adminToken = localStorage.getItem("admin_token");
-      console.log('🔍 [DEBUG] Current admin token:', adminToken ? adminToken.substring(0, 20) + '...' : 'null');
-      console.log('🔍 [DEBUG] Firebase supported:', isFirebaseSupported());
-      console.log('🔍 [DEBUG] Service worker supported:', 'serviceWorker' in navigator);
-      console.log('🔍 [DEBUG] Push manager supported:', 'PushManager' in window);
-      
-      if (adminToken) {
-        try {
-          // Check if we can get stored tokens
-          const tokens = await getStoredTokens(adminToken);
-          console.log('🔍 [DEBUG] Stored tokens:', tokens);
-        } catch (error) {
-          console.error('🔍 [DEBUG] Error getting stored tokens:', error);
-        }
-      }
-    };
-    
     // Initialize notifications and Firebase messaging
     const initNotifications = async () => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
-        // Debug current state
-        await debugFirebaseState();
-        
         // Fetch initial unread count
         try {
           const response = await getUnreadCount(adminToken);
