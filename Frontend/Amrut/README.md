@@ -1,4 +1,29 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Amrut Jewels — B2B Mobile App
+
+The React Native (TypeScript) **B2B / wholesale** mobile app for the Amrut Jewels platform.
+Built with [**React Native**](https://reactnative.dev), bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+
+## 📚 Project Documentation
+
+- **[FUNCTION_LIST.md](./FUNCTION_LIST.md)** — Complete reference of every function in the
+  app (API calls, contexts, hooks, services, screens, navigation, components, and utils),
+  grouped by module with a short description of each.
+
+### Source Layout (`src/`)
+
+| Folder | Contents |
+|--------|----------|
+| `services/` | API client (`Api.jsx`) + socket, realtime, notification, firebase, version & app-icon services |
+| `context/` | Global state — `CartContext`, `NavigationContext` |
+| `hooks/` | `useCart`, `useLoginPrompt`, `useRealtimeData`, `useUserSocket`, `useVersionManager`, `useAppIcon` |
+| `screens/` | Home, Collection, Product(Detail), Cart, Orders, Search, Filter, Profile, Login/Register, Splash |
+| `navigation/` | Bottom tab + stack navigators |
+| `components/` | Shared UI components (`common/`) + notification managers |
+| `utils/` | Image URL + responsive/screen helpers |
+
+> See **FUNCTION_LIST.md** for the full function-by-function breakdown.
+
+---
 
 # Getting Started
 
