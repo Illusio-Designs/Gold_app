@@ -110,23 +110,29 @@ function generateOrderPDF(order, stream) {
   billLine(order.user_name && order.business_name ? order.user_name : null);
   billLine(order.user_phone);
   billLine(order.email);
+  const addrLine = [order.address_line1, order.address_line2, order.landmark]
+    .filter(Boolean)
+    .join(", ");
+  const cityLine = [order.city, order.state, order.country]
+    .filter(Boolean)
+    .join(", ");
+  billLine(addrLine);
+  billLine(cityLine);
 
   // ---- Items table ---------------------------------------------------------
   y += 18;
   const cImg = M;
   const cName = M + 58; // text after a 46px thumb
-  const cSku = M + 250;
-  const cQty = M + 360;
-  const cAmt = M + 420;
-  const amtW = contentW - (cAmt - M);
+  const cSku = M + 320;
+  const cQty = M + 440;
+  const qtyW = contentW - (cQty - M);
 
   // Header row
   doc.rect(M, y, contentW, 26).fill(BRAND);
   doc.fillColor(CREAM).font("Helvetica-Bold").fontSize(10);
   doc.text("PRODUCT", cName, y + 8, { width: cSku - cName - 8 });
   doc.text("SKU", cSku, y + 8, { width: cQty - cSku - 8 });
-  doc.text("QTY", cQty, y + 8, { width: cAmt - cQty - 8, align: "right" });
-  doc.text("AMOUNT", cAmt, y + 8, { width: amtW, align: "right" });
+  doc.text("QTY", cQty, y + 8, { width: qtyW, align: "right" });
   y += 26;
 
   // Item row (single product per order in this schema)
@@ -187,19 +193,11 @@ function generateOrderPDF(order, stream) {
       width: cQty - cSku - 8,
     });
   doc.text(String(order.quantity ?? order.total_qty ?? 1), cQty, rowTop + 22, {
-    width: cAmt - cQty - 8,
+    width: qtyW,
     align: "right",
   });
 
   const amount = order.total_amount ?? order.total_mark_amount;
-  doc
-    .fillColor(INK)
-    .font("Helvetica-Bold")
-    .fontSize(10)
-    .text(formatCurrency(amount), cAmt, rowTop + 22, {
-      width: amtW,
-      align: "right",
-    });
   y += rowH;
 
   // ---- Totals --------------------------------------------------------------
