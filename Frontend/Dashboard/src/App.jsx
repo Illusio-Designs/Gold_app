@@ -22,6 +22,7 @@ import AuthPage from "./pages/AuthPage";
 import HomePage from "./webpage/HomePage";
 import PrivacyPolicy from "./webpage/PrivacyPolicy";
 import DeletePage from "./webpage/DeletePage";
+import ContactUs from "./webpage/ContactUs";
 import { isAuthenticated, autoLogout } from "./utils/authUtils";
 import { showToast } from "./utils/toast";
 import ToastManager from "./components/common/ToastManager";
@@ -65,6 +66,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/delete" element={<DeletePage />} />
+        <Route path="/contact" element={<ContactUs />} />
         
         {/* Public route for authentication */}
         <Route path="/auth" element={<AuthPage />} />

@@ -49,6 +49,7 @@ const PrivacyPolicy = () => {
           <li onClick={() => setIsMobileMenuOpen(false)}><a href="/">Home</a></li>
           <li className="active" onClick={() => setIsMobileMenuOpen(false)}><a href="/privacy">Privacy Policy</a></li>
           <li onClick={() => setIsMobileMenuOpen(false)}><a href="/delete">Delete Account</a></li>
+          <li onClick={() => setIsMobileMenuOpen(false)}><a href="/contact">Contact Us</a></li>
         </ul>
       </nav>
       
@@ -167,6 +168,7 @@ const PrivacyPolicy = () => {
                 <a href="/">Home</a>
                 <a href="/privacy">Privacy Policy</a>
                 <a href="/delete">Delete Account</a>
+                <a href="/contact">Contact Us</a>
               </div>
               <div className="homepage-footer-section">
                 <h4>Contact Us</h4>

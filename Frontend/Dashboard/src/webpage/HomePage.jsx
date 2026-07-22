@@ -467,6 +467,7 @@ const HomePage = () => {
                 <a href="/">Home</a>
                 <a href="/privacy">Privacy Policy</a>
                 <a href="/delete">Delete Account</a>
+                <a href="/contact">Contact Us</a>
               </div>
               <div className="homepage-footer-section">
                 <h4>Contact Us</h4>
