@@ -413,11 +413,17 @@ All routes require authentication and admin access.
 - **Body**: Form data with `image`
 - **Response**: Upload result
 
-#### POST `/api/media-gallery/bulk-upload`
-- **Description**: Bulk upload media files (max 20)
+#### POST `/api/media-gallery/upload-and-assign`
+- **Description**: Upload one image and assign it to a product. Auto-assigns by the uploaded file name (matched to product SKU/name); a watermark is applied. Rejected (422) if the file name matches no product and no `productId` is given.
 - **Authentication**: Required (Admin)
-- **Body**: Form data with `images[]` (array) and `autoDetect` (boolean)
-- **Response**: Upload results with OCR and AI processing info
+- **Body**: Form data with `image` and optional `productId`
+- **Response**: `{ success, matched, matchedBy, productId, productName, image }`
+
+#### POST `/api/media-gallery/bulk-upload`
+- **Description**: Bulk upload images (max 20). Each image is assigned to a product by its file name (SKU/name match); watermark applied. Files with no match are skipped.
+- **Authentication**: Required (Admin)
+- **Body**: Form data with `images[]` (array)
+- **Response**: `{ message, summary: { total, assigned, rejected }, results[] }`
 
 #### DELETE `/api/media-gallery/file`
 - **Description**: Delete specific file
@@ -789,5 +795,5 @@ Error response format:
 - Maximum file size: 50MB
 - Bulk upload supports up to 20 files at once
 - Image processing includes watermarking and WebP conversion
-- OCR and AI processing available for bulk uploads (if configured)
+- Media uploads are auto-assigned to products by file name (SKU/name match); watermark + WebP applied
 

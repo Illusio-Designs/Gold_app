@@ -36,6 +36,13 @@ router.post(
   mediaGalleryController.uploadMedia
 );
 
+// Upload an image and assign it to a product (auto by file name, watermark applied)
+router.post(
+  "/upload-and-assign",
+  upload.single("image"),
+  mediaGalleryController.uploadAndAssign
+);
+
 // Bulk upload media files
 router.post(
   "/bulk-upload",

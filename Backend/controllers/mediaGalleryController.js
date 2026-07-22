@@ -128,413 +128,164 @@ function uploadMedia(req, res) {
   );
 }
 
-// Bulk upload media files with auto-detection
+// Upload a single image and assign it to a product.
+// Auto-assigns by the uploaded file name (SKU/name match); a watermark is applied.
+// If the file name matches no product (and none is chosen), the upload is rejected.
+async function uploadAndAssign(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
+  const imageProcessingService = require("../services/imageProcessingService");
+  const autoDetectionService = require("../services/autoDetectionService");
+  const productModel = require("../models/product");
+  const socketService = require("../services/socketService");
+
+  const file = req.file;
+  let productId = req.body.productId ? parseInt(req.body.productId, 10) : null;
+  let matchedBy = "manual";
+
+  try {
+    // No product chosen -> auto-assign by the uploaded file name
+    if (!productId) {
+      const detection = await autoDetectionService.detectImageAssociation(
+        file.originalname
+      );
+      if (detection && detection.type === "product") {
+        productId = detection.id;
+        matchedBy = `filename (${detection.confidence})`;
+      }
+    }
+
+    // Still no product -> reject the upload and remove the temp file
+    if (!productId) {
+      fs.unlink(file.path, () => {});
+      return res.status(422).json({
+        matched: false,
+        error:
+          "No product matched the file name. Rename the file to the product SKU/name, or select a product.",
+      });
+    }
+
+    // Verify the product exists
+    const product = await new Promise((resolve, reject) => {
+      productModel.getProductById(productId, (err, rows) =>
+        err ? reject(err) : resolve(rows && rows[0])
+      );
+    });
+    if (!product) {
+      fs.unlink(file.path, () => {});
+      return res.status(404).json({ matched: false, error: "Product not found" });
+    }
+
+    // Process image (Sharp -> WebP + watermark); the service removes the original file
+    const processedPath = await imageProcessingService.processProductImage(
+      file.path,
+      file.filename
+    );
+    const outputFilename = path.basename(processedPath);
+
+    // Assign the processed image to the product
+    await new Promise((resolve, reject) => {
+      productModel.addProductImage(productId, outputFilename, (err, result) =>
+        err ? reject(err) : resolve(result)
+      );
+    });
+
+    // Live update to app + dashboard
+    try {
+      socketService.notifyProductUpdate(
+        { ...product, image: outputFilename },
+        "updated"
+      );
+    } catch (e) {}
+
+    return res.json({
+      success: true,
+      matched: true,
+      matchedBy,
+      productId,
+      productName: product.name,
+      image: outputFilename,
+    });
+  } catch (err) {
+    fs.unlink(file.path, () => {});
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+// Bulk upload: assign each image to a product by its file name (watermark applied).
+// Files whose name matches no product are rejected (reported as skipped).
 async function bulkUploadMedia(req, res) {
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ error: "No files uploaded" });
   }
 
-  const results = [];
   const imageProcessingService = require("../services/imageProcessingService");
   const autoDetectionService = require("../services/autoDetectionService");
-  const ocrService = require("../services/ocrService");
-  const aiStudioService = require("../services/aiStudioService");
+  const productModel = require("../models/product");
+  const socketService = require("../services/socketService");
 
-  const aiEnabled = aiStudioService.isEnabled();
-  const aiMissing = !process.env.GOOGLE_AI_API_KEY ? "GOOGLE_AI_API_KEY" : null;
+  const results = [];
 
-  for (let i = 0; i < req.files.length; i++) {
-    const file = req.files[i];
+  for (const file of req.files) {
     try {
-      let processedFilePath = file.path; // Default to temp path
-      let fileUrl = `/uploads/temp/${file.filename}`;
-      let detectedAssociation = null;
-      let updateResult = null;
-      let ocrMeta = { enabled: true, tag: null, candidates: [], error: null };
-      let aiMeta = {
-        enabled: aiEnabled,
-        missingEnv: aiMissing,
-        attempted: false,
-        bgRemovedPath: null,
-        studioPath: null,
-        error: null,
-      };
+      const detection = await autoDetectionService.detectImageAssociation(
+        file.originalname
+      );
 
-      // Auto-detect image association
-      if (file.mimetype.startsWith("image/")) {
-        try {
-          // Prefer OCR-based detection (tag/SKU inside image). Fallback to filename-based auto-detect.
-          let ocrSku = null;
-          let ocrCandidates = [];
-          try {
-            const ocr = await ocrService.extractTagNo(file.path, {
-              minLen: 3,
-              maxLen: 30,
-            });
-            ocrSku = ocr.tag;
-            ocrCandidates = ocr.candidates || [];
-            ocrMeta.tag = ocrSku;
-            ocrMeta.candidates = ocrCandidates;
-            ocrMeta.rawText = ocr.rawText ? ocr.rawText.substring(0, 200) : null; // Store first 200 chars for debugging
-          } catch (ocrErr) {
-            ocrMeta.error = ocrErr.message;
-            ocrMeta.rawText = null;
-          }
+      if (!detection || detection.type !== "product") {
+        fs.unlink(file.path, () => {});
+        results.push({
+          file: file.originalname,
+          success: false,
+          reason: "No matching product for file name",
+        });
+        continue;
+      }
 
-          if (ocrSku) {
-            const matchedProduct = await new Promise((resolve, reject) => {
-              db.query(
-                "SELECT id, name, sku FROM products WHERE sku = ? LIMIT 1",
-                [ocrSku],
-                (err, rows) => {
-                  if (err) return reject(err);
-                  resolve(rows && rows.length ? rows[0] : null);
-                }
-              );
-            });
-
-            if (matchedProduct) {
-              detectedAssociation = {
-                type: "product",
-                id: matchedProduct.id,
-                name: matchedProduct.name,
-                sku: matchedProduct.sku,
-                confidence: "high",
-                source: "ocr",
-                ocrCandidates,
-              };
-            }
-            // If no product found, don't create one - just leave detectedAssociation as null
-          }
-
-          if (!detectedAssociation) {
-            detectedAssociation =
-              await autoDetectionService.detectImageAssociation(file.originalname);
-          }
-
-          if (detectedAssociation) {
-            // Process image based on detected type
-            if (detectedAssociation.type === "product") {
-              // Optional AI photoshoot enhancement (only if configured)
-              let inputPathForProcessing = file.path;
-              let inputFilenameForProcessing = file.filename;
-              let bgRemovedPath = null;
-              const tempDir = path.join(__dirname, "../uploads/temp");
-              const tempFilesToCleanup = []; // Track all temp files for cleanup
-
-              if (aiEnabled) {
-                try {
-                  aiMeta.attempted = true;
-                  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-                  bgRemovedPath = await aiStudioService.removeBackground(
-                    file.path,
-                    tempDir
-                  );
-                  aiMeta.bgRemovedPath = bgRemovedPath;
-                  if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
-                    tempFilesToCleanup.push(bgRemovedPath);
-                  }
-
-                  const studioPath = await aiStudioService.generateStudioImage(
-                    bgRemovedPath,
-                    tempDir
-                  );
-                  aiMeta.studioPath = studioPath;
-                  if (studioPath && studioPath.includes("/temp/")) {
-                    tempFilesToCleanup.push(studioPath);
-                  }
-
-                  inputPathForProcessing = studioPath;
-                  inputFilenameForProcessing = `${detectedAssociation.sku || "product"}-${Date.now()}.png`;
-
-                  // Mark original temp upload for cleanup (don't delete immediately)
-                  if (file.path && file.path.includes("/temp/")) {
-                    tempFilesToCleanup.push(file.path);
-                  }
-                } catch (aiErr) {
-                  aiMeta.error = aiErr.message;
-                  inputPathForProcessing = file.path;
-                  inputFilenameForProcessing = file.filename;
-                }
-                // Don't cleanup here - track for later cleanup
-              }
-
-              // Store temp files for cleanup
-              if (tempFilesToCleanup.length > 0) {
-                if (!results[i]) results[i] = {};
-                results[i].tempFilesToCleanup = tempFilesToCleanup;
-              }
-
-              processedFilePath = await imageProcessingService.processProductImage(
-                inputPathForProcessing,
-                inputFilenameForProcessing
-              );
-              fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
-
-              // Verify file exists
-              if (!fs.existsSync(processedFilePath)) {
-              }
-
-              // Update existing product (only if product exists)
-              if (detectedAssociation.id) {
-                // Update existing product with new image and set status to active
-                const updateProductSql =
-                  "UPDATE products SET image = ?, status = 'active' WHERE id = ?";
-                await new Promise((resolve, reject) => {
-                  db.query(
-                    updateProductSql,
-                    [path.basename(processedFilePath), detectedAssociation.id],
-                    (err, result) => {
-                      if (err) {
-                        reject(err);
-                      } else {
-                        updateResult = {
-                          type: "product",
-                          id: detectedAssociation.id,
-                          name: detectedAssociation.name,
-                          status: "active",
-                        };
-                        resolve();
-                      }
-                    }
-                  );
-                });
-              }
-            } else if (detectedAssociation.type === "category") {
-              processedFilePath =
-                await imageProcessingService.processCategoryImage(
-                  file.path,
-                  file.filename
-                );
-              fileUrl = `/uploads/categories/${path.basename(
-                processedFilePath
-              )}`;
-
-              // Update category with new image and set status to active
-              const updateCategorySql =
-                "UPDATE categories SET image = ?, status = 'active' WHERE id = ?";
-              await new Promise((resolve, reject) => {
-                db.query(
-                  updateCategorySql,
-                  [path.basename(processedFilePath), detectedAssociation.id],
-                  (err, result) => {
-                    if (err) {
-                      reject(err);
-                    } else {
-                      updateResult = {
-                        type: "category",
-                        id: detectedAssociation.id,
-                        name: detectedAssociation.name,
-                        status: "active",
-                      };
-                      resolve();
-                    }
-                  }
-                );
-              });
-            }
-
-            } else {
-            // Process as generic product image if no association found
-            // Optional AI photoshoot enhancement (only if configured)
-            let inputPathForProcessing = file.path;
-            let inputFilenameForProcessing = file.filename;
-            let bgRemovedPath = null;
-            const tempDir = path.join(__dirname, "../uploads/temp");
-            const tempFilesToCleanup = []; // Track all temp files for cleanup
-
-            if (aiEnabled) {
-              try {
-                aiMeta.attempted = true;
-                if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-                bgRemovedPath = await aiStudioService.removeBackground(
-                  file.path,
-                  tempDir
-                );
-                aiMeta.bgRemovedPath = bgRemovedPath;
-                if (bgRemovedPath && bgRemovedPath.includes("/temp/")) {
-                  tempFilesToCleanup.push(bgRemovedPath);
-                }
-
-                const studioPath = await aiStudioService.generateStudioImage(
-                  bgRemovedPath,
-                  tempDir
-                );
-                aiMeta.studioPath = studioPath;
-                if (studioPath && studioPath.includes("/temp/")) {
-                  tempFilesToCleanup.push(studioPath);
-                }
-
-                inputPathForProcessing = studioPath;
-                inputFilenameForProcessing = `product-${Date.now()}.png`;
-
-                // Mark original temp upload for cleanup (don't delete immediately)
-                if (file.path && file.path.includes("/temp/")) {
-                  tempFilesToCleanup.push(file.path);
-                }
-              } catch (aiErr) {
-                aiMeta.error = aiErr.message;
-                inputPathForProcessing = file.path;
-                inputFilenameForProcessing = file.filename;
-              }
-              // Don't cleanup here - track for later cleanup
-            }
-
-            // Store temp files for cleanup
-            if (tempFilesToCleanup.length > 0) {
-              if (!results[i]) results[i] = {};
-              results[i].tempFilesToCleanup = tempFilesToCleanup;
-            }
-
-            processedFilePath = await imageProcessingService.processProductImage(
-              inputPathForProcessing,
-              inputFilenameForProcessing
-            );
-            fileUrl = `/uploads/products/${path.basename(processedFilePath)}`;
-            
-            // Verify file exists
-            if (!fs.existsSync(processedFilePath)) {
-            }
-
-            // If OCR found a SKU but no product exists, don't create one
-            // Image will be saved without product association
-          }
-        } catch (processError) {
-          // Continue with original file if processing fails
-        }
-      } else {
-        }
-
-      // Save to media gallery for tracking
-      const fileData = {
-        title: file.originalname,
-        file_url: fileUrl,
-        file_type: file.mimetype.startsWith("image/") ? "image" : "video",
-        category: detectedAssociation
-          ? `${detectedAssociation.type}_auto_detected`
-          : "bulk_upload",
-        auto_detected: !!detectedAssociation,
-        association: detectedAssociation,
-        update_result: updateResult,
-        ocr: ocrMeta,
-        ai: aiMeta,
-      };
-
-      const sql = `
-        INSERT INTO media_gallery (title, file_url, file_type, category)
-        VALUES (?, ?, ?, ?)
-      `;
+      const processedPath = await imageProcessingService.processProductImage(
+        file.path,
+        file.filename
+      );
+      const outputFilename = path.basename(processedPath);
 
       await new Promise((resolve, reject) => {
-        db.query(
-          sql,
-          [
-            fileData.title,
-            fileData.file_url,
-            fileData.file_type,
-            fileData.category,
-          ],
-          (err, result) => {
-            if (err) {
-              results[i] = {
-                error: err.message,
-                filename: file.originalname,
-                success: false,
-              };
-              reject(err);
-            } else {
-              results[i] = {
-                id: result.insertId,
-                filename: file.originalname,
-                success: true,
-                ...fileData,
-              };
-              resolve();
-            }
-          }
+        productModel.addProductImage(detection.id, outputFilename, (err, result) =>
+          err ? reject(err) : resolve(result)
         );
       });
-    } catch (error) {
-      results[i] = {
-        error: error.message,
-        filename: file.originalname,
-        success: false,
-      };
-    }
-  }
 
-  // Clean up temporary files after processing
-  const tempDir = path.join(__dirname, "../uploads/temp");
-  const cleanedFiles = new Set(); // Track cleaned files to avoid duplicates
-
-  // Clean up files tracked in results
-  for (let i = 0; i < results.length; i++) {
-    const result = results[i];
-    if (result && result.tempFilesToCleanup && Array.isArray(result.tempFilesToCleanup)) {
-      for (const tempFile of result.tempFilesToCleanup) {
-        if (tempFile && !cleanedFiles.has(tempFile)) {
-          try {
-            if (fs.existsSync(tempFile)) {
-              fs.unlinkSync(tempFile);
-              cleanedFiles.add(tempFile);
-              }
-          } catch (cleanupError) {
-            }
-        }
-      }
-    }
-  }
-
-  // Clean up original uploaded temp files
-  for (let i = 0; i < req.files.length; i++) {
-    const file = req.files[i];
-    if (file && file.path && !cleanedFiles.has(file.path)) {
       try {
-        // Only delete if it's still in temp directory and processing was successful
-        if (file.path.includes("/temp/") && results[i] && results[i].success) {
-          if (fs.existsSync(file.path)) {
-            fs.unlinkSync(file.path);
-            cleanedFiles.add(file.path);
-            }
-        }
-      } catch (cleanupError) {
-        }
+        socketService.notifyProductUpdate(
+          { id: detection.id, name: detection.name, image: outputFilename },
+          "updated"
+        );
+      } catch (e) {}
+
+      results.push({
+        file: file.originalname,
+        success: true,
+        productId: detection.id,
+        productName: detection.name,
+        image: outputFilename,
+        matchedBy: `filename (${detection.confidence})`,
+      });
+    } catch (err) {
+      fs.unlink(file.path, () => {});
+      results.push({ file: file.originalname, success: false, reason: err.message });
     }
   }
 
-  // Clean up any remaining temp files in temp directory (AI-generated files)
-  try {
-    if (fs.existsSync(tempDir)) {
-      const tempFiles = fs.readdirSync(tempDir);
-      const now = Date.now();
-      for (const tempFile of tempFiles) {
-        const tempFilePath = path.join(tempDir, tempFile);
-        if (!cleanedFiles.has(tempFilePath)) {
-          try {
-            const stats = fs.statSync(tempFilePath);
-            // Delete files older than 1 hour or AI-generated files
-            if (now - stats.mtimeMs > 3600000 || tempFile.includes("bg-removed") || tempFile.includes("studio-gemini") || tempFile.includes("studio-")) {
-              fs.unlinkSync(tempFilePath);
-              }
-          } catch (cleanupError) {
-            }
-        }
-      }
-    }
-  } catch (dirError) {
-    }
-
-  res.json({
-    message: "Bulk upload completed with auto-detection",
-    files: results,
+  const assigned = results.filter((r) => r.success).length;
+  return res.json({
+    message: `Assigned ${assigned}/${results.length} image(s) to products by file name`,
     summary: {
       total: results.length,
-      successful: results.filter((r) => r.success).length,
-      failed: results.filter((r) => !r.success).length,
-      auto_detected: results.filter((r) => r.auto_detected).length,
+      assigned,
+      rejected: results.length - assigned,
     },
+    results,
   });
 }
 
@@ -1014,6 +765,7 @@ module.exports = {
   cleanupOrphanedRecords,
   getFileInfo,
   uploadMedia,
+  uploadAndAssign,
   bulkUploadMedia,
   getAvailableItems,
   getMediaItemsWithProcessedImages,
