@@ -132,15 +132,32 @@ body {
 }
 
 .sidebar-nav a:hover {
-  background: var(--sidebar-active-bg);
-  color: var(--sidebar-active-text-color);
+  background: rgba(252, 226, 191, 0.12);
+  color: var(--sidebar-text-color);
 }
 
 .sidebar-nav a.active {
   background: var(--sidebar-active-bg);
   color: var(--sidebar-active-text-color);
   font-weight: 600;
-  border-left-color: var(--sidebar-active-text-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+/* Active indicator bar on the left of the pill */
+.sidebar-nav a.active::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--brand);
+}
+
+.dashboard-layout.collapsed .sidebar-nav a.active::before {
+  display: none;
 }
 
 /* Tooltips are now handled by React component */

@@ -360,7 +360,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
         <footer className="dashboard-footer">
-          &copy; 1991 Amrut Jewels Admin
+          &copy; {new Date().getFullYear()} Amrut Jewels Admin
         </footer>
       </div>
 
