@@ -11,3 +11,5 @@ logs/
 # Uploads
 uploads/
 uploads/profile/ 
+# Firebase service-account private key (never commit)
+*firebase-adminsdk*.json

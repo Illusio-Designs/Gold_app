@@ -35,10 +35,11 @@ function createOrder(req, res) {
   }
 
   const orderData = {
-    business_user_id,
+    // Map request fields to the columns the order model actually reads
+    user_id: business_user_id,
     product_id,
-    total_qty,
-    total_mark_amount,
+    quantity: total_qty,
+    total_amount: total_mark_amount,
     total_net_weight,
     total_less_weight,
     total_gross_weight,
@@ -494,10 +495,11 @@ function updateOrder(req, res) {
   } = req.body;
 
   const orderData = {
-    business_user_id,
+    // Map request fields to the columns the order model actually reads
+    user_id: business_user_id,
     product_id,
-    total_qty,
-    total_mark_amount,
+    quantity: total_qty,
+    total_amount: total_mark_amount,
     total_net_weight,
     total_less_weight,
     total_gross_weight,

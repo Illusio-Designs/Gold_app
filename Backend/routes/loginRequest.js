@@ -8,7 +8,12 @@ const {
 } = require("../middlewares/auth");
 
 // Business user routes
-router.post("/", loginRequestController.createLoginRequest);
+router.post(
+  "/",
+  verifyToken,
+  requireBusiness,
+  loginRequestController.createLoginRequest
+);
 router.get(
   "/user",
   verifyToken,

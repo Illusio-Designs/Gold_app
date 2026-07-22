@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const socketService = require('../services/socketService');
 const { getAdminNotificationStats } = require('../services/adminNotificationService');
+const { verifyToken, requireAdmin } = require('../middlewares/auth');
+
+// All admin-notification endpoints require an authenticated admin
+router.use(verifyToken);
+router.use(requireAdmin);
 
 // Get admin notification statistics
 router.get('/stats', async (req, res) => {

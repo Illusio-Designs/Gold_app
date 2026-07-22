@@ -3,6 +3,7 @@ const router = express.Router();
 const sliderController = require('../controllers/sliderController');
 const multer = require('multer');
 const path = require('path');
+const { verifyToken, requireAdmin } = require('../middlewares/auth');
 
 // Multer config for slider images
 const storage = multer.diskStorage({
@@ -20,10 +21,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.post('/', upload.single('image'), sliderController.createSlider);
+router.post('/', verifyToken, requireAdmin, upload.single('image'), sliderController.createSlider);
 router.get('/', sliderController.getSliders);
 router.get('/:id', sliderController.getSliderById);
-router.put('/:id', upload.single('image'), sliderController.updateSlider);
-router.delete('/:id', sliderController.deleteSlider);
+router.put('/:id', verifyToken, requireAdmin, upload.single('image'), sliderController.updateSlider);
+router.delete('/:id', verifyToken, requireAdmin, sliderController.deleteSlider);
 
 module.exports = router; 

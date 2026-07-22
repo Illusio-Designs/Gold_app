@@ -3,6 +3,7 @@ const { db } = require("../config/db");
 const { executeQuery, checkConnection } = require("../utils/dbHelper");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/jwt");
 const axios = require("axios");
 const fs = require("fs");
 const {
@@ -146,7 +147,7 @@ async function adminLogin(req, res) {
       // Generate JWT token
       const token = jwt.sign(
         { id: user.id, email: user.email, type: user.type },
-        process.env.JWT_SECRET || "secretkey",
+        JWT_SECRET,
         { expiresIn: "1d" }
       );
 
@@ -205,7 +206,7 @@ async function businessLogin(req, res) {
       // Generate JWT token
       const token = jwt.sign(
         { id: user.id, phone_number: user.phone_number, type: user.type },
-        process.env.JWT_SECRET || "secretkey",
+        JWT_SECRET,
         { expiresIn: "1d" }
       );
 
@@ -694,7 +695,7 @@ async function verifyBusinessOTP(req, res) {
             phone_number: user.phone_number,
             type: user.type,
           },
-          process.env.JWT_SECRET || "secretkey",
+          JWT_SECRET,
           { expiresIn: "365d" } // 1 year - essentially unlimited
         );
 
@@ -757,7 +758,7 @@ async function handleBypassUserOTP(user, res) {
                 sessionDurationMinutes,
                 loginRequestId: insertResult.insertId,
               },
-              process.env.JWT_SECRET || "secretkey",
+              JWT_SECRET,
               { expiresIn: `${sessionDurationMinutes}m` }
             );
 
@@ -833,7 +834,7 @@ async function handleRegularUserOTP(user, res) {
                   sessionDurationMinutes: activeSession.session_time_minutes,
                   loginRequestId: activeSession.id,
                 },
-                process.env.JWT_SECRET || "secretkey",
+                JWT_SECRET,
                 { expiresIn: `${Math.ceil(remainingTimeSeconds / 60)}m` }
               );
 
@@ -929,7 +930,7 @@ async function handleRegularUserOTP(user, res) {
                               sessionDurationMinutes,
                               loginRequestId: approvedRequest.id,
                             },
-                            process.env.JWT_SECRET || "secretkey",
+                            JWT_SECRET,
                             { expiresIn: `${sessionDurationMinutes}m` }
                           );
 

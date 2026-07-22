@@ -52,6 +52,7 @@ router.post(
 router.put(
   "/:id",
   verifyToken,
+  requireAdmin,
   upload.single("image"),
   userController.updateUser
 );

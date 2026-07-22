@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/db');
+const { JWT_SECRET } = require('../config/jwt');
 
 // Verify JWT token
 function verifyToken(req, res, next) {
@@ -10,7 +11,7 @@ function verifyToken(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     req.user = decoded;
     next();
   } catch (error) {
@@ -85,7 +86,7 @@ function optionalAuth(req, res, next) {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+      const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
       req.user = decoded;
     } catch (error) {
       // Token is invalid, but we don't fail the request

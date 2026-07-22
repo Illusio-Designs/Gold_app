@@ -10,7 +10,9 @@ const { getBaseUrl } = require("../config/environment");
 
 // Create login request
 function createLoginRequest(req, res) {
-  const { phone_number, categoryIds, country_code, userId } = req.body;
+  const { phone_number, categoryIds, country_code } = req.body;
+  // Derive the user from the authenticated token, never from the request body
+  const userId = req.user.id;
 
   if (
     !phone_number ||
