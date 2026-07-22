@@ -204,7 +204,7 @@ const DeletePage = () => {
                 <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
               </a>
               <a
-                href="https://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+                href="https://play.google.com/store/apps/details?id=com.goldapp.amrutkumargovinddasllp"
                 target="_blank"
                 rel="noopener noreferrer"
               >
