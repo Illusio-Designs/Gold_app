@@ -4,16 +4,14 @@ import {
   getTodayOrders 
 } from '../services/adminApiService';
 import { 
-  ShoppingCart, 
-  Users, 
-  Package, 
-  Tag,
+  ShoppingCart,
+  Users,
+  Package,
   TrendingUp,
   DollarSign,
   Clock,
   CheckCircle,
-  XCircle,
-  AlertTriangle
+  XCircle
 } from 'lucide-react';
 import NotificationSender from '../components/common/NotificationSender';
 import "../styles/pages/DashboardPage.css";
@@ -23,7 +21,6 @@ const DashboardPage = () => {
   const [todayOrders, setTodayOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshInterval, setRefreshInterval] = useState(null);
 
   // Utility functions
   const formatCurrency = (amount) => {
@@ -63,7 +60,6 @@ const DashboardPage = () => {
     
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchDashboardData, 30000);
-    setRefreshInterval(interval);
 
     return () => {
       if (interval) clearInterval(interval);
@@ -81,14 +77,10 @@ const DashboardPage = () => {
         getTodayOrders(token)
       ]);
       
-      console.log('Dashboard stats response:', statsResponse);
-      console.log('Today orders response:', ordersResponse);
-      
       setDashboardData(statsResponse?.data || null);
       // Ensure todayOrders is always an array, even if the API fails
       setTodayOrders(ordersResponse?.data || []);
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
       setError(err.error || 'Failed to load dashboard data');
       // Set empty arrays as fallback when API fails
       setTodayOrders([]);

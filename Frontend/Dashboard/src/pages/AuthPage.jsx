@@ -62,7 +62,9 @@ const AuthPage = () => {
             <h2 className="auth-title">Admin Login</h2>
           </div>
           <div className="auth-fields">
+            <label htmlFor="auth-email" className="sr-only">Email</label>
             <input
+              id="auth-email"
               type="email"
               placeholder="Email"
               value={email}
@@ -70,7 +72,9 @@ const AuthPage = () => {
               required
               className="auth-input"
             />
+            <label htmlFor="auth-password" className="sr-only">Password</label>
             <input
+              id="auth-password"
               type="password"
               placeholder="Password"
               value={password}

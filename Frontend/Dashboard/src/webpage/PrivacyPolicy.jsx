@@ -133,7 +133,7 @@ const PrivacyPolicy = () => {
                 <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
               </a>
               <a
-                href="http://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+                href="https://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
                 target="_blank"
                 rel="noopener noreferrer"
               >

@@ -324,7 +324,14 @@ const HomePage = () => {
               <br />
               Download now to explore more.
             </p>
-            <button className="homepage-download-btn">Download</button>
+            <a
+              className="homepage-download-btn"
+              href="https://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download
+            </a>
           </div>
         </div>
       </section>
@@ -463,7 +470,7 @@ const HomePage = () => {
                 <img src={appstore} alt="Download on App Store" className="homepage-store-img" />
               </a>
               <a
-                href="http://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
+                href="https://api.amrutkumargovinddasllp.com/uploads/app/app-release.apk"
                 target="_blank"
                 rel="noopener noreferrer"
               >

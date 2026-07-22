@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Edit,
   Trash2,
-  Image as ImageIcon,
   FileSpreadsheet,
   Plus,
 } from "lucide-react";
@@ -16,13 +15,9 @@ import { getProductImageUrl } from "../utils/imageUtils";
 import "../styles/pages/ProductsPage.css";
 import {
   getAllProducts,
-  getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
-  uploadProductImages,
-  getProductImages,
-  deleteProductImage,
   getAllCategories,
   updateProductStockStatus,
 } from "../services/adminApiService";
@@ -41,7 +36,6 @@ const ProductsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [deleteProduct, setDeleteProduct] = useState(null);
-  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [excelImportModalOpen, setExcelImportModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [stockModalOpen, setStockModalOpen] = useState(false);
@@ -173,17 +167,6 @@ const ProductsPage = () => {
             tooltip="Delete"
           >
             <Trash2 size={16} />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setSelectedProduct(row);
-              setImageModalOpen(true);
-            }}
-            tooltip="Manage Images"
-          >
-            <ImageIcon size={16} />
           </Button>
           <Button
             variant="outline"
@@ -594,18 +577,6 @@ const ProductsPage = () => {
           </Button>
           <Button onClick={handleCancel} variant="secondary">
             Cancel
-          </Button>
-        </div>
-      </Modal>
-      <Modal
-        isOpen={imageModalOpen}
-        onClose={() => setImageModalOpen(false)}
-        title="Manage Product Images"
-      >
-        <p>Product image management UI goes here.</p>
-        <div className="modal-actions">
-          <Button onClick={() => setImageModalOpen(false)} variant="secondary">
-            Close
           </Button>
         </div>
       </Modal>

@@ -51,7 +51,6 @@ const SliderPage = () => {
               alt={row.title}
               className="preview-image"
               onError={(e) => {
-                console.error("[SliderPage] Image failed to load:", row.image_url);
                 e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
               }}
             />
@@ -133,10 +132,8 @@ const SliderPage = () => {
     try {
       const token = localStorage.getItem("admin_token");
       const response = await getAllCategories(token);
-      console.log("Categories response:", response);
       setCategories(response.data || response || []);
     } catch (err) {
-      console.error("Failed to load categories:", err);
       setCategories([]);
     }
   };
@@ -151,13 +148,11 @@ const SliderPage = () => {
 
   const handleDropdownChange = (selectedOption, actionMeta) => {
     const { name } = actionMeta;
-    console.log("Category selection changed:", { selectedOption, name });
     setForm((prev) => {
       const newForm = {
         ...prev,
         [name]: selectedOption ? selectedOption.value : "",
       };
-      console.log("Updated form:", newForm);
       return newForm;
     });
   };
@@ -211,14 +206,9 @@ const SliderPage = () => {
       setError("");
       const token = localStorage.getItem("admin_token");
 
-      console.log("Form data before submission:", form);
       const formData = new FormData();
       formData.append("title", form.title);
       formData.append("category_id", form.category_id || "");
-      console.log("FormData values:", {
-        title: form.title,
-        category_id: form.category_id
-      });
 
       if (selectedFile) {
         formData.append("image", selectedFile);
@@ -234,15 +224,12 @@ const SliderPage = () => {
       setEditSlider(null);
       setForm({
         title: "",
-        description: "",
-        link: "",
         category_id: "",
       });
       setSelectedFile(null);
       setFilePreview("");
       loadSliders();
     } catch (err) {
-      console.error("Slider save error:", err);
       if (err.response) {
         // Server responded with error
         const errorMessage =

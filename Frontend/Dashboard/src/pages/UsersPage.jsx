@@ -11,7 +11,6 @@ import {
   getAllUsers,
   createUser,
   updateUser,
-  updateUserStatus,
   deleteUser,
 } from "../services/adminApiService";
 
@@ -83,9 +82,7 @@ const UsersPage = () => {
               borderRadius: "4px",
             }}
             onError={(e) => {
-              e.target.style.display = "none";
-              e.target.parentNode.innerHTML =
-                '<span style="color: #999; font-size: 12px;">Error</span>';
+              e.currentTarget.style.display = "none";
             }}
           />
         );
@@ -193,16 +190,9 @@ const UsersPage = () => {
     setError("");
     try {
       const token = localStorage.getItem("admin_token");
-      console.log("🔄 Fetching users...");
-      console.log("🔄 Token:", token ? "Present" : "Missing");
       const data = await getAllUsers(token);
-      console.log("✅ Users fetched:", data);
-      console.log("✅ Users count:", data.length);
-      console.log("✅ Users data:", JSON.stringify(data, null, 2));
       setUsers(data);
     } catch (err) {
-      console.error("❌ Error fetching users:", err);
-      console.error("❌ Error details:", err.response?.data);
       setError("Failed to load users");
     } finally {
       setLoading(false);
@@ -283,17 +273,10 @@ const UsersPage = () => {
       formData.append("remarks", form.remarks || "");
 
       if (editUser) {
-        console.log("🔄 Updating user with ID:", editUser.id);
-        console.log("🔄 Update data:", Object.fromEntries(formData.entries()));
-        const updateResult = await updateUser(editUser.id, formData, token);
-        console.log("✅ User update response:", updateResult);
-        console.log("✅ User updated successfully, refreshing user list...");
+        await updateUser(editUser.id, formData, token);
         setError(""); // Clear any previous errors
       } else {
-        console.log("🔄 Creating new user...");
-        const createResult = await createUser(formData, token);
-        console.log("✅ User create response:", createResult);
-        console.log("✅ User created successfully, refreshing user list...");
+        await createUser(formData, token);
         setError(""); // Clear any previous errors
       }
 
@@ -321,11 +304,8 @@ const UsersPage = () => {
       setImagePreview("");
 
       // Refresh users to show updated data
-      console.log("🔄 Refreshing user list after update...");
       await fetchUsers();
-      console.log("✅ User list refresh completed");
     } catch (err) {
-      console.error("Error saving user:", err);
       setError(err.response?.data?.error || "Failed to save user");
     } finally {
       setLoading(false);

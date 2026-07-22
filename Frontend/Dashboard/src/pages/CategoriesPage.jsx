@@ -8,7 +8,6 @@ import { getCategoryImageUrl } from "../utils/imageUtils";
 import "../styles/pages/CategoriesPage.css";
 import {
   getAllCategories,
-  getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
@@ -44,9 +43,7 @@ const CategoriesPage = () => {
             alt={row.name}
             style={{ width: 40, height: 40, objectFit: "cover" }}
             onError={(e) => {
-              e.target.style.display = "none";
-              e.target.parentNode.innerHTML =
-                '<span style="color: #999; font-size: 12px;">Error</span>';
+              e.currentTarget.style.display = "none";
             }}
           />
         );
@@ -56,7 +53,6 @@ const CategoriesPage = () => {
       header: "Actions",
       accessor: "actions",
       cell: (row) => {
-        console.log("🔍 [CategoriesPage] Rendering actions for row:", row);
         return (
           <div
             className="action-buttons"
@@ -65,10 +61,6 @@ const CategoriesPage = () => {
               variant="outline"
               size="sm"
               onClick={() => {
-                console.log(
-                  "🔍 [CategoriesPage] Edit button clicked for:",
-                  row
-                );
                 setEditCategory(row);
                 setForm({
                   name: row.name || "",
@@ -88,10 +80,6 @@ const CategoriesPage = () => {
               variant="danger"
               size="sm"
               onClick={() => {
-                console.log(
-                  "🔍 [CategoriesPage] Delete button clicked for:",
-                  row
-                );
                 setDeleteCategory(row);
               }}
               tooltip="Delete"
@@ -110,27 +98,11 @@ const CategoriesPage = () => {
       setError("");
       try {
         const token = localStorage.getItem("admin_token");
-        console.log(
-          "🔍 [CategoriesPage] Fetching categories with token:",
-          token ? "Present" : "Missing"
-        );
         const response = await getAllCategories(token);
-        console.log("🔍 [CategoriesPage] Categories response received:", response);
-        
+
         // Extract the data array from the response
         const data = response.data || response;
-        console.log("🔍 [CategoriesPage] Categories data extracted:", data);
         setCategories(Array.isArray(data) ? data : []);
-
-        // Debug: Log image URLs
-        data.forEach((cat) => {
-          if (cat.image) {
-            console.log(
-              `Category ${cat.name} image URL:`,
-              getCategoryImageUrl(cat.image)
-            );
-          }
-        });
       } catch (err) {
         setError("Failed to load categories");
       } finally {
@@ -179,13 +151,6 @@ const CategoriesPage = () => {
       data.append("description", form.description || "");
       if (form.image) data.append("image", form.image);
 
-      // Debug: Log the form data
-      console.log("Form data being sent:", {
-        name: form.name,
-        description: form.description,
-        hasImage: !!form.image,
-      });
-
       if (editCategory) {
         await updateCategory(editCategory.id, data, token);
       } else {
@@ -202,7 +167,6 @@ const CategoriesPage = () => {
       const cats = response.data || response;
       setCategories(Array.isArray(cats) ? cats : []);
     } catch (err) {
-      console.error("Error saving category:", err);
       setError(err.response?.data?.error || "Failed to save category");
     } finally {
       setLoading(false);

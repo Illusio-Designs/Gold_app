@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  getAllOrders, 
-  getOrdersByUserId, 
-  updateOrderStatus, 
+  getAllOrders,
+  updateOrderStatus,
   bulkUpdateOrderStatuses,
   getOrderStatistics,
   getUserCart,
@@ -14,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
-import { ShoppingCart, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
+import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
 
@@ -70,7 +69,6 @@ const OrdersPage = () => {
       setOrders(response);
       setFilteredOrders(response);
     } catch (error) {
-      console.error('Error loading orders:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -92,7 +90,6 @@ const OrdersPage = () => {
       const response = await getOrderStatistics(token);
       setStatistics(response);
     } catch (error) {
-      console.error('Error loading statistics:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -145,7 +142,6 @@ const OrdersPage = () => {
       showSuccessToast(`Order ${orderId} status updated to ${newStatus}`);
       loadStatistics(); // Refresh statistics
     } catch (error) {
-      console.error('Error updating order status:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -182,7 +178,6 @@ const OrdersPage = () => {
 
       showSuccessToast('Business approved successfully');
     } catch (error) {
-      console.error('Error approving business:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -218,7 +213,6 @@ const OrdersPage = () => {
       showSuccessToast(`${selectedOrders.length} orders updated to ${newStatus}`);
       loadStatistics(); // Refresh statistics
     } catch (error) {
-      console.error('Error bulk updating orders:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -267,7 +261,6 @@ const OrdersPage = () => {
       setSelectedUser(userId);
       setShowUserCart(true);
     } catch (error) {
-      console.error('Error loading user cart:', error);
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
         navigate('/auth');
@@ -332,7 +325,6 @@ const OrdersPage = () => {
               alt={row.product_name} 
               className="product-thumbnail"
               onError={(e) => {
-                console.error("[OrdersPage] Product image failed to load:", row.product_image);
                 e.target.style.display = 'none';
                 e.target.nextSibling.style.display = 'flex';
               }}
@@ -537,7 +529,7 @@ const OrdersPage = () => {
               
               <div className="cart-items">
                 <h4>Cart Items:</h4>
-                {userCart.items.map(item => (
+                {(userCart.items || []).map(item => (
                   <div key={item.id} className="cart-item">
                     <div className="cart-item-info">
                       <img 
@@ -545,7 +537,6 @@ const OrdersPage = () => {
                         alt={item.product_name} 
                         className="cart-item-image"
                         onError={(e) => {
-                          console.error("[OrdersPage] Cart item image failed to load:", item.product_image);
                           e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23f0f0f0' width='50' height='50'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
                         }}
                       />
