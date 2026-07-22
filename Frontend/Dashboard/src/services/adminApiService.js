@@ -523,18 +523,6 @@ export const updateOrderStatus = (orderId, status, token) =>
     )
     .then((r) => r.data);
 
-// NEW: Bulk update multiple order statuses
-export const bulkUpdateOrderStatuses = (orderIds, status, token) =>
-  axiosInstance
-    .patch(
-      `/orders/bulk-status`,
-      { order_ids: orderIds, status },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    )
-    .then((r) => r.data);
-
 export const deleteOrder = (id, token) =>
   axiosInstance
     .delete(`/orders/${id}`, { headers: { Authorization: `Bearer ${token}` } })

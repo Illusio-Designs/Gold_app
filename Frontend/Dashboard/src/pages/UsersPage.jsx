@@ -15,7 +15,7 @@ import {
   getAllUsers,
   createUser,
   updateUser,
-  deleteUser,
+  deleteUser as deleteUserApi,
 } from "../services/adminApiService";
 
 const userTypes = [
@@ -302,7 +302,7 @@ const UsersPage = () => {
       setLoading(true);
       setError("");
       const token = localStorage.getItem("admin_token");
-      await deleteUser(deleteUser.id, token);
+      await deleteUserApi(deleteUser.id, token);
       setDeleteUser(null);
 
       // Refresh users

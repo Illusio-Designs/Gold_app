@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   getAllOrders,
   updateOrderStatus,
-  bulkUpdateOrderStatuses,
   getOrderStatistics,
   getUserCart,
   updateUserStatus,
@@ -25,7 +24,6 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrders, setSelectedOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statistics, setStatistics] = useState({});
@@ -191,66 +189,6 @@ const OrdersPage = () => {
     }
   };
 
-  const handleBulkStatusUpdate = async (newStatus) => {
-    if (selectedOrders.length === 0) {
-      showErrorToast('Please select orders to update');
-      return;
-    }
-
-    try {
-      const token = getAdminToken();
-      if (!token) {
-        showErrorToast('Authentication token not found');
-        navigate('/auth');
-        return;
-      }
-      await bulkUpdateOrderStatuses(selectedOrders, newStatus, token);
-      
-      // Update local state
-      setOrders(prevOrders => 
-        prevOrders.map(order => 
-          selectedOrders.includes(order.id) ? { ...order, status: newStatus } : order
-        )
-      );
-      
-      setSelectedOrders([]);
-      showSuccessToast(`${selectedOrders.length} orders updated to ${newStatus}`);
-      loadStatistics(); // Refresh statistics
-    } catch (error) {
-      if (error.response?.status === 401) {
-        showErrorToast('Session expired. Please login again');
-        navigate('/auth');
-        return;
-      }
-      if (error.response?.status === 403 && error.response?.data?.code === 'BUSINESS_NOT_APPROVED') {
-        const blocked = error.response?.data?.blockedOrders || [];
-        const msg = blocked.length
-          ? `Some orders belong to not-approved businesses. Approve first or cancel. Blocked: ${blocked
-              .map(b => `#${b.orderId}(${b.userStatus})`)
-              .join(', ')}`
-          : 'Some orders belong to not-approved businesses. Approve first or cancel.';
-        showErrorToast(msg);
-        return;
-      }
-      showErrorToast('Failed to bulk update orders');
-    }
-  };
-
-  const handleOrderSelection = (orderId) => {
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedOrders.length === filteredOrders.length) {
-      setSelectedOrders([]);
-    } else {
-      setSelectedOrders(filteredOrders.map(order => order.id));
-    }
-  };
 
   const handleDownloadPdf = async (order) => {
     try {
@@ -448,18 +386,16 @@ const OrdersPage = () => {
 
         return (
           <div className="status-cell">
-            <select
-              value={row.status}
-              onChange={(e) => handleStatusUpdate(row.id, e.target.value)}
-              className="status-update-select"
-              style={{ borderColor: getStatusColor(row.status) }}
-            >
-              {allowedOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 150 }}>
+              <DropdownSelect
+                value={row.status}
+                onChange={(opt) => opt && handleStatusUpdate(row.id, opt.value)}
+                options={allowedOptions}
+                isClearable={false}
+                isSearchable={false}
+                placeholder="Status"
+              />
+            </div>
             {!isApproved && (
               <div className="status-guard">
                 <Button
@@ -526,27 +462,13 @@ const OrdersPage = () => {
         pageTitle="Order Management"
         loading={loading}
         actions={
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div style={{ width: "max-content" }}>
-              <DropdownSelect
-                value={filterStatus}
-                onChange={setFilterStatus}
-                options={statusOptions}
-                placeholder="All Statuses"
-              />
-            </div>
-            <div style={{ width: "max-content" }}>
-              <DropdownSelect
-                value=""
-                onChange={(value) => handleBulkStatusUpdate(value)}
-                options={statusOptions.slice(1).map(option => ({
-                  value: option.value,
-                  label: `Update to ${option.label}`
-                }))}
-                placeholder="Bulk Update Status"
-                disabled={selectedOrders.length === 0}
-              />
-            </div>
+          <div style={{ width: "max-content" }}>
+            <DropdownSelect
+              value={filterStatus}
+              onChange={setFilterStatus}
+              options={statusOptions}
+              placeholder="All Statuses"
+            />
           </div>
         }
       />

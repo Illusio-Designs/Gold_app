@@ -380,105 +380,6 @@ function updateOrderStatus(req, res) {
   });
 }
 
-// Bulk update order statuses
-function bulkUpdateOrderStatuses(req, res) {
-  const { order_ids, status } = req.body;
-
-  if (!order_ids || !Array.isArray(order_ids) || order_ids.length === 0) {
-    return res.status(400).json({ error: "Order IDs array is required" });
-  }
-
-  if (!status) {
-    return res.status(400).json({ error: "Status is required" });
-  }
-
-  // Validate status
-  const validStatuses = [
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ];
-  if (!validStatuses.includes(status)) {
-    return res
-      .status(400)
-      .json({
-        error: "Invalid status. Must be one of: " + validStatuses.join(", "),
-      });
-  }
-
-  // Same admin-side rule for bulk:
-  // - If status != "cancelled", all involved businesses must be approved.
-  if (status !== "cancelled") {
-    orderModel.getOrdersByIds(order_ids, (listErr, listRows) => {
-      if (listErr) {
-        return res.status(500).json({ error: listErr.message });
-      }
-
-      const blocked = (listRows || []).filter(
-        (r) => !isApprovedBusinessStatus(r.user_status)
-      );
-
-      if (blocked.length > 0) {
-        return res.status(403).json({
-          error:
-            "One or more orders belong to businesses that are not approved. Approve them first or cancel the orders.",
-          code: "BUSINESS_NOT_APPROVED",
-          blockedOrders: blocked.map((b) => ({
-            orderId: b.order_id,
-            userId: b.user_id,
-            userStatus: b.user_status,
-          })),
-          allowedStatuses: ["cancelled"],
-        });
-      }
-
-      orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-
-        // Emit real-time bulk update
-        socketService.emitToAll("order-update", {
-          action: "bulk-status-updated",
-          orderIds: order_ids,
-          status: status,
-          affectedRows: result.affectedRows,
-          timestamp: new Date().toISOString(),
-        });
-
-        res.json({
-          message: "Order statuses updated successfully",
-          affectedOrders: result.affectedRows,
-        });
-      });
-    });
-    return;
-  }
-
-  // Cancelling is always allowed.
-  orderModel.bulkUpdateOrderStatuses(order_ids, status, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    // Emit real-time bulk update
-    socketService.emitToAll("order-update", {
-      action: "bulk-status-updated",
-      orderIds: order_ids,
-      status: status,
-      affectedRows: result.affectedRows,
-      timestamp: new Date().toISOString(),
-    });
-
-    res.json({
-      message: "Order statuses updated successfully",
-      affectedOrders: result.affectedRows,
-    });
-  });
-}
-
 // Update order with full details
 function updateOrder(req, res) {
   const { id } = req.params;
@@ -617,7 +518,6 @@ module.exports = {
   getCurrentUserOrders,
   getOrderById,
   updateOrderStatus,
-  bulkUpdateOrderStatuses,
   updateOrder,
   deleteOrder,
   getOrderStatistics,

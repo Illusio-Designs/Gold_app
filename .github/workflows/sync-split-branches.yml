@@ -55,6 +55,12 @@ jobs:
           # Remove everything, then restore only the target folder from main.
           git rm -r --quiet .
           git checkout main -- "${{ matrix.keep }}"
+
+          # These component branches contain no dashboard, so Vercel's build
+          # errors on them. A repo-root vercel.json disables Git deployments so
+          # Vercel stops creating (failing) preview builds for these branches.
+          printf '{\n  "git": { "deploymentEnabled": false }\n}\n' > vercel.json
+
           git add -A
 
           # Skip if nothing actually changed for this component.

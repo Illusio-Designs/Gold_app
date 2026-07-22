@@ -217,15 +217,6 @@ function updateOrder(id, order, callback) {
   db.query(sql, values, callback);
 }
 
-// Bulk update order statuses
-function bulkUpdateOrderStatuses(orderIds, status, callback) {
-  const sql = `UPDATE orders SET 
-    status = ?, updated_at = NOW()
-    WHERE id IN (${orderIds.map(() => "?").join(",")})`;
-
-  db.query(sql, [status, ...orderIds], callback);
-}
-
 // Delete order
 function deleteOrder(id, callback) {
   const sql = "DELETE FROM orders WHERE id = ?";
@@ -256,7 +247,6 @@ module.exports = {
   getOrdersByIds,
   updateOrderStatus,
   updateOrder,
-  bulkUpdateOrderStatuses,
   deleteOrder,
   getOrderStatistics,
 };

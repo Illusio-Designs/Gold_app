@@ -30,8 +30,6 @@ router.get('/:id', orderController.getOrderById);
 // Update order status (individual product status)
 router.patch('/:id/status', orderController.updateOrderStatus);
 
-// Bulk update order statuses (admin only)
-router.patch('/bulk-status', requireAdmin, orderController.bulkUpdateOrderStatuses);
 
 // Update order with full details (admin only)
 router.put('/:id', requireAdmin, orderController.updateOrder);
