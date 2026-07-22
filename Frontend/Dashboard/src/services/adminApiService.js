@@ -3,6 +3,8 @@
 // BASE_URL is set from environment variable
 
 import axios from "axios";
+import { clearAuthData } from "../utils/authUtils";
+import { showWarningToast } from "../utils/toast";
 
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
@@ -47,9 +49,6 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
-      const { clearAuthData } = require("../utils/authUtils");
-      const { showWarningToast } = require("../utils/toast");
-      
       // Clear auth data
       clearAuthData();
       
@@ -430,7 +429,7 @@ export const updateProduct = (id, data, token) => {
   });
 
   return axiosInstance
-    .put(`/products/${id}`, data, {
+    .put(`/products/${id}`, formData, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);

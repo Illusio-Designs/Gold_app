@@ -227,7 +227,7 @@ class RealtimeNotificationService {
     this.connect();
   }
 
-  isConnected() {
+  getConnectionStatus() {
     return this.isConnected;
   }
 

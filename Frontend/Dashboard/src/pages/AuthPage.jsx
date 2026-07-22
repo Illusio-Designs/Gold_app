@@ -16,14 +16,13 @@ const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Clear any expired/invalid auth data when landing on login page
-    clearAuthData();
-    
-    // Check if user is already authenticated (shouldn't happen after clearAuthData)
+    // If already authenticated, go straight to the dashboard
     if (isAuthenticated()) {
-      // Redirect to dashboard if already logged in
       navigate("/dashboard", { replace: true });
+      return;
     }
+    // Otherwise clear any stale/expired auth data on the login page
+    clearAuthData();
   }, [navigate]);
 
   const handleSubmit = async (e) => {

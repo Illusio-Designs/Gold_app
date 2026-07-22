@@ -23,7 +23,6 @@ import {
 import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
 import NotificationManager from "../common/NotificationManager";
-import ToastManager from "../common/ToastManager";
 import RealTimeNotifications from "../RealTimeNotifications";
 import { getUnreadCount } from "../../services/adminApiService";
 import { logout, getAdminToken } from "../../utils/authUtils";
@@ -166,6 +165,9 @@ export default function DashboardLayout() {
     
     return () => {
       clearInterval(interval);
+      // Stop the realtime notification polling so it doesn't keep hitting the
+      // API with a cleared token after logout/unmount.
+      RealtimeNotificationService.disconnect();
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       document.removeEventListener('click', handleClickOutside);
       window.removeEventListener('notification-updated', handleNotificationUpdate);
@@ -365,10 +367,7 @@ export default function DashboardLayout() {
           &copy; 1991 Amrut Jewels Admin
         </footer>
       </div>
-      
-      {/* Toast Manager for real-time notifications */}
-      <ToastManager />
-      
+
       {/* Tooltip */}
       {tooltip.show && collapsed && (
         <div

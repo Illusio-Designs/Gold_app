@@ -24,6 +24,7 @@ import PrivacyPolicy from "./webpage/PrivacyPolicy";
 import DeletePage from "./webpage/DeletePage";
 import { isAuthenticated, autoLogout } from "./utils/authUtils";
 import { showToast } from "./utils/toast";
+import ToastManager from "./components/common/ToastManager";
 
 // Removed Firebase messaging-related code
 
@@ -88,6 +89,9 @@ function App() {
   return (
     <Router>
       <SessionChecker />
+      {/* Mounted at the root so login/logout/session toasts render on every
+          route, not only inside the dashboard. */}
+      <ToastManager />
       <Routes>
         {/* Public webpage routes */}
         <Route path="/" element={<HomePage />} />

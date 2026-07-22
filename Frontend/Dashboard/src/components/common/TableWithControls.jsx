@@ -77,7 +77,7 @@ const TableWithControls = ({
               options={filter.options}
               value={selectedFilters[filter.key] || ""}
               onChange={(option) =>
-                handleFilterChange(filter.key, option.value)
+                handleFilterChange(filter.key, option ? option.value : "")
               }
               placeholder={filter.placeholder}
             />
