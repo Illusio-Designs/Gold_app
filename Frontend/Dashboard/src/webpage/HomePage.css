@@ -908,33 +908,48 @@ button {
 /* Page Loader */
 .page-loader {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #ffffff;
+  inset: 0;
+  background: radial-gradient(120% 120% at 50% 35%, #fff8ee 0%, #fdf0de 55%, #f6e4cb 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  gap: 20px;
+  gap: 22px;
+  animation: page-loader-fade 0.3s ease;
 }
 
+@keyframes page-loader-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Branded gradient ring (maroon -> gold -> cream) via a masked conic gradient */
 .page-loader-spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #5d0829;
+  width: 62px;
+  height: 62px;
+  border: none;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  background: conic-gradient(from 90deg, #5d0829, #7a1538, #c09e83, #fce2bf, #5d0829);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 7px));
+  animation: spin 0.9s linear infinite;
+  box-shadow: 0 6px 18px rgba(93, 8, 41, 0.12);
 }
 
 .page-loader-text {
   color: #5d0829;
-  font-size: 18px;
-  font-weight: 600;
-  font-family: "Montserrat", sans-serif !important;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: "Glorify", serif !important;
+  animation: page-loader-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes page-loader-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
 /* Burger Menu Styles */

@@ -23,6 +23,7 @@ const notificationRoutes = require("./routes/notifications");
 const adminNotificationRoutes = require("./routes/adminNotifications");
 const seoRoutes = require("./routes/seo");
 const accountDeletionRoutes = require("./routes/accountDeletion");
+const systemRoutes = require("./routes/system");
 
 const app = express();
 
@@ -110,6 +111,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin-notifications", adminNotificationRoutes);
 app.use("/api/seo", seoRoutes);
 app.use("/api/account-deletion", accountDeletionRoutes);
+app.use("/api/system", systemRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

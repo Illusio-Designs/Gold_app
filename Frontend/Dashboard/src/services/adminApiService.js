@@ -542,6 +542,16 @@ export const getOrderStatistics = (token) =>
     })
     .then((r) => r.data);
 
+// SYSTEM — destructive full data reset (admin only).
+export const wipeAllData = (confirm, token) =>
+  axiosInstance
+    .post(
+      "/system/wipe-data",
+      { confirm },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then((r) => r.data);
+
 // ACCOUNT DELETION REQUESTS
 export const getAccountDeletionRequests = (token) =>
   axiosInstance

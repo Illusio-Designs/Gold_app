@@ -18,6 +18,7 @@ import AppVersionsPage from "./pages/AppVersionsPage";
 import AppIconsPage from "./pages/AppIconsPage";
 import SliderPage from "./pages/SliderPage";
 import AccountDeletionPage from "./pages/AccountDeletionPage";
+import SettingsPage from "./pages/SettingsPage";
 import AuthLayout from "./components/layout/AuthLayout";
 import AuthPage from "./pages/AuthPage";
 import HomePage from "./webpage/HomePage";
@@ -85,6 +86,7 @@ function App() {
             <Route path="app-icons" element={<AppIconsPage />} />
             <Route path="sliders" element={<SliderPage />} />
             <Route path="account-deletion" element={<AccountDeletionPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>
         
