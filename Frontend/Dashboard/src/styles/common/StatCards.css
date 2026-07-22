@@ -1,5 +1,7 @@
 /* Shared summary stat strip — the consistent "upper part" above every table.
-   Mirrors the Orders page stat cards (accent bar + label + value). */
+   Mirrors the Orders page stat cards (accent bar + label + value).
+   All selectors are scoped under .stat-cards to avoid clashing with the
+   Dashboard home page's own KPI cards. */
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -7,7 +9,7 @@
   margin-bottom: 20px;
 }
 
-.stat-card {
+.stat-cards .stat-card {
   position: relative;
   overflow: hidden;
   background: var(--surface, #fff);
@@ -17,7 +19,7 @@
   box-shadow: var(--shadow-sm, 0 1px 2px rgba(93, 8, 41, 0.06));
 }
 
-.stat-card::before {
+.stat-cards .stat-card::before {
   content: "";
   position: absolute;
   left: 0;
@@ -27,14 +29,14 @@
   background: var(--brand, #5d0829);
 }
 
-.stat-card.success::before { background: var(--success, #1a7f4b); }
-.stat-card.warning::before { background: var(--warning, #b07d0a); }
-.stat-card.info::before { background: var(--info, #1f6feb); }
-.stat-card.purple::before { background: #7a3ea8; }
-.stat-card.danger::before { background: var(--danger, #b3261e); }
-.stat-card.neutral::before { background: var(--gold, #c09e83); }
+.stat-cards .stat-card.success::before { background: var(--success, #1a7f4b); }
+.stat-cards .stat-card.warning::before { background: var(--warning, #b07d0a); }
+.stat-cards .stat-card.info::before { background: var(--info, #1f6feb); }
+.stat-cards .stat-card.purple::before { background: #7a3ea8; }
+.stat-cards .stat-card.danger::before { background: var(--danger, #b3261e); }
+.stat-cards .stat-card.neutral::before { background: var(--gold, #c09e83); }
 
-.stat-card__label {
+.stat-cards .stat-card__label {
   display: block;
   font-size: 0.76rem;
   color: var(--text-secondary, #8a6d5a);
@@ -42,7 +44,7 @@
   letter-spacing: 0.2px;
 }
 
-.stat-card__value {
+.stat-cards .stat-card__value {
   display: block;
   font-size: 1.7rem;
   line-height: 1;
@@ -51,12 +53,12 @@
   margin-top: 5px;
 }
 
-.stat-card.success .stat-card__value { color: var(--success, #1a7f4b); }
-.stat-card.warning .stat-card__value { color: var(--warning, #b07d0a); }
-.stat-card.info .stat-card__value { color: var(--info, #1f6feb); }
-.stat-card.purple .stat-card__value { color: #7a3ea8; }
-.stat-card.danger .stat-card__value { color: var(--danger, #b3261e); }
-.stat-card.neutral .stat-card__value { color: var(--text, #5d0829); }
+.stat-cards .stat-card.success .stat-card__value { color: var(--success, #1a7f4b); }
+.stat-cards .stat-card.warning .stat-card__value { color: var(--warning, #b07d0a); }
+.stat-cards .stat-card.info .stat-card__value { color: var(--info, #1f6feb); }
+.stat-cards .stat-card.purple .stat-card__value { color: #7a3ea8; }
+.stat-cards .stat-card.danger .stat-card__value { color: var(--danger, #b3261e); }
+.stat-cards .stat-card.neutral .stat-card__value { color: var(--text, #5d0829); }
 
 @media (max-width: 560px) {
   .stat-cards { grid-template-columns: repeat(2, 1fr); }

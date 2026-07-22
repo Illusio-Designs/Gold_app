@@ -93,7 +93,7 @@ const DashboardPage = () => {
   };
 
   const StatCard = ({ title, value, icon: Icon, colorClass, subtitle, trend }) => (
-    <div className="stat-card">
+    <div className={`kpi-card ${colorClass}`}>
       <div className="stat-content">
         <div className="stat-info">
           <p className="stat-title">{title}</p>
@@ -111,7 +111,7 @@ const DashboardPage = () => {
           )}
         </div>
         <div className={`stat-icon ${colorClass}`}>
-          <Icon size={24} color="white" />
+          <Icon size={22} color="white" />
         </div>
       </div>
     </div>
