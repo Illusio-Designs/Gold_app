@@ -426,6 +426,30 @@
   position: relative;
 }
 
+/* Category cards are identified by name, not an image. */
+.media-preview--category {
+  background: linear-gradient(135deg, #fdf6ea 0%, #f2e3ca 100%);
+}
+.media-category-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  width: 100%;
+  padding: 18px;
+  text-align: center;
+  color: var(--brand, #5d0829);
+}
+.media-category-name span {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
 .media-preview::before {
   content: '';
   position: absolute;

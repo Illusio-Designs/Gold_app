@@ -196,18 +196,21 @@ const MediaGalleryPage = () => {
     // Use processed_image field from API response
     const imagePath = item.processed_image || item.image;
     const fileUrl = getFileUrl(item.type, imagePath);
+    const isCategory = item.type === "category";
     return (
       <div key={item.id} className="media-card">
         <div className="media-card-header">
           <div className="media-type-badge">
-            {item.type === "category" && <Layers size={16} />}
+            {isCategory && <Layers size={16} />}
             {item.type === "product" && <Package size={16} />}
             <span>{item.type?.replace("_", " ")}</span>
           </div>
           <div className="media-actions">
-            <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
-              <Download size={16} />
-            </a>
+            {!isCategory && (
+              <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
+                <Download size={16} />
+              </a>
+            )}
             <button
               className="action-btn delete-btn"
               onClick={() => setDeleteItem(item)}
@@ -218,43 +221,51 @@ const MediaGalleryPage = () => {
           </div>
         </div>
 
-        <div className="media-preview">
-          {fileUrl && imagePath ? (
-            <img
-              src={fileUrl}
-              alt={item.name}
-              loading="lazy"
-              decoding="async"
-              key={`${item.id}-${imagePath}`}
-              onError={(e) => {
-                // Try fallback URL with direct file access
-                const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
-                let fallbackUrl;
-                if (imagePath.startsWith("/uploads/")) {
-                  fallbackUrl = `${imageBaseUrl}${imagePath.replace('/uploads', '')}`;
-                } else {
-                  fallbackUrl = `${imageBaseUrl}/${
-                    item.type === "category" ? "categories" : "products"
-                  }/${imagePath}`;
-                }
-                e.target.src = fallbackUrl;
-              }}
-            />
-          ) : (
-            <div className="no-preview">
-              <Image size={32} />
-              <span>No Preview</span>
+        {isCategory ? (
+          // Categories are identified by their name, not an image.
+          <div className="media-preview media-preview--category">
+            <div className="media-category-name">
+              <Layers size={30} />
+              <span>{item.name}</span>
             </div>
-          )}
-          <span className="wm-overlay">
-            <Droplet size={11} /> Watermarked
-          </span>
-        </div>
+          </div>
+        ) : (
+          <div className="media-preview">
+            {fileUrl && imagePath ? (
+              <img
+                src={fileUrl}
+                alt={item.name}
+                loading="lazy"
+                decoding="async"
+                key={`${item.id}-${imagePath}`}
+                onError={(e) => {
+                  // Try fallback URL with direct file access
+                  const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
+                  let fallbackUrl;
+                  if (imagePath.startsWith("/uploads/")) {
+                    fallbackUrl = `${imageBaseUrl}${imagePath.replace('/uploads', '')}`;
+                  } else {
+                    fallbackUrl = `${imageBaseUrl}/products/${imagePath}`;
+                  }
+                  e.target.src = fallbackUrl;
+                }}
+              />
+            ) : (
+              <div className="no-preview">
+                <Image size={32} />
+                <span>No Preview</span>
+              </div>
+            )}
+            <span className="wm-overlay">
+              <Droplet size={11} /> Watermarked
+            </span>
+          </div>
+        )}
 
         <div className="media-info">
           <h4>{item.name}</h4>
           <p className="media-ref">
-            {item.type === "category" ? "Category" : "SKU"}:{" "}
+            {isCategory ? "Category" : "SKU"}:{" "}
             <strong>{item.name}</strong>
           </p>
         </div>
