@@ -363,6 +363,16 @@ button {
   font-weight: 700;
 }
 
+/* Text-only category chips (predefined, no image) */
+.homepage-category-card--text {
+  justify-content: center;
+  padding: 14px 30px;
+  white-space: nowrap;
+}
+.homepage-category-card--text .homepage-category-label {
+  font-size: 20px;
+}
+
 .homepage-category-description {
   font-size: 12px;
   color: #8b4513;

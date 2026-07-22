@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./HomePage.css";
 import logo from "../assests/dashboardlogo.png";
 import heroBg from "../assests/Amruthero.png";
@@ -12,29 +12,7 @@ import aboutImg from "../assests/ft.png";
 import footerBg from "../assests/bgdesign.png";
 import flower from "../assests/Flower.png";
 import cowflower from "../assests/cow & flower.png";
-import { getPublicCategories } from "../services/publicApiService";
 import SEOWrapper from "../components/SEOWrapper";
-
-// Image base URL for constructing category image URLs
-const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL || "https://api.amrutkumargovinddasllp.com/uploads";
-
-// Helper function to construct category image URL from filename
-const getCategoryImageUrl = (filename) => {
-  if (!filename) return null;
-  
-  // If it's already a full URL, return as-is
-  if (filename.startsWith("http")) {
-    // But if it's localhost, transform it to production URL
-    if (filename.includes("localhost:3001")) {
-      const filenamePart = filename.split("/").pop();
-      return `${IMAGE_BASE_URL}/categories/${filenamePart}`;
-    }
-    return filename;
-  }
-  
-  // Construct the full URL from just the filename
-  return `${IMAGE_BASE_URL}/categories/${filename}`;
-};
 
 const faqData = [
   {
@@ -55,14 +33,23 @@ const faqData = [
   }
 ];
 
+// Predefined categories shown on the homepage — static names, no API, no images.
+const PREDEFINED_CATEGORIES = [
+  "Rings",
+  "Necklaces",
+  "Earrings",
+  "Bracelets",
+  "Chains",
+  "Bangles",
+  "Pendants",
+  "Anklets",
+  "Mangalsutra",
+  "Nazariya",
+];
+
 const HomePage = () => {
-  const scrollContainerRef = useRef(null);
-  const intervalRef = useRef(null);
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
-  const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
@@ -77,57 +64,6 @@ const HomePage = () => {
       setActiveSection(sectionId);
     }
   };
-
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        setCategoriesError(null);
-
-        const apiCategories = await getPublicCategories();
-
-        // Transform API categories to match our format and remove duplicates
-        const uniqueCategories = [];
-        const seenNames = new Set();
-        
-        const transformedCategories = apiCategories.map(category => {
-          // Skip if we've already seen this category name
-          if (seenNames.has(category.name)) {
-            return null;
-          }
-          
-          seenNames.add(category.name);
-          
-          // Use the image filename from backend (not full URLs)
-          // Backend returns: category.image (filename only)
-          const imageFilename = category.image;
-          const imageUrl = getCategoryImageUrl(imageFilename);
-
-          return {
-            id: category.id,
-            name: category.name,
-            description: category.description,
-            image: imageFilename, // Store the filename
-            img: imageUrl // Constructed full URL for display
-          };
-        }).filter(category => category !== null); // Remove null entries
-        
-        if (transformedCategories.length > 0) {
-          setCategories(transformedCategories);
-        } else {
-          setCategories([]);
-        }
-      } catch (error) {
-        setCategoriesError(error.message);
-        setCategories([]); // Empty array on error
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   // Track scroll position to update active section
   useEffect(() => {
@@ -156,30 +92,6 @@ const HomePage = () => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    // Disable auto-scrolling since we're showing actual categories only
-    // Users can manually scroll if needed
-    container.scrollTo({
-      left: 0,
-      behavior: 'auto'
-    });
-
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [categories]);
 
   return (
     <SEOWrapper pageUrl="/">
@@ -293,48 +205,12 @@ const HomePage = () => {
         <div className="homepage-categories-container">
           <div className="homepage-categories-shadow-left"></div>
           <div className="homepage-categories-shadow-right"></div>
-          <div 
-            className="homepage-categories-list"
-            ref={scrollContainerRef}
-          >
-            {categoriesLoading ? (
-              <div className="homepage-categories-loading">
-                <div className="homepage-loading-spinner"></div>
-                <p>Loading categories...</p>
+          <div className="homepage-categories-list">
+            {PREDEFINED_CATEGORIES.map((name) => (
+              <div className="homepage-category-card homepage-category-card--text" key={name}>
+                <span className="homepage-category-label">{name}</span>
               </div>
-            ) : categoriesError ? (
-              <div className="homepage-categories-error">
-                <p>Unable to load categories. Please try again later.</p>
-                <p style={{ fontSize: '14px', color: '#999' }}>{categoriesError}</p>
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="homepage-categories-empty">
-                <p>No categories available at the moment.</p>
-              </div>
-            ) : (
-              categories.map((cat, index) => (
-                <div className="homepage-category-card" key={`${cat.id || cat.name}-${index}`}>
-                  {cat.img ? (
-                    <img
-                      src={cat.img}
-                      alt={cat.name}
-                      className="homepage-category-img"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="homepage-category-img homepage-category-no-image">
-                      <span>No Image</span>
-                    </div>
-                  )}
-                  <span className="homepage-category-label">{cat.name}</span>
-                  {cat.description && (
-                    <span className="homepage-category-description">{cat.description}</span>
-                  )}
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </section>
