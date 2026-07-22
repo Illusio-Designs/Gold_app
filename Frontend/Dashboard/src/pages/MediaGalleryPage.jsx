@@ -17,6 +17,7 @@ import {
 } from "../services/adminApiService";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import { SkeletonCards } from "../components/common/Skeleton";
+import SidePanel from "../components/common/SidePanel";
 import "../styles/pages/MediaGalleryPage.css";
 
 const MediaGalleryPage = () => {
@@ -316,84 +317,71 @@ const MediaGalleryPage = () => {
         )}
       </div>
 
-      {/* Bulk Upload Modal */}
-      {showBulkUploadModal && (
-        <div className="modal-overlay">
-          <div className="modal bulk-upload-modal">
-            <div className="modal-header">
-              <h3>Upload Images</h3>
-              <button
-                className="modal-close"
-                onClick={() => {
-                  setShowBulkUploadModal(false);
-                  resetBulkUploadForm();
-                }}
-              >
-                ×
-              </button>
+      {/* Bulk Upload Side Panel */}
+      <SidePanel
+        isOpen={showBulkUploadModal}
+        onClose={() => {
+          setShowBulkUploadModal(false);
+          resetBulkUploadForm();
+        }}
+        title="Upload Images"
+        footer={
+          <>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                setShowBulkUploadModal(false);
+                resetBulkUploadForm();
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn-primary"
+              onClick={handleBulkUpload}
+              disabled={bulkUploading || bulkUploadFiles.length === 0}
+            >
+              {bulkUploading ? "Uploading..." : "Upload Images"}
+            </button>
+          </>
+        }
+      >
+        <div className="form-group">
+          <label>Select Images (Max 20 files)</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleBulkFileSelect}
+          />
+          {bulkUploadFiles.length > 0 && (
+            <div className="file-list">
+              <p>
+                <strong>Selected Files ({bulkUploadFiles.length}):</strong>
+              </p>
+              <ul>
+                {bulkUploadFiles.map((file, index) => (
+                  <li key={`${file.name}-${index}`}>{file.name}</li>
+                ))}
+              </ul>
             </div>
-
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Select Images (Max 20 files)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleBulkFileSelect}
-                />
-                {bulkUploadFiles.length > 0 && (
-                  <div className="file-list">
-                    <p>
-                      <strong>
-                        Selected Files ({bulkUploadFiles.length}):
-                      </strong>
-                    </p>
-                    <ul>
-                      {bulkUploadFiles.map((file, index) => (
-                        <li key={`${file.name}-${index}`}>{file.name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div className="upload-info">
-                <p>
-                  <strong>How it works:</strong>
-                </p>
-                <ul>
-                  <li>
-                    Each image is assigned to a product by its <strong>file name</strong>{" "}
-                    (matched to the product SKU or name)
-                  </li>
-                  <li>Files whose name matches no product are skipped</li>
-                  <li>Assigned images are watermarked and converted to WebP</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setShowBulkUploadModal(false);
-                  resetBulkUploadForm();
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-primary"
-                onClick={handleBulkUpload}
-                disabled={bulkUploading || bulkUploadFiles.length === 0}
-              >
-                {bulkUploading ? "Uploading..." : "Upload Images"}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+
+        <div className="upload-info">
+          <p>
+            <strong>How it works:</strong>
+          </p>
+          <ul>
+            <li>
+              Each image is assigned to a product by its <strong>file name</strong>{" "}
+              (matched to the product SKU or name)
+            </li>
+            <li>Files whose name matches no product are skipped</li>
+            <li>Assigned images are watermarked and converted to WebP</li>
+          </ul>
+        </div>
+      </SidePanel>
 
       {/* Upload Results */}
       {bulkUploadResults.length > 0 && (
