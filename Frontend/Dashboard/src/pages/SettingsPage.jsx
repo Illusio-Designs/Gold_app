@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Settings as SettingsIcon } from "lucide-react";
 import { wipeAllData } from "../services/adminApiService";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
+import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
 
 const CONFIRM_PHRASE = "DELETE ALL DATA";
@@ -44,7 +45,7 @@ const SettingsPage = () => {
 
   return (
     <div className="settings-page">
-      <h1 className="settings-title">Settings</h1>
+      <PageHeader title="Settings" subtitle="Manage administrative settings" icon={SettingsIcon} />
 
       <section className="danger-zone">
         <div className="danger-zone__head">

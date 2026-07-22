@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/authUtils";
 import { showErrorToast } from "../utils/toast";
 import Badge from "../components/common/Badge";
+import PageHeader from "../components/common/PageHeader";
 import { User, Mail, ShieldCheck, Clock } from "lucide-react";
 import "../styles/pages/ProfilePage.css";
 
@@ -34,7 +35,7 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      <h1 className="profile-title">Profile</h1>
+      <PageHeader title="Profile" subtitle="Your account details" icon={User} />
 
       <div className="profile-card">
         <div className="profile-card__header">

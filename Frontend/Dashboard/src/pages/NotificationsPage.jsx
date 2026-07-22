@@ -5,8 +5,9 @@ import { showErrorToast } from "../utils/toast";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
+import PageHeader from "../components/common/PageHeader";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
-import { BellOff } from "lucide-react";
+import { BellOff, Bell } from "lucide-react";
 import "../styles/pages/NotificationsPage.css";
 
 const NotificationsPage = () => {
@@ -82,6 +83,7 @@ const NotificationsPage = () => {
   if (loading) {
     return (
       <div className="notifications-page">
+        <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Bell} />
         <SkeletonStats count={2} />
         <SkeletonTable rows={6} />
       </div>
@@ -90,7 +92,7 @@ const NotificationsPage = () => {
 
   return (
     <div className="notifications-page">
-      <h1 className="notifications-title">Notifications</h1>
+      <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Bell} />
       <StatCards stats={notificationStats} />
 
       {notifications.length === 0 ? (
