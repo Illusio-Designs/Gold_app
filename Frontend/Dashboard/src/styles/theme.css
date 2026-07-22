@@ -75,6 +75,18 @@
   box-shadow: 0 0 0 3px rgba(192, 158, 131, 0.28);
 }
 
+/* When `form-control` is placed on a field WRAPPER (InputField / DropdownSelect
+   render it on their outer div), it must NOT draw its own box — the inner input
+   / select already has one. Otherwise every field looks double-boxed. */
+.input-field.form-control,
+.dropdown-select.form-control {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* Accessibility helper for visually-hidden labels */
 .sr-only {
   position: absolute;

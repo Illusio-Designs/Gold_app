@@ -11,16 +11,18 @@ const NotificationManager = ({ isDropdown = false, onNotificationUpdate }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch once when the dropdown opens. Background updates are handled by
+    // RealtimeNotificationService + the `notification-updated` event, so we no
+    // longer run a duplicate polling loop here.
     fetchNotifications();
     fetchUnreadCount();
-    
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(() => {
+
+    const onUpdate = () => {
       fetchNotifications();
       fetchUnreadCount();
-    }, 30000);
-    
-    return () => clearInterval(interval);
+    };
+    window.addEventListener("notification-updated", onUpdate);
+    return () => window.removeEventListener("notification-updated", onUpdate);
   }, []);
 
   const fetchNotifications = async () => {

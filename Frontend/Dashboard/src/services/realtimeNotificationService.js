@@ -7,7 +7,7 @@ class RealtimeNotificationService {
     this.lastNotificationCount = 0;
     this.lastNotificationId = 0;
     this.lastNotificationTimestamp = 0; // Add missing timestamp property
-    this.pollingIntervalMs = 5000; // Poll every 5 seconds for real-time feel
+    this.pollingIntervalMs = 30000; // Poll every 30s (5s hammered the API 12x/min)
     this.processedNotifications = new Set(); // To prevent duplicate notifications
     this.notificationCache = new Map(); // To cache notifications
   }

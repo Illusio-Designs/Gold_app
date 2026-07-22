@@ -36,23 +36,31 @@
   color: var(--brand-gold, #c09e83) !important;
 }
 .react-select__menu {
-  background: #fce2bf !important;
+  background: #fff !important;
   color: #5d0829 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 16px rgba(93, 8, 41, 0.18) !important;
+  border: 1px solid var(--brand-gold, #c09e83) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 24px rgba(93, 8, 41, 0.16) !important;
+  overflow: hidden;
 }
 .react-select__option {
-  background: #fce2bf !important;
+  background: #fff !important;
   color: #5d0829 !important;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.15s, color 0.15s;
 }
-.react-select__option--is-selected {
-  background: #c09e83 !important;
-  color: #5d0829 !important;
-}
+/* Hover / keyboard-focused option — subtle cream tint, maroon text (readable). */
 .react-select__option--is-focused {
-  background: #c09e83 !important;
-  color: #fce2bf !important;
+  background: var(--surface-muted, #f9f2e7) !important;
+  color: #5d0829 !important;
+}
+/* Selected option — clear maroon highlight with cream text. */
+.react-select__option--is-selected {
+  background: var(--brand, #5d0829) !important;
+  color: var(--brand-cream, #fce2bf) !important;
+}
+.react-select__option--is-selected.react-select__option--is-focused {
+  background: var(--brand-dark, #430620) !important;
+  color: var(--brand-cream, #fce2bf) !important;
 }
 
 .dropdown-container {
