@@ -67,7 +67,6 @@ function generateOrderPDF(order, stream) {
   heading("Product");
   line("Name", order.product_name);
   line("SKU", order.product_sku);
-  line("Description", order.description);
 
   heading("Order Details");
   line("Quantity", order.quantity);

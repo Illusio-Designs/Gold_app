@@ -290,13 +290,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 0 0 16px 16px;
-  border-left: 1.5px solid #e2c9b0;
-  border-right: 1.5px solid #e2c9b0;
-  border-bottom: 1.5px solid #e2c9b0;
-  box-shadow: 0 2px 12px rgba(93, 8, 41, 0.04);
+  padding: 0;
 }
 
 .media-card {

@@ -166,7 +166,7 @@ function getOrderById(id, callback) {
   const sql = `
     SELECT o.*, 
            u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status,
-           p.name as product_name, p.sku as product_sku, p.image as product_image, p.description
+           p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
     LEFT JOIN products p ON o.product_id = p.id

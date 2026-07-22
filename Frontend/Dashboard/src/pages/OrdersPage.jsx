@@ -408,12 +408,18 @@ const OrdersPage = () => {
       cell: (row) => (
         <div className="user-info">
           <div className="user-name">{row.user_name || row.business_name || 'N/A'}</div>
-          <div className="user-phone">{row.user_phone || 'N/A'}</div>
-          {row.user_status && (
-            <Badge tone={getStatusTone(row.user_status)}>{row.user_status}</Badge>
-          )}
         </div>
       ),
+    },
+    {
+      header: "User Status",
+      accessor: "user_status",
+      cell: (row) =>
+        row.user_status ? (
+          <Badge tone={getStatusTone(row.user_status)}>{row.user_status}</Badge>
+        ) : (
+          <span style={{ color: 'var(--text-secondary)' }}>—</span>
+        ),
     },
     {
       header: "Quantity",
