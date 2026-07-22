@@ -626,12 +626,16 @@ button {
   margin-top: 17%;
 }
 
-/* Footer font consistency — force one family across the whole footer on every
-   page, overriding the global Glorify `*` rule so the company name, the
-   app-promo title and the copyright link all match the Montserrat body text. */
+/* Footer font consistency — use the homepage display font (Glorify) across the
+   whole footer on every page. The extra selectors below out-specify the
+   per-section Montserrat rules so the entire footer matches the homepage. */
 .homepage-footer,
-.homepage-footer * {
-  font-family: "Montserrat", sans-serif !important;
+.homepage-footer *,
+.homepage-footer .homepage-footer-section h4,
+.homepage-footer .homepage-footer-section p,
+.homepage-footer .homepage-footer-section a,
+.homepage-footer .homepage-copyright p {
+  font-family: "Glorify", serif !important;
 }
 
 /* App Promo Section */
