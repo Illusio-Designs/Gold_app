@@ -152,61 +152,13 @@ export const useUserSocket = (userData = null) => {
       }
     });
 
-    // Listen for login request status changes
-    const loginRequestStatusListener = SocketService.addEventListener('login-request-status-change', (data) => {
-      console.log('[useUserSocket] 🔔 Login request status change received:', data);
-      console.log('[useUserSocket] Event data:', {
-        action: data.action,
-        request: data.request,
-        type: data.type,
-        timestamp: data.timestamp
-      });
-      
-      if (data.request && data.request.status) {
-        const status = data.request.status;
-        const userName = data.request.userName || 'User';
-        
-        const title = status === 'approved' ? 'Login Approved ✅' : 
-                     status === 'rejected' ? 'Login Request Rejected ❌' : 
-                     'Login Request Updated';
-        
-        const message = status === 'approved' ? `Welcome ${userName}! You can now access the app.` :
-                       status === 'rejected' ? `Sorry ${userName}, your login request has been rejected.` :
-                       `Your login request status has been updated to: ${status}`;
-        
-        Toast.show({
-          type: status === 'approved' ? 'success' : status === 'rejected' ? 'error' : 'info',
-          text1: title,
-          text2: message,
-          position: 'top',
-          autoHide: true,
-          visibilityTime: 6000,
-        });
-
-        // Handle logout if rejected
-        if (status === 'rejected') {
-          setTimeout(async () => {
-            try {
-              await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'userId', 'userType']);
-              // You might want to navigate to login screen here
-              console.log('[useUserSocket] User logged out due to login request rejection');
-            } catch (error) {
-              console.error('[useUserSocket] Error logging out user:', error);
-            }
-          }, 3000); // Give user time to read the message
-        }
-      }
-    });
-
     console.log('[useUserSocket] 🔔 Event listeners set up successfully');
     console.log('[useUserSocket] Registration status listener ID:', registrationStatusListener);
-    console.log('[useUserSocket] Login request status listener ID:', loginRequestStatusListener);
 
     // Cleanup listeners
     return () => {
       console.log('[useUserSocket] 🧹 Cleaning up event listeners...');
       SocketService.removeEventListener('registration-status-change', registrationStatusListener);
-      SocketService.removeEventListener('login-request-status-change', loginRequestStatusListener);
       console.log('[useUserSocket] 🧹 Event listeners cleaned up');
     };
   }, [isConnected]);

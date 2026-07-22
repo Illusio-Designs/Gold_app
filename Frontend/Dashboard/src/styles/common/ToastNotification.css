@@ -179,14 +179,6 @@
 }
 
 /* Toast Types */
-.toast-notification.login-request {
-  border-left: 4px solid var(--text-primary);
-}
-
-.toast-notification.login-request .toast-icon {
-  background: var(--text-primary);
-  color: white;
-}
 
 /* Animation for multiple toasts */
 .toast-notification:nth-child(2) {
