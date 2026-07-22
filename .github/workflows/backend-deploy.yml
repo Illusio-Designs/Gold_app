@@ -54,9 +54,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Need the previous commit to diff against (default is a shallow
-          # single-commit fetch).
-          fetch-depth: 2
+          # Full history so we can diff against the push's "before" commit even
+          # when several commits land at once (e.g. a branch fast-forwarded into
+          # main). A shallow fetch makes older "before" SHAs a "bad object".
+          fetch-depth: 0
 
       # Decide whether this push actually requires any database / dependency
       # work. Pure code deploys need none — Passenger just restarts.
@@ -67,6 +68,11 @@ jobs:
           BEFORE="${{ github.event.before }}"
           # Fall back to HEAD~1 for manual runs or a new-branch first push.
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            BEFORE="$(git rev-parse HEAD~1 2>/dev/null || echo '')"
+          fi
+          # If the "before" SHA isn't a reachable object (shallow clone, rebase,
+          # force-push), fall back to HEAD~1 so `git diff` never hard-fails.
+          if [ -n "$BEFORE" ] && ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
             BEFORE="$(git rev-parse HEAD~1 2>/dev/null || echo '')"
           fi
           if [ -z "$BEFORE" ]; then
