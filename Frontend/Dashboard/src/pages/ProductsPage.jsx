@@ -4,10 +4,14 @@ import {
   Trash2,
   FileSpreadsheet,
   Plus,
+  Package,
 } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import { SkeletonTable } from "../components/common/Skeleton";
+import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import ExcelImport from "../components/ExcelImport";
@@ -109,10 +113,10 @@ const ProductsPage = () => {
       header: "Stock Status",
       accessor: "stock_status",
       cell: (row) => {
-        const statusColors = {
-          available: "bg-green-100 text-green-800",
-          out_of_stock: "bg-red-100 text-red-800",
-          reserved: "bg-yellow-100 text-yellow-800",
+        const statusTones = {
+          available: "success",
+          out_of_stock: "danger",
+          reserved: "warning",
         };
         const statusLabels = {
           available: "Available",
@@ -120,13 +124,9 @@ const ProductsPage = () => {
           reserved: "Reserved",
         };
         return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              statusColors[row.stock_status] || "bg-gray-100 text-gray-800"
-            }`}
-          >
+          <Badge tone={statusTones[row.stock_status] || "neutral"}>
             {statusLabels[row.stock_status] || row.stock_status || "N/A"}
-          </span>
+          </Badge>
         );
       },
     },
@@ -181,7 +181,7 @@ const ProductsPage = () => {
             }}
             tooltip="Manage Stock"
           >
-            📦
+            <Package size={16} />
           </Button>
         </div>
       ),
@@ -239,12 +239,6 @@ const ProductsPage = () => {
     };
     fetchData();
   }, []);
-
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -397,6 +391,9 @@ const ProductsPage = () => {
 
   return (
     <div className="products-page">
+      {loading ? (
+        <SkeletonTable rows={8} cols={5} />
+      ) : (
       <TableWithControls
         columns={columns}
         data={products}
@@ -452,7 +449,8 @@ const ProductsPage = () => {
         ]}
         errorMessage={error}
       />
-      <Modal
+      )}
+      <SidePanel
         isOpen={modalOpen}
         onClose={handleCancel}
         title={editProduct ? "Edit Product" : "Add Product"}
@@ -470,7 +468,7 @@ const ProductsPage = () => {
               : null
           }
           onChange={handleDropdownChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Name"
@@ -478,7 +476,7 @@ const ProductsPage = () => {
           placeholder="Enter product name"
           value={form.name}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Image"
@@ -486,7 +484,7 @@ const ProductsPage = () => {
           type="file"
           accept="image/*"
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
@@ -508,7 +506,7 @@ const ProductsPage = () => {
           placeholder="Enter net weight"
           value={form.net_weight}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Gross Weight"
@@ -516,7 +514,7 @@ const ProductsPage = () => {
           placeholder="Enter gross weight"
           value={form.gross_weight}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <InputField
@@ -525,7 +523,7 @@ const ProductsPage = () => {
           placeholder="Enter size"
           value={form.size}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Attributes"
@@ -533,7 +531,7 @@ const ProductsPage = () => {
           placeholder="Enter attributes"
           value={form.attributes}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <InputField
@@ -542,7 +540,7 @@ const ProductsPage = () => {
           placeholder="Enter SKU"
           value={form.sku}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Pieces"
@@ -550,7 +548,7 @@ const ProductsPage = () => {
           placeholder="Enter number of pieces"
           value={form.pieces}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <DropdownSelect
           label="Purity"
@@ -560,7 +558,7 @@ const ProductsPage = () => {
             form.purity ? { value: form.purity, label: form.purity } : null
           }
           onChange={handleDropdownChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="MRP"
@@ -568,7 +566,7 @@ const ProductsPage = () => {
           placeholder="Enter Maximum Retail Price"
           value={form.mark_amount}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
 
         <div className="modal-actions">
@@ -579,7 +577,7 @@ const ProductsPage = () => {
             Cancel
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
       <Modal
         isOpen={!!deleteProduct}
         onClose={() => setDeleteProduct(null)}

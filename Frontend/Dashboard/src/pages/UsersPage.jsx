@@ -3,6 +3,9 @@ import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import { SkeletonTable } from "../components/common/Skeleton";
+import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import { getProfileImageUrl } from "../utils/imageUtils";
@@ -93,27 +96,15 @@ const UsersPage = () => {
       accessor: "status",
       cell: (row) => {
         const status = row.status || "";
-        let color = "#aaa";
-        if (status === "approved") color = "#4caf50";
-        else if (status === "pending") color = "#ff9800";
-        else if (status === "rejected") color = "#f44336";
-        else if (status === "denied") color = "#9c27b0";
+        let tone = "neutral";
+        if (status === "approved") tone = "success";
+        else if (status === "pending") tone = "warning";
+        else if (status === "rejected") tone = "danger";
+        else if (status === "denied") tone = "danger";
         return (
-          <span
-            style={{
-              display: "inline-block",
-              padding: "2px 10px",
-              borderRadius: "12px",
-              background: color + "22",
-              color,
-              fontWeight: 600,
-              fontSize: 13,
-              minWidth: 70,
-              textAlign: "center",
-            }}
-          >
+          <Badge tone={tone}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
-          </span>
+          </Badge>
         );
       },
     },
@@ -177,13 +168,6 @@ const UsersPage = () => {
     ],
     [users]
   );
-
-  // Consistent color styling for all fields
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -356,6 +340,9 @@ const UsersPage = () => {
 
   return (
     <div className="users-page">
+      {loading ? (
+        <SkeletonTable rows={8} cols={5} />
+      ) : (
       <TableWithControls
         columns={columns}
         data={users}
@@ -415,7 +402,8 @@ const UsersPage = () => {
         ]}
         errorMessage={error}
       />
-      <Modal
+      )}
+      <SidePanel
         isOpen={modalOpen}
         onClose={handleCancel}
         title={editUser ? "Edit User" : "Add User"}
@@ -433,7 +421,7 @@ const UsersPage = () => {
               : null
           }
           onChange={handleDropdownChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Name"
@@ -441,7 +429,7 @@ const UsersPage = () => {
           placeholder="Enter full name"
           value={form.name}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Email"
@@ -450,7 +438,7 @@ const UsersPage = () => {
           placeholder="Enter email"
           value={form.email}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Password"
@@ -461,7 +449,7 @@ const UsersPage = () => {
           }
           value={form.password}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Image"
@@ -469,7 +457,7 @@ const UsersPage = () => {
           type="file"
           accept="image/*"
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
@@ -491,7 +479,7 @@ const UsersPage = () => {
           placeholder="Enter phone number"
           value={form.phone_number}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Address Line 1"
@@ -499,7 +487,7 @@ const UsersPage = () => {
           placeholder="Enter address line 1"
           value={form.address_line1}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Address Line 2"
@@ -507,7 +495,7 @@ const UsersPage = () => {
           placeholder="Enter address line 2"
           value={form.address_line2}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Landmark"
@@ -515,7 +503,7 @@ const UsersPage = () => {
           placeholder="Enter landmark"
           value={form.landmark}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="State"
@@ -523,7 +511,7 @@ const UsersPage = () => {
           placeholder="Enter state"
           value={form.state}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="City"
@@ -531,7 +519,7 @@ const UsersPage = () => {
           placeholder="Enter city"
           value={form.city}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Country"
@@ -539,7 +527,7 @@ const UsersPage = () => {
           placeholder="Enter country"
           value={form.country}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="GST Number"
@@ -547,7 +535,7 @@ const UsersPage = () => {
           placeholder="Enter GST number"
           value={form.gst_number}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="PAN Number"
@@ -555,7 +543,7 @@ const UsersPage = () => {
           placeholder="Enter PAN number"
           value={form.pan_number}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Business Name"
@@ -563,7 +551,7 @@ const UsersPage = () => {
           placeholder="Enter business name"
           value={form.business_name}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <DropdownSelect
           label="Status"
@@ -579,7 +567,7 @@ const UsersPage = () => {
               : null
           }
           onChange={handleDropdownChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Remarks"
@@ -587,7 +575,7 @@ const UsersPage = () => {
           placeholder="Enter remarks"
           value={form.remarks}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <div className="modal-actions">
           <Button onClick={handleSave} variant="primary" disabled={loading}>
@@ -597,7 +585,7 @@ const UsersPage = () => {
             Cancel
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
       <Modal
         isOpen={!!deleteUser}
         onClose={() => setDeleteUser(null)}

@@ -3,6 +3,8 @@ import { Edit, Trash2, Upload, Plus, Image as ImageIcon } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import { SkeletonTable } from "../components/common/Skeleton";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import {
@@ -266,14 +268,11 @@ const SliderPage = () => {
     }
   };
 
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
-
   return (
     <div className="slider-page">
+      {loading ? (
+        <SkeletonTable rows={8} cols={5} />
+      ) : (
       <TableWithControls
         data={sliders}
         columns={columns}
@@ -301,13 +300,14 @@ const SliderPage = () => {
         ]}
         errorMessage={error}
       />
+      )}
 
-      {/* Create/Edit Modal */}
-      <Modal
+      {/* Create/Edit Panel */}
+      <SidePanel
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editSlider ? "Edit Slider" : "Create New Slider"}
-        size="lg"
+        size="large"
       >
         <div className="form-grid">
           <div className="form-row">
@@ -319,7 +319,7 @@ const SliderPage = () => {
               onChange={handleInputChange}
               placeholder="Enter slider title"
               required
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -338,7 +338,7 @@ const SliderPage = () => {
               ]}
               placeholder="Select a category"
               required
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -409,7 +409,7 @@ const SliderPage = () => {
             </Button>
           </div>
         </div>
-      </Modal>
+      </SidePanel>
 
       {/* Delete Confirmation Modal */}
       <Modal

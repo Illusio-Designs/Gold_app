@@ -6,6 +6,9 @@ import {
   Package,
   Layers,
   Upload,
+  Droplet,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import {
   bulkUploadMediaFiles,
@@ -13,6 +16,7 @@ import {
   deleteMediaFile,
 } from "../services/adminApiService";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
+import { SkeletonCards } from "../components/common/Skeleton";
 import "../styles/pages/MediaGalleryPage.css";
 
 const MediaGalleryPage = () => {
@@ -198,7 +202,7 @@ const MediaGalleryPage = () => {
             {item.type === "category" && <Layers size={16} />}
             {item.type === "product" && <Package size={16} />}
             <span>{item.type?.replace("_", " ")}</span>
-            <span className="watermark-badge">💧 Watermarked</span>
+            <span className="watermark-badge"><Droplet size={12} /> Watermarked</span>
           </div>
           <div className="media-actions">
             <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
@@ -250,7 +254,7 @@ const MediaGalleryPage = () => {
           {item.type === "category" && (
             <p className="category">Category: {item.name}</p>
           )}
-          <p className="status">✅ Watermarked</p>
+          <p className="status"><CheckCircle2 size={14} /> Watermarked</p>
         </div>
       </div>
     );
@@ -265,7 +269,7 @@ const MediaGalleryPage = () => {
     return (
       <div className="media-gallery-page">
         <div className="loading-state">
-          <div className="loading-spinner"></div>
+          <SkeletonCards count={8} />
         </div>
       </div>
     );
@@ -404,7 +408,7 @@ const MediaGalleryPage = () => {
               >
                 <div className="result-header">
                   <span className="result-status">
-                    {result.success ? "✅" : "❌"}
+                    {result.success ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                   </span>
                   <span className="filename">{result.filename}</span>
                 </div>

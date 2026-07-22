@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
+import { SkeletonTable } from '../components/common/Skeleton';
+import Badge from '../components/common/Badge';
 import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
@@ -275,6 +277,25 @@ const OrdersPage = () => {
     return statusOption ? statusOption.color : '#666';
   };
 
+  const getStatusTone = (status) => {
+    switch (String(status || '').toLowerCase()) {
+      case 'delivered':
+      case 'approved':
+        return 'success';
+      case 'shipped':
+      case 'processing':
+        return 'info';
+      case 'pending':
+        return 'warning';
+      case 'cancelled':
+      case 'rejected':
+      case 'blocked':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -297,9 +318,7 @@ const OrdersPage = () => {
   if (loading) {
     return (
       <div className="orders-page">
-        <div className="loading">
-          <div className="loading-spinner"></div>
-        </div>
+        <SkeletonTable rows={8} cols={6} />
       </div>
     );
   }
@@ -353,9 +372,7 @@ const OrdersPage = () => {
           <div className="business-name">{row.business_name || 'N/A'}</div>
           <div className="user-phone">{row.user_phone || 'N/A'}</div>
           {row.user_status && (
-            <div className={`user-status-badge ${String(row.user_status).toLowerCase()}`}>
-              {row.user_status}
-            </div>
+            <Badge tone={getStatusTone(row.user_status)}>{row.user_status}</Badge>
           )}
         </div>
       ),

@@ -3,6 +3,9 @@ import { Edit, Trash2, Upload, AlertTriangle, CheckCircle, XCircle, Plus, Smartp
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
+import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import { getAllAppIcons, createAppIcon, updateAppIcon, deleteAppIcon, activateAppIcon } from "../services/adminApiService";
@@ -82,14 +85,9 @@ const AppIconsPage = () => {
       header: "Status",
       accessor: "is_active",
       cell: (row) => (
-        <div className="status-badge">
-          {row.is_active ? (
-            <CheckCircle className="active-icon" />
-          ) : (
-            <XCircle className="inactive-icon" />
-          )}
+        <Badge tone={row.is_active ? "success" : "neutral"}>
           {row.is_active ? "Active" : "Inactive"}
-        </div>
+        </Badge>
       ),
     },
     {
@@ -299,44 +297,42 @@ const AppIconsPage = () => {
     }
   };
 
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
-
   return (
     <div className="app-icons-page">
-      <TableWithControls
-        data={icons}
-        columns={columns}
-        loading={loading}
-        pageTitle="App Icon Management"
-        searchFields={["name", "platform", "icon_type"]}
-        actions={
-          <Button onClick={handleCreate}>
-            <Plus className="icon" />
-            Upload New Icon
-          </Button>
-        }
-        filters={[
-          { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
-          { key: "icon_type", options: iconTypeOptions, placeholder: "Filter by type" },
-          {
-            key: "is_active",
-            options: [
-              { value: "", label: "All Statuses" },
-              { value: "true", label: "Active" },
-              { value: "false", label: "Inactive" },
-            ],
-            placeholder: "Filter by status",
-          },
-        ]}
-        errorMessage={error}
-      />
+      {loading ? (
+        <SkeletonTable rows={6} cols={4} />
+      ) : (
+        <TableWithControls
+          data={icons}
+          columns={columns}
+          loading={loading}
+          pageTitle="App Icon Management"
+          searchFields={["name", "platform", "icon_type"]}
+          actions={
+            <Button onClick={handleCreate}>
+              <Plus className="icon" />
+              Upload New Icon
+            </Button>
+          }
+          filters={[
+            { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
+            { key: "icon_type", options: iconTypeOptions, placeholder: "Filter by type" },
+            {
+              key: "is_active",
+              options: [
+                { value: "", label: "All Statuses" },
+                { value: "true", label: "Active" },
+                { value: "false", label: "Inactive" },
+              ],
+              placeholder: "Filter by status",
+            },
+          ]}
+          errorMessage={error}
+        />
+      )}
 
-      {/* Create/Edit Modal */}
-      <Modal
+      {/* Create/Edit SidePanel */}
+      <SidePanel
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editIcon ? "Edit App Icon" : "Upload New App Icon"}
@@ -352,7 +348,7 @@ const AppIconsPage = () => {
               onChange={handleInputChange}
               placeholder="e.g., Holiday Icon, Special Event"
               required
-              style={inputStyle}
+              className="form-control"
             />
             <DropdownSelect
               label="Icon Type"
@@ -361,7 +357,7 @@ const AppIconsPage = () => {
               onChange={handleInputChange}
               options={iconTypeOptions}
               required
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -373,7 +369,7 @@ const AppIconsPage = () => {
               onChange={handleInputChange}
               options={platformOptions}
               required
-              style={inputStyle}
+              className="form-control"
             />
             <InputField
               label="Priority (0-100)"
@@ -384,7 +380,7 @@ const AppIconsPage = () => {
               value={form.priority}
               onChange={handleInputChange}
               placeholder="Higher number = higher priority"
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -395,7 +391,7 @@ const AppIconsPage = () => {
               type="date"
               value={form.start_date}
               onChange={handleInputChange}
-              style={inputStyle}
+              className="form-control"
             />
             <InputField
               label="End Date (Optional)"
@@ -403,7 +399,7 @@ const AppIconsPage = () => {
               type="date"
               value={form.end_date}
               onChange={handleInputChange}
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -415,7 +411,7 @@ const AppIconsPage = () => {
               value={form.icon_url}
               onChange={handleInputChange}
               placeholder="https://example.com/icon.png"
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -468,7 +464,7 @@ const AppIconsPage = () => {
             {editIcon ? "Update Icon" : "Upload Icon"}
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
 
       {/* Delete Confirmation Modal */}
       <Modal

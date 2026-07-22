@@ -3,6 +3,9 @@ import { Edit, Trash2, Download, AlertTriangle, CheckCircle, XCircle, Plus, Smar
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
+import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import { getAllAppVersions, createAppVersion, updateAppVersion, deleteAppVersion, activateAppVersion } from "../services/adminApiService";
@@ -73,14 +76,9 @@ const AppVersionsPage = () => {
       header: "Status",
       accessor: "is_active",
       cell: (row) => (
-        <div className="status-badge">
-          {row.is_active ? (
-            <CheckCircle className="active-icon" />
-          ) : (
-            <XCircle className="inactive-icon" />
-          )}
+        <Badge tone={row.is_active ? "success" : "neutral"}>
           {row.is_active ? "Active" : "Inactive"}
-        </div>
+        </Badge>
       ),
     },
     {
@@ -266,44 +264,42 @@ const AppVersionsPage = () => {
     }
   };
 
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
-
   return (
     <div className="app-versions-page">
-      <TableWithControls
-        data={versions}
-        columns={columns}
-        loading={loading}
-        pageTitle="App Version Management"
-        searchFields={["version_name", "version_code", "platform"]}
-        actions={
-          <Button onClick={handleCreate}>
-            <Plus className="icon" />
-            Create New Version
-          </Button>
-        }
-        filters={[
-          { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
-          { key: "update_type", options: updateTypeOptions, placeholder: "Filter by update type" },
-          {
-            key: "is_active",
-            options: [
-              { value: "", label: "All Statuses" },
-              { value: "true", label: "Active" },
-              { value: "false", label: "Inactive" },
-            ],
-            placeholder: "Filter by status",
-          },
-        ]}
-        errorMessage={error}
-      />
+      {loading ? (
+        <SkeletonTable rows={6} cols={4} />
+      ) : (
+        <TableWithControls
+          data={versions}
+          columns={columns}
+          loading={loading}
+          pageTitle="App Version Management"
+          searchFields={["version_name", "version_code", "platform"]}
+          actions={
+            <Button onClick={handleCreate}>
+              <Plus className="icon" />
+              Create New Version
+            </Button>
+          }
+          filters={[
+            { key: "platform", options: platformOptions, placeholder: "Filter by platform" },
+            { key: "update_type", options: updateTypeOptions, placeholder: "Filter by update type" },
+            {
+              key: "is_active",
+              options: [
+                { value: "", label: "All Statuses" },
+                { value: "true", label: "Active" },
+                { value: "false", label: "Inactive" },
+              ],
+              placeholder: "Filter by status",
+            },
+          ]}
+          errorMessage={error}
+        />
+      )}
 
-      {/* Create/Edit Modal */}
-      <Modal
+      {/* Create/Edit SidePanel */}
+      <SidePanel
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editVersion ? "Edit App Version" : "Create New App Version"}
@@ -319,7 +315,7 @@ const AppVersionsPage = () => {
               onChange={handleInputChange}
               placeholder="e.g., 1, 2, 3..."
               required
-              style={inputStyle}
+              className="form-control"
             />
             <InputField
               label="Version Name"
@@ -329,7 +325,7 @@ const AppVersionsPage = () => {
               onChange={handleInputChange}
               placeholder="e.g., 1.0.0, 1.1.0..."
               required
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -341,7 +337,7 @@ const AppVersionsPage = () => {
               onChange={handleInputChange}
               options={platformOptions}
               required
-              style={inputStyle}
+              className="form-control"
             />
             <DropdownSelect
               label="Update Type"
@@ -350,7 +346,7 @@ const AppVersionsPage = () => {
               onChange={handleInputChange}
               options={updateTypeOptions}
               required
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -362,7 +358,7 @@ const AppVersionsPage = () => {
               value={form.min_version_code}
               onChange={handleInputChange}
               placeholder="Minimum version required for update"
-              style={inputStyle}
+              className="form-control"
             />
             <div className="checkbox-field">
               <label>
@@ -385,7 +381,7 @@ const AppVersionsPage = () => {
               value={form.download_url}
               onChange={handleInputChange}
               placeholder="https://play.google.com/store/apps/details?id=..."
-              style={inputStyle}
+              className="form-control"
             />
           </div>
 
@@ -397,7 +393,7 @@ const AppVersionsPage = () => {
               onChange={handleInputChange}
               placeholder="What's new in this version..."
               rows={4}
-              style={inputStyle}
+              className="form-control"
             />
           </div>
         </div>
@@ -410,7 +406,7 @@ const AppVersionsPage = () => {
             {editVersion ? "Update Version" : "Create Version"}
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
 
       {/* Delete Confirmation Modal */}
       <Modal

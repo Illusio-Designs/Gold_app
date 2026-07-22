@@ -11,9 +11,11 @@ import {
   DollarSign,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 import NotificationSender from '../components/common/NotificationSender';
+import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
 import "../styles/pages/DashboardPage.css";
 
 const DashboardPage = () => {
@@ -141,9 +143,15 @@ const DashboardPage = () => {
 
   if (loading && !dashboardData) {
     return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading dashboard...</p>
+      <div className="dashboard-page">
+        <div className="stats-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rect" height={90} radius={12} />
+          ))}
+        </div>
+        <div style={{ marginTop: 24 }}>
+          <SkeletonTable rows={5} cols={4} />
+        </div>
       </div>
     );
   }
@@ -151,7 +159,7 @@ const DashboardPage = () => {
   if (error) {
     return (
       <div className="dashboard-error">
-        <div className="error-icon">⚠️</div>
+        <div className="error-icon"><AlertTriangle size={40} /></div>
         <h2 className="error-title">Error Loading Dashboard</h2>
         <p className="error-message">{error}</p>
         <button className="error-retry-btn" onClick={fetchDashboardData}>

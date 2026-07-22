@@ -3,6 +3,8 @@ import { Edit, Trash2, Plus } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
+import SidePanel from "../components/common/SidePanel";
+import { SkeletonTable } from "../components/common/Skeleton";
 import InputField from "../components/common/InputField";
 import { getCategoryImageUrl } from "../utils/imageUtils";
 import "../styles/pages/CategoriesPage.css";
@@ -112,12 +114,6 @@ const CategoriesPage = () => {
     fetchCategories();
   }, []);
 
-  const inputStyle = {
-    background: "#f9f2e7",
-    borderColor: "#c09e83",
-    color: "#5d0829",
-  };
-
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image") {
@@ -200,6 +196,9 @@ const CategoriesPage = () => {
 
   return (
     <div className="categories-page">
+      {loading ? (
+        <SkeletonTable rows={8} cols={5} />
+      ) : (
       <TableWithControls
         columns={columns}
         data={categories}
@@ -222,7 +221,8 @@ const CategoriesPage = () => {
         itemsPerPage={10}
         errorMessage={error}
       />
-      <Modal
+      )}
+      <SidePanel
         isOpen={modalOpen}
         onClose={handleCancel}
         title={editCategory ? "Edit Category" : "Add Category"}
@@ -233,7 +233,7 @@ const CategoriesPage = () => {
           placeholder="Enter category name"
           value={form.name}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Description"
@@ -241,7 +241,7 @@ const CategoriesPage = () => {
           placeholder="Enter description"
           value={form.description}
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         <InputField
           label="Image"
@@ -249,7 +249,7 @@ const CategoriesPage = () => {
           type="file"
           accept="image/*"
           onChange={handleInputChange}
-          style={inputStyle}
+          className="form-control"
         />
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
@@ -273,7 +273,7 @@ const CategoriesPage = () => {
             Cancel
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
       <Modal
         isOpen={!!deleteCategory}
         onClose={() => setDeleteCategory(null)}
