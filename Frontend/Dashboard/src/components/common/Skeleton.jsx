@@ -43,25 +43,52 @@ export const SkeletonText = ({ lines = 3, className = "" }) => (
   </span>
 );
 
-export const SkeletonTable = ({ rows = 6, cols = 5, className = "" }) => (
-  <div className={`skeleton-table ${className}`} aria-hidden="true">
+// A table skeleton shaped like the real table (card shell + toolbar + header
+// row + data rows with a thumbnail, column cells and action buttons).
+export const SkeletonTable = ({ rows = 6, className = "" }) => (
+  <div className={`skeleton-table-card ${className}`} aria-hidden="true">
+    <div className="skeleton-table-card__toolbar">
+      <Skeleton width={140} height={22} />
+      <Skeleton width={280} height={38} radius={10} />
+    </div>
+    <div className="skeleton-table-card__row skeleton-table-card__head">
+      {Array.from({ length: 6 }).map((_, c) => (
+        <Skeleton key={c} height={12} width="70%" />
+      ))}
+    </div>
     {Array.from({ length: rows }).map((_, r) => (
-      <div className="skeleton-table__row" key={r}>
-        {Array.from({ length: cols }).map((_, c) => (
-          <Skeleton key={c} height={14} width={c === 0 ? "40%" : "80%"} />
-        ))}
+      <div className="skeleton-table-card__row" key={r}>
+        <span className="skeleton-cell-media">
+          <Skeleton variant="rect" width={44} height={44} radius={9} />
+          <span className="skeleton-cell-lines">
+            <Skeleton width={120} height={12} />
+            <Skeleton width={70} height={10} />
+          </span>
+        </span>
+        <Skeleton height={12} width="70%" />
+        <Skeleton height={12} width="50%" />
+        <Skeleton height={12} width="60%" />
+        <Skeleton height={12} width="80%" />
+        <span className="skeleton-cell-actions">
+          <Skeleton variant="rect" width={34} height={34} radius={9} />
+          <Skeleton variant="rect" width={34} height={34} radius={9} />
+        </span>
       </div>
     ))}
   </div>
 );
 
+// A card grid skeleton shaped like the media cards (maroon header + image + footer).
 export const SkeletonCards = ({ count = 8, className = "" }) => (
-  <div className={`skeleton-cards ${className}`} aria-hidden="true">
+  <div className={`skeleton-media-grid ${className}`} aria-hidden="true">
     {Array.from({ length: count }).map((_, i) => (
-      <div className="skeleton-cards__item" key={i}>
-        <Skeleton variant="rect" height={150} radius={10} />
-        <Skeleton height={14} width="70%" />
-        <Skeleton height={12} width="45%" />
+      <div className="skeleton-media-card" key={i}>
+        <div className="skeleton-media-card__head" />
+        <Skeleton variant="rect" height={150} radius={0} />
+        <div className="skeleton-media-card__foot">
+          <Skeleton width="60%" height={14} />
+          <Skeleton width="40%" height={11} />
+        </div>
       </div>
     ))}
   </div>

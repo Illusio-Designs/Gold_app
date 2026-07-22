@@ -1,41 +1,65 @@
 
 
-/* Statistics Display */
+/* Statistics Display — clean accent stat cards */
 .statistics-display {
-  background: #fff;
-  padding: 16px 24px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
   margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(93, 8, 41, 0.06);
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
 .stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface, #fff);
+  border: 1px solid #ece2d5;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(93, 8, 41, 0.06));
 }
+.stat-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--brand, #5d0829);
+}
+.stat-item.pending::before { background: var(--warning, #b07d0a); }
+.stat-item.processing::before { background: var(--info, #1f6feb); }
+.stat-item.shipped::before { background: #7a3ea8; }
+.stat-item.delivered::before { background: var(--success, #1a7f4b); }
+.stat-item.cancelled::before { background: var(--danger, #b3261e); }
 
 .stat-label {
-  font-size: 13px;
-  color: #8b4513;
-  font-weight: 500;
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-secondary, #8a6d5a);
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .stat-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #5d0829;
+  display: block;
+  font-size: 1.7rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--brand, #5d0829);
+  margin-top: 5px;
 }
+.stat-item.pending .stat-value { color: var(--warning, #b07d0a); }
+.stat-item.processing .stat-value { color: var(--info, #1f6feb); }
+.stat-item.shipped .stat-value { color: #7a3ea8; }
+.stat-item.delivered .stat-value { color: var(--success, #1a7f4b); }
+.stat-item.cancelled .stat-value { color: var(--danger, #b3261e); }
 
-.stat-value.pending { color: #ff9800; }
-.stat-value.processing { color: #2196f3; }
-.stat-value.shipped { color: #9c27b0; }
-.stat-value.delivered { color: #4caf50; }
-.stat-value.cancelled { color: #f44336; }
+@media (max-width: 900px) {
+  .statistics-display { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+  .statistics-display { grid-template-columns: repeat(2, 1fr); }
+}
 
 
 /* Product Info */

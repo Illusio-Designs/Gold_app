@@ -340,6 +340,9 @@ const OrdersPage = () => {
     }).format(amount);
   };
 
+  // Unique, human-readable order id, e.g. ORD-000012
+  const formatOrderId = (id) => `ORD-${String(id ?? '').padStart(6, '0')}`;
+
   if (loading) {
     return (
       <div className="orders-page">
@@ -355,7 +358,7 @@ const OrdersPage = () => {
       header: "Order ID",
       accessor: "id",
       cell: (row) => (
-        <span className="order-id">#{row.id}</span>
+        <span className="order-id">{formatOrderId(row.id)}</span>
       ),
     },
     {
@@ -499,29 +502,29 @@ const OrdersPage = () => {
     <div className="orders-page">
       {/* Statistics Display */}
       <div className="statistics-display">
-        <div className="stat-item">
-          <span className="stat-label">Total:</span>
+        <div className="stat-item total">
+          <span className="stat-label">Total</span>
           <span className="stat-value">{statistics.total_orders || 0}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Pending:</span>
-          <span className="stat-value pending">{statistics.pending_orders || 0}</span>
+        <div className="stat-item pending">
+          <span className="stat-label">Pending</span>
+          <span className="stat-value">{statistics.pending_orders || 0}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Processing:</span>
-          <span className="stat-value processing">{statistics.processing_orders || 0}</span>
+        <div className="stat-item processing">
+          <span className="stat-label">Processing</span>
+          <span className="stat-value">{statistics.processing_orders || 0}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Shipped:</span>
-          <span className="stat-value shipped">{statistics.shipped_orders || 0}</span>
+        <div className="stat-item shipped">
+          <span className="stat-label">Shipped</span>
+          <span className="stat-value">{statistics.shipped_orders || 0}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Delivered:</span>
-          <span className="stat-value delivered">{statistics.delivered_orders || 0}</span>
+        <div className="stat-item delivered">
+          <span className="stat-label">Delivered</span>
+          <span className="stat-value">{statistics.delivered_orders || 0}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Cancelled:</span>
-          <span className="stat-value cancelled">{statistics.cancelled_orders || 0}</span>
+        <div className="stat-item cancelled">
+          <span className="stat-label">Cancelled</span>
+          <span className="stat-value">{statistics.cancelled_orders || 0}</span>
         </div>
       </div>
 
