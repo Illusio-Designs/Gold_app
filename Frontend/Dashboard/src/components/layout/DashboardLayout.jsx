@@ -23,7 +23,6 @@ import {
 import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
 import NotificationManager from "../common/NotificationManager";
-import RealTimeNotifications from "../RealTimeNotifications";
 import { getUnreadCount } from "../../services/adminApiService";
 import { logout, getAdminToken } from "../../utils/authUtils";
 import { initializeFirebaseMessaging, isFirebaseSupported } from "../../services/firebaseService";
@@ -299,10 +298,7 @@ export default function DashboardLayout() {
             <button className="header-icon-btn" onClick={handleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
               {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
             </button>
-            
-            {/* Real-Time Notifications */}
-            <RealTimeNotifications adminData={{ id: 1, name: 'Admin' }} />
-            
+
             {/* Notification Bell */}
             <div className="notification-menu">
               <button
