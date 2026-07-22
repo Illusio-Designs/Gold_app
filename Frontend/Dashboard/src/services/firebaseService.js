@@ -62,17 +62,11 @@ export const requestNotificationPermission = async (adminToken) => {
 
     // Get FCM token
     const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-    console.log('✅ [FIREBASE] FCM token obtained:', token ? token.substring(0, 20) + '...' : 'null');
 
     if (token) {
       // Register token with backend
       try {
-        console.log('🔔 [FIREBASE] Attempting to register FCM token with backend...');
-        console.log('🔔 [FIREBASE] Admin token preview:', adminToken ? adminToken.substring(0, 20) + '...' : 'null');
-        console.log('🔔 [FIREBASE] FCM token preview:', token.substring(0, 20) + '...');
-        
-        const result = await registerFCMToken(adminToken, token);
-        console.log('✅ [FIREBASE] FCM token registered with backend successfully:', result);
+        await registerFCMToken(adminToken, token);
         return token;
       } catch (error) {
         console.error('❌ [FIREBASE] Error registering FCM token:', error);

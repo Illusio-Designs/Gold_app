@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2, Download, AlertTriangle, CheckCircle, XCircle, Plus, Smartphone, Globe } from "lucide-react";
+import { Edit, Trash2, Download, AlertTriangle, CheckCircle, Plus, Smartphone, Globe } from "lucide-react";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import Skeleton, { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";

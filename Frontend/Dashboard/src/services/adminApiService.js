@@ -10,14 +10,6 @@ const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api");
 
-// Debug logging
-console.log(
-  "🔧 Environment:",
-  import.meta.env.DEV ? "development" : "production"
-);
-console.log("🔧 VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
-console.log("🔧 Final BASE_URL:", BASE_URL);
-
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,

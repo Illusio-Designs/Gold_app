@@ -421,7 +421,7 @@ const HomePage = () => {
                
                <div className="homepage-about-section">
                  <h3 className="homepage-about-section-title">Join Our Journey:</h3>
-                 <p>"Partner with us and together, let's create a sparkling future, one jewel at a time. Feel free to modify it to fit your brand's voice and style."</p>
+                 <p>"Partner with us and together, let's create a sparkling future, one jewel at a time."</p>
                </div>
              </div>
            </div>
@@ -432,7 +432,7 @@ const HomePage = () => {
           <div className="homepage-faq-left">
             <h2 className="homepage-faq-title">We're here to answer all your questions.</h2>
             <p className="homepage-faq-subtitle">
-              'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text.
+              Everything you need to know about partnering with us. Can't find what you're looking for? Reach out to our team anytime.
             </p>
           </div>
           <div className="homepage-faq-right">

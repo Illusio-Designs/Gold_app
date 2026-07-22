@@ -24,7 +24,7 @@ import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
 import NotificationManager from "../common/NotificationManager";
 import { getUnreadCount } from "../../services/adminApiService";
-import { logout, getAdminToken } from "../../utils/authUtils";
+import { logout } from "../../utils/authUtils";
 import { initializeFirebaseMessaging, isFirebaseSupported } from "../../services/firebaseService";
 import notificationSoundService from "../../services/notificationSoundService";
 import RealtimeNotificationService from "../../services/realtimeNotificationService";

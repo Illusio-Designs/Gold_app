@@ -6,13 +6,6 @@ const BASE_URL = import.meta.env.DEV
   ? "/api" 
   : (import.meta.env.VITE_API_BASE_URL || "https://api.amrutkumargovinddasllp.com/api");
 
-console.log("🔧 [SEO SERVICE] Configuration:", {
-  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
-  DEV: import.meta.env.DEV,
-  BASE_URL: BASE_URL,
-  MODE: import.meta.env.MODE
-});
-
 // Create axios instance for SEO API calls
 const seoAxiosInstance = axios.create({
   baseURL: BASE_URL,

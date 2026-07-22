@@ -32,11 +32,8 @@ const NotificationManager = ({ isDropdown = false, onNotificationUpdate }) => {
         return;
       }
       
-      console.log('🔔 [FRONTEND] Fetching notifications with token:', token.substring(0, 20) + '...');
       const response = await getAdminNotifications(token);
-      console.log('🔔 [FRONTEND] Notifications API response:', response);
-      console.log('🔔 [FRONTEND] Setting notifications:', response.notifications || []);
-      
+
       // Debug: Log each notification's data structure
       if (response.notifications && response.notifications.length > 0) {
         console.log('🔍 [FRONTEND] First notification data structure:', response.notifications[0]);
@@ -144,14 +141,6 @@ const NotificationManager = ({ isDropdown = false, onNotificationUpdate }) => {
       }
     }
   }, [notifications]);
-
-  // Test sound on first render when dropdown opens
-  useEffect(() => {
-    if (isDropdown && notifications.length > 0) {
-      console.log('Testing sound on dropdown open...');
-      notificationSoundService.testSound('default');
-    }
-  }, [isDropdown, notifications.length]);
 
   // If not dropdown, just show empty div (badge moved to profile dropdown)
   if (!isDropdown) {

@@ -54,38 +54,6 @@ function SessionChecker() {
 }
 
 function App() {
-  // Add test function to global scope for debugging
-  useEffect(() => {
-    window.testFCM = async () => {
-      console.log('[FCM TEST] Starting FCM test...');
-      try {
-        // The original code had Firebase messaging imports, but they are removed.
-        // This function will now cause an error if not adapted.
-        // For now, keeping the structure as per instructions.
-        // If Firebase messaging is truly removed, this function should be removed.
-        // For now, it's kept as a placeholder.
-        // const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-        // console.log('[FCM TEST] Token:', token);
-        // return token;
-        console.warn('[FCM TEST] Firebase messaging imports removed. Cannot perform FCM test.');
-        return null;
-      } catch (error) {
-        console.error('[FCM TEST] Error:', error);
-        return null;
-      }
-    };
-    
-    window.testNotification = () => {
-      // The original code had a showCustomNotification function, but it's removed.
-      // This function will now cause an error if not adapted.
-      // For now, keeping the structure as per instructions.
-      // If showCustomNotification is truly removed, this function should be removed.
-      // For now, it's kept as a placeholder.
-      // showCustomNotification('Test Notification', 'This is a test notification');
-      console.warn('[FCM TEST] showCustomNotification function removed. Cannot display notification.');
-    };
-  }, []);
-
   return (
     <Router>
       <SessionChecker />
