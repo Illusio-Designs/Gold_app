@@ -4,7 +4,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable } from "../components/common/Skeleton";
+import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
 import { getCategoryImageUrl } from "../utils/imageUtils";
 import "../styles/pages/CategoriesPage.css";
@@ -194,11 +195,23 @@ const CategoriesPage = () => {
     setImagePreview("");
   };
 
+  const withImage = categories.filter((c) => c.image).length;
+  const categoryStats = [
+    { label: "Total Categories", value: categories.length, tone: "brand" },
+    { label: "With Image", value: withImage, tone: "success" },
+    { label: "No Image", value: categories.length - withImage, tone: "neutral" },
+  ];
+
   return (
     <div className="categories-page">
       {loading ? (
-        <SkeletonTable rows={8} cols={5} />
+        <>
+          <SkeletonStats count={3} />
+          <SkeletonTable rows={8} cols={5} />
+        </>
       ) : (
+      <>
+      <StatCards stats={categoryStats} />
       <TableWithControls
         columns={columns}
         data={categories}
@@ -221,6 +234,7 @@ const CategoriesPage = () => {
         itemsPerPage={10}
         errorMessage={error}
       />
+      </>
       )}
       <SidePanel
         isOpen={modalOpen}

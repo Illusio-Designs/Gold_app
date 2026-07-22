@@ -4,7 +4,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
+import Skeleton, { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
@@ -264,11 +265,23 @@ const AppVersionsPage = () => {
     }
   };
 
+  const activeVersions = versions.filter((v) => v.is_active).length;
+  const versionStats = [
+    { label: "Total Versions", value: versions.length, tone: "brand" },
+    { label: "Active", value: activeVersions, tone: "success" },
+    { label: "Inactive", value: versions.length - activeVersions, tone: "neutral" },
+  ];
+
   return (
     <div className="app-versions-page">
       {loading ? (
-        <SkeletonTable rows={6} cols={4} />
+        <>
+          <SkeletonStats count={3} />
+          <SkeletonTable rows={6} cols={4} />
+        </>
       ) : (
+        <>
+        <StatCards stats={versionStats} />
         <TableWithControls
           data={versions}
           columns={columns}
@@ -296,6 +309,7 @@ const AppVersionsPage = () => {
           ]}
           errorMessage={error}
         />
+        </>
       )}
 
       {/* Create/Edit SidePanel */}

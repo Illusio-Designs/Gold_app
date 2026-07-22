@@ -43,6 +43,18 @@ export const SkeletonText = ({ lines = 3, className = "" }) => (
   </span>
 );
 
+// A stat-strip skeleton shaped like the real StatCards row above the table.
+export const SkeletonStats = ({ count = 4, className = "" }) => (
+  <div className={`skeleton-stats ${className}`} aria-hidden="true">
+    {Array.from({ length: count }).map((_, i) => (
+      <div className="skeleton-stat-card" key={i}>
+        <Skeleton width="55%" height={11} />
+        <Skeleton width="40%" height={24} />
+      </div>
+    ))}
+  </div>
+);
+
 // A table skeleton shaped like the real table (card shell + toolbar + header
 // row + data rows with a thumbnail, column cells and action buttons).
 export const SkeletonTable = ({ rows = 6, className = "" }) => (

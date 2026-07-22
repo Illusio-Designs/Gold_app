@@ -4,7 +4,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable } from "../components/common/Skeleton";
+import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
@@ -338,11 +339,28 @@ const UsersPage = () => {
     setImagePreview("");
   };
 
+  const approvedCount = users.filter((u) => u.status === "approved").length;
+  const pendingCount = users.filter((u) => u.status === "pending").length;
+  const rejectedCount = users.filter(
+    (u) => u.status === "rejected" || u.status === "denied"
+  ).length;
+  const userStats = [
+    { label: "Total Users", value: users.length, tone: "brand" },
+    { label: "Approved", value: approvedCount, tone: "success" },
+    { label: "Pending", value: pendingCount, tone: "warning" },
+    { label: "Rejected", value: rejectedCount, tone: "danger" },
+  ];
+
   return (
     <div className="users-page">
       {loading ? (
-        <SkeletonTable rows={8} cols={5} />
+        <>
+          <SkeletonStats count={4} />
+          <SkeletonTable rows={8} cols={5} />
+        </>
       ) : (
+      <>
+      <StatCards stats={userStats} />
       <TableWithControls
         columns={columns}
         data={users}
@@ -402,6 +420,7 @@ const UsersPage = () => {
         ]}
         errorMessage={error}
       />
+      </>
       )}
       <SidePanel
         isOpen={modalOpen}

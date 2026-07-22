@@ -14,7 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
-import { SkeletonTable } from '../components/common/Skeleton';
+import { SkeletonTable, SkeletonStats } from '../components/common/Skeleton';
+import StatCards from '../components/common/StatCards';
 import Badge from '../components/common/Badge';
 import { ShoppingCart, Image as ImageIcon, FileDown } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
@@ -346,10 +347,20 @@ const OrdersPage = () => {
   if (loading) {
     return (
       <div className="orders-page">
+        <SkeletonStats count={6} />
         <SkeletonTable rows={8} cols={6} />
       </div>
     );
   }
+
+  const orderStats = [
+    { label: 'Total', value: statistics.total_orders || 0, tone: 'brand' },
+    { label: 'Pending', value: statistics.pending_orders || 0, tone: 'warning' },
+    { label: 'Processing', value: statistics.processing_orders || 0, tone: 'info' },
+    { label: 'Shipped', value: statistics.shipped_orders || 0, tone: 'purple' },
+    { label: 'Delivered', value: statistics.delivered_orders || 0, tone: 'success' },
+    { label: 'Cancelled', value: statistics.cancelled_orders || 0, tone: 'danger' },
+  ];
 
   // Create columns for TableWithControls
   const columns = [
@@ -500,33 +511,7 @@ const OrdersPage = () => {
 
   return (
     <div className="orders-page">
-      {/* Statistics Display */}
-      <div className="statistics-display">
-        <div className="stat-item total">
-          <span className="stat-label">Total</span>
-          <span className="stat-value">{statistics.total_orders || 0}</span>
-        </div>
-        <div className="stat-item pending">
-          <span className="stat-label">Pending</span>
-          <span className="stat-value">{statistics.pending_orders || 0}</span>
-        </div>
-        <div className="stat-item processing">
-          <span className="stat-label">Processing</span>
-          <span className="stat-value">{statistics.processing_orders || 0}</span>
-        </div>
-        <div className="stat-item shipped">
-          <span className="stat-label">Shipped</span>
-          <span className="stat-value">{statistics.shipped_orders || 0}</span>
-        </div>
-        <div className="stat-item delivered">
-          <span className="stat-label">Delivered</span>
-          <span className="stat-value">{statistics.delivered_orders || 0}</span>
-        </div>
-        <div className="stat-item cancelled">
-          <span className="stat-label">Cancelled</span>
-          <span className="stat-value">{statistics.cancelled_orders || 0}</span>
-        </div>
-      </div>
+      <StatCards stats={orderStats} />
 
       <TableWithControls
         columns={columns}

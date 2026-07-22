@@ -4,7 +4,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable } from "../components/common/Skeleton";
+import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import {
@@ -268,11 +269,24 @@ const SliderPage = () => {
     }
   };
 
+  const sliderCategories = new Set(
+    sliders.map((s) => s.category_name).filter(Boolean)
+  ).size;
+  const sliderStats = [
+    { label: "Total Slides", value: sliders.length, tone: "brand" },
+    { label: "Categories", value: sliderCategories, tone: "info" },
+  ];
+
   return (
     <div className="slider-page">
       {loading ? (
-        <SkeletonTable rows={8} cols={5} />
+        <>
+          <SkeletonStats count={2} />
+          <SkeletonTable rows={8} cols={5} />
+        </>
       ) : (
+      <>
+      <StatCards stats={sliderStats} />
       <TableWithControls
         data={sliders}
         columns={columns}
@@ -300,6 +314,7 @@ const SliderPage = () => {
         ]}
         errorMessage={error}
       />
+      </>
       )}
 
       {/* Create/Edit Panel */}

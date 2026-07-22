@@ -4,7 +4,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
+import Skeleton, { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
@@ -297,11 +298,23 @@ const AppIconsPage = () => {
     }
   };
 
+  const activeIcons = icons.filter((i) => i.is_active).length;
+  const iconStats = [
+    { label: "Total Icons", value: icons.length, tone: "brand" },
+    { label: "Active", value: activeIcons, tone: "success" },
+    { label: "Inactive", value: icons.length - activeIcons, tone: "neutral" },
+  ];
+
   return (
     <div className="app-icons-page">
       {loading ? (
-        <SkeletonTable rows={6} cols={4} />
+        <>
+          <SkeletonStats count={3} />
+          <SkeletonTable rows={6} cols={4} />
+        </>
       ) : (
+        <>
+        <StatCards stats={iconStats} />
         <TableWithControls
           data={icons}
           columns={columns}
@@ -329,6 +342,7 @@ const AppIconsPage = () => {
           ]}
           errorMessage={error}
         />
+        </>
       )}
 
       {/* Create/Edit SidePanel */}

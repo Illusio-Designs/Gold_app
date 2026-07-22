@@ -10,7 +10,8 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable } from "../components/common/Skeleton";
+import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
@@ -389,11 +390,25 @@ const ProductsPage = () => {
     }
   };
 
+  const inStock = products.filter((p) => p.stock_status !== "out_of_stock").length;
+  const outOfStock = products.filter((p) => p.stock_status === "out_of_stock").length;
+  const productStats = [
+    { label: "Total Products", value: products.length, tone: "brand" },
+    { label: "In Stock", value: inStock, tone: "success" },
+    { label: "Out of Stock", value: outOfStock, tone: "danger" },
+    { label: "Categories", value: categories.length, tone: "info" },
+  ];
+
   return (
     <div className="products-page">
       {loading ? (
-        <SkeletonTable rows={8} cols={5} />
+        <>
+          <SkeletonStats count={4} />
+          <SkeletonTable rows={8} cols={5} />
+        </>
       ) : (
+      <>
+      <StatCards stats={productStats} />
       <TableWithControls
         columns={columns}
         data={products}
@@ -449,6 +464,7 @@ const ProductsPage = () => {
         ]}
         errorMessage={error}
       />
+      </>
       )}
       <SidePanel
         isOpen={modalOpen}
