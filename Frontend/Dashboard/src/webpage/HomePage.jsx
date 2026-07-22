@@ -38,7 +38,7 @@ const getCategoryImageUrl = (filename) => {
 
 const faqData = [
   {
-    question: "What makes AmrutKumar Govinddas LLP different from other jewelry retailers?",
+    question: "What makes Amrutkumar Govinddas LLP different from other jewelry retailers?",
     answer: "Our legacy of excellence in jewellery sets us apart. We combine traditional craftmanship with timeless beauty, ensuring each piece reflects our commitment to quality and innovation. Our vision is to bring exceptional jewelry to people through dedicated craftsmanship and personalized service."
   },
   {
@@ -58,7 +58,6 @@ const faqData = [
 const HomePage = () => {
   const scrollContainerRef = useRef(null);
   const intervalRef = useRef(null);
-  const scrollPosition = useRef(0);
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
   const [categories, setCategories] = useState([]);
@@ -85,14 +84,9 @@ const HomePage = () => {
       try {
         setCategoriesLoading(true);
         setCategoriesError(null);
-        console.log("🔄 [HOMEPAGE] Fetching categories from API...");
-        console.log("🔄 [HOMEPAGE] Environment:", import.meta.env.DEV ? "development" : "production");
-        console.log("🔄 [HOMEPAGE] API URL:", import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api"));
-        
+
         const apiCategories = await getPublicCategories();
-        console.log("✅ [HOMEPAGE] Categories fetched:", apiCategories);
-        console.log("✅ [HOMEPAGE] Categories count:", apiCategories.length);
-        
+
         // Transform API categories to match our format and remove duplicates
         const uniqueCategories = [];
         const seenNames = new Set();
@@ -100,7 +94,6 @@ const HomePage = () => {
         const transformedCategories = apiCategories.map(category => {
           // Skip if we've already seen this category name
           if (seenNames.has(category.name)) {
-            console.log("⚠️ [HOMEPAGE] Skipping duplicate category:", category.name);
             return null;
           }
           
@@ -110,13 +103,7 @@ const HomePage = () => {
           // Backend returns: category.image (filename only)
           const imageFilename = category.image;
           const imageUrl = getCategoryImageUrl(imageFilename);
-          
-          console.log("🖼️ [HOMEPAGE] Category image:", {
-            name: category.name,
-            filename: imageFilename,
-            constructedUrl: imageUrl
-          });
-          
+
           return {
             id: category.id,
             name: category.name,
@@ -128,26 +115,10 @@ const HomePage = () => {
         
         if (transformedCategories.length > 0) {
           setCategories(transformedCategories);
-          console.log("✅ [HOMEPAGE] Categories updated:", transformedCategories);
-          console.log("✅ [HOMEPAGE] Unique categories count:", transformedCategories.length);
-          console.log("✅ [HOMEPAGE] Categories with images:", transformedCategories.map(cat => ({
-            name: cat.name,
-            filename: cat.image,
-            url: cat.img,
-            hasImage: !!cat.image
-          })));
         } else {
-          console.log("⚠️ [HOMEPAGE] No categories found from API");
           setCategories([]);
         }
       } catch (error) {
-        console.error("❌ [HOMEPAGE] Error fetching categories:", error);
-        console.error("❌ [HOMEPAGE] Error details:", {
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data
-        });
         setCategoriesError(error.message);
         setCategories([]); // Empty array on error
       } finally {
@@ -176,9 +147,6 @@ const HomePage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Display only the actual categories from API (no duplication)
-  const displayCategories = categories;
 
   // Page loader effect
   useEffect(() => {
@@ -226,12 +194,12 @@ const HomePage = () => {
         <div className="homepage-hero-bg-pattern">
           <img
             src={designBg}
-            alt="Background Pattern Left"
+            alt=""
             className="homepage-bg-design homepage-bg-design-left"
           />
           <img
             src={designBg}
-            alt="Background Pattern Right"
+            alt=""
             className="homepage-bg-design homepage-bg-design-right"
           />
         </div>
@@ -354,12 +322,12 @@ const HomePage = () => {
                 <p>Unable to load categories. Please try again later.</p>
                 <p style={{ fontSize: '14px', color: '#999' }}>{categoriesError}</p>
               </div>
-            ) : displayCategories.length === 0 ? (
+            ) : categories.length === 0 ? (
               <div className="homepage-categories-empty">
                 <p>No categories available at the moment.</p>
               </div>
             ) : (
-              displayCategories.map((cat, index) => (
+              categories.map((cat, index) => (
                 <div className="homepage-category-card" key={`${cat.id || cat.name}-${index}`}>
                   {cat.img ? (
                     <img
@@ -367,11 +335,7 @@ const HomePage = () => {
                       alt={cat.name}
                       className="homepage-category-img"
                       onError={(e) => {
-                        console.error(`❌ Failed to load image for ${cat.name}:`, cat.img);
                         e.target.style.display = 'none';
-                      }}
-                      onLoad={() => {
-                        console.log(`✅ Image loaded successfully for ${cat.name}`);
                       }}
                     />
                   ) : (
@@ -395,7 +359,7 @@ const HomePage = () => {
            <div className="homepage-about-content">
              <div className="homepage-about-gallery">
                <div className="homepage-about-gallery-frame">
-                 <img src={bg1} alt="Floral Background" className="homepage-about-bg-pattern" />
+                 <img src={bg1} alt="" className="homepage-about-bg-pattern" />
                  <div className="homepage-about-photos">
                    <div className="homepage-about-photo-item">
                      <img src={aboutImg} alt="Team Member" className="homepage-about-photo" />
@@ -487,7 +451,7 @@ const HomePage = () => {
           </div>
         </div>
         <div className="homepage-decorative-flower homepage-flower-top">
-            <img src={flowers} alt="Flower" className="homepage-flower-img" />
+            <img src={flowers} alt="" className="homepage-flower-img" />
           </div>
         
         <div className="homepage-footer-main">
@@ -531,21 +495,21 @@ const HomePage = () => {
           
           <div className="homepage-decorative-elements">
             <div className="homepage-flower-bottom-left">
-              <img src={flower} alt="Flower" className="homepage-flower-img-left" />
+              <img src={flower} alt="" className="homepage-flower-img-left" />
             </div>
             <div className="homepage-decorative-cow">
-              <img src={cowflower} alt="Cow" className="homepage-cow-img" />
+              <img src={cowflower} alt="" className="homepage-cow-img" />
             </div>
           </div>
           <div className="homepage-footer-bg-pattern">
           <img
             src={footerBg}
-            alt="Background Pattern"
+            alt=""
             className="homepage-bg-design homepage-bg-design-left footer-bg-design"
           />
         </div>
         <div className="homepage-copyright">
-          <p>© 2025. All Right Reserved. Design & Develop with ❤️ by - <a href="https://illusiodesigns.agency/" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Illusio Designs</a></p>
+          <p>© {new Date().getFullYear()}. All Rights Reserved. Made with ❤️ by <a href="https://finvera.solutions" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Finvera Solutions</a></p>
         </div>
         </div>
       </section>

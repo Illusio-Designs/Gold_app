@@ -55,7 +55,8 @@ const PrivacyPolicy = () => {
       <main className="privacy-main">
         <div className="privacy-content">
           <h1>Privacy Policy</h1>
-          <p>AmrutKumar Goviddas LLP we operates this application and is committed to protecting your privacy. We are transparent about how we collect, use, and protect your data in our Gold B2B dealership business.</p>
+          <p className="privacy-last-updated">Last Updated: July 2026</p>
+          <p>Amrutkumar Govinddas LLP operates this application and is committed to protecting your privacy. We are transparent about how we collect, use, and protect your data in our Gold B2B dealership business.</p>
 
           <h2>1. Information We Collect</h2>
           <p>We may collect the following types of information:</p>
@@ -72,7 +73,7 @@ const PrivacyPolicy = () => {
             <li>Accounting, record keeping, and business management.</li>
             <li>Improving app functionality and maintaining system security.</li>
           </ul>
-          <p><strong>👉 We do not use your data for advertising, promotions, or marketing purposes.</strong></p>
+          <p><strong>We do not use your data for advertising, promotions, or marketing purposes.</strong></p>
           
           <h2>3. Data Retention and Deletion</h2>
           <ul>
@@ -113,8 +114,8 @@ const PrivacyPolicy = () => {
           <p>For questions or concerns regarding this Privacy Policy, please contact us:</p>
           <ul>
             <li><strong>Email:</strong> amrutranpara109@gmail.com</li>
-            <li><strong>Phone:</strong> 9426783859</li>
-            <li><strong>Company Name:</strong> AmrutKumar Goviddas LLP</li>
+            <li><strong>Phone:</strong> +91 94267 83859</li>
+            <li><strong>Company Name:</strong> Amrutkumar Govinddas LLP</li>
           </ul>
         </div>
       </main>
@@ -208,7 +209,7 @@ const PrivacyPolicy = () => {
           />
         </div>
         <div className="homepage-copyright">
-          <p>© 2025. All Right Reserved. Design & Develop with ❤️ by - <a href="https://illusiodesigns.agency/" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Illusio Designs</a></p>
+          <p>© {new Date().getFullYear()}. All Rights Reserved. Made with ❤️ by <a href="https://finvera.solutions" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Finvera Solutions</a></p>
         </div>
         </div>
       </section>

@@ -279,7 +279,6 @@ button {
   box-shadow: 0 2px 12px rgba(90, 10, 45, 0.1);
   padding: 10px 15px;
   transition: box-shadow 0.2s, border 0.2s;
-  cursor: pointer;
   gap: 10px;
 }
 
@@ -326,8 +325,8 @@ button {
 
 /* No image placeholder */
 .homepage-category-no-image {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -37,6 +37,11 @@ const DeletePage = () => {
       alert('Please fill in all fields');
       return;
     }
+    const mobileDigits = formData.mobileNumber.replace(/[\s+-]/g, '');
+    if (!/^\d{10,13}$/.test(mobileDigits)) {
+      alert('Please enter a valid mobile number');
+      return;
+    }
     setShowConfirmation(true);
   };
 
@@ -48,7 +53,7 @@ const DeletePage = () => {
       // Here you would make an actual API call to delete the account
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      alert('Account deletion request submitted successfully. You will receive a confirmation email shortly.');
+      alert('Your account deletion request has been submitted. Our team will review and process it shortly.');
       setShowConfirmation(false);
       setFormData({ userName: '', businessName: '', mobileNumber: '' });
     } catch (error) {
@@ -279,7 +284,7 @@ const DeletePage = () => {
           />
         </div>
         <div className="homepage-copyright">
-          <p>© 2025. All Right Reserved. Design & Develop with ❤️ by - <a href="https://illusiodesigns.agency/" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Illusio Designs</a></p>
+          <p>© {new Date().getFullYear()}. All Rights Reserved. Made with ❤️ by <a href="https://finvera.solutions" target="_blank" rel="noopener noreferrer" className="homepage-illusio">Finvera Solutions</a></p>
         </div>
         </div>
       </section>
