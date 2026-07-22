@@ -584,14 +584,35 @@ async function updateUser(req, res) {
 function deleteUser(req, res) {
   const { id } = req.params;
 
-  db.query("DELETE FROM users WHERE id = ?", [id], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+  // A user is referenced by their cart items and orders (foreign keys), so a
+  // plain DELETE fails with a constraint error. Remove the dependent rows
+  // first, then the user. Missing tables are ignored.
+  const childSteps = [
+    "DELETE FROM cart_items WHERE user_id = ?",
+    "DELETE FROM orders WHERE user_id = ?",
+  ];
+  let i = 0;
+  const runChildren = (done) => {
+    if (i >= childSteps.length) return done(null);
+    db.query(childSteps[i++], [id], (err) => {
+      if (err && err.code !== "ER_NO_SUCH_TABLE") return done(err);
+      runChildren(done);
+    });
+  };
+
+  runChildren((childErr) => {
+    if (childErr) {
+      return res.status(500).json({ error: childErr.message });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    res.json({ message: "User deleted successfully" });
+    db.query("DELETE FROM users WHERE id = ?", [id], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json({ message: "User deleted successfully" });
+    });
   });
 }
 

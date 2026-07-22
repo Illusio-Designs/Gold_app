@@ -7,6 +7,7 @@ const GOLD = "#c09e83";
 const CREAM = "#fce2bf";
 const INK = "#2b2b2b";
 const MUTED = "#7a6a5d";
+const LINE = "#e6d8c8";
 
 const formatOrderId = (id) => `ORD-${String(id ?? "").padStart(6, "0")}`;
 
@@ -17,9 +18,8 @@ const formatCurrency = (amount) => {
 };
 
 /**
- * Stream a branded order form PDF to a writable stream (e.g. the HTTP
- * response). `order` is the flat, joined row from orderModel.getOrderById.
- * The caller sets Content-Type / Content-Disposition before calling this.
+ * Stream a branded invoice-style order PDF to a writable stream.
+ * `order` is the flat, joined row from orderModel.getOrderById.
  */
 function generateOrderPDF(order, stream) {
   const doc = new PDFDocument({ margin: 0, size: "A4" });
@@ -33,86 +33,110 @@ function generateOrderPDF(order, stream) {
   doc.pipe(stream);
 
   const pageW = doc.page.width;
-  const M = 48; // content margin
+  const M = 48;
   const contentW = pageW - M * 2;
 
   // ---- Header band ---------------------------------------------------------
-  doc.rect(0, 0, pageW, 92).fill(BRAND);
-  doc.rect(0, 92, pageW, 4).fill(GOLD);
+  doc.rect(0, 0, pageW, 96).fill(BRAND);
+  doc.rect(0, 96, pageW, 4).fill(GOLD);
   doc
     .fillColor(CREAM)
     .font("Helvetica-Bold")
     .fontSize(24)
-    .text("AMRUT JEWELS", M, 26);
-  doc
-    .fillColor(GOLD)
-    .font("Helvetica")
-    .fontSize(11)
-    .text("Amrutkumar Govinddas LLP  •  Order Form", M, 58);
-
-  // Order id + date, right-aligned in the band.
-  doc
-    .fillColor(CREAM)
-    .font("Helvetica-Bold")
-    .fontSize(13)
-    .text(formatOrderId(order.id), pageW - M - 200, 30, {
-      width: 200,
-      align: "right",
-    });
+    .text("AMRUT JEWELS", M, 28);
   doc
     .fillColor(GOLD)
     .font("Helvetica")
     .fontSize(10)
+    .text("Amrutkumar Govinddas LLP", M, 60)
+    .text("Soni Bazar, Main Road, Rajkot - 360001", M, 73);
+
+  doc
+    .fillColor(CREAM)
+    .font("Helvetica-Bold")
+    .fontSize(20)
+    .text("INVOICE", pageW - M - 220, 30, { width: 220, align: "right" });
+  doc
+    .fillColor(GOLD)
+    .font("Helvetica")
+    .fontSize(10)
+    .text(formatOrderId(order.id), pageW - M - 220, 58, {
+      width: 220,
+      align: "right",
+    })
     .text(
-      order.created_at ? new Date(order.created_at).toLocaleString("en-IN") : "",
+      order.created_at
+        ? new Date(order.created_at).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
+        : "",
       pageW - M - 220,
-      50,
+      72,
       { width: 220, align: "right" }
     );
 
+  // ---- Bill to / Status ----------------------------------------------------
   let y = 128;
+  doc.fillColor(MUTED).font("Helvetica-Bold").fontSize(9).text("BILL TO", M, y);
+  doc
+    .fillColor(MUTED)
+    .font("Helvetica-Bold")
+    .fontSize(9)
+    .text("ORDER STATUS", pageW - M - 200, y, { width: 200, align: "right" });
+  y += 15;
 
-  // ---- Section helpers -----------------------------------------------------
-  const sectionTitle = (text) => {
-    doc.fillColor(BRAND).font("Helvetica-Bold").fontSize(12).text(text, M, y);
-    y += 18;
-    doc
-      .moveTo(M, y)
-      .lineTo(M + contentW, y)
-      .lineWidth(1)
-      .strokeColor(GOLD)
-      .stroke();
-    y += 12;
-  };
-
-  const row = (label, value) => {
-    if (value === undefined || value === null || value === "") return;
-    doc.fillColor(MUTED).font("Helvetica-Bold").fontSize(10).text(label, M, y, {
-      width: 150,
+  doc
+    .fillColor(BRAND)
+    .font("Helvetica-Bold")
+    .fontSize(12)
+    .text(order.business_name || order.user_name || "N/A", M, y, { width: 300 });
+  doc
+    .fillColor(BRAND)
+    .font("Helvetica-Bold")
+    .fontSize(12)
+    .text(String(order.status || "-").toUpperCase(), pageW - M - 200, y, {
+      width: 200,
+      align: "right",
     });
-    doc
-      .fillColor(INK)
-      .font("Helvetica")
-      .fontSize(11)
-      .text(String(value), M + 150, y - 1, { width: contentW - 150 });
-    y += 20;
+  y += 16;
+
+  const billLine = (t) => {
+    if (!t) return;
+    doc.fillColor(INK).font("Helvetica").fontSize(10).text(t, M, y, { width: 320 });
+    y += 14;
   };
+  billLine(order.user_name && order.business_name ? order.user_name : null);
+  billLine(order.user_phone);
+  billLine(order.email);
 
-  // ---- Business user -------------------------------------------------------
-  sectionTitle("Business User");
-  row("Name", order.user_name);
-  row("Business", order.business_name);
-  row("Email", order.email);
-  row("Phone", order.user_phone);
-  if (order.user_status) row("Status", String(order.user_status).toUpperCase());
-  y += 8;
+  // ---- Items table ---------------------------------------------------------
+  y += 18;
+  const cImg = M;
+  const cName = M + 58; // text after a 46px thumb
+  const cSku = M + 250;
+  const cQty = M + 360;
+  const cAmt = M + 420;
+  const amtW = contentW - (cAmt - M);
 
-  // ---- Product -------------------------------------------------------------
-  sectionTitle("Product");
-  const productTop = y;
+  // Header row
+  doc.rect(M, y, contentW, 26).fill(BRAND);
+  doc.fillColor(CREAM).font("Helvetica-Bold").fontSize(10);
+  doc.text("PRODUCT", cName, y + 8, { width: cSku - cName - 8 });
+  doc.text("SKU", cSku, y + 8, { width: cQty - cSku - 8 });
+  doc.text("QTY", cQty, y + 8, { width: cAmt - cQty - 8, align: "right" });
+  doc.text("AMOUNT", cAmt, y + 8, { width: amtW, align: "right" });
+  y += 26;
 
-  // Optional image on the right.
-  let imageDrawn = false;
+  // Item row (single product per order in this schema)
+  const rowTop = y;
+  const rowH = 58;
+  doc.rect(M, y, contentW, rowH).fill("#fbf6ee");
+  doc.rect(M, y, contentW, rowH).strokeColor(LINE).lineWidth(1).stroke();
+
+  // Product thumbnail
+  let thumbOk = false;
   if (order.product_image) {
     const imgPath = path.join(
       __dirname,
@@ -123,56 +147,100 @@ function generateOrderPDF(order, stream) {
     );
     if (fs.existsSync(imgPath)) {
       try {
-        doc.image(imgPath, M + contentW - 130, productTop, {
-          fit: [130, 130],
-          align: "right",
-        });
-        imageDrawn = true;
+        doc.image(imgPath, cImg + 4, rowTop + 6, { fit: [46, 46] });
+        thumbOk = true;
       } catch (e) {
-        /* skip unreadable image */
+        /* skip */
       }
     }
   }
-
-  const savedRight = contentW;
-  if (imageDrawn) {
-    // Narrow the text column so it doesn't overlap the image.
-    row("Name", order.product_name);
-    row("SKU", order.product_sku);
-    y = Math.max(y, productTop + 130 + 6);
-  } else {
-    row("Name", order.product_name);
-    row("SKU", order.product_sku);
+  if (!thumbOk) {
+    doc.rect(cImg + 4, rowTop + 6, 46, 46).fill(CREAM);
+    doc
+      .fillColor(GOLD)
+      .font("Helvetica-Bold")
+      .fontSize(8)
+      .text("IMG", cImg + 4, rowTop + 26, { width: 46, align: "center" });
   }
-  y += 8;
 
-  // ---- Order details -------------------------------------------------------
-  sectionTitle("Order Details");
-  row("Order Status", order.status ? String(order.status).toUpperCase() : "");
-  row("Quantity", order.quantity ?? order.total_qty);
-  row("Courier Company", order.courier_company);
-  row("Remark", order.remark);
-  y += 6;
-
-  // ---- Total highlight -----------------------------------------------------
-  const amount = order.total_amount ?? order.total_mark_amount;
-  if (amount !== undefined && amount !== null && amount !== "") {
-    doc.rect(M, y, contentW, 38).fill(CREAM);
-    doc.rect(M, y, 4, 38).fill(BRAND);
+  doc
+    .fillColor(BRAND)
+    .font("Helvetica-Bold")
+    .fontSize(11)
+    .text(order.product_name || "N/A", cName, rowTop + 12, {
+      width: cSku - cName - 8,
+    });
+  if (order.net_weight) {
     doc
-      .fillColor(BRAND)
-      .font("Helvetica-Bold")
-      .fontSize(12)
-      .text("TOTAL AMOUNT", M + 16, y + 12);
-    doc
-      .fillColor(BRAND)
-      .font("Helvetica-Bold")
-      .fontSize(15)
-      .text(formatCurrency(amount), M, y + 10, {
-        width: contentW - 16,
-        align: "right",
+      .fillColor(MUTED)
+      .font("Helvetica")
+      .fontSize(8)
+      .text(`Weight: ${order.net_weight} g`, cName, rowTop + 30, {
+        width: cSku - cName - 8,
       });
-    y += 54;
+  }
+  doc
+    .fillColor(INK)
+    .font("Helvetica")
+    .fontSize(10)
+    .text(order.product_sku || "-", cSku, rowTop + 22, {
+      width: cQty - cSku - 8,
+    });
+  doc.text(String(order.quantity ?? order.total_qty ?? 1), cQty, rowTop + 22, {
+    width: cAmt - cQty - 8,
+    align: "right",
+  });
+
+  const amount = order.total_amount ?? order.total_mark_amount;
+  doc
+    .fillColor(INK)
+    .font("Helvetica-Bold")
+    .fontSize(10)
+    .text(formatCurrency(amount), cAmt, rowTop + 22, {
+      width: amtW,
+      align: "right",
+    });
+  y += rowH;
+
+  // ---- Totals --------------------------------------------------------------
+  y += 14;
+  const totalsX = M + contentW - 220;
+  doc.rect(totalsX, y, 220, 40).fill(CREAM);
+  doc.rect(totalsX, y, 4, 40).fill(BRAND);
+  doc
+    .fillColor(BRAND)
+    .font("Helvetica-Bold")
+    .fontSize(12)
+    .text("TOTAL", totalsX + 16, y + 13);
+  doc
+    .fillColor(BRAND)
+    .font("Helvetica-Bold")
+    .fontSize(14)
+    .text(formatCurrency(amount), totalsX, y + 12, {
+      width: 204,
+      align: "right",
+    });
+  y += 56;
+
+  // Optional courier / remark notes
+  if (order.courier_company || order.remark) {
+    doc.fillColor(MUTED).font("Helvetica-Bold").fontSize(9).text("NOTES", M, y);
+    y += 14;
+    if (order.courier_company) {
+      doc
+        .fillColor(INK)
+        .font("Helvetica")
+        .fontSize(10)
+        .text(`Courier: ${order.courier_company}`, M, y);
+      y += 14;
+    }
+    if (order.remark) {
+      doc
+        .fillColor(INK)
+        .font("Helvetica")
+        .fontSize(10)
+        .text(`Remark: ${order.remark}`, M, y, { width: contentW });
+    }
   }
 
   // ---- Footer --------------------------------------------------------------
@@ -188,7 +256,7 @@ function generateOrderPDF(order, stream) {
     .font("Helvetica")
     .fontSize(9)
     .text(
-      "This is a system-generated order form from Amrutkumar Govinddas LLP.",
+      "Thank you for your business.  •  Amrutkumar Govinddas LLP",
       M,
       footerY + 10,
       { width: contentW, align: "center" }

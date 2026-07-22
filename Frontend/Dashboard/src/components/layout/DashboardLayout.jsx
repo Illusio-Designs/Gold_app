@@ -327,20 +327,14 @@ export default function DashboardLayout() {
               </button>
               {showProfileMenu && (
                 <div className="profile-dropdown">
-                  <Link to="#" className="dropdown-item">
+                  <Link to="/dashboard/profile" className="dropdown-item">
                     <User size={18} />
                     <span>Profile</span>
                   </Link>
-                  <button 
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowNotificationMenu(!showNotificationMenu);
-                      setShowProfileMenu(false);
-                    }}
-                  >
+                  <Link to="/dashboard/notifications" className="dropdown-item">
                     <Bell size={18} />
                     <span>Notifications</span>
-                  </button>
+                  </Link>
                   <Link to="/dashboard/settings" className="dropdown-item">
                     <Settings size={18} />
                     <span>Settings</span>

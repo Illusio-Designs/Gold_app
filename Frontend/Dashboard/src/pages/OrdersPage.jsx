@@ -6,6 +6,7 @@ import {
   getUserCart,
   updateUserStatus,
   downloadOrderPDF,
+  deleteOrder,
 } from '../services/adminApiService';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { isAuthenticated, getAdminToken } from '../utils/authUtils';
@@ -13,10 +14,11 @@ import { useNavigate } from 'react-router-dom';
 import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
+import Modal from '../components/common/Modal';
 import { SkeletonTable, SkeletonStats } from '../components/common/Skeleton';
 import StatCards from '../components/common/StatCards';
 import Badge from '../components/common/Badge';
-import { ShoppingCart, Image as ImageIcon, FileDown } from 'lucide-react';
+import { ShoppingCart, Image as ImageIcon, FileDown, Trash2 } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
 
@@ -30,7 +32,30 @@ const OrdersPage = () => {
   const [selectedUser, setSelectedUser] = useState('');
   const [userCart, setUserCart] = useState(null);
   const [showUserCart, setShowUserCart] = useState(false);
+  const [deleteOrderItem, setDeleteOrderItem] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
+
+  const handleDeleteOrder = async () => {
+    if (!deleteOrderItem) return;
+    try {
+      setDeleting(true);
+      const token = getAdminToken();
+      if (!token) {
+        navigate('/auth');
+        return;
+      }
+      await deleteOrder(deleteOrderItem.id, token);
+      setOrders((prev) => prev.filter((o) => o.id !== deleteOrderItem.id));
+      showSuccessToast('Order deleted');
+      setDeleteOrderItem(null);
+      loadStatistics();
+    } catch (err) {
+      showErrorToast(err?.response?.data?.error || 'Failed to delete order');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const statusOptions = [
     { value: 'all', label: 'All Statuses', color: '#666' },
@@ -446,6 +471,14 @@ const OrdersPage = () => {
           >
             <FileDown size={16} />
           </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => setDeleteOrderItem(row)}
+            title="Delete Order"
+          >
+            <Trash2 size={16} />
+          </Button>
         </div>
       ),
     },
@@ -523,6 +556,30 @@ const OrdersPage = () => {
           </div>
         </div>
       )}
+
+      {/* Delete order confirmation */}
+      <Modal
+        isOpen={!!deleteOrderItem}
+        onClose={() => setDeleteOrderItem(null)}
+        title="Delete Order"
+        size="small"
+      >
+        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Are you sure you want to delete order{' '}
+          <strong style={{ color: 'var(--brand)' }}>
+            {formatOrderId(deleteOrderItem?.id)}
+          </strong>
+          ? This action cannot be undone.
+        </p>
+        <div className="modal-actions">
+          <Button variant="secondary" onClick={() => setDeleteOrderItem(null)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDeleteOrder} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

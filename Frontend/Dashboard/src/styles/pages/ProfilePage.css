@@ -1,0 +1,100 @@
+.profile-page {
+  max-width: 640px;
+}
+
+.profile-title {
+  color: var(--brand, #5d0829);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 20px;
+}
+
+.profile-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--brand-gold, #c09e83);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(93, 8, 41, 0.06));
+  overflow: hidden;
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 22px;
+  background: var(--surface-muted, #f9f2e7);
+  border-bottom: 1px solid var(--brand-gold, #c09e83);
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--brand, #5d0829);
+  color: var(--brand-cream, #fce2bf);
+  border: 2px solid var(--brand-gold, #c09e83);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(93, 8, 41, 0.06));
+}
+
+.profile-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-name {
+  margin: 0;
+  color: var(--brand, #5d0829);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.profile-info {
+  list-style: none;
+  margin: 0;
+  padding: 10px 22px 18px;
+}
+
+.profile-info__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--surface-sunken, #f4ece0);
+}
+.profile-info__row:last-child {
+  border-bottom: none;
+}
+
+.profile-info__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface-muted, #f9f2e7);
+  color: var(--brand-gold, #c09e83);
+}
+
+.profile-info__label {
+  width: 110px;
+  flex-shrink: 0;
+  color: var(--text-secondary, #8a6d5a);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.profile-info__value {
+  color: var(--brand, #5d0829);
+  font-size: 0.95rem;
+  font-weight: 600;
+  word-break: break-word;
+}
