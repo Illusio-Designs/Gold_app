@@ -3,6 +3,7 @@ const orderModel = require("../models/order");
 const cartModel = require("../models/cart");
 const { notifyNewOrder } = require("../services/adminNotificationService");
 const socketService = require("../services/socketService");
+const pdfService = require("../services/pdfService");
 
 function isApprovedBusinessStatus(status) {
   return String(status || "").toLowerCase() === "approved";
@@ -594,16 +595,17 @@ function downloadOrderPDF(req, res) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // For now, just return the order data
-    // In a real implementation, you would generate a PDF here
-    res.json({
-      message: "PDF download functionality not implemented",
-      order: results[0],
-    });
+    const order = results[0];
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="order-${order.id}.pdf"`
+    );
+    pdfService.generateOrderPDF(order, res);
   });
 }
 

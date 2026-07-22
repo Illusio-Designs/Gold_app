@@ -1,77 +1,103 @@
-const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
 
 /**
- * Generate a PDF print order form for an order.
- * @param {Object} order - Order details
- * @param {Object} product - Product details
- * @param {Object} user - User (business) details
- * @param {Array} images - Array of product image filenames
- * @param {string} outputPath - Path to save the generated PDF
+ * Stream an order form PDF directly to a writable stream (e.g. the HTTP
+ * response). `order` is the flat, joined row returned by
+ * orderModel.getOrderById (order + user_* + product_* fields).
+ *
+ * The caller is responsible for setting Content-Type / Content-Disposition
+ * headers before calling this.
  */
-function generateOrderPDF(order, product, user, images, outputPath) {
-  const doc = new PDFDocument({ margin: 40 });
-  doc.pipe(fs.createWriteStream(outputPath));
+function generateOrderPDF(order, stream) {
+  const doc = new PDFDocument({ margin: 44, size: "A4" });
+
+  // If PDF generation fails after headers are sent, just end the stream.
+  doc.on("error", () => {
+    try {
+      stream.end();
+    } catch (e) {
+      /* noop */
+    }
+  });
+
+  doc.pipe(stream);
+
+  const brand = "#5d0829";
+  const line = (label, value) => {
+    if (value === undefined || value === null || value === "") return;
+    doc
+      .font("Helvetica-Bold")
+      .fillColor("#333")
+      .text(`${label}: `, { continued: true });
+    doc.font("Helvetica").fillColor("#000").text(String(value));
+  };
+  const heading = (text) => {
+    doc.moveDown(0.6);
+    doc.font("Helvetica-Bold").fontSize(13).fillColor(brand).text(text);
+    doc.fontSize(11);
+  };
 
   // Header
-  doc.fontSize(20).text('Order Form', { align: 'center' });
-  doc.moveDown();
+  doc
+    .font("Helvetica-Bold")
+    .fontSize(20)
+    .fillColor(brand)
+    .text("Amrut Jewels", { align: "center" });
+  doc
+    .font("Helvetica")
+    .fontSize(13)
+    .fillColor("#333")
+    .text("Order Form", { align: "center" });
+  doc.moveDown(0.8);
+  doc.fontSize(11);
 
-  // Order Info
-  doc.fontSize(12).text(`Order ID: ${order.id || ''}`);
-  doc.text(`Status: ${order.status || ''}`);
-  doc.text(`Date: ${order.created_at || ''}`);
-  doc.moveDown();
+  heading("Order");
+  line("Order ID", `#${order.id}`);
+  line("Status", order.status);
+  line("Date", order.created_at ? new Date(order.created_at).toLocaleString() : "");
 
-  // User Info
-  doc.fontSize(14).text('Business User:', { underline: true });
-  doc.fontSize(12).text(`Name: ${user.name || ''}`);
-  doc.text(`Email: ${user.email || ''}`);
-  doc.text(`Phone: ${user.phone_number || ''}`);
-  doc.moveDown();
+  heading("Business User");
+  line("Name", order.user_name);
+  line("Business", order.business_name);
+  line("Email", order.email);
+  line("Phone", order.user_phone);
 
-  // Product Info
-  doc.fontSize(14).text('Product:', { underline: true });
-  doc.fontSize(12).text(`Name: ${product.name || ''}`);
-  doc.text(`SKU: ${product.sku || ''}`);
-  doc.text(`Purity: ${product.purity || ''}`);
-  doc.text(`Net Weight: ${product.net_weight || ''}`);
-  doc.text(`Gross Weight: ${product.gross_weight || ''}`);
-  doc.text(`Less Weight: ${product.less_weight || ''}`);
-  doc.text(`Size: ${product.size || ''}`);
-  doc.text(`Attributes: ${product.attributes || ''}`);
-  doc.text(`Length: ${product.length || ''}`);
-  doc.text(`Mark: ${product.mark || ''}`);
-  doc.text(`Mark Amount: ${product.mark_amount || ''}`);
-  doc.moveDown();
+  heading("Product");
+  line("Name", order.product_name);
+  line("SKU", order.product_sku);
+  line("Description", order.description);
 
-  // Order Details
-  doc.fontSize(14).text('Order Details:', { underline: true });
-  doc.fontSize(12).text(`Total Qty: ${order.total_qty || ''}`);
-  doc.text(`Total Mark Amount: ${order.total_mark_amount || ''}`);
-  doc.text(`Total Net Weight: ${order.total_net_weight || ''}`);
-  doc.text(`Total Less Weight: ${order.total_less_weight || ''}`);
-  doc.text(`Total Gross Weight: ${order.total_gross_weight || ''}`);
-  if (order.courier_company) doc.text(`Courier Company: ${order.courier_company}`);
-  if (order.remark) doc.text(`Remark: ${order.remark}`);
-  doc.moveDown();
+  heading("Order Details");
+  line("Quantity", order.quantity);
+  line("Total Amount", order.total_amount);
+  line("Courier Company", order.courier_company);
+  line("Remark", order.remark);
 
-  // Product Images
-  if (images && images.length > 0) {
-    doc.fontSize(14).text('Product Images:', { underline: true });
-    images.forEach((img, idx) => {
-      const imgPath = path.join('uploads/products', img.image || img);
-      if (fs.existsSync(imgPath)) {
-        doc.image(imgPath, { width: 120, height: 120, align: 'left' });
-        doc.moveDown(0.5);
+  if (order.product_image) {
+    const imgPath = path.join(
+      __dirname,
+      "..",
+      "uploads",
+      "products",
+      order.product_image
+    );
+    if (fs.existsSync(imgPath)) {
+      try {
+        doc.moveDown(0.6);
+        doc.font("Helvetica-Bold").fontSize(13).fillColor(brand).text("Product Image");
+        doc.moveDown(0.3);
+        doc.image(imgPath, { fit: [160, 160] });
+      } catch (e) {
+        /* skip unreadable image */
       }
-    });
+    }
   }
 
   doc.end();
 }
 
 module.exports = {
-  generateOrderPDF
-}; 
+  generateOrderPDF,
+};

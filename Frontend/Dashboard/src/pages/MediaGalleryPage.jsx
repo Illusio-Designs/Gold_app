@@ -202,7 +202,6 @@ const MediaGalleryPage = () => {
             {item.type === "category" && <Layers size={16} />}
             {item.type === "product" && <Package size={16} />}
             <span>{item.type?.replace("_", " ")}</span>
-            <span className="watermark-badge"><Droplet size={12} /> Watermarked</span>
           </div>
           <div className="media-actions">
             <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
@@ -246,15 +245,17 @@ const MediaGalleryPage = () => {
               <span>No Preview</span>
             </div>
           )}
+          <span className="wm-overlay">
+            <Droplet size={11} /> Watermarked
+          </span>
         </div>
 
         <div className="media-info">
           <h4>{item.name}</h4>
-          {item.type === "product" && <p className="sku">SKU: {item.name}</p>}
-          {item.type === "category" && (
-            <p className="category">Category: {item.name}</p>
-          )}
-          <p className="status"><CheckCircle2 size={14} /> Watermarked</p>
+          <p className="media-ref">
+            {item.type === "category" ? "Category" : "SKU"}:{" "}
+            <strong>{item.name}</strong>
+          </p>
         </div>
       </div>
     );

@@ -6,6 +6,7 @@ import {
   getOrderStatistics,
   getUserCart,
   updateUserStatus,
+  downloadOrderPDF,
 } from '../services/adminApiService';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { isAuthenticated, getAdminToken } from '../utils/authUtils';
@@ -15,7 +16,7 @@ import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
 import { SkeletonTable } from '../components/common/Skeleton';
 import Badge from '../components/common/Badge';
-import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
+import { ShoppingCart, Image as ImageIcon, FileDown } from 'lucide-react';
 import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
 
@@ -250,6 +251,30 @@ const OrdersPage = () => {
     }
   };
 
+  const handleDownloadPdf = async (order) => {
+    try {
+      const token = getAdminToken();
+      if (!token) {
+        showErrorToast('Authentication token not found');
+        navigate('/auth');
+        return;
+      }
+      const res = await downloadOrderPDF(order.id, token);
+      const url = window.URL.createObjectURL(
+        new Blob([res.data], { type: 'application/pdf' })
+      );
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `order-${order.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showErrorToast('Failed to download order PDF');
+    }
+  };
+
   const viewUserCart = async (userId) => {
     try {
       const token = getAdminToken();
@@ -368,8 +393,7 @@ const OrdersPage = () => {
       accessor: "user_info",
       cell: (row) => (
         <div className="user-info">
-          <div className="user-name">{row.user_name || 'N/A'}</div>
-          <div className="business-name">{row.business_name || 'N/A'}</div>
+          <div className="user-name">{row.user_name || row.business_name || 'N/A'}</div>
           <div className="user-phone">{row.user_phone || 'N/A'}</div>
           {row.user_status && (
             <Badge tone={getStatusTone(row.user_status)}>{row.user_status}</Badge>
@@ -457,6 +481,14 @@ const OrdersPage = () => {
             title="View User Cart"
           >
             <ShoppingCart size={16} />
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => handleDownloadPdf(row)}
+            title="Download PDF"
+          >
+            <FileDown size={16} />
           </Button>
         </div>
       ),
