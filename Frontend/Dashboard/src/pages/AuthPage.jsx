@@ -32,7 +32,10 @@ const AuthPage = () => {
     try {
       const res = await adminLogin({ email, password });
       setAdminToken(res.token);
-      
+      if (res.user) {
+        localStorage.setItem("admin_user", JSON.stringify(res.user));
+      }
+
       // Show success notification
       showSuccessToast("Welcome back! You have successfully logged in.", "Login Successful");
       

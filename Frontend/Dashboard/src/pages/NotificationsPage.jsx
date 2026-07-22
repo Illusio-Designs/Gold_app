@@ -6,8 +6,9 @@ import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
 import PageHeader from "../components/common/PageHeader";
+import TableWithControls from "../components/common/TableWithControls";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
-import { BellOff, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import "../styles/pages/NotificationsPage.css";
 
 const NotificationsPage = () => {
@@ -80,6 +81,49 @@ const NotificationsPage = () => {
     { label: "Unread", value: unread, tone: "warning" },
   ];
 
+  const columns = [
+    {
+      header: "Notification",
+      accessor: "title",
+      cell: (row) => (
+        <div className="notif-cell">
+          {!row.is_read && <span className="notif-dot" title="Unread" />}
+          <div>
+            <div className="notif-cell__title">{row.title || "—"}</div>
+            {(row.message || row.body) && (
+              <div className="notif-cell__body">{row.message || row.body}</div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: "Type",
+      accessor: "type",
+      cell: (row) => (
+        <Badge tone={typeTone(row.type || row.data?.notificationType)}>
+          {formatType(row.type || row.data?.notificationType)}
+        </Badge>
+      ),
+    },
+    {
+      header: "Status",
+      accessor: "is_read",
+      cell: (row) => (
+        <Badge tone={row.is_read ? "neutral" : "warning"}>
+          {row.is_read ? "Read" : "Unread"}
+        </Badge>
+      ),
+    },
+    {
+      header: "Date",
+      accessor: "created_at",
+      cell: (row) => (
+        <span className="notif-date">{formatDate(row.created_at)}</span>
+      ),
+    },
+  ];
+
   if (loading) {
     return (
       <div className="notifications-page">
@@ -94,40 +138,13 @@ const NotificationsPage = () => {
     <div className="notifications-page">
       <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Bell} />
       <StatCards stats={notificationStats} />
-
-      {notifications.length === 0 ? (
-        <div className="notifications-empty">
-          <BellOff size={40} />
-          <p>No notifications yet</p>
-        </div>
-      ) : (
-        <div className="notifications-list">
-          {notifications.map((n) => {
-            const message = n.message || n.body;
-            return (
-              <div
-                key={n.id}
-                className={`notification-card${n.is_read ? "" : " unread"}`}
-              >
-                <div className="notification-card__main">
-                  <div className="notification-card__top">
-                    <span className="notification-card__title">{n.title}</span>
-                    <Badge tone={typeTone(n.type || n.data?.notificationType)}>
-                      {formatType(n.type || n.data?.notificationType)}
-                    </Badge>
-                  </div>
-                  {message && (
-                    <p className="notification-card__body">{message}</p>
-                  )}
-                  <span className="notification-card__date">
-                    {formatDate(n.created_at)}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <TableWithControls
+        columns={columns}
+        data={notifications}
+        searchFields={["title", "message", "body", "type"]}
+        pageTitle="All Notifications"
+        loading={loading}
+      />
     </div>
   );
 };

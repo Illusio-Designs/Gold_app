@@ -51,6 +51,37 @@ export const setAdminToken = (token) => {
 };
 
 /**
+ * Return the logged-in admin's details ({ id, name, email, type, ... }).
+ * Prefers the stored user object; falls back to decoding the JWT payload
+ * (which carries id/email/type) so it works even on older sessions.
+ */
+export const getAdminUser = () => {
+  let stored = {};
+  try {
+    stored = JSON.parse(localStorage.getItem("admin_user") || "{}") || {};
+  } catch (e) {
+    stored = {};
+  }
+  if (stored && stored.id) return stored;
+
+  const token = localStorage.getItem("admin_token");
+  if (token && token.split(".").length === 3) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return { ...payload, ...stored };
+    } catch (e) {
+      /* ignore malformed token */
+    }
+  }
+  return stored;
+};
+
+/** Merge and persist updated admin profile fields locally. */
+export const setAdminUser = (user) => {
+  localStorage.setItem("admin_user", JSON.stringify(user || {}));
+};
+
+/**
  * Clear all authentication data
  */
 export const clearAuthData = () => {
