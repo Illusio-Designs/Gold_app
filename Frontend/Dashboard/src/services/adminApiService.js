@@ -554,6 +554,30 @@ export const getOrderStatistics = (token) =>
     })
     .then((r) => r.data);
 
+// ACCOUNT DELETION REQUESTS
+export const getAccountDeletionRequests = (token) =>
+  axiosInstance
+    .get("/account-deletion", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((r) => r.data);
+
+export const getAccountDeletionStats = (token) =>
+  axiosInstance
+    .get("/account-deletion/stats", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((r) => r.data);
+
+export const updateAccountDeletionStatus = (id, status, token) =>
+  axiosInstance
+    .patch(
+      `/account-deletion/${id}/status`,
+      { status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then((r) => r.data);
+
 // NOTIFICATIONS
 export const getAdminNotifications = (token) => {
   console.log(

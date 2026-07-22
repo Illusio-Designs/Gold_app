@@ -10,6 +10,7 @@ import flowers from "../assests/flowers.png";
 import phones from "../assests/phones.png";
 import footerBg from "../assests/bgdesign.png";
 import SEOWrapper from "../components/SEOWrapper";
+import { submitAccountDeletionRequest } from "../services/publicApiService";
 
 const DeletePage = () => {
   const [formData, setFormData] = useState({
@@ -47,17 +48,20 @@ const DeletePage = () => {
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
-    
-    // Simulate API call
+
     try {
-      // Here you would make an actual API call to delete the account
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await submitAccountDeletionRequest({
+        user_name: formData.userName,
+        business_name: formData.businessName,
+        mobile_number: formData.mobileNumber,
+      });
+
       alert('Your account deletion request has been submitted. Our team will review and process it shortly.');
       setShowConfirmation(false);
       setFormData({ userName: '', businessName: '', mobileNumber: '' });
     } catch (error) {
-      alert('Error processing deletion request. Please try again later.');
+      const msg = error?.response?.data?.error || 'Error processing deletion request. Please try again later.';
+      alert(msg);
     } finally {
       setIsDeleting(false);
     }

@@ -38,6 +38,12 @@ publicAxiosInstance.interceptors.response.use(
   }
 );
 
+// PUBLIC — submit an account deletion request from the website /delete form.
+export const submitAccountDeletionRequest = (data) =>
+  publicAxiosInstance
+    .post("/account-deletion/request", data)
+    .then((response) => response.data);
+
 // PUBLIC CATEGORIES API (no authentication required)
 export const getPublicCategories = () =>
   publicAxiosInstance

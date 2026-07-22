@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   Smartphone,
   Palette,
+  UserX,
 } from "lucide-react";
 import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
@@ -39,6 +40,7 @@ const SidebarLinks = [
   { name: "Media Gallery", path: "/dashboard/media-gallery", icon: ImageIcon },
   { name: "App Versions", path: "/dashboard/app-versions", icon: Smartphone },
   { name: "App Icons", path: "/dashboard/app-icons", icon: Palette },
+  { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserX },
 ];
 
 export default function DashboardLayout() {
