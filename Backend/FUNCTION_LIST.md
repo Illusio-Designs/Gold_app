@@ -1,145 +1,160 @@
-# Amrut Backend — Function & API List
+# Backend — Function List & Flow
 
-Reference for the **Node.js + Express + MySQL** API server (`Backend/`).
-Entry point: `index.js` (mounts routes, Socket.io, CORS, static `/uploads`).
+Regenerated after the syntax repairs, the Phase 2 security fixes, and the
+login-request cleanup. Covers the current state of `Backend/`.
 
-> Architecture: `routes/` → `controllers/` → `models/` (MySQL) + `services/` (business logic / integrations).
-
----
-
-## 1. API Endpoints (by route)
-
-All routes are mounted under `/api/*` in `index.js`. Health check: `GET /api/health`.
-
-### Users — `/api/users`
-`POST /register`, `POST /admin/login`, `POST /business/login`, `POST /check-exists`,
-`POST /verify-otp`, `POST /logout`, `GET /`, `GET /:id`, `PUT /:id`, `PATCH /:id` (status),
-`DELETE /:id`.
-
-### Products — `/api/products`
-`GET /`, `GET /category/:categoryId`, `GET /sku/:sku`, `GET /:id`, `POST /`, `PUT /:id`,
-`DELETE /:id`, `PATCH /:id` (stock), `GET /:id/stock-status`, `GET /:id/stock-history`,
-`POST /:id/images`, `GET /:productId/images`, `DELETE …/images`, bulk-upload endpoints.
-
-### Categories — `/api/categories`
-`GET /`, `GET /:id`, `POST /`, `PUT /:id`, `DELETE /:id`.
-
-### Orders — `/api/orders`
-`POST /`, `POST /from-cart`, `GET /`, `GET /user/:user_id`, `GET /my-orders`,
-`GET /stats/statistics`, `GET /:id`, `PATCH /:id/status`, `PATCH /bulk-status`, `PUT /:id`,
-`DELETE /:id`, `GET /:id/pdf` (invoice PDF).
-
-### Cart — `/api/cart`
-`POST /add`, `GET /user/:user_id`, `PUT /item/:cart_item_id/quantity`,
-`DELETE /item/:cart_item_id`, `DELETE /user/:user_id/clear`, `GET /item/:cart_item_id`.
-
-### Slider — `/api/slider`
-`POST /`, `GET /`, `GET /:id`, `PUT /:id`, `DELETE /:id`.
-
-### App Icons — `/api/app-icons`
-`GET /current/:platform`, `GET /current/:platform/:type`, `GET /active/:platform`,
-`POST /`, `GET /`, `GET /stats`, `GET /:id`, `PUT /:id`, `DELETE /:id`, `PATCH /:id/activate`.
-
-### App Versions — `/api/app-versions`
-`GET /check-update`, `GET /latest/:platform`, `POST /`, `GET /`, `GET /platform/:platform`,
-`PUT /:id`, `DELETE /:id`, `PATCH /:id/activate`.
-
-### Login Requests — `/api/login-requests`
-`POST /`, `GET …`, `PATCH …` (approve/reject), plus admin list endpoints.
-
-### Media Gallery — `/api/media-gallery`
-`GET /all`, `GET /stats`, `DELETE /orphaned`, `DELETE /file`, `POST …` (upload / bulk upload),
-`GET /file-info/:encodedPath`, `GET /available-items`, `GET /debug-database`,
-`GET /serve/:type/:filename`.
-
-### Search — `/api/search`
-`GET /all`, `GET /categories`, `GET /products`.
-
-### Dashboard — `/api/dashboard`
-`GET /stats`, `GET /today-orders`, `GET /quick-stats`.
-
-### Notifications — `/api/notifications`
-`POST /`, `GET /user/:userId`, `GET /user/:userId/unread`, `PATCH /:notificationId/read`,
-`PATCH /user/:userId/read-all`, `DELETE /:notificationId`, `POST /register-token`,
-`POST /register-token-unauth`, `POST /subscribe-topic`, `POST /unsubscribe-topic`,
-`GET /vapid-key`, `GET /sse` (server-sent events).
-
-### Admin Notifications — `/api/admin-notifications`
-`GET /stats`, `GET /admin-clients`, `POST /test-notification`.
-
-### SEO — `/api/seo`
-`GET /` (SEO metadata by page).
+Sections: **1) Flow** · **2) Function inventory by module** · **3) Unused / dead
+functions (removal candidates)**.
 
 ---
 
-## 2. Controllers — `controllers/`
-Handle request/response for each domain (validation, call model + service, format response):
-`userController`, `productController`, `categoryController`, `orderController`,
-`cartController`, `sliderController`, `appIconController`, `appVersionController`,
-`loginRequestController`, `mediaGalleryController`, `searchController`,
-`dashboardController`, `notificationController`, `seoController`, `uploadController`.
+## 1. Flow
 
-## 3. Models — `models/` (MySQL data access)
-`user`, `product`, `category`, `order`, `cart`, `slider`, `appIcon`, `appVersion`,
-`loginRequest`.
+### 1.1 Request flow (HTTP)
+```
+client (mobile app / dashboard)
+        │  HTTP  /api/*
+        ▼
+index.js  ── CORS ── express.json ── static /uploads
+        │  app.use("/api/<x>", <x>Routes)
+        ▼
+routes/<x>.js         auth middleware:  verifyToken → requireAdmin | requireBusiness | requireApprovedBusiness
+        ▼
+controllers/<x>Controller.js   (validate → call model/service → respond)
+        ├─────────────▶ models/<x>.js        → MySQL (config/db.js pool, ? placeholders)
+        └─────────────▶ services/*            → Socket.io / FCM / Cloudinary / Sharp / AI / OCR
+        ▼
+       res.json(...)
+```
 
----
+### 1.2 Auth flow
+`middlewares/auth.js` verifies the JWT with `config/jwt.js` (`JWT_SECRET`, HS256).
+`req.user = { id, type }`. Guards: `requireAdmin` (type==='admin'),
+`requireBusiness` (type==='business'), `requireApprovedBusiness` (business + DB
+`status='approved'`, with the 7600046416 bypass).
 
-## 4. Services — `services/` (business logic & integrations)
+### 1.3 Real-time flow (Socket.io — `services/socketService.js`)
+```
+data change in a controller
+   → socketService.notify<Entity>Update(...)
+   → io.to(room).emit(event)   rooms: 'admin', `user_<id>`
+   → dashboard (adminSocketService) / mobile app (SocketService) listeners update live
+```
+Events: `category-update`, `product-update`, `order-update`, `user-update`,
+`registration-status-change`, `app-version-update`, `app-icon-update`, `slider-update`.
 
-### `socketService.js` — Socket.io real-time
-`initialize`, `setupEventHandlers`, `emitToAll`, `emitToRoom`, `emitToClient`,
-`broadcastToOthers`, `notifyCategoryUpdate`, `notifyProductUpdate`, `notifyOrderUpdate`,
-`notifyUserUpdate`, `notifyNewUserRegistration`, `notifyUserRegistrationStatusChange`,
-`notifyLoginRequestStatusChange`, `notifyAppVersionUpdate`, `notifyAppIconUpdate`,
-`notifySliderUpdate`, `getConnectedClientsCount`.
+### 1.4 Notification flow (push)
+```
+event → adminNotificationService.notify*  →  firebaseNotificationService.send*  → FCM
+                                          └→ inserts a row in notifications table
+```
 
-### `firebaseNotificationService.js` — FCM push
-`sendNotification`, `sendMulticastNotification`, `sendTopicNotification`,
-`subscribeToTopic`, `unsubscribeFromTopic`, `sendAdminNotification`.
-
-### `adminNotificationService.js` — admin alerts
-`sendAdminNotification`, `notifyUserRegistration`, `notifyLoginRequest`, `notifyNewOrder`,
-`notifyRegistrationStatusChange`, `notifyLoginRequestStatusChange`, `notifyOrderStatusChange`,
-`sendUserNotification`, `getAdminNotificationStats`.
-
-### `cloudinaryService.js` — image storage
-`uploadToCloudinary`, `uploadToLocalStorage`, `deleteFromCloudinary`, `isCloudinaryConfigured`.
-
-### `imageProcessingService.js` — Sharp image processing
-`processImage`, `applyWatermark`, `processProductImage`, `processCategoryImage`,
-`getFileSize`, `deleteOriginalFile`, `ensureDirectoriesExist`.
-
-### `enhancedImageProcessingService.js` — advanced processing
-`cleanGreyBackground`, `applyWatermark`, `processExistingProductImage`,
-`processNewProductImage`, `cleanAllExistingProductImages`.
-
-### `aiStudioService.js` — Google Gemini / GenAI (AI image work)
-`isEnabled`, `listAvailableModels`, `removeBackground`, `enhancePromptWithGemini`,
-`generateStudioImage` (+ internal `_generateImageWithGenAI`, `_generateImageWithAnalysis`).
-
-### `ocrService.js` — Tesseract OCR
-`preprocessForOcr`, `extractTagNo` (reads tag/SKU numbers from images).
-
-### `autoDetectionService.js` — auto-match uploads to products
-`detectImageAssociation`, `detectBySku`, `detectByProductName`, `detectByCategoryName`,
-`fuzzyMatchProduct`, `fuzzyMatchCategory`, `processBulkUpload`, `guessTypeFromFilename`.
-
-### `mediaGalleryService.js` — media management
-`getAllMedia`, `findAndDeleteOrphanedFiles`, `deleteOrphanedFiles`, `getMediaStats`,
-`deleteFile`, `getFileInfo`, `cleanupOrphanedDatabaseRecords`.
-
-### `pdfService.js` — invoices
-`generateOrderPDF`.
-
-### `uploadService.js` — `handleFileUpload` (Multer wrapper).
+### 1.5 Key feature flows
+- **Business login/approval:** `POST /api/users/business/login` → `verify-otp` →
+  `userController.verifyBusinessOTP` reads/writes the **`login_requests` table**
+  (session store: `pending`/`approved`/`logged_in`/`expired`, session timers). Approval
+  status gates category/product visibility.
+- **Order create:** `POST /api/orders` → `orderController.createOrder` (maps
+  `business_user_id/total_qty/total_mark_amount` → model `user_id/quantity/total_amount`)
+  → `orderModel.createOrder` (checks stock, inserts, marks product out_of_stock, records
+  stock history) → notify admin + socket `order-update`.
+- **Media upload + AI/OCR:** `POST /api/media-gallery/*` → `mediaGalleryController`
+  → `autoDetectionService` (match file→product) + `ocrService` (Tesseract tag read)
+  + `aiStudioService` (Gemini bg-removal/studio) + `imageProcessingService` (Sharp/watermark)
+  → Cloudinary/local storage.
 
 ---
 
-## 5. Config, Middleware, Utils, Scripts
-- **`config/`** — `db.js` (MySQL pool), `corsConfig.js`, `environment.js`, `multerConfig.js`
-- **`middlewares/auth.js`** — JWT auth guard
-- **`utils/`** — `dbHelper.js`, `imageUpload.js`
-- **`scripts/`** — `setup.js` (DB init / migrations), `migrate_sliders.js`, `clearUserCart.js`
+## 2. Function inventory by module
 
-> See also `API_LIST.md` and `API_OPTIMIZATION_RECOMMENDATIONS.md` in this folder.
+### Entry — `index.js`
+Boots Express, CORS, Socket.io (`socketService.initialize`), mounts 15 route groups
+under `/api/*` (`/health`, users, products, categories, orders, cart, slider, app-icons,
+app-versions, media-gallery, search, dashboard, notifications, admin-notifications, seo).
+
+### `config/`
+- **`jwt.js`** — `JWT_SECRET` (required; throws if unset) *(added in Phase 2)*
+- **`db.js`** — MySQL pool `db`
+- **`corsConfig.js`**, **`environment.js`** (`getBaseUrl`), **`multerConfig.js`** (`upload`, `bulkUpload`, `excelUpload`)
+
+### `middlewares/auth.js`
+`verifyToken`, `requireAdmin`, `requireBusiness`, `requireApprovedBusiness`, `optionalAuth`
+
+### Controllers — `controllers/`
+- **userController** — registerUser, adminLogin, businessLogin, checkUserExists, verifyBusinessOTP, getAllUsers, getUserById, updateUser, updateUserStatus, deleteUser, createUser
+- **productController** — CRUD + getProductsByCategory, getProductBySku, stock-status/history, image upload/delete, bulk Excel upload, addWatermarksToExistingProducts
+- **categoryController** — getCategories, getCategoryById, create/update/delete
+- **orderController** — createOrder, createOrderFromCart, getAllOrders, getOrdersByUserId, getCurrentUserOrders, getOrderById, getOrderStatistics, updateOrderStatus, bulkUpdateOrderStatuses, updateOrder, deleteOrder, downloadOrderPDF*
+- **cartController** — addToCart, getUserCart, updateCartItemQuantity, removeFromCart, clearUserCart, getCartItemById
+- **sliderController**, **appIconController**, **appVersionController** — CRUD + activate
+- **mediaGalleryController** — getAllMedia, getStats, upload/bulkUpload, deleteFile, serveMediaFile, getFileInfo, getAvailableItems, orphan cleanup
+- **uploadController** — uploadProfileImage
+- **notificationController** — createNotification, getUserNotifications, getUnreadCount, markAsRead, markAllAsRead, deleteNotification, registerFCMToken(+Unauth), subscribe/unsubscribe topic, SSE
+- **dashboardController** — getStats, getTodayOrders, getQuickStats
+- **searchController** — searchAll, searchCategories, searchProducts
+- **seoController** — getSEOByPageUrl
+
+> *`downloadOrderPDF` is a stub — returns "PDF download functionality not implemented" (see §3).*
+
+### Models — `models/` (MySQL)
+`user`, `product`, `category`, `order`, `cart`, `slider`, `appIcon`, `appVersion`
+(each: create/get/update/delete + domain helpers).
+
+### Services — `services/`
+- **socketService** — initialize + emit/notify helpers (see §1.3)
+- **adminNotificationService** — notifyUserRegistration, notifyNewOrder, notifyRegistrationStatusChange, notifyOrderStatusChange, sendAdminNotification, sendUserNotification, getAdminNotificationStats
+- **firebaseNotificationService** — sendNotification, sendMulticastNotification, sendTopicNotification, subscribe/unsubscribeFromTopic, sendAdminNotification
+- **cloudinaryService** — uploadToCloudinary, uploadToLocalStorage
+- **imageProcessingService / enhancedImageProcessingService** — Sharp processing + watermark
+- **aiStudioService** — Gemini: removeBackground, enhancePromptWithGemini, generateStudioImage
+- **ocrService** — preprocessForOcr, extractTagNo (Tesseract)
+- **autoDetectionService** — detectImageAssociation, fuzzy match, processBulkUpload
+- **mediaGalleryService** — getAllMedia, getMediaStats, deleteFile, orphan cleanup
+
+### Utils — `utils/`
+- **dbHelper** — executeQuery, checkConnection
+- **imageUpload** — `processImageUpload` (used) + several unused helpers (see §3)
+
+### Removed in this cleanup ✅
+`routes/loginRequest.js`, `controllers/loginRequestController.js`, `models/loginRequest.js`,
+and the `/api/login-requests` mount. *(The `login_requests` table + userController session
+logic were KEPT — still used by business login.)*
+
+---
+
+## 3. Unused / dead functions — removal candidates
+
+Verified: each is referenced only by its own definition/export, with **no caller**
+anywhere in the repo. Safe to delete after a final confirm.
+
+### Whole modules with no importer (delete the file)
+| File | Note |
+|------|------|
+| **`services/pdfService.js`** | `generateOrderPDF` never called; not required anywhere. PDF invoices are not wired up — `orderController.downloadOrderPDF` is a stub returning *"not implemented"*. Remove the module (and the `/:id/pdf` route + stub) **or** actually wire the feature. |
+| **`services/uploadService.js`** | `handleFileUpload` never called; module not required anywhere. |
+
+### Individual unused exports
+| Function | File |
+|----------|------|
+| `deleteFromCloudinary`, `isCloudinaryConfigured` | `services/cloudinaryService.js` |
+| `firebaseConfig` (unused web config object) | `services/firebaseNotificationService.js` |
+| `getForceUpdateInfo` | `models/appVersion.js` |
+| `checkProductInCart` | `models/cart.js` |
+| `getProductBySkuAny` | `models/product.js` |
+| `createAppIconsTable`, `checkScheduledIconChanges` | `models/appIcon.js` |
+| `deleteImage`, `ensureDirectoryExists`, `deleteOldImageIfChanged`, `applyTiledWatermark` | `utils/imageUpload.js` (module IS used for `processImageUpload`; these specific exports are dead. `convertToWebp` is used internally.) |
+
+### Dead-but-harmless notification remnants (from the login-request cleanup)
+Now that the login-request controller is gone, these have no caller. Optional to remove
+(they are inert; kept to avoid touching notification wiring):
+- `adminNotificationService.notifyLoginRequest`, `notifyLoginRequestStatusChange`
+- `socketService.notifyLoginRequestStatusChange`
+- Mobile: `firebaseService.js` `LOGIN_REQUEST*` channel config; `SocketService.js` low-level `login-request-status-change` handler (never fires now)
+
+> Detection is call-graph based (grep for references). Before deleting, glance at each to
+> rule out dynamic/reflective use — none was found here, but a 10-second check is cheap.
+
+---
+
+*Mobile app (`Frontend/Amrut`) and Dashboard function lists are unchanged except for the
+login-request remnants removed in this cleanup — see their own `FUNCTION_LIST.md`.*
