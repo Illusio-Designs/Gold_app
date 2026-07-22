@@ -44,7 +44,9 @@ const SidebarLinks = [
 ];
 
 export default function DashboardLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    () => typeof window !== "undefined" && window.innerWidth <= 768
+  );
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -263,6 +265,11 @@ export default function DashboardLayout() {
                   <Link
                     to={link.path}
                     className={isActive ? "active" : ""}
+                    onClick={() => {
+                      // On mobile, tapping a nav item closes the drawer.
+                      if (window.innerWidth <= 768) setCollapsed(true);
+                      setTooltip({ show: false, text: "", x: 0, y: 0 });
+                    }}
                     onMouseEnter={(e) => {
                       if (collapsed) {
                         const rect = e.currentTarget.getBoundingClientRect();
