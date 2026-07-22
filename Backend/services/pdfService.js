@@ -199,28 +199,8 @@ function generateOrderPDF(order, stream) {
     align: "right",
   });
 
-  const amount = order.total_amount ?? order.total_mark_amount;
   y += rowH;
-
-  // ---- Totals --------------------------------------------------------------
-  y += 14;
-  const totalsX = M + contentW - 220;
-  doc.rect(totalsX, y, 220, 40).fill(CREAM);
-  doc.rect(totalsX, y, 4, 40).fill(BRAND);
-  doc
-    .fillColor(BRAND)
-    .font("Helvetica-Bold")
-    .fontSize(12)
-    .text("TOTAL", totalsX + 16, y + 13);
-  doc
-    .fillColor(BRAND)
-    .font("Helvetica-Bold")
-    .fontSize(14)
-    .text(formatCurrency(amount), totalsX, y + 12, {
-      width: 204,
-      align: "right",
-    });
-  y += 56;
+  y += 20;
 
   // Optional courier / remark notes
   if (order.courier_company || order.remark) {
