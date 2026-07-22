@@ -47,8 +47,9 @@ const ContactUs = () => {
           </button>
           <ul className={`homepage-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
             <li onClick={() => setIsMobileMenuOpen(false)}><a href="/">Home</a></li>
-            <li onClick={() => setIsMobileMenuOpen(false)}><a href="/privacy">Privacy Policy</a></li>
-            <li onClick={() => setIsMobileMenuOpen(false)}><a href="/delete">Delete Account</a></li>
+            <li onClick={() => setIsMobileMenuOpen(false)}><a href="/#categories">Categories</a></li>
+            <li onClick={() => setIsMobileMenuOpen(false)}><a href="/#about">About Us</a></li>
+            <li onClick={() => setIsMobileMenuOpen(false)}><a href="/#faqs">FAQs</a></li>
             <li className="active" onClick={() => setIsMobileMenuOpen(false)}><a href="/contact">Contact Us</a></li>
           </ul>
         </nav>

@@ -242,8 +242,8 @@ const HomePage = () => {
             >
               About Us
             </li>
-            <li 
-              className={activeSection === 'faqs' ? 'active' : ''} 
+            <li
+              className={activeSection === 'faqs' ? 'active' : ''}
               onClick={() => {
                 scrollToSection('faqs');
                 setIsMobileMenuOpen(false);
@@ -251,23 +251,8 @@ const HomePage = () => {
             >
               FAQs
             </li>
-            <li 
-              className="homepage-menu-mobile-only"
-              onClick={() => {
-                window.location.href = '/privacy';
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              Privacy Policy
-            </li>
-            <li 
-              className="homepage-menu-mobile-only"
-              onClick={() => {
-                window.location.href = '/delete';
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              Delete Account
+            <li onClick={() => setIsMobileMenuOpen(false)}>
+              <a href="/contact">Contact Us</a>
             </li>
           </ul>
         </nav>

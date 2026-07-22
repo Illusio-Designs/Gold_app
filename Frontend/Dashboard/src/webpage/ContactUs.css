@@ -6,6 +6,60 @@
   font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Navbar styling to match the homepage / other public pages */
+.contact-page .homepage-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 13%;
+  background: linear-gradient(253.3deg, #43051d 1.95%, #5d0829 102.63%);
+  position: relative;
+  z-index: 10;
+}
+
+.contact-page .homepage-logo {
+  height: 100px;
+}
+
+.contact-page .homepage-menu {
+  display: flex;
+  gap: 0px;
+  list-style: none;
+  border: 1.5px solid #fce2bf;
+  margin: 0;
+  padding: 10px 30px;
+  border-radius: 20px;
+}
+
+.contact-page .homepage-menu li {
+  font-size: 1.1rem;
+  color: #c09e83;
+  background: transparent;
+  border-radius: 18px;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "DM Sans", sans-serif !important;
+  font-weight: 500;
+}
+
+.contact-page .homepage-menu li:hover,
+.contact-page .homepage-menu li:hover a {
+  color: #fce2bf;
+}
+
+.contact-page .homepage-menu li.active,
+.contact-page .homepage-menu li.active a {
+  color: #fce2bf;
+  font-weight: 600;
+}
+
+.contact-page .homepage-menu li a {
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+}
+
 .contact-main {
   max-width: 1000px;
   margin: 0 auto;

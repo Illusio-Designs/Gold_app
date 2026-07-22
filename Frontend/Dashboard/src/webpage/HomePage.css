@@ -82,11 +82,24 @@ button {
   font-weight: 500;
 }
 
+/* Nav items rendered as links (sub-pages) must look identical to the
+   plain-text items on the homepage — no underline, inherit brand color. */
+.homepage-menu li a {
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+}
+
 .homepage-menu li:hover {
   color: #fce2bf;
 }
 
-.homepage-menu li.active {
+.homepage-menu li:hover a {
+  color: #fce2bf;
+}
+
+.homepage-menu li.active,
+.homepage-menu li.active a {
   color: #fce2bf;
   font-weight: 600;
 }
