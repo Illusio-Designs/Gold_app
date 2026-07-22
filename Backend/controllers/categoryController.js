@@ -10,20 +10,6 @@ function getAllCategories(req, res) {
   const sql =
     "SELECT * FROM categories WHERE status = 'active' AND image IS NOT NULL ORDER BY name";
 
-  // First, let's check all categories to see what status values exist
-  db.query(
-    "SELECT id, name, status, image FROM categories ORDER BY name",
-    (debugErr, debugResults) => {
-      if (debugErr) {
-        } else {
-        => c.status === "active")
-        );
-        => c.image && c.image !== "null")
-        );
-      }
-    }
-  );
-
   db.query(sql, (err, results) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -85,10 +71,6 @@ function getAllCategories(req, res) {
         hasProcessedImage: !!processedImageUrl,
       };
     });
-
-    // Add logging to debug category response
-    processedResults.forEach((category, index) => {
-      });
 
     res.json({
       success: true,

@@ -143,7 +143,6 @@ async function startServer() {
     // Start the server even if database failed
     app.listen(PORT, HOST, () => {
       serverStarted = true;
-      .join(", ")}`);
       });
   } catch (error) {
     process.exit(1);

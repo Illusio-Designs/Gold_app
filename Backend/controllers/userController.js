@@ -253,7 +253,6 @@ async function businessLogin(req, res) {
             (insertErr, insertResult) => {
               if (insertErr) {
                 } else {
-                to all ${categoryIds.length} active categories`);
               }
             }
           );
@@ -467,7 +466,6 @@ async function updateUser(req, res) {
 
     // Log incoming request for debugging
     if (!req.file) {
-      );
     }
 
     // Validate required fields

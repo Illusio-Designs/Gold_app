@@ -133,7 +133,6 @@ class SocketService {
   broadcastToOthers(socketId, event, data) {
     if (this.io) {
       this.io.to(socketId).emit(event, data);
-      `);
     }
   }
 
@@ -232,8 +231,6 @@ class SocketService {
       timestamp: new Date().toISOString(),
       type: 'registration_status_change'
     });
-    
-    `);
   }
 
   /**
@@ -256,8 +253,6 @@ class SocketService {
       timestamp: new Date().toISOString(),
       type: 'login_request_status_change'
     });
-    
-    `);
   }
 
   /**

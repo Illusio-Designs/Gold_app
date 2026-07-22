@@ -137,9 +137,6 @@ async function createNotification(req, res) {
 
 // Get user notifications
 function getUserNotifications(req, res) {
-  .toISOString(),
-  });
-
   const { userId } = req.params;
   const { page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
@@ -153,9 +150,6 @@ function getUserNotifications(req, res) {
     LIMIT ? OFFSET ?
   `;
 
-  ,
-    offset,
-  });
   db.query(sql, [userId, parseInt(limit), offset], (err, results) => {
     if (err) {
       return res.status(500).json({ error: "Failed to get notifications" });
@@ -171,9 +165,6 @@ function getUserNotifications(req, res) {
 
 // Get unread count for a user
 function getUnreadCount(req, res) {
-  .toISOString(),
-  });
-
   const { userId } = req.params;
 
   const sql = `
@@ -266,8 +257,6 @@ function registerFCMToken(req, res) {
     return res.status(400).json({ error: "FCM token is required" });
   }
 
-  + "..."
-  );
   const sql = `
     INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
     VALUES (?, ?, ?, true, NOW())
@@ -295,10 +284,6 @@ function registerFCMTokenUnauth(req, res) {
     if (!token) {
       return res.status(400).json({ error: "FCM token is required" });
     }
-
-    + "...",
-      deviceType,
-    });
 
     const sql = `
       INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)

@@ -148,20 +148,6 @@ function deleteProductImage(productId, imageIndex, callback) {
 
 // Get all products (only active ones)
 function getAllProducts(callback) {
-  // First, let's check all products to see what status values exist
-  db.query(
-    "SELECT id, name, status, stock_status FROM products ORDER BY created_at DESC",
-    (debugErr, debugResults) => {
-      if (debugErr) {
-        } else {
-        => p.status === "active").length
-        );
-        => p.status === "draft").length
-        );
-      }
-    }
-  );
-
   const sql =
     "SELECT * FROM products WHERE status = 'active' ORDER BY created_at DESC";
 

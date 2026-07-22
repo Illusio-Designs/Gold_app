@@ -87,9 +87,6 @@ function createOrder(order, callback) {
 
 // Create order from cart items (multiple products)
 function createOrderFromCart(userId, cartItems, orderDetails, callback) {
-  "
-  );
-
   const orderIds = [];
   let completedCount = 0;
   let hasError = false;

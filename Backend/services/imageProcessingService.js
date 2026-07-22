@@ -152,9 +152,6 @@ class ImageProcessingService {
    */
   async processProductImage(inputPath, filename) {
     try {
-      }`
-      );
-
       // Use enhanced processing for new uploads
       const EnhancedImageProcessingService = require("./enhancedImageProcessingService");
       const enhancedService = new EnhancedImageProcessingService();

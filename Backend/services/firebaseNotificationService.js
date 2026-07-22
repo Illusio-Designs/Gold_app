@@ -39,13 +39,6 @@ try {
  * @returns {Promise<Object>} - Firebase response
  */
 async function sendNotification(fcmToken, title, body, data = {}) {
-  + '...' : 'null',
-    title,
-    body,
-    dataKeys: Object.keys(data),
-    timestamp: new Date().toISOString()
-  });
-
   try {
     const message = {
       token: fcmToken,
@@ -73,9 +66,6 @@ async function sendNotification(fcmToken, title, body, data = {}) {
         },
       },
     };
-
-    .length
-    });
 
     const response = await admin.messaging().send(message);
     return { success: true, messageId: response };

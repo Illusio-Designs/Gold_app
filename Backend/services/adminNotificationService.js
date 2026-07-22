@@ -40,10 +40,6 @@ const NOTIFICATION_TYPES = {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function sendAdminNotification(type, title, body, data = {}) {
-  ,
-    timestamp: new Date().toISOString()
-  });
-
   try {
     // Get admin user ID (assuming admin has ID 1)
     const adminUserId = 1;
@@ -68,10 +64,7 @@ async function sendAdminNotification(type, title, body, data = {}) {
         }
 
         const adminToken = tokenResults[0].token;
-        + '...',
-          fullToken: adminToken
-        });
-        
+
         // Add notification type and sound to data (all values must be strings for Firebase)
         const typeKey = (type || '').toString().toUpperCase();
         const notificationData = {
@@ -85,17 +78,15 @@ async function sendAdminNotification(type, title, body, data = {}) {
           timestamp: new Date().toISOString()
         };
 
-        });
-
         // Create notification record in database
         const insertNotificationSql = `
-          INSERT INTO notifications (user_id, title, body, type, data, created_at) 
+          INSERT INTO notifications (user_id, title, body, type, data, created_at)
           VALUES (?, ?, ?, ?, ?, ?)
         `;
 
         // Check for duplicate notifications to prevent spam (within last 1 minute)
         const checkDuplicateSql = `
-          SELECT id FROM notifications 
+          SELECT id FROM notifications
           WHERE user_id = ? AND type = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)
           LIMIT 1
         `;
@@ -108,10 +99,6 @@ async function sendAdminNotification(type, title, body, data = {}) {
             return;
           }
 
-          ,
-            created_at: new Date()
-          });
-          
           db.query(insertNotificationSql, [
             adminUserId,
             title,
@@ -129,9 +116,7 @@ async function sendAdminNotification(type, title, body, data = {}) {
             // Send push notification to admin
             try {
               const pushResult = await sendNotification(adminToken, title, body, notificationData);
-              + '...'
-              });
-              
+
               // Mark notification as unread for admin in user_notifications table
               const markUnreadSql = `
                 INSERT INTO user_notifications (user_id, notification_id, read_at)
@@ -143,9 +128,6 @@ async function sendAdminNotification(type, title, body, data = {}) {
                 if (markErr) {
                   } else {
                   }
-              });
-
-              + '...'
               });
 
               resolve({
@@ -310,9 +292,7 @@ async function notifyLoginRequestStatusChange(requestData) {
 
   // Use a more specific notification type for status changes
   const notificationType = requestData.status === 'approved' ? 'login_approved' : 'login_rejected';
-  
-  });
-  
+
   // Send FCM push notification first
   const pushResult = await sendUserNotification(requestData.userId, notificationType, title, body, data);
   
@@ -366,10 +346,6 @@ async function notifyOrderStatusChange(orderData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function sendUserNotification(userId, type, title, body, data = {}) {
-  ,
-    timestamp: new Date().toISOString()
-  });
-
   try {
     // For login approval notifications, also check for unauthenticated tokens
     // This handles the case where user hasn't logged in yet but has the app installed
@@ -381,13 +357,11 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
         ORDER BY user_id DESC, created_at DESC
         LIMIT 1
       `;
-      ...');
     } else {
       getTokensSql = `
         SELECT token FROM notification_tokens 
         WHERE user_id = ? AND active = true
       `;
-      ...');
     }
 
     return new Promise((resolve, reject) => {
@@ -396,10 +370,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           reject({ success: false, error: 'Failed to get tokens' });
           return;
         }
-
-                         + '...' : 'null'
-          }))
-        });
 
         if (tokenResults.length === 0) {
           // For login notifications, try to find any unauthenticated token as fallback
@@ -429,8 +399,7 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
               
               // Use fallback token
               const fallbackToken = fallbackResults[0].token;
-              + '...');
-              
+
               // Continue with notification sending using fallback token
               const typeKey = (type || '').toString().toUpperCase();
               const notificationData = {
@@ -465,11 +434,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
 
          // Get user's token (authenticated only)
          const userToken = tokenResults[0].token;
-         :', {
-           tokenLength: userToken.length,
-           tokenPreview: userToken.substring(0, 20) + '...',
-           totalTokensFound: tokenResults.length
-         });
 
         // Add notification type and sound to data (all values must be strings for Firebase)
         const typeKey = (type || '').toString().toUpperCase();
@@ -484,17 +448,15 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           timestamp: new Date().toISOString()
         };
 
-        });
-
         // Create notification record in database
         const insertNotificationSql = `
-          INSERT INTO notifications (user_id, title, body, type, data, created_at) 
+          INSERT INTO notifications (user_id, title, body, type, data, created_at)
           VALUES (?, ?, ?, ?, ?, ?)
         `;
 
         // Check for duplicate notifications to prevent spam (within last 1 minute)
         const checkDuplicateSql = `
-          SELECT id FROM notifications 
+          SELECT id FROM notifications
           WHERE user_id = ? AND type = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)
           LIMIT 1
         `;
@@ -507,10 +469,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             return;
           }
 
-          ,
-            created_at: new Date()
-          });
-          
           db.query(insertNotificationSql, [
             userId,
             title,
@@ -528,8 +486,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             // Send push notification to user
             try {
               const pushResult = await sendNotification(userToken, title, body, notificationData);
-              + '...'
-              });
 
               // Mark notification as unread for user
               const markUnreadSql = `
@@ -544,8 +500,6 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
                   }
               });
 
-              + '...'
-              });
               resolve({ success: true, notificationId, pushResult });
             } catch (pushError) {
               reject({ success: false, error: 'Failed to send push notification' });

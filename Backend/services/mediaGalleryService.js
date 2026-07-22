@@ -242,13 +242,11 @@ class MediaGalleryService {
           
           categories.forEach(category => {
             const imagePath = path.join(this.uploadDirs.category, category.image);
-            - Image: ${category.image}`);
             if (!fs.existsSync(imagePath)) {
               // Image file doesn't exist, remove from database
               db.query('UPDATE categories SET image = NULL WHERE id = ?', [category.id], (updateErr) => {
                 if (updateErr) {
                   } else {
-                  `);
                   cleanedCount++;
                   categoryCleaned++;
                 }
@@ -266,13 +264,11 @@ class MediaGalleryService {
             
             products.forEach(product => {
               const imagePath = path.join(this.uploadDirs.product, product.image);
-              - Image: ${product.image}`);
               if (!fs.existsSync(imagePath)) {
                 // Image file doesn't exist, remove from database
                 db.query('UPDATE products SET image = NULL WHERE id = ?', [product.id], (updateErr) => {
                   if (updateErr) {
                     } else {
-                    `);
                     cleanedCount++;
                     productCleaned++;
                   }

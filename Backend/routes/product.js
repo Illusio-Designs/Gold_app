@@ -88,8 +88,6 @@ router.post(
       // Convert to JSON
       const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-      );
-
       // Clean up uploaded file
       const fs = require("fs");
       if (fs.existsSync(req.file.path)) {

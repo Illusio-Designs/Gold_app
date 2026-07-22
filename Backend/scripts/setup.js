@@ -292,27 +292,6 @@ async function createTablesAndAdmin() {
 
     // Step 4: Update existing tables with new fields
     await updateExistingTables();
-
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    ");
-    "
-    );
-    ");
-    ");
-    ");
-    ");
     } catch (error) {
     throw error;
   }
@@ -511,8 +490,6 @@ async function updateExistingTables() {
       }
 
     } catch (error) {
-    : ${error.message}`
-    );
   }
 }
 

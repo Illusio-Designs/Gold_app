@@ -471,8 +471,6 @@ async function importFromExcel(req, res) {
     // Convert to JSON
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-    );
-
     if (data.length < 2) {
       return res
         .status(400)
@@ -484,8 +482,6 @@ async function importFromExcel(req, res) {
     // Debug: Show exact header names and their positions
     headers.forEach((header, index) => {
       if (header) {
-        `
-        );
       }
     });
 
@@ -553,17 +549,11 @@ async function importFromExcel(req, res) {
         columnIndices[mapping.key] = index;
         // Special debugging for stamp column
         if (mapping.key === "stamp") {
-          }`
-          );
           }
       } else {
         missingColumns.push(mapping.names[0]); // Use first name for error message
         // Special debugging for missing stamp column
         if (mapping.key === "stamp") {
-          }`
-          );
-          => typeof h)
-          );
         }
       }
     }
@@ -612,21 +602,11 @@ async function importFromExcel(req, res) {
         };
 
         categoryGroups[itemName].push(productData);
-        `
-        );
       } catch (error) {
         const errorMsg = `Row ${rowNumber}: ${error.message}`;
         results.errors.push(errorMsg);
       }
     }
-
-    );
-    .map(([name, products]) => [
-          name,
-          products.length,
-        ])
-      )
-    );
 
     // Create/Update categories and products
     for (const [categoryName, products] of Object.entries(categoryGroups)) {
@@ -773,8 +753,6 @@ function createOrUpdateProduct(productData, categoryId) {
       if (results.length > 0) {
         // Product exists, update it
         const existingProductId = results[0].id;
-        , updating...`
-        );
 
         const updateSql = `
           UPDATE products SET 
@@ -862,8 +840,6 @@ async function addWatermarksToExistingProducts(req, res) {
       // Process each product
       products.forEach(async (product) => {
         if (!product.image) {
-          has no image, skipping...`
-          );
           processedCount++;
           return;
         }

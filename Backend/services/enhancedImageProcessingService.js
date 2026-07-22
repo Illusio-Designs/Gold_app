@@ -15,9 +15,6 @@ class EnhancedImageProcessingService {
 
     // Check if watermark file exists
     if (fs.existsSync(this.watermarkPath)) {
-      .size,
-        "bytes"
-      );
     } else {
       }
   }
@@ -162,9 +159,6 @@ class EnhancedImageProcessingService {
    */
   async processNewProductImage(inputPath, filename) {
     try {
-      }`
-      );
-
       // Handle filename - it might be just the filename or contain a path
       let cleanFilename = filename;
       if (filename.includes("/")) {
@@ -194,8 +188,6 @@ class EnhancedImageProcessingService {
           );
         }
       } catch (watermarkError) {
-        ,
-        });
         // Don't continue without watermark - throw the error
         throw new Error(
           `Watermark application failed: ${watermarkError.message}`

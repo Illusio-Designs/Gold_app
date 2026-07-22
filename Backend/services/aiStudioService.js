@@ -58,7 +58,6 @@ class AiStudioService {
         const name = m.name || m.displayName || '';
         return name.replace(/^models\//, ''); // Remove "models/" prefix if present
       });
-      :`, modelNames);
       return modelNames;
     } catch (error) {
       // Return empty array on error
@@ -219,8 +218,7 @@ Return ONLY the enhanced prompt, nothing else.`;
 
       const response = await result.response;
       const enhancedPrompt = response.text().trim();
-      
-      `);
+
       return enhancedPrompt || basePrompt; // Fallback to base prompt if empty
     } catch (error) {
       lastError = error;
@@ -356,8 +354,6 @@ Return ONLY the enhanced prompt, nothing else.`;
    * Generate image using analysis + Sharp enhancement (fallback)
    */
   async _generateImageWithAnalysis(inputImageUrlOrPath, basePrompt, workDir) {
-    ...`);
-    
     const genAI = await this._initGeminiClient();
     const imageData = await this._readImageData(inputImageUrlOrPath);
     const base64Image = imageData.toString("base64");
