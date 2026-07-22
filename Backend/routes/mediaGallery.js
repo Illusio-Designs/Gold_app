@@ -14,27 +14,12 @@ router.get("/all", mediaGalleryController.getAllMedia);
 // Get media statistics
 router.get("/stats", mediaGalleryController.getMediaStats);
 
-// Delete orphaned files
-router.delete("/orphaned", mediaGalleryController.deleteOrphanedFiles);
 
 // Delete specific file
 router.delete("/file", mediaGalleryController.deleteFile);
 
-// Clean up orphaned database records
-router.post(
-  "/cleanup-orphaned-records",
-  mediaGalleryController.cleanupOrphanedRecords
-);
-
 // Get file info - using encoded path parameter
 router.get("/file-info/:encodedPath", mediaGalleryController.getFileInfo);
-
-// Upload media file
-router.post(
-  "/upload",
-  upload.single("image"),
-  mediaGalleryController.uploadMedia
-);
 
 // Upload an image and assign it to a product (auto by file name, watermark applied)
 router.post(
@@ -59,8 +44,6 @@ router.get(
   mediaGalleryController.getMediaItemsWithProcessedImages
 );
 
-// Debug endpoint to check database contents
-router.get("/debug-database", mediaGalleryController.debugDatabaseContents);
 
 // Serve media files
 router.get("/serve/:type/:filename", mediaGalleryController.serveMediaFile);

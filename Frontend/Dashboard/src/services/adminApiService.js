@@ -681,14 +681,6 @@ export const getUsers = (token) =>
     .get("/users", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-// Get stored FCM tokens (for debugging)
-export const getStoredTokens = (token) =>
-  axiosInstance
-    .get("/notifications/debug/tokens", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
 // Subscribe user to topic
 export const subscribeUserToTopic = (userId, topic, token) =>
   axiosInstance
@@ -769,13 +761,6 @@ export const getMediaStats = (token) =>
     })
     .then((r) => r.data);
 
-export const deleteOrphanedFiles = (token) =>
-  axiosInstance
-    .delete("/media-gallery/orphaned", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
 export const deleteMediaFile = (data, token) =>
   axiosInstance
     .delete("/media-gallery/file", {
@@ -788,16 +773,6 @@ export const getFileInfo = (filePath, token) =>
   axiosInstance
     .get(`/media-gallery/file-info/${encodeURIComponent(filePath)}`, {
       headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
-export const uploadMediaFile = (formData, token) =>
-  axiosInstance
-    .post("/media-gallery/upload", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
     })
     .then((r) => r.data);
 
@@ -817,23 +792,6 @@ export const getAvailableItems = (token) =>
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-
-// Debug endpoint to check database contents
-export const debugDatabaseContents = (token) => {
-  console.log("🔍 [API SERVICE] debugDatabaseContents called");
-  return axiosInstance
-    .get("/media-gallery/debug-database", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((response) => {
-      console.log("🔍 [API SERVICE] Debug response:", response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("❌ [API SERVICE] Debug error:", error);
-      throw error;
-    });
-};
 
 // Get media items with actual processed images from products and categories tables
 export const getMediaItemsWithProcessedImages = (token) => {
@@ -902,20 +860,6 @@ export const getQuickStats = (token) =>
 export const updateProductStockStatus = (productId, data, token) =>
   axiosInstance
     .patch(`/products/${productId}/stock-status`, data, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
-export const getProductStockStatus = (productId, token) =>
-  axiosInstance
-    .get(`/products/${productId}/stock-status`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((r) => r.data);
-
-export const getProductStockHistory = (productId, token) =>
-  axiosInstance
-    .get(`/products/${productId}/stock-history`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);

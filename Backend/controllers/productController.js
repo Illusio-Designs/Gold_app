@@ -884,54 +884,6 @@ function updateProductStockStatus(req, res) {
   });
 }
 
-function getProductStockStatus(req, res) {
-  const { id } = req.params;
-
-  productModel.getProductStockStatus(id, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    if (results.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    res.json({
-      product_id: id,
-      stock_status: results[0].stock_status,
-    });
-  });
-}
-
-function getProductStockHistory(req, res) {
-  const { id } = req.params;
-
-  // This would need a new function in the product model
-  // For now, we'll use a direct database query
-  const sql = `
-    SELECT 
-      psh.*,
-      u.name as user_name,
-      o.id as order_id
-    FROM product_stock_history psh
-    LEFT JOIN users u ON psh.user_id = u.id
-    LEFT JOIN orders o ON psh.order_id = o.id
-    WHERE psh.product_id = ?
-    ORDER BY psh.created_at DESC
-  `;
-
-  db.query(sql, [id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    res.json({
-      product_id: id,
-      history: results,
-    });
-  });
-}
-
 module.exports = {
   createProduct,
   getAllProducts,
@@ -945,6 +897,4 @@ module.exports = {
   getProductsByCategory,
   importFromExcel,
   updateProductStockStatus,
-  getProductStockStatus,
-  getProductStockHistory,
 };

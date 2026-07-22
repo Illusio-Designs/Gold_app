@@ -36,13 +36,6 @@ function getMediaStats(req, res) {
     res.json(results[0]);
   });
 }
-
-// Delete orphaned files
-function deleteOrphanedFiles(req, res) {
-  res.json({ message: "Orphaned files deletion not implemented yet" });
-}
-
-// Delete specific file
 function deleteFile(req, res) {
   const { filePath } = req.body;
 
@@ -64,13 +57,6 @@ function deleteFile(req, res) {
     res.json({ message: "File deleted successfully" });
   });
 }
-
-// Clean up orphaned database records
-function cleanupOrphanedRecords(req, res) {
-  res.json({ message: "Cleanup orphaned records not implemented yet" });
-}
-
-// Get file info
 function getFileInfo(req, res) {
   const { encodedPath } = req.params;
   const filePath = decodeURIComponent(encodedPath);
@@ -88,49 +74,6 @@ function getFileInfo(req, res) {
     res.json(results[0]);
   });
 }
-
-// Upload media file
-function uploadMedia(req, res) {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  const { originalname, filename, mimetype, size } = req.file;
-  const filePath = `media/${filename}`;
-  const fileType = mimetype.startsWith("image/") ? "image" : "video";
-
-  const sql = `
-    INSERT INTO media_gallery (original_name, file_name, file_path, file_type, file_size, mime_type)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(
-    sql,
-    [originalname, filename, filePath, fileType, size, mimetype],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-
-      res.json({
-        message: "File uploaded successfully",
-        file: {
-          id: result.insertId,
-          originalName: originalname,
-          fileName: filename,
-          filePath: filePath,
-          fileType: fileType,
-          fileSize: size,
-          mimeType: mimetype,
-        },
-      });
-    }
-  );
-}
-
-// Upload a single image and assign it to a product.
-// Auto-assigns by the uploaded file name (SKU/name match); a watermark is applied.
-// If the file name matches no product (and none is chosen), the upload is rejected.
 async function uploadAndAssign(req, res) {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
@@ -309,86 +252,6 @@ function getAvailableItems(req, res) {
     res.json({ items: results });
   });
 }
-
-// Debug endpoint to check database contents
-function debugDatabaseContents(req, res) {
-  // Check products table
-  db.query("SELECT COUNT(*) as count FROM products", (err, productsCount) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    // Check categories table
-    db.query(
-      "SELECT COUNT(*) as count FROM categories",
-      (err, categoriesCount) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-
-        // Check media_gallery table
-        db.query(
-          "SELECT COUNT(*) as count FROM media_gallery",
-          (err, mediaCount) => {
-            if (err) {
-              return res.status(500).json({ error: err.message });
-            }
-
-            // Get sample data from each table
-            db.query(
-              "SELECT id, name, image, status FROM products WHERE image IS NOT NULL LIMIT 5",
-              (err, products) => {
-                if (err) {
-                  return res.status(500).json({ error: err.message });
-                }
-
-                db.query(
-                  "SELECT id, name, image, status FROM categories WHERE image IS NOT NULL LIMIT 5",
-                  (err, categories) => {
-                    if (err) {
-                      return res.status(500).json({ error: err.message });
-                    }
-
-                    db.query(
-                      "SELECT id, title, file_url, category FROM media_gallery LIMIT 5",
-                      (err, media) => {
-                        if (err) {
-                          return res.status(500).json({ error: err.message });
-                        }
-
-                        const debugInfo = {
-                          counts: {
-                            products: productsCount[0].count,
-                            categories: categoriesCount[0].count,
-                            media_gallery: mediaCount[0].count,
-                          },
-                          samples: {
-                            products: products,
-                            categories: categories,
-                            media_gallery: media,
-                          },
-                          database: {
-                            name: process.env.DB_NAME,
-                            host: process.env.DB_HOST,
-                            user: process.env.DB_USER,
-                          },
-                        };
-
-                        res.json({ success: true, debug: debugInfo });
-                      }
-                    );
-                  }
-                );
-              }
-            );
-          }
-        );
-      }
-    );
-  });
-}
-
-// Get media items with actual processed images from products, categories, and media_gallery tables
 function getMediaItemsWithProcessedImages(req, res) {
   // First, let's check what data actually exists with more flexible conditions
   // Check products with any image data
@@ -760,15 +623,11 @@ function serveMediaFile(req, res) {
 module.exports = {
   getAllMedia,
   getMediaStats,
-  deleteOrphanedFiles,
   deleteFile,
-  cleanupOrphanedRecords,
   getFileInfo,
-  uploadMedia,
   uploadAndAssign,
   bulkUploadMedia,
   getAvailableItems,
   getMediaItemsWithProcessedImages,
-  debugDatabaseContents,
   serveMediaFile,
 };

@@ -13,7 +13,6 @@ import {
   bulkUploadMediaFiles,
   getMediaItemsWithProcessedImages,
   deleteMediaFile,
-  debugDatabaseContents,
 } from "../services/adminApiService";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import "../styles/pages/MediaGalleryPage.css";
@@ -209,16 +208,6 @@ const MediaGalleryPage = () => {
     setAutoDetectEnabled(true);
   };
 
-  const handleDebugDatabase = async () => {
-    try {
-      const token = localStorage.getItem("admin_token");
-      await debugDatabaseContents(token);
-      showSuccessToast("Database debug info logged to console");
-    } catch (error) {
-      showErrorToast("Failed to debug database");
-    }
-  };
-
   const getFileUrl = useCallback((type, filename) => {
     if (!filename) {
       return null;
@@ -337,13 +326,6 @@ const MediaGalleryPage = () => {
             >
               <Upload size={16} />
               Upload Images
-            </button>
-            <button
-              className="upload-btn"
-              onClick={handleDebugDatabase}
-              style={{ backgroundColor: "#ff6b6b" }}
-            >
-              🔍 Debug Database
             </button>
           </div>
         </div>

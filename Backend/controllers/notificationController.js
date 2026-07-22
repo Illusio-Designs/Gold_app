@@ -275,123 +275,6 @@ function registerFCMToken(req, res) {
     res.json({ message: "FCM token registered successfully" });
   });
 }
-
-// Register FCM token for unauthenticated user
-function registerFCMTokenUnauth(req, res) {
-  try {
-    const { token, deviceType = "mobile", userId = null } = req.body;
-
-    if (!token) {
-      return res.status(400).json({ error: "FCM token is required" });
-    }
-
-    const sql = `
-      INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
-      VALUES (?, ?, ?, true, NOW())
-      ON DUPLICATE KEY UPDATE 
-        user_id = COALESCE(notification_tokens.user_id, VALUES(user_id)),
-        device_type = VALUES(device_type),
-        active = true,
-        updated_at = NOW()
-    `;
-
-    db.query(sql, [userId, token, deviceType], (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: "Failed to register FCM token" });
-      }
-
-      res.json({
-        success: true,
-        message: "FCM token registered successfully",
-        userId: userId || null,
-      });
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
-  }
-}
-
-// Get stored tokens (admin only)
-function getStoredTokens(req, res) {
-  // Get stored tokens for debugging
-
-  const { userId } = req.query;
-
-  let sql = "SELECT * FROM notification_tokens WHERE active = true";
-  let params = [];
-
-  if (userId) {
-    sql += " AND user_id = ?";
-    params.push(userId);
-  }
-
-  sql += " ORDER BY created_at DESC";
-
-  // Execute query
-  db.query(sql, params, (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to get stored tokens" });
-    }
-
-    if (results.length > 0) {
-      }
-
-    // If userId is provided, also check user info
-    if (userId) {
-      const userSql =
-        "SELECT id, name, email, status, created_at FROM users WHERE id = ?";
-      db.query(userSql, [userId], (userErr, userResults) => {
-        if (userErr) {
-          } else if (userResults.length > 0) {
-          const user = userResults[0];
-          }
-
-        // Return token details with user info
-        const formattedResults = results.map((t) => ({
-          id: t.id,
-          user_id: t.user_id,
-          token_preview: t.token ? t.token.substring(0, 20) + "..." : "null",
-          device_type: t.device_type,
-          active: t.active,
-          created_at: t.created_at,
-        }));
-
-        res.json({
-          tokens: formattedResults,
-          totalCount: results.length,
-          hasTokens: results.length > 0,
-          user: userResults.length > 0 ? userResults[0] : null,
-          notificationStatus: {
-            hasFCMToken: results.length > 0,
-            tokenCount: results.length,
-            canReceiveNotifications: results.length > 0,
-          },
-        });
-      });
-    } else {
-      // Return token details without user info
-      const formattedResults = results.map((t) => ({
-        id: t.id,
-        user_id: t.user_id,
-        token_preview: t.token ? t.token.substring(0, 20) + "..." : "null",
-        device_type: t.device_type,
-        active: t.active,
-        created_at: t.created_at,
-      }));
-
-      res.json({
-        tokens: formattedResults,
-        totalCount: results.length,
-        hasTokens: results.length > 0,
-      });
-    }
-  });
-}
-
-// Subscribe user to topic
 function subscribeUserToTopic(req, res) {
   const { userId, topic } = req.body;
 
@@ -509,8 +392,6 @@ module.exports = {
   markAllAsRead,
   deleteNotification,
   registerFCMToken,
-  registerFCMTokenUnauth,
-  getStoredTokens,
   subscribeUserToTopic,
   unsubscribeUserFromTopic,
   getVapidKey,

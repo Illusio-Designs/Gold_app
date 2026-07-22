@@ -17,8 +17,6 @@ router.patch(
   requireAdmin,
   productController.updateProductStockStatus
 );
-router.get("/:id/stock-status", productController.getProductStockStatus);
-router.get("/:id/stock-history", productController.getProductStockHistory);
 
 // Protected routes (require authentication)
 router.post(
