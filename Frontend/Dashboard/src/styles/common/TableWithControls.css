@@ -60,11 +60,49 @@
   flex: 0 1 auto;
 }
 
-/* On narrow screens, let the toolbar controls wrap again. */
-@media (max-width: 820px) {
+/* Tablet: let the toolbar controls wrap. */
+@media (max-width: 820px) and (min-width: 641px) {
   .controls-right {
     flex-wrap: wrap;
     justify-content: flex-end;
+  }
+}
+
+/* Mobile: stack the whole toolbar full-width (title, then search, filters and
+   action buttons each spanning the full width — no right-aligned gap). */
+@media (max-width: 640px) {
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .controls-left {
+    width: 100%;
+  }
+  .controls-right {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  /* Search, filters and any action wrapper all go full width */
+  .controls-right > *,
+  .controls-right .search-form,
+  .controls-right .modern-searchbar-form,
+  .controls-right .dropdown-select {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+  }
+  /* Action button groups stretch their buttons to share the row */
+  .controls-right .action-buttons,
+  .controls-right [class*="btn"] {
+    width: 100%;
+  }
+  .controls-right button,
+  .controls-right .common-button {
+    flex: 1 1 auto;
+    justify-content: center;
   }
 }
 

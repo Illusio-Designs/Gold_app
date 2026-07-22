@@ -178,10 +178,23 @@ export default function DashboardLayout() {
   }, []);
 
   const getPageTitle = () => {
-    const currentLink = SidebarLinks.find((link) =>
-      location.pathname.startsWith(link.path)
-    );
-    return currentLink ? currentLink.name : "Dashboard";
+    const path = location.pathname;
+    // Pages not in the sidebar.
+    const extra = {
+      "/dashboard/settings": "Settings",
+      "/dashboard/profile": "Profile",
+      "/dashboard/notifications": "Notifications",
+      "/dashboard/account-deletion": "Account Deletion",
+    };
+    if (extra[path]) return extra[path];
+
+    // Match the most specific sidebar link. The "/dashboard" root must match
+    // exactly, otherwise it would win for every sub-path via startsWith.
+    const match = SidebarLinks.filter((link) =>
+      link.path === "/dashboard" ? path === "/dashboard" : path.startsWith(link.path)
+    ).sort((a, b) => b.path.length - a.path.length)[0];
+
+    return match ? match.name : "Dashboard";
   };
 
   const handleLogout = () => {

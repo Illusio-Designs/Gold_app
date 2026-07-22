@@ -513,9 +513,18 @@ body {
   }
   
   .header-actions {
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    align-items: center;
   }
-  
+
+  .dashboard-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .header-icon-btn {
     min-width: 36px;
     min-height: 36px;
