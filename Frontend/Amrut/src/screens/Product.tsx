@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'rea
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import CustomHeader from '../components/common/CustomHeader';
 import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
@@ -62,6 +63,20 @@ const Product = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { addToCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
+
+  const onHeart = (item: any) =>
+    toggleWishlist({
+      id: item.id,
+      name: item.name,
+      image: item.image,
+      sku: item.sku,
+      category_name: item.category_name,
+      gross_weight: item.gross_weight,
+      net_weight: item.net_weight,
+      size: item.size,
+      length: item.length,
+    });
 
   // Check if user is logged in
   useEffect(() => {
@@ -421,10 +436,18 @@ const Product = () => {
           {filteredProducts.map((item, idx) => {
             return (
               <FadeInSlide key={item.id || idx} delay={Math.min(idx, 8) * 55} style={styles.cardWrap}>
-                <PressableScale
-                  style={styles.card}
-                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-                >
+                <View style={styles.card}>
+                  {/* Wishlist heart at top-left */}
+                  <TouchableOpacity
+                    style={styles.heartBtn}
+                    onPress={() => onHeart(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.heartGlyph, isWishlisted(item.id) && styles.heartActive]}>
+                      {isWishlisted(item.id) ? '♥' : '♡'}
+                    </Text>
+                  </TouchableOpacity>
+
                   {/* Cart icon at top-right */}
                   <TouchableOpacity
                     style={styles.cartIconContainer}
@@ -434,11 +457,25 @@ const Product = () => {
                     <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
                   </TouchableOpacity>
 
-                  {/* Product Image - Using our custom render function */}
-                  {renderProductImage(item)}
+                  {/* Product Image - tap to view */}
+                  <TouchableOpacity
+                    style={styles.imageTouch}
+                    activeOpacity={0.85}
+                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                  >
+                    {renderProductImage(item)}
+                    <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
+                  </TouchableOpacity>
 
-                  <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
-                </PressableScale>
+                  {/* View button */}
+                  <PressableScale
+                    style={styles.viewBtn}
+                    activeScale={0.96}
+                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                  >
+                    <Text style={styles.viewText}>View</Text>
+                  </PressableScale>
+                </View>
               </FadeInSlide>
             );
           })}
@@ -553,16 +590,58 @@ const styles = StyleSheet.create({
     borderColor: '#EADBC8',
     alignItems: 'center',
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 10,
     paddingHorizontal: 8,
     width: '100%',
-    height: 178,
-    position: 'relative', // for absolute positioning of cart icon
+    position: 'relative', // for absolute positioning of cart/heart icons
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  imageTouch: {
+    width: '100%',
+  },
+  heartBtn: {
+    position: 'absolute',
+    top: 8,
+    left: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FCE2BF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  heartGlyph: {
+    color: '#5D0829',
+    fontSize: 16,
+    marginTop: -1,
+  },
+  heartActive: {
+    color: '#C0392B',
+  },
+  viewBtn: {
+    marginTop: 10,
+    backgroundColor: '#5D0829',
+    borderRadius: 10,
+    paddingVertical: 8,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewText: {
+    color: '#FCE2BF',
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontSize: 13,
+    fontWeight: '700',
   },
   cartIconContainer: {
     position: 'absolute',

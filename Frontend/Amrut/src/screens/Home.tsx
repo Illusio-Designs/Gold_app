@@ -6,6 +6,7 @@ import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
 import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
+import { useWishlist } from '../context/WishlistContext';
 import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -24,24 +25,43 @@ type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }) => {
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const saved = isWishlisted(product.id);
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
-  // Optional sub-label under the name (category) — only when it adds info.
-  const subLabel = product.category_name && product.category_name !== product.name
-    ? String(product.category_name)
-    : '';
+
+  const onHeart = () =>
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      sku: product.sku,
+      category_name: product.category_name,
+      gross_weight: product.gross_weight,
+      net_weight: product.net_weight,
+      size: product.size,
+      length: product.length,
+    });
+
   return (
   <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
-    <PressableScale style={productCardStyles.card} onPress={onPress}>
-      <View style={productCardStyles.imageWrap}>
+    <View style={productCardStyles.card}>
+      <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
         <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
-      </View>
+      </TouchableOpacity>
+      {/* Wishlist heart */}
+      <TouchableOpacity style={productCardStyles.heartBtn} onPress={onHeart} activeOpacity={0.7}>
+        <Text style={[productCardStyles.heartGlyph, saved && productCardStyles.heartActive]}>{saved ? '♥' : '♡'}</Text>
+      </TouchableOpacity>
       <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
-      {subLabel ? <Text style={productCardStyles.sku} numberOfLines={1}>{subLabel.toUpperCase()}</Text> : null}
-    </PressableScale>
+      {/* View button */}
+      <PressableScale style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
+        <Text style={productCardStyles.viewText}>View</Text>
+      </PressableScale>
+    </View>
   </FadeInSlide>
 );
 };
@@ -57,6 +77,7 @@ const Home = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const navigation = useNavigation();
+  const { count: wishCount } = useWishlist();
 
   // Add error boundary
   const [hasError, setHasError] = useState(false);
@@ -444,6 +465,18 @@ const Home = () => {
           <Text style={styles.greetName}>Amrut Jewels</Text>
         </View>
         <TouchableOpacity
+          style={styles.wishIconBtn}
+          onPress={() => (navigation as any).navigate('Wishlist')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.wishIconGlyph}>♥</Text>
+          {wishCount > 0 ? (
+            <View style={styles.wishBadge}>
+              <Text style={styles.wishBadgeText}>{wishCount > 9 ? '9+' : wishCount}</Text>
+            </View>
+          ) : null}
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.searchIconBtn}
           onPress={() => (navigation as any).navigate('Search')}
           activeOpacity={0.8}
@@ -556,6 +589,41 @@ const styles = StyleSheet.create({
     borderColor: '#EEE3D3',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  wishIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  wishIconGlyph: {
+    color: '#5D0829',
+    fontSize: 20,
+    marginTop: -1,
+  },
+  wishBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#C0392B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: '#fff',
+  },
+  wishBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
   },
   searchIconImg: {
     width: 20,
@@ -688,10 +756,10 @@ const productCardStyles = StyleSheet.create({
     borderColor: '#EADBC8',
     alignItems: 'center',
     paddingTop: hp('1%'),
-    paddingBottom: hp('1%'),
+    paddingBottom: hp('1.2%'),
     paddingHorizontal: wp('2%'),
     width: '100%',
-    height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.2%') : hp('17.6%'),
+    position: 'relative',
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -709,6 +777,30 @@ const productCardStyles = StyleSheet.create({
     height: isSmallScreen() ? hp('11.8%') : isMediumScreen() ? hp('11.8%') : hp('11.4%'),
     borderRadius: wp('3.2%'),
   },
+  heartBtn: {
+    position: 'absolute',
+    top: hp('1.6%'),
+    right: wp('4%'),
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FCE2BF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  heartGlyph: {
+    color: '#5D0829',
+    fontSize: 16,
+    marginTop: -1,
+  },
+  heartActive: {
+    color: '#C0392B',
+  },
   name: {
     color: '#5D0829',
     fontFamily: 'Glorifydemo-BW3J3',
@@ -716,6 +808,21 @@ const productCardStyles = StyleSheet.create({
     fontWeight: '700',
     marginTop: hp('0.9%'),
     textAlign: 'center',
+  },
+  viewBtn: {
+    marginTop: hp('0.9%'),
+    backgroundColor: '#5D0829',
+    borderRadius: 10,
+    paddingVertical: hp('0.9%'),
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewText: {
+    color: '#FCE2BF',
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontSize: wp('3.4%'),
+    fontWeight: '700',
   },
   sku: {
     color: '#C09E83',
