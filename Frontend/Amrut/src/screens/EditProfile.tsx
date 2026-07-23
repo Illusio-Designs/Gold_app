@@ -22,7 +22,7 @@ const EditProfile = () => {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [pin, setPin] = useState('');
-  const [name, setName] = useState('Wade Warrant');
+  const [name, setName] = useState('Guest');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address1, setAddress1] = useState('');

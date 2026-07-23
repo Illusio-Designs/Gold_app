@@ -21,7 +21,7 @@ const FamilyTree = ({ navigation }: Props) => {
         console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
       }
       navigation.replace('MainTabs');
-    }, 5000); // 5 seconds
+    }, 3000); // 3 seconds
     return () => clearTimeout(timer);
   }, [navigation]);
 

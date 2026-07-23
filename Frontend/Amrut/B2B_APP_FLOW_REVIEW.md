@@ -4,7 +4,7 @@
 > **Reviewed against:** production backend `https://api.amrutkumargovinddasllp.com/api`
 > **Purpose:** map the end-to-end user flow, list every break / stale / inconsistency,
 > and give a prioritized plan to make the app behave correctly against the current backend.
-> **Status:** review only — no code changed yet.
+> **Status:** ✅ **Resolved** — all four tiers implemented (see §6 "Resolution" below).
 
 ---
 
@@ -126,6 +126,21 @@ and a bypassed *account-deletion* endpoint, not broken API calls.
   behavior/product choice, so flagged for confirmation rather than assumed.
 
 ---
+
+## 6. Resolution (implemented)
+
+| Finding | Fix |
+|---|---|
+| I1 account deletion | `Profile.tsx` now opens our portal `https://amrutkumargovinddasllp.com/delete` (→ `/api/account-deletion`); external Netlify URL removed. |
+| S1–S4 approval leftovers | Removed pending/approved branch (`Login.tsx`), Home approval dead-branches, approval notif types (`NotificationService.ts` → generic keyword mapping), approval socket listeners (`SocketService.js`, `useUserSocket.js`). |
+| I2 guest catalog | `Home.tsx` loads categories & products for everyone (guest-browsable), matching the backend serving all data. |
+| B1 cart fallback | `Product.tsx` requires a real SKU; no more `RMB1021`/`2.512` placeholders → can't add the wrong product. |
+| B2 / S6 image URLs | `imageUtils.ts` product image uses the resolved `BACKEND_URL`; `localhost→prod` slider hack removed. |
+| P1 MSG91 creds | Moved from `Login.tsx` into `.env` (`MSG91_WIDGET_ID`/`MSG91_TOKEN_AUTH`, read via `@env`). *Note: `.env` is tracked; these are client-side widget creds shipped in the binary — to fully remove from the repo, gitignore `.env` and inject at build time.* |
+| S5 / S7 stale config | `172.20.10.10:3001` fallbacks → production host; commented `192.168.x` removed from `.env`. |
+| I3 socket auth | `RealtimeDataService` connects with the stored token and reconnects authenticated after login → user-room order/cart events work. |
+| I4 order status | Buyer order view is now **read-only** (Update-Status button + modal removed); status changes only from the admin dashboard. |
+| P2–P6 polish | `'Wade Warrant'` → `'Guest'`; removed dead files (`EditProfile.tsx.backup`, `debug-tokens.js`, `checkHermes.js`, `SocketDebugger.jsx`); trimmed console noise; onboarding timers 5s→3s; cart weight rounded (NaN-safe). |
 
 ## 5. Notes
 - All secrets (FTP, MSG91) belong in environment config / GitHub Actions secrets, never in

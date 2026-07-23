@@ -26,8 +26,6 @@ type ProductCardProps = {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
-console.log("imageSource",imageUrl)
-
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
@@ -94,35 +92,12 @@ const Home = () => {
       setCategoriesLoading(true);
       setCategoriesError(null);
       
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Fetching approved categories for user:', userId);
-        console.log('[Home] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
-        
-        try {
-          const response = await getApprovedCategoriesForUser(userId, accessToken);
-          console.log('[Home] Approved categories response:', response);
-          
-          if (response && response.success && response.data && response.data.length > 0) {
-            setCategories(response.data);
-            console.log('[Home] Set approved categories:', response.data.length, 'categories');
-            console.log('[Home] Approved categories names:', response.data.map((cat: any) => cat.name));
-          } else {
-            console.log('[Home] No approved categories found - user may not have approved login request yet');
-            console.log('[Home] Setting empty categories array - user needs to request login first');
-            setCategories([]);
-          }
-        } catch (apiError: any) {
-          console.error('[Home] Error calling getApprovedCategoriesForUser:', apiError);
-          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty state');
-            setCategories([]);
-          } else {
-            console.log('[Home] Setting empty categories array due to API error');
-            setCategories([]);
-          }
-        }
+      // Catalog is public — the backend serves all categories to everyone,
+      // logged in or not, so the storefront is fully browsable as a guest.
+      const response = await getApprovedCategoriesForUser(userId, accessToken);
+      if (response && response.success && Array.isArray(response.data)) {
+        setCategories(response.data);
       } else {
-        console.log('[Home] User not logged in - showing empty categories');
         setCategories([]);
       }
     } catch (err) {
@@ -161,36 +136,14 @@ const Home = () => {
   const loadProducts = async () => {
     try {
       setProductsLoading(true);
-      let response;
-      
-      if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Loading approved products for user:', userId);
-        try {
-          // Use filtered products for logged-in users
-          response = await getApprovedProductsForUser(userId, accessToken);
-          console.log('[Home] Approved products response:', response);
-          if (response.success && response.data && response.data.length > 0) {
-            setAllProducts(response.data); // Store all products
-            setProducts(response.data); // Initially show all products
-            console.log('[Home] Loaded approved products:', response.data.length);
-          } else {
-            console.log('[Home] No approved products found - user may not have approved login request yet');
-            setAllProducts([]);
-            setProducts([]);
-          }
-        } catch (apiError: any) {
-          console.error('[Home] Error calling getApprovedProductsForUser:', apiError);
-          if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty products');
-            setProducts([]);
-          } else {
-            console.log('[Home] Setting empty products array due to API error');
-            setAllProducts([]);
-            setProducts([]);
-          }
-        }
+
+      // Products are public — served to everyone regardless of auth, so guests
+      // can browse the full catalog just like logged-in users.
+      const response = await getApprovedProductsForUser(userId, accessToken);
+      if (response && response.success && Array.isArray(response.data)) {
+        setAllProducts(response.data); // Store all products
+        setProducts(response.data); // Initially show all products
       } else {
-        console.log('[Home] User not logged in - showing empty products');
         setAllProducts([]);
         setProducts([]);
       }
@@ -216,13 +169,7 @@ const Home = () => {
     getSliders,
     []
   );
-  console.log("slidersData:", slidersData);
-  
-  // Process sliders response and fix localhost URLs
-  const slidersResponse = (slidersData?.data || []).map((slider: any) => ({
-    ...slider,
-    image_url: slider.image_url ? slider.image_url.replace('http://localhost:3001', 'https://api.amrutkumargovinddasllp.com') : slider.image_url
-  }));
+  const slidersResponse = slidersData?.data || [];
   const slidersLoading = slidersData?.loading || false;
   const slidersError = slidersData?.error || null;
   const refreshSliders = slidersData?.refresh || (() => {});
@@ -232,11 +179,6 @@ const Home = () => {
   useEffect(() => {
     refreshSlidersRef.current = refreshSliders;
   });
-
-  // Categories are now managed by local state
-  console.log('[Home] Current categories state:', categories);
-  console.log('[Home] User logged in:', isUserLoggedIn);
-  console.log('[Home] User ID:', userId);
 
   // Extract sliders from response
   const sliders = slidersResponse || [];

@@ -26,12 +26,8 @@ axios.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// ✅ Fallback if API_URL is undefined
-export const BASE_URL = API_URL || 'http://172.20.10.10:3001/api';
-// Use your LAN IP if on physical device
-
-console.log('🌍 API_URL from @env:', API_URL);
-console.log('🌍 Using BASE_URL:', BASE_URL);
+// ✅ Fallback if API_URL is undefined — production API host.
+export const BASE_URL = API_URL || 'https://api.amrutkumargovinddasllp.com/api';
 
 // ✅ Register user API call
 export const registerUser = async userData => {

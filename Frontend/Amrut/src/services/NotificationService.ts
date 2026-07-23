@@ -195,23 +195,17 @@ class NotificationService {
         created_at: notification.created_at
       });
 
-      // Determine toast type based on notification type
+      // Determine toast type from the notification type. Generic keyword
+      // mapping so it works for any backend notification (orders, etc.) —
+      // the old login-approval types are no longer used.
       let toastType = 'info'; // default
-      
-      console.log('[NotificationService] Processing notification type:', notification.type);
-      console.log('[NotificationService] Available types: login_approved, login_rejected, login_request');
-      
-      if (notification.type === 'login_approved') {
-        toastType = 'success';
-        console.log('[NotificationService] Matched login_approved -> success toast');
-      } else if (notification.type === 'login_rejected') {
+      const type = (notification.type || '').toLowerCase();
+      if (/reject|cancel|fail|delete|error/.test(type)) {
         toastType = 'error';
-        console.log('[NotificationService] Matched login_rejected -> error toast');
-      } else if (notification.type === 'login_request') {
-        toastType = 'info';
-        console.log('[NotificationService] Matched login_request -> info toast');
-      } else {
-        console.log('[NotificationService] Unknown notification type, using default info toast');
+      } else if (/approve|success|deliver|confirm|complete|paid/.test(type)) {
+        toastType = 'success';
+      } else if (/warn|pending|hold/.test(type)) {
+        toastType = 'warning';
       }
 
       // Show a custom toast notification

@@ -280,32 +280,40 @@ const Product = () => {
 
   const addToCartDirectly = async (product: Product) => {
     try {
+      // A valid SKU is required — CartContext resolves the real product_id via
+      // getProductBySku(sku) before adding it to the backend cart. Never fall
+      // back to a placeholder SKU, or we'd add the wrong product to the cart.
+      if (!product.sku || String(product.sku).trim() === '') {
+        Toast.show({
+          type: 'error',
+          text1: 'Cannot add to cart',
+          text2: 'This product is missing its SKU. Please try again later.',
+          position: 'top',
+          visibilityTime: 2500,
+        });
+        return;
+      }
+
       // Use the same image priority as the display logic - prioritize original image
       let imageUrl = product.image || product.originalImageUrl || product.imageUrl || product.processedImageUrl;
-      
+
       // Use the same URL construction as ProductDetail
       if (imageUrl && !imageUrl.startsWith('http')) {
         imageUrl = getProductImageUrl(imageUrl) || undefined;
       }
-      
-      console.log(`[Product] Adding to cart: ${product.name || product.sku}`);
-      console.log(`[Product] Cart image URL: ${imageUrl || 'No image'}`);
-      
+
       await addToCart({
         image: imageUrl && imageUrl.trim() !== '' ? imageUrl : 'fallback',
         title: product.name || product.sku || 'Product',
         subtitle: 'Jewelry',
-        gWeight: product.gross_weight || '2.512',
-        nWeight: product.net_weight || '2.512',
-        sku: product.sku || 'RMB1021',
-        size: product.size || '18" (46cm)',
-        length: product.length || '12-14 in',
+        gWeight: product.gross_weight || '',
+        nWeight: product.net_weight || '',
+        sku: product.sku,
+        size: product.size || '',
+        length: product.length || '',
         quantity: 1,
       }, 1, '');
-      
-      console.log(`[Product] Added to cart: ${product.name || product.sku} (Quantity: 1)`);
-      console.log(`[Product] Cart image: ${imageUrl || 'No image'}`);
-      
+
       // Show success toast
       Toast.show({
         type: 'success',
@@ -415,21 +423,6 @@ const Product = () => {
       ) : (
         <ScrollView contentContainerStyle={styles.productGrid} showsVerticalScrollIndicator={false}>
           {filteredProducts.map((item, idx) => {
-            // Debug logging for each product
-            console.log(`[Product Screen] Rendering product ${idx + 1}:`, {
-              id: item.id,
-              name: item.name,
-              sku: item.sku,
-              image: item.image,
-              processedImageUrl: item.processedImageUrl,
-              originalImageUrl: item.originalImageUrl,
-              imageUrl: item.imageUrl,
-              imageType: typeof item.image,
-              hasImage: !!item.image,
-              hasProcessedImage: !!item.processedImageUrl,
-              finalImageUrl: item.processedImageUrl || item.imageUrl || item.originalImageUrl || item.image
-            });
-            
             return (
               <TouchableOpacity
                 key={item.id || idx}

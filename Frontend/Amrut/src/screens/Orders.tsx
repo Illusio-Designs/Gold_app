@@ -5,7 +5,7 @@ import CartItemCard from '../components/common/CartItemCard';
 import CustomLoader from '../components/common/CustomLoader';
 import ScreenLoader from '../components/common/ScreenLoader';
 import { useRealtimeData } from '../hooks/useRealtimeData';
-import { getCurrentUserOrders, updateOrderStatus } from '../services/Api';
+import { getCurrentUserOrders } from '../services/Api';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPromptModal from '../components/common/LoginPromptModal';
@@ -32,8 +32,6 @@ const orderTabs = [
 const Orders = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [showStatusModal, setShowStatusModal] = useState(false);
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
 
   // Check if user is logged in when component mounts
@@ -128,40 +126,7 @@ const Orders = () => {
     }
   };
 
-  // Handle order status update
-  const handleStatusUpdate = async (orderId, newStatus) => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-      
-      await updateOrderStatus(orderId, newStatus, token);
-      
-      // Refresh orders to get updated data
-      await refresh();
-      
-      Toast.show({
-        type: 'success',
-        text1: 'Status Updated',
-        text2: `Order status changed to ${orderStatuses[newStatus]?.label || newStatus}`,
-        position: 'top',
-        visibilityTime: 3000
-      });
-      
-      setShowStatusModal(false);
-      setSelectedOrder(null);
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Update Failed',
-        text2: 'Could not update order status',
-        position: 'top',
-        visibilityTime: 3000
-      });
-    }
-  };
+  // Order status is managed by the admin only — the app shows it read-only.
 
   // Handle real-time order updates from socket events
   const handleRealTimeOrderUpdate = (updateData) => {
@@ -188,12 +153,6 @@ const Orders = () => {
       default:
         console.log('[Orders] Unknown order action:', action);
     }
-  };
-
-  // Show status update confirmation
-  const showStatusUpdateModal = (order) => {
-    setSelectedOrder(order);
-    setShowStatusModal(true);
   };
 
   // Get status color for order
@@ -359,63 +318,11 @@ const Orders = () => {
                   <Text style={styles.summaryLabel}>Total Amount:</Text>
                   <Text style={styles.summaryValue}>{formatCurrency(order.total_mark_amount)}</Text>
                 </View>
-                {order.status === 'pending' && (
-                  <TouchableOpacity
-                    style={styles.updateStatusButton}
-                    onPress={() => showStatusUpdateModal(order)}
-                  >
-                    <Text style={styles.updateStatusButtonText}>Update Status</Text>
-                  </TouchableOpacity>
-                )}
               </View>
             </View>
           ))
         )}
       </ScrollView>
-
-      {/* Status Update Modal */}
-      {showStatusModal && selectedOrder && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Update Order Status</Text>
-              <TouchableOpacity
-                onPress={() => setShowStatusModal(false)}
-                style={styles.closeButton}
-              >
-                <Text style={styles.closeButtonText}>×</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.modalBody}>
-              <Text style={styles.modalSubtitle}>
-                Order #{selectedOrder.id} - {selectedOrder.product_name}
-              </Text>
-              
-              <Text style={styles.modalDescription}>
-                Select the new status for this order:
-              </Text>
-              
-              <View style={styles.statusOptions}>
-                {Object.entries(orderStatuses).map(([status, config]) => (
-                  <TouchableOpacity
-                    key={status}
-                    style={[
-                      styles.statusOption,
-                      { backgroundColor: config.bgColor }
-                    ]}
-                    onPress={() => handleStatusUpdate(selectedOrder.id, status)}
-                  >
-                    <Text style={[styles.statusOptionText, { color: config.color }]}>
-                      {config.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
 
       {/* Toast for notifications */}
       <Toast />

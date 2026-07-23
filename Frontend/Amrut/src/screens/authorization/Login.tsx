@@ -19,7 +19,9 @@ import { Country } from '../../data/countries';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { verifyBusinessOTP } from '../../services/Api';
+import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
+import RealtimeDataService from '../../services/RealtimeDataService';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
@@ -28,9 +30,9 @@ import { wp, hp } from '../../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
 import RNOtpVerify from 'react-native-otp-verify';
 
-// --- MSG91 Configuration ---
-const WIDGET_ID = "356772683359393932343835";
-const TOKEN_AUTH = "426738TnK6bIEz7eK5687e1942P1";
+// --- MSG91 Configuration (from .env via @env — not hardcoded in source) ---
+const WIDGET_ID = MSG91_WIDGET_ID;
+const TOKEN_AUTH = MSG91_TOKEN_AUTH;
 
 const Login = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -287,18 +289,15 @@ const Login = () => {
             }
           }
           
+          // Upgrade the realtime socket to an authenticated (user-room)
+          // connection so order/cart push events start flowing.
+          RealtimeDataService.reconnectWithAuth?.();
+
           Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
           navigation.navigate('MainTabs');
         } else {
-          // Show specific toast for backend error status
-          const errMsg = loginResult.error ? loginResult.error.toLowerCase() : '';
-          if (errMsg.includes('pending') || loginResult.error === 'Your login request is still pending approval.') {
-            Toast.show({ type: 'info', text1: 'Pending Approval', text2: 'Your account is still pending approval.' });
-          } else if (errMsg.includes('not approved')) {
-            Toast.show({ type: 'error', text1: 'Not Approved', text2: 'Your account is not approved.' });
-          } else {
-            Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
-          }
+          // No token returned — surface whatever error the backend sent.
+          Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
         }
       } else {
         console.log('[MSG91] OTP verification failed:', response.message || response.errors || 'The OTP is incorrect.');

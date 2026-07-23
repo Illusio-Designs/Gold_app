@@ -13,11 +13,11 @@ const getImageUrl = () => {
       return API_URL.replace('/api', '');
     }
     
-    // Final fallback
-    return 'http://172.20.10.10:3001';
+    // Final fallback — production API host
+    return 'https://api.amrutkumargovinddasllp.com';
   } catch (error) {
     console.log('[ImageUtils] Error getting image URL, using fallback:', error);
-    return 'http://172.20.10.10:3001';
+    return 'https://api.amrutkumargovinddasllp.com';
   }
 };
 
@@ -30,12 +30,9 @@ export const getProductImageUrl = (imagePath: string | null | undefined): string
     return imagePath;
   }
   
-  // Use direct file access for product images
-  const fullUrl = `${process.env.IMAGE_URL}/uploads/products/${imagePath}?t=${Date.now()}`;
-  console.log(`[App] Product image URL:`, {
-    imagePath,
-    fullUrl
-  });
+  // Use direct file access for product images (same resolved base as the
+  // other image helpers so it never depends on a raw env var being present)
+  const fullUrl = `${BACKEND_URL}/uploads/products/${imagePath}?t=${Date.now()}`;
   return fullUrl;
 };
 
@@ -48,10 +45,6 @@ export const getCategoryImageUrl = (imagePath: string | null | undefined): strin
   
   // Use direct file access for category images
   const fullUrl = `${BACKEND_URL}/uploads/categories/${imagePath}?t=${Date.now()}`;
-  console.log(`[App] Category image URL:`, {
-    imagePath,
-    fullUrl
-  });
   return fullUrl;
 };
 
@@ -64,10 +57,6 @@ export const getSliderImageUrl = (imagePath: string | null | undefined): string 
   
   // Use direct file access for slider images
   const fullUrl = `${BACKEND_URL}/uploads/slider/${imagePath}?t=${Date.now()}`;
-  console.log(`[App] Slider image URL:`, {
-    imagePath,
-    fullUrl
-  });
   return fullUrl;
 };
 
@@ -80,9 +69,5 @@ export const getProfileImageUrl = (imagePath: string | null | undefined): string
   
   // Use direct file access for profile images
   const fullUrl = `${BACKEND_URL}/uploads/profile/${imagePath}?t=${Date.now()}`;
-  console.log(`[App] Profile image URL:`, {
-    imagePath,
-    fullUrl
-  });
   return fullUrl;
 };

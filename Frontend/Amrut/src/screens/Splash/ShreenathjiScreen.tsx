@@ -16,7 +16,7 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
     const timer = setTimeout(() => {
       console.log('🔔 [SHRENATHJI] Navigating to FamilyTree');
       navigation.replace('FamilyTree');
-    }, 5000); // 5 seconds
+    }, 3000); // 3 seconds
     return () => clearTimeout(timer);
   }, [navigation]);
 

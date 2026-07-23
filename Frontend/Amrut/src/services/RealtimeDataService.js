@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCategories, getProductsByCategory, getUserOrders } from './Api';
 import SocketService from './SocketService';
 
@@ -17,12 +18,35 @@ class RealtimeDataService {
   /**
    * Initialize Socket.IO connection and listeners
    */
-  initializeSocket() {
-    // Connect to Socket.IO server
-    SocketService.connect();
-    
+  async initializeSocket() {
+    // Connect to Socket.IO server, authenticated when the user is logged in so
+    // the backend can join us to the user room and push order/cart events.
+    // Falls back to an anonymous connection (public category/product/slider
+    // updates) when there's no token.
+    let token = null;
+    try {
+      token = await AsyncStorage.getItem('accessToken');
+    } catch (e) {
+      // ignore — connect anonymously
+    }
+    SocketService.connect(token);
+
     // Listen for real-time updates
     this.setupSocketListeners();
+  }
+
+  /**
+   * Reconnect the socket with the current auth token. Call this after login so
+   * the socket upgrades from anonymous to a user-room connection.
+   */
+  async reconnectWithAuth() {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      SocketService.reset && SocketService.reset();
+      await SocketService.connect(token);
+    } catch (e) {
+      // best-effort — realtime falls back to polling
+    }
   }
 
   /**

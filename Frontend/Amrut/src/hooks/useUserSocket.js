@@ -119,48 +119,9 @@ export const useUserSocket = (userData = null) => {
       return;
     }
     
-    console.log('[useUserSocket] ✅ Setting up notification listeners...');
-
-    // Listen for registration status changes
-    const registrationStatusListener = SocketService.addEventListener('registration-status-change', (data) => {
-      console.log('[useUserSocket] 🔔 Registration status change received:', data);
-      console.log('[useUserSocket] Event data:', {
-        action: data.action,
-        user: data.user,
-        type: data.type,
-        timestamp: data.timestamp
-      });
-      
-      if (data.user && data.user.status) {
-        const status = data.user.status;
-        const title = status === 'approved' ? 'Registration Approved ✅' : 
-                     status === 'rejected' ? 'Registration Rejected ❌' : 
-                     'Registration Status Updated';
-        
-        const message = status === 'approved' ? 'Your account has been approved! You can now access all features.' :
-                       status === 'rejected' ? 'Your registration has been rejected. Please contact support.' :
-                       `Your registration status has been updated to: ${status}`;
-        
-        Toast.show({
-          type: status === 'approved' ? 'success' : status === 'rejected' ? 'error' : 'info',
-          text1: title,
-          text2: message,
-          position: 'top',
-          autoHide: true,
-          visibilityTime: 6000,
-        });
-      }
-    });
-
-    console.log('[useUserSocket] 🔔 Event listeners set up successfully');
-    console.log('[useUserSocket] Registration status listener ID:', registrationStatusListener);
-
-    // Cleanup listeners
-    return () => {
-      console.log('[useUserSocket] 🧹 Cleaning up event listeners...');
-      SocketService.removeEventListener('registration-status-change', registrationStatusListener);
-      console.log('[useUserSocket] 🧹 Event listeners cleaned up');
-    };
+    // No user-status listeners needed — the login-approval model was removed.
+    // User-scoped realtime (order/cart events) is handled where those screens
+    // subscribe. Nothing to set up or tear down here.
   }, [isConnected]);
 
   // Join user room manually

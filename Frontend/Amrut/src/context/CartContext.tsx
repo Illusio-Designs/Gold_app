@@ -477,7 +477,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const getTotalWeight = () => {
-    return cartItems.reduce((total, item) => total + (parseFloat(item.nWeight) * item.quantity), 0);
+    const total = cartItems.reduce(
+      (sum, item) => sum + ((parseFloat(item.nWeight) || 0) * item.quantity),
+      0,
+    );
+    // Round to 3 decimals so the cart never shows long floating-point tails.
+    return Math.round(total * 1000) / 1000;
   };
 
   const checkout = async (remark?: string, courierCompany?: string) => {

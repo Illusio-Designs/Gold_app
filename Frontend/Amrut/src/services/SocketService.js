@@ -250,23 +250,6 @@ class SocketService {
       this.emitToListeners('slider-update', data);
     });
 
-         // User notification events
-     this.socket.on('registration-status-change', (data) => {
-       console.log('[SocketService] 🔔 Registration status change received:', data);
-       console.log('[SocketService] Event details:', {
-         action: data.action,
-         user: data.user,
-         type: data.type,
-         timestamp: data.timestamp
-       });
-       this.emitToListeners('registration-status-change', data);
-     });
-
-    this.socket.on('login-request-status-change', (data) => {
-      console.log('[SocketService] Login request status change received:', data);
-      this.emitToListeners('login-request-status-change', data);
-    });
-
          // User room events
      this.socket.on('user-room-joined', (data) => {
        console.log('[SocketService] ✅ User room joined:', data);

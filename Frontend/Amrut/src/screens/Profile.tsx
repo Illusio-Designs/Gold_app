@@ -25,7 +25,7 @@ const Profile = () => {
   const { showLoader } = useNavigationLoader();
   const [photoUri, setPhotoUri] = useState(require('../assets/img/profile/profilephoto.png'));
   const [uploading, setUploading] = useState(false);
-  const [userName, setUserName] = useState('Wade Warrant');
+  const [userName, setUserName] = useState('Guest');
   const [loading, setLoading] = useState(true);
   const [appVersion, setAppVersion] = useState('1.0.0');
   const [userId, setUserId] = useState(null);
@@ -51,7 +51,7 @@ const Profile = () => {
           const res = await require('../services/Api').getUserById(userId, token);
           const user = res.user || res;
           await AsyncStorage.setItem('user', JSON.stringify(user));
-          setUserName(user.name || 'Wade Warrant');
+          setUserName(user.name || 'Guest');
           if (user.image) {
             const imgUrl = user.image.startsWith('http')
               ? user.image
@@ -67,7 +67,7 @@ const Profile = () => {
           const userStr = await AsyncStorage.getItem('user');
           if (userStr) {
             const user = JSON.parse(userStr);
-            setUserName(user.name || 'Wade Warrant');
+            setUserName(user.name || 'Guest');
             if (user.image) {
               const imgUrl = user.image.startsWith('http')
                 ? user.image
@@ -85,7 +85,7 @@ const Profile = () => {
         const userStr = await AsyncStorage.getItem('user');
         if (userStr) {
           const user = JSON.parse(userStr);
-          setUserName(user.name || 'Wade Warrant');
+          setUserName(user.name || 'Guest');
           if (user.image) {
             const imgUrl = user.image.startsWith('http')
               ? user.image
@@ -285,40 +285,34 @@ const Profile = () => {
   };
 
   const executeAccountDeletion = async () => {
+    // Our official account-deletion portal — the /delete page on the company
+    // website, which submits the request to our own backend
+    // (POST /api/account-deletion). The form there collects name, business and
+    // mobile number to identify the account, then our team processes it.
+    const deletionUrl = 'https://amrutkumargovinddasllp.com/delete';
+
     try {
-      // Redirect to the account deletion website
-      const deletionUrl = 'https://amrutkumar-govinddas-account-deletion.netlify.app/';
-      
       const supported = await Linking.canOpenURL(deletionUrl);
-      
+
       if (supported) {
         await Linking.openURL(deletionUrl);
-        
         Alert.alert(
           'Account Deletion',
-          'You have been redirected to our account deletion portal. Please complete the process there.',
-          [
-            {
-              text: 'OK',
-            }
-          ]
+          'You have been redirected to our account deletion portal. Please complete the request there and our team will process it.',
+          [{ text: 'OK' }]
         );
       } else {
         Alert.alert(
           'Unable to Open Link',
-          'Please visit: https://amrutkumar-govinddas-account-deletion.netlify.app/ to delete your account.',
-          [
-            {
-              text: 'OK',
-            }
-          ]
+          `Please visit ${deletionUrl} to request account deletion.`,
+          [{ text: 'OK' }]
         );
       }
     } catch (error) {
       console.error('[Profile] Delete account error:', error);
       Alert.alert(
-        'Error', 
-        'Unable to open deletion portal. Please visit: https://amrutkumar-govinddas-account-deletion.netlify.app/ in your browser.'
+        'Error',
+        `Unable to open the deletion portal. Please visit ${deletionUrl} in your browser.`
       );
     }
   };
