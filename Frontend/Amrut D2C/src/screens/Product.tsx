@@ -8,8 +8,8 @@ import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { getApprovedProductsForUser } from '../services/Api';
-import CustomLoader from '../components/common/CustomLoader';
 import ScreenLoader from '../components/common/ScreenLoader';
+import { ProductGridSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 
 import Toast from 'react-native-toast-message';
@@ -383,10 +383,6 @@ const Product = () => {
     return <ScreenLoader text="Loading Category..." />;
   }
 
-  if (loading) {
-    return <ScreenLoader text="Loading Products..." />;
-  }
-
   return (
     <View style={styles.container}>
       <CustomHeader title={categoryName} timer={true} />
@@ -402,12 +398,9 @@ const Product = () => {
       
       {/* Product grid */}
       {productsLoading ? (
-        <CustomLoader 
-          size="large" 
-          text="Loading products..." 
-          textColor="#5D0829"
-          containerStyle={{ marginTop: 40 }}
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ProductGridSkeleton count={6} />
+        </ScrollView>
       ) : (error && !filteredProducts.length) ? (
         <Text style={styles.errorText}>{error}</Text>
       ) : filteredProducts.length === 0 ? (
@@ -431,26 +424,26 @@ const Product = () => {
             });
             
             return (
-              <TouchableOpacity
-                key={item.id || idx}
-                style={styles.card}
-                activeOpacity={0.85}
-                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-              >
-                {/* Cart icon at top-right */}
-                <TouchableOpacity 
-                  style={styles.cartIconContainer} 
-                  onPress={() => addToCartDirectly(item)}
-                  activeOpacity={0.7}
+              <FadeInSlide key={item.id || idx} delay={Math.min(idx, 8) * 55}>
+                <PressableScale
+                  style={styles.card}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 >
-                  <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
-                </TouchableOpacity>
-                
-                {/* Product Image - Using our custom render function */}
-                {renderProductImage(item)}
-                
-                <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
-              </TouchableOpacity>
+                  {/* Cart icon at top-right */}
+                  <TouchableOpacity
+                    style={styles.cartIconContainer}
+                    onPress={() => addToCartDirectly(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
+                  </TouchableOpacity>
+
+                  {/* Product Image - Using our custom render function */}
+                  {renderProductImage(item)}
+
+                  <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
+                </PressableScale>
+              </FadeInSlide>
             );
           })}
         </ScrollView>

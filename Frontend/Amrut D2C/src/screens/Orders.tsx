@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Image, RefreshControl, Alert } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import CartItemCard from '../components/common/CartItemCard';
-import CustomLoader from '../components/common/CustomLoader';
-import ScreenLoader from '../components/common/ScreenLoader';
+import { ListSkeleton } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, updateOrderStatus } from '../services/Api';
 import Toast from 'react-native-toast-message';
@@ -227,7 +226,12 @@ const Orders = () => {
   };
 
   if (loading && orders.length === 0) {
-    return <ScreenLoader text="Loading your orders..." />;
+    return (
+      <View style={styles.container}>
+        <CustomHeader title="My Orders" timer={true} />
+        <ListSkeleton count={5} />
+      </View>
+    );
   }
 
   if (error && orders.length === 0) {
