@@ -6,11 +6,11 @@ const { verifyToken, requireAdmin } = require('../middlewares/auth');
 // Order routes - all require authentication
 router.use(verifyToken);
 
-// Create new order
-router.post('/', orderController.createOrder);
+// Create new order — only an approved business may place orders.
+router.post('/', orderController.requireApprovedBusiness, orderController.createOrder);
 
-// Create order from cart (multiple products)
-router.post('/from-cart', orderController.createOrderFromCart);
+// Create order from cart (multiple products) — approved businesses only.
+router.post('/from-cart', orderController.requireApprovedBusiness, orderController.createOrderFromCart);
 
 // Get all orders (admin only — returns every customer's orders)
 router.get('/', requireAdmin, orderController.getAllOrders);

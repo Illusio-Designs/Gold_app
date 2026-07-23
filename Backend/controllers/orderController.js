@@ -9,6 +9,43 @@ function isApprovedBusinessStatus(status) {
   return String(status || "").toLowerCase() === "approved";
 }
 
+// Middleware: only an approved business may place an order. Browsing and
+// building a cart stay open to everyone; the gate is enforced at order
+// creation. Non-business accounts (e.g. admin) pass through. Identity comes
+// from the verified token (req.user), so it can't be spoofed via the body.
+function requireApprovedBusiness(req, res, next) {
+  const userId = req.user && req.user.id;
+  if (!userId) {
+    return res.status(401).json({ error: "User not authenticated" });
+  }
+
+  db.query(
+    "SELECT type, status FROM users WHERE id = ?",
+    [userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error" });
+      }
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const user = rows[0];
+      const isBusiness = String(user.type || "").toLowerCase() === "business";
+      if (isBusiness && !isApprovedBusinessStatus(user.status)) {
+        return res.status(403).json({
+          error:
+            "Your business account is pending approval. You'll be able to place orders once an admin approves your account.",
+          code: "BUSINESS_NOT_APPROVED",
+          userStatus: user.status,
+        });
+      }
+
+      next();
+    }
+  );
+}
+
 // Create new order
 function createOrder(req, res) {
   const {
@@ -511,6 +548,7 @@ function downloadOrderPDF(req, res) {
 }
 
 module.exports = {
+  requireApprovedBusiness,
   createOrder,
   createOrderFromCart,
   getAllOrders,

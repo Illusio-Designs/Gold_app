@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, RefreshControl, Alert } from 'react-native';
 import CartItemCard from '../components/common/CartItemCard';
 import CustomHeader from '../components/common/CustomHeader';
 import Button from '../components/common/Button';
@@ -170,6 +170,16 @@ const Cart = () => {
           position: 'top',
           visibilityTime: 3000
         });
+      } else if (result.code === 'BUSINESS_NOT_APPROVED') {
+        // Account still pending admin approval — explain clearly. The cart is
+        // preserved so they can order once approved.
+        console.log('[Cart] Checkout blocked — business not approved');
+        Alert.alert(
+          'Account Pending Approval',
+          result.message ||
+            "Your business account is pending approval. You'll be able to place orders once an admin approves your account.",
+          [{ text: 'OK' }]
+        );
       } else {
         // Show error message
         console.error('[Cart] Checkout failed:', result.message);

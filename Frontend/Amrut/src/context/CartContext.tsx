@@ -584,9 +584,13 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       
     } catch (error: any) {
       console.error('❌ [CartContext] Checkout error:', error);
-      return { 
-        success: false, 
-        message: (error as any).message || 'Failed to create orders' 
+      // The API rejects with the backend's response body, e.g.
+      // { error, code: 'BUSINESS_NOT_APPROVED' }. Surface that message and
+      // code so the UI can explain a pending-approval block clearly.
+      return {
+        success: false,
+        message: error?.error || error?.message || 'Failed to create orders',
+        code: error?.code,
       };
     }
   };

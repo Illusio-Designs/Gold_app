@@ -142,6 +142,24 @@ and a bypassed *account-deletion* endpoint, not broken API calls.
 | I4 order status | Buyer order view is now **read-only** (Update-Status button + modal removed); status changes only from the admin dashboard. |
 | P2–P6 polish | `'Wade Warrant'` → `'Guest'`; removed dead files (`EditProfile.tsx.backup`, `debug-tokens.js`, `checkHermes.js`, `SocketDebugger.jsx`); trimmed console noise; onboarding timers 5s→3s; cart weight rounded (NaN-safe). |
 
+## 7. Order gate — approved business required (added)
+
+Access model after this change:
+- **Guest / not logged in** → browse all categories & products; login prompt on Cart/Orders/Profile.
+- **Registered user (any status)** → can log in (login itself is not approval-gated).
+- **Placing an order** → **requires an approved business** (`users.status = 'approved'`).
+
+Backend (`POST /orders`, `POST /orders/from-cart`) now runs
+`requireApprovedBusiness` middleware (`orderController.js`): identity is taken
+from the verified token, and a `business` account whose status is not
+`approved` gets `403 { code: 'BUSINESS_NOT_APPROVED' }`. Non-business
+accounts (admin) pass through.
+
+App: a pending user can still browse and build a cart; at checkout the app
+catches `BUSINESS_NOT_APPROVED` and shows an "Account Pending Approval" alert
+(`Cart.tsx` / `CartContext.tsx`) instead of a generic error. The cart is kept
+so they can order once approved.
+
 ## 5. Notes
 - All secrets (FTP, MSG91) belong in environment config / GitHub Actions secrets, never in
   committed source.
