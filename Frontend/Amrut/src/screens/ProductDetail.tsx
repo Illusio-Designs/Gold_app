@@ -182,188 +182,137 @@ const ProductDetail = () => {
     );
   }
 
+  const lessWeight = (product.gross_weight && product.net_weight)
+    ? (parseFloat(product.gross_weight) - parseFloat(product.net_weight)).toFixed(3)
+    : null;
+
+  const handleAddToCart = () => {
+    addToCart({
+      image: getProductImage(),
+      title: product.name || product.sku || 'Product Name',
+      subtitle: 'Jewelry',
+      gWeight: product.gross_weight ? `${product.gross_weight}` : 'N/A',
+      lWeight: lessWeight || 'N/A',
+      nWeight: product.net_weight ? `${product.net_weight}` : 'N/A',
+      sku: product.sku || 'N/A',
+      size: product.size || 'N/A',
+      length: product.length || 'N/A',
+      quantity: 1,
+    }, 1, amount);
+    Toast.show({
+      type: 'success',
+      text1: 'Added to Cart',
+      text2: `${product.name || product.sku} added to cart`,
+      position: 'top',
+      visibilityTime: 2000,
+    });
+    navigation.goBack();
+  };
+
+  // D2 · Maroon hero + white sheet
   return (
-    <View style={styles.baseBg}>
+    <View style={styles.d2Base}>
+      {/* Maroon hero with header + product image */}
       <LinearGradient
         colors={["#43051D", "#5D0829"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[
-          styles.gradientBg,
-          { 
-            height: height - (getResponsiveSpacing(60, 70, 80) + Math.max(insets.bottom, 10))
-          }
-        ]}
+        style={styles.hero}
       >
-        <View style={styles.headerRow}>
-          <TouchableOpacity 
-            style={styles.backBtn} 
-            onPress={() => {
-              if (navigation.canGoBack()) {
-                navigation.goBack();
-              } else {
-                navigation.navigate('Home');
-              }
-            }}
+        <View style={styles.heroHeader}>
+          <TouchableOpacity
+            style={styles.heroBackBtn}
+            onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
             activeOpacity={0.7}
           >
-            <Image source={require('../assets/img/common/creamback.png')} style={styles.backArrow} />
+            <Image source={require('../assets/img/common/creamback.png')} style={styles.heroBackArrow} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Product Details</Text>
-        </View>
-        {/* Product Image Card */}
-        <View style={styles.imageCard}>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => setImagePreviewVisible(true)}
-          >
-            <Image 
-              source={getProductImage()} 
-              style={styles.productImage}
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
+          <Text style={styles.heroTitle}>Product Details</Text>
+          <View style={styles.heroBackBtn} />
         </View>
 
-        {/* Full-screen image preview (tap image to open) */}
-        <Modal
-          visible={imagePreviewVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setImagePreviewVisible(false)}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.heroImageWrap}
+          onPress={() => setImagePreviewVisible(true)}
         >
-          <View style={styles.imagePreviewBackdrop}>
-            <Pressable
-              style={{ flex: 1 }}
-              onPress={() => setImagePreviewVisible(false)}
-            >
-              <Image
-                source={getProductImage()}
-                style={styles.imagePreviewImage}
-                resizeMode="contain"
-              />
-            </Pressable>
+          <Image source={getProductImage()} style={styles.heroImage} resizeMode="cover" />
+        </TouchableOpacity>
+      </LinearGradient>
 
-            <TouchableOpacity
-              style={styles.imagePreviewCloseBtn}
-              onPress={() => setImagePreviewVisible(false)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.imagePreviewCloseText}>×</Text>
-            </TouchableOpacity>
+      {/* White sheet that overlaps the hero */}
+      <View style={styles.sheet}>
+        <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
+          <Text style={styles.sheetName}>{product.name || product.sku || 'Product Name'}</Text>
+
+          <View style={styles.sheetDetails}>
+            {product.size ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Size</Text><Text style={styles.dValue}>{product.size}</Text></View>
+            ) : null}
+            {product.length ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Length</Text><Text style={styles.dValue}>{product.length}</Text></View>
+            ) : null}
+            {product.sku ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>SKU</Text><Text style={styles.dValue}>{product.sku}</Text></View>
+            ) : null}
+            {product.purity ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Purity</Text><Text style={styles.dValue}>{product.purity}</Text></View>
+            ) : null}
+            {product.mark ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Mark</Text><Text style={styles.dValue}>{product.mark}</Text></View>
+            ) : null}
+            {product.gross_weight ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Gross Weight</Text><Text style={styles.dValue}>{product.gross_weight} g</Text></View>
+            ) : null}
+            {lessWeight ? (
+              <View style={styles.dRow}><Text style={styles.dLabel}>Less Weight</Text><Text style={styles.dValue}>{lessWeight} g</Text></View>
+            ) : null}
+            {product.net_weight ? (
+              <View style={[styles.dRow, styles.dRowLast]}><Text style={styles.dLabel}>Net Weight</Text><Text style={styles.dValue}>{product.net_weight} g</Text></View>
+            ) : null}
           </View>
-        </Modal>
-        {/* Product Name and Quantity Selector */}
-        <View style={styles.productRow}>
-          <Text style={styles.productName}>{product.name || product.sku || 'Product Name'}</Text>
-        </View>
-        {/* Product Details Section */}
-        <View style={styles.detailsSection}>
-          {product.size && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Size</Text>
-              <Text style={styles.detailValue}>{product.size}</Text>
-            </View>
-          )}
-          {product.length && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Length</Text>
-              <Text style={styles.detailValue}>{product.length}</Text>
-            </View>
-          )}
-          {product.sku && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>SKU</Text>
-              <Text style={[styles.detailValue, styles.skuValue]}>{product.sku}</Text>
-            </View>
-          )}
-          {product.purity && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Purity</Text>
-              <Text style={styles.detailValue}>{product.purity}</Text>
-            </View>
-          )}
-          {product.mark && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mark</Text>
-              <Text style={styles.detailValue}>{product.mark}</Text>
-            </View>
-          )}
-          {product.gross_weight && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Gross Weight</Text>
-              <Text style={styles.detailValue}>{product.gross_weight} g</Text>
-            </View>
-          )}
-          {product.gross_weight && product.net_weight && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Less Weight</Text>
-              <Text style={styles.detailValue}>
-                {(parseFloat(product.gross_weight) - parseFloat(product.net_weight)).toFixed(3)} g
-              </Text>
-            </View>
-          )}
-          {product.net_weight && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Net Weight</Text>
-              <Text style={styles.detailValue}>{product.net_weight} g</Text>
-            </View>
-          )}
-        </View>
-        {/* Other Charges Section */}
-        <Text style={styles.otherChargesHeading}>Other Charges</Text>
-        <View style={styles.otherChargesRow}>
+
+          <Text style={styles.ocHeading}>Other Charges</Text>
           <TextInput
-            style={[styles.inputBox, styles.amountBox, { color: '#FCE2BF' }]}
+            style={styles.amountInput}
             placeholder="Amount"
-            placeholderTextColor="#FCE2BF"
+            placeholderTextColor="#A47C8C"
             value={amount}
             onChangeText={setAmount}
             keyboardType="numeric"
           />
-        </View>
-        {/* More content goes here */}
-      </LinearGradient>
-              {/* Add to Cart Button at the bottom */}
-        <TouchableOpacity 
-          style={[
-            styles.addToCartBtn,
-            { 
-              paddingBottom: Math.max(insets.bottom, 10),
-              height: getResponsiveSpacing(60, 70, 80) + Math.max(insets.bottom, 10)
-            }
-          ]}
-          onPress={() => {
-            addToCart({
-              image: getProductImage(),
-              title: product.name || product.sku || 'Product Name',
-              subtitle: 'Jewelry',
-              gWeight: product.gross_weight ? `${product.gross_weight}` : 'N/A',
-              lWeight: (product.gross_weight && product.net_weight) ? 
-                `${(parseFloat(product.gross_weight) - parseFloat(product.net_weight)).toFixed(3)}` : 'N/A',
-              nWeight: product.net_weight ? `${product.net_weight}` : 'N/A',
-              sku: product.sku || 'N/A',
-              size: product.size || 'N/A',
-              length: product.length || 'N/A',
-              quantity: 1,
-            }, 1, amount);
-            
-            Toast.show({
-              type: 'success',
-              text1: 'Added to Cart',
-              text2: `${product.name || product.sku} added to cart`,
-              position: 'top',
-              visibilityTime: 2000
-            });
-            
-            navigation.goBack();
-          }}
-        >
-          <Text style={styles.addToCartText}>Add to Cart</Text>
+        </ScrollView>
+      </View>
+
+      {/* Sticky Add to Cart */}
+      <View style={[styles.addBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <TouchableOpacity style={styles.addBtn} activeOpacity={0.9} onPress={handleAddToCart}>
+          <Text style={styles.addText}>Add to Cart</Text>
         </TouchableOpacity>
-        
-        {/* Toast component for notifications */}
-        <Toast />
+      </View>
+
+      {/* Full-screen image preview */}
+      <Modal
+        visible={imagePreviewVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setImagePreviewVisible(false)}
+      >
+        <View style={styles.imagePreviewBackdrop}>
+          <Pressable style={{ flex: 1 }} onPress={() => setImagePreviewVisible(false)}>
+            <Image source={getProductImage()} style={styles.imagePreviewImage} resizeMode="contain" />
+          </Pressable>
+          <TouchableOpacity
+            style={styles.imagePreviewCloseBtn}
+            onPress={() => setImagePreviewVisible(false)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.imagePreviewCloseText}>×</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+
+      <Toast />
     </View>
   );
 };
@@ -372,6 +321,148 @@ const styles = StyleSheet.create({
   baseBg: {
     flex: 1,
     backgroundColor: '#FCE2BF',
+  },
+
+  /* ===== D2 · Maroon hero + white sheet ===== */
+  d2Base: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  hero: {
+    height: height * 0.42,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: 'hidden',
+    alignItems: 'center',
+  },
+  heroHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: isShortScreen() ? 40 : isTallScreen() ? 58 : 50,
+    paddingHorizontal: 16,
+  },
+  heroBackBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroBackArrow: {
+    width: 24,
+    height: 24,
+    resizeMode: 'contain',
+    tintColor: '#FCE2BF',
+  },
+  heroTitle: {
+    color: '#FCE2BF',
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'GlorifyDEMO',
+  },
+  heroImageWrap: {
+    flex: 1,
+    marginTop: 6,
+    marginBottom: 22,
+    aspectRatio: 0.82,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#FCE2BF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
+    elevation: 8,
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  sheet: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    marginTop: -26,
+    paddingTop: 6,
+  },
+  sheetContent: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 20,
+  },
+  sheetName: {
+    color: '#5D0829',
+    fontSize: 24,
+    fontWeight: '700',
+    fontFamily: 'GlorifyDEMO',
+    marginBottom: 12,
+  },
+  sheetDetails: {
+    marginBottom: 4,
+  },
+  dRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0E7DA',
+  },
+  dRowLast: {
+    borderBottomWidth: 0,
+  },
+  dLabel: {
+    color: '#8A7A80',
+    fontSize: 14,
+    fontFamily: 'GlorifyDEMO',
+  },
+  dValue: {
+    color: '#5D0829',
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'GlorifyDEMO',
+  },
+  ocHeading: {
+    color: '#5D0829',
+    fontSize: 17,
+    fontWeight: '700',
+    fontFamily: 'GlorifyDEMO',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  amountInput: {
+    borderWidth: 1.5,
+    borderColor: '#C09E83',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#5D0829',
+    backgroundColor: '#F9F2E7',
+    fontFamily: 'GlorifyDEMO',
+  },
+  addBar: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#F0E7DA',
+  },
+  addBtn: {
+    backgroundColor: '#5D0829',
+    borderRadius: 14,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addText: {
+    color: '#FCE2BF',
+    fontSize: 17,
+    fontWeight: '700',
+    fontFamily: 'GlorifyDEMO',
+    letterSpacing: 0.5,
   },
   gradientBg: {
     position: 'absolute',

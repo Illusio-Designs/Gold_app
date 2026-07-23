@@ -4,6 +4,7 @@ import Collection from '../screens/Collection';
 import Cart from '../screens/Cart';
 import Profile from '../screens/Profile';
 import Home from '../screens/Home';
+import CustomOrder from '../screens/CustomOrder';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
 import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
@@ -34,6 +35,7 @@ const icons = {
 const labels = {
   Home: 'Home',
   Collection: 'Collection',
+  Custom: 'Custom',
   Cart: 'Cart',
   Profile: 'Profile',
 };
@@ -69,7 +71,21 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             style={styles.tabBtn}
             activeOpacity={0.8}
           >
-            {isFocused && isTabName(route.name) ? (
+            {route.name === 'Custom' ? (
+              isFocused ? (
+                <View style={styles.activeIconWrapper}>
+                  <Text style={styles.activeGlyph}>✦</Text>
+                  <Text style={styles.activeLabelInside}>{labels.Custom}</Text>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.iconWrapper}>
+                    <Text style={styles.glyph}>✦</Text>
+                  </View>
+                  <Text style={styles.label}>{labels.Custom}</Text>
+                </>
+              )
+            ) : isFocused && isTabName(route.name) ? (
               <View style={styles.activeIconWrapper}>
                 <Image
                   source={icons[route.name].active}
@@ -112,6 +128,7 @@ const BottomNavigation = () => (
   >
     <Tab.Screen name="Home" component={Home} />
     <Tab.Screen name="Collection" component={CollectionStack} />
+    <Tab.Screen name="Custom" component={CustomOrder} />
     <Tab.Screen name="Cart" component={Cart} />
     <Tab.Screen name="Profile" component={Profile} />
   </Tab.Navigator>
@@ -174,6 +191,18 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: '#5D0829',
+  },
+  glyph: {
+    fontSize: 20,
+    lineHeight: 22,
+    color: '#FCE2BF',
+    textAlign: 'center',
+  },
+  activeGlyph: {
+    fontSize: 20,
+    lineHeight: 22,
+    color: '#5D0829',
+    textAlign: 'center',
   },
   label: {
     color: '#FCE2BF',

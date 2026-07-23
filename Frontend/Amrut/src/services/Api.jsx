@@ -484,6 +484,34 @@ export const createOrder = async (orderData, token) => {
   }
 };
 
+// 🎨 CUSTOM ORDER — image-driven bespoke request (multipart with photos)
+export const createCustomOrder = async (formData, token) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/custom-orders`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ createCustomOrder error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
+export const getMyCustomOrders = async (token) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/custom-orders/my`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ getMyCustomOrders error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
 export const createOrderFromCart = async (cartOrderData, token) => {
   try {
     console.log(

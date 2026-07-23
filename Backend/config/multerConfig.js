@@ -8,6 +8,7 @@ const uploadDirs = {
   category: path.join(__dirname, "../uploads/categories"),
   product: path.join(__dirname, "../uploads/products"),
   excel: path.join(__dirname, "../uploads/excel"),
+  customorder: path.join(__dirname, "../uploads/customorders"),
 };
 
 Object.values(uploadDirs).forEach((dir) => {
@@ -44,6 +45,15 @@ const storage = multer.diskStorage({
     ) {
       // For user profile uploads
       uploadDir = uploadDirs.profile;
+      } else if (
+      (file.fieldname === "images" || file.fieldname === "image") &&
+      req.baseUrl.includes("/custom-orders")
+    ) {
+      // Custom order design photos
+      uploadDir = uploadDirs.customorder;
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
       } else {
       }
 
