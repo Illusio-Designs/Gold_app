@@ -435,8 +435,11 @@ const productCardStyles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: '#5D0829',
-    margin: getResponsiveSpacing(6, 8, 10),
-    width: isSmallScreen() ? wp('42%') : isMediumScreen() ? wp('42%') : wp('43%'),
+    // Fixed 2-per-row grid: 46% width + 2% side margins = 50% each → always
+    // two columns, never collapses to one.
+    marginHorizontal: '2%',
+    marginVertical: 8,
+    width: '46%',
     height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.5%') : hp('18%'),
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 5 },
