@@ -256,6 +256,9 @@ const Orders = () => {
       >
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIconGlyph}>🧾</Text>
+            </View>
             <Text style={styles.emptyText}>
               {selectedTab === 'all' 
                 ? 'No orders found' 
@@ -524,6 +527,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 100,
     paddingHorizontal: 20,
+  },
+  emptyIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyIconGlyph: {
+    fontSize: 36,
   },
   emptyText: {
     fontSize: 18,

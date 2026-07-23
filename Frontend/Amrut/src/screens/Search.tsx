@@ -359,6 +359,9 @@ const Search = () => {
               }
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
+                  <View style={styles.emptyIconCircle}>
+                    <Text style={styles.emptyIconGlyph}>🔍</Text>
+                  </View>
                   <Text style={styles.emptyText}>No results found</Text>
                   <Text style={styles.emptySubtext}>
                     Try adjusting your search terms or filters
@@ -576,6 +579,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: getResponsiveSpacing(40, 50, 60),
     paddingHorizontal: getResponsiveSpacing(20, 25, 30),
+  },
+  emptyIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyIconGlyph: {
+    fontSize: 34,
   },
   emptyText: {
     color: '#5D0829',

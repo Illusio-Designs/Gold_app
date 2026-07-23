@@ -227,9 +227,12 @@ const Cart = () => {
       >
         {cartItems.length === 0 ? (
           <View style={styles.emptyCartContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIconGlyph}>🛍</Text>
+            </View>
             <Text style={styles.emptyCartText}>Your cart is empty</Text>
             <Text style={styles.emptyCartSubtext}>Start shopping to add items to your cart</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.shopNowButton}
               onPress={() => navigation.navigate('Collection' as never)}
             >
@@ -239,15 +242,6 @@ const Cart = () => {
         ) : (
           <>
             {cartItems.map((item: any) => {
-              console.log('[Cart] Rendering cart item:', {
-                id: item.id,
-                title: item.title,
-                image: item.image,
-                imageType: typeof item.image,
-                hasUri: item.image?.uri,
-                hasImage: !!item.image
-              });
-              
               return (
                 <CartItemCard
                   key={item.id}
@@ -429,6 +423,31 @@ const styles = StyleSheet.create({
   summaryBox: {
     marginHorizontal: getResponsiveSpacing(20, 24, 28),
     marginBottom: getResponsiveSpacing(16, 20, 24),
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    paddingVertical: getResponsiveSpacing(12, 14, 16),
+    paddingHorizontal: getResponsiveSpacing(14, 16, 18),
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  emptyIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyIconGlyph: {
+    fontSize: 38,
   },
   summaryRow: {
     flexDirection: 'row',

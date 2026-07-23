@@ -395,8 +395,16 @@ const Profile = () => {
           <Text style={styles.menuText}>My Orders</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => (navigation as any).navigate('Custom')}
+        >
+          <Text style={styles.menuGlyph}>✦</Text>
+          <Text style={styles.menuText}>Custom Order</Text>
+          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuBtn}
           onPress={handleDeleteAccount}
         >
           <Image source={require('../assets/img/profile/logout.png')} style={[styles.menuIcon, {tintColor: '#dc2626'}]} />
@@ -471,11 +479,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 18,
-    borderWidth: 0.5,
-    borderColor: '#C09E83',
-    paddingVertical: getResponsiveSpacing(8, 10, 12),
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    paddingVertical: getResponsiveSpacing(11, 13, 15),
     paddingHorizontal: getResponsiveSpacing(14, 18, 22),
-    marginBottom: getResponsiveSpacing(14, 18, 22),
+    marginBottom: getResponsiveSpacing(11, 13, 14),
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.07,
+    shadowRadius: 7,
+    elevation: 2,
   },
   menuIcon: {
     width: getResponsiveSpacing(24, 28, 32),
@@ -483,6 +496,13 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginRight: getResponsiveSpacing(12, 16, 20),
     tintColor: '#5D0829',
+  },
+  menuGlyph: {
+    width: getResponsiveSpacing(24, 28, 32),
+    fontSize: getResponsiveFontSize(20, 22, 24),
+    color: '#5D0829',
+    textAlign: 'center',
+    marginRight: getResponsiveSpacing(12, 16, 20),
   },
   menuText: {
     color: '#5D0829',
