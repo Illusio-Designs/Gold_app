@@ -8,6 +8,7 @@ import CustomOrder from '../screens/CustomOrder';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
 import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 const Tab = createBottomTabNavigator();
@@ -61,6 +62,35 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
         };
         // Type guard for route.name
         const isTabName = (name: string): name is TabName => tabNames.includes(name as TabName);
+
+        // Center-raised Custom Order button (B2).
+        if (route.name === 'Custom') {
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              onPress={onPress}
+              style={styles.customTab}
+              activeOpacity={0.9}
+            >
+              <LinearGradient
+                colors={isFocused ? ['#FCE2BF', '#C09E83'] : ['#E9C9A0', '#C09E83']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.fab}
+              >
+                <Text style={styles.fabGlyph}>✦</Text>
+              </LinearGradient>
+              <Text style={[styles.label, styles.customLabel, isFocused && styles.labelActive]}>
+                {labels.Custom}
+              </Text>
+            </TouchableOpacity>
+          );
+        }
+
+        if (!isTabName(route.name)) return null;
+
         return (
           <TouchableOpacity
             key={route.key}
@@ -71,41 +101,12 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             style={styles.tabBtn}
             activeOpacity={0.8}
           >
-            {route.name === 'Custom' ? (
-              isFocused ? (
-                <View style={styles.activeIconWrapper}>
-                  <Text style={styles.activeGlyph}>✦</Text>
-                  <Text style={styles.activeLabelInside}>{labels.Custom}</Text>
-                </View>
-              ) : (
-                <>
-                  <View style={styles.iconWrapper}>
-                    <Text style={styles.glyph}>✦</Text>
-                  </View>
-                  <Text style={styles.label}>{labels.Custom}</Text>
-                </>
-              )
-            ) : isFocused && isTabName(route.name) ? (
-              <View style={styles.activeIconWrapper}>
-                <Image
-                  source={icons[route.name].active}
-                  style={styles.activeIcon}
-                  resizeMode="contain"
-                />
-                <Text style={styles.activeLabelInside}>{labels[route.name]}</Text>
-              </View>
-            ) : isTabName(route.name) ? (
-              <>
-                <View style={styles.iconWrapper}>
-                  <Image
-                    source={icons[route.name].inactive}
-                    style={styles.icon}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text style={styles.label}>{labels[route.name]}</Text>
-              </>
-            ) : null}
+            <Image
+              source={isFocused ? icons[route.name].active : icons[route.name].inactive}
+              style={[styles.icon, isFocused ? styles.iconActive : styles.iconInactive]}
+              resizeMode="contain"
+            />
+            <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[route.name]}</Text>
           </TouchableOpacity>
         );
       })}
@@ -135,87 +136,84 @@ const BottomNavigation = () => (
 );
 
 const styles = StyleSheet.create({
+  // B2 · Center-raised Custom — maroon bar with a raised gold Custom button.
   tabBarContainer: {
     flexDirection: 'row',
     backgroundColor: '#5D0829',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    height: 70,
-    alignItems: 'flex-end',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    height: 66,
+    alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: Platform.OS === 'ios' ? 15 : 10,
-    paddingTop: 20,
-    // shadowColor: '#000',
-    // shadowOpacity: 0.08,
-    // shadowRadius: 8,
-    // elevation: 10,
+    paddingBottom: Platform.OS === 'ios' ? 12 : 8,
+    paddingTop: 8,
+    overflow: 'visible',
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 12,
   },
   tabBtn: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  icon: {
+    width: 22,
+    height: 22,
+    tintColor: '#FCE2BF',
+  },
+  iconActive: {
+    opacity: 1,
+  },
+  iconInactive: {
+    opacity: 0.6,
+  },
+  label: {
+    color: '#FCE2BF',
+    fontSize: 11,
+    fontFamily: 'GlorifyDEMO',
+    marginTop: 3,
+    opacity: 0.75,
+  },
+  labelActive: {
+    opacity: 1,
+    fontWeight: 'bold',
+  },
+  // Raised center Custom button
+  customTab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
     height: '100%',
   },
-  iconWrapper: {
-    backgroundColor: 'transparent',
-    borderRadius: 24,
-    padding: 8,
-    marginBottom: 0 ,
-  },
-  activeIconWrapper: {
-    backgroundColor: '#FCE2BF', // your highlight color
-    borderRadius: 12,           // rounded square
-    paddingHorizontal: 8,      // square shape
-    paddingVertical: 12,
-    marginBottom: 0,            // move square down
-    marginTop: 0,              // move square down
+  fab: {
+    position: 'absolute',
+    top: -26,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'column',
-    minWidth: 60,
+    borderWidth: 4,
+    borderColor: '#5D0829',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  activeLabelInside: {
-    color: '#5D0829', // maroon
-    fontSize: 12,
-    fontFamily: 'GlorifyDEMO',
-    fontWeight: 'bold',
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    tintColor: '#FCE2BF',
-  },
-  activeIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#5D0829',
-  },
-  glyph: {
-    fontSize: 20,
-    lineHeight: 22,
-    color: '#FCE2BF',
-    textAlign: 'center',
-  },
-  activeGlyph: {
-    fontSize: 20,
-    lineHeight: 22,
+  fabGlyph: {
+    fontSize: 24,
+    lineHeight: 26,
     color: '#5D0829',
-    textAlign: 'center',
-  },
-  label: {
-    color: '#FCE2BF',
-    fontSize: 12,
-    fontFamily: 'GlorifyDEMO',
-    marginTop: 2,
-  },
-  activeLabel: {
-    color: '#FCE2BF',
-    fontSize: 12,
-    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
-    marginTop: 2,
+  },
+  customLabel: {
+    marginTop: 0,
+    marginBottom: 2,
   },
 });
 

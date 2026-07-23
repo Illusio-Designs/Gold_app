@@ -1,23 +1,24 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 
 type RightAction = {
   icon: any;            // require(...) image source
   onPress: () => void;
-  tint?: string;
 };
 
 interface CustomHeaderProps {
   title: string;
   onBack?: () => void;
-  showBack?: boolean;          // hide the back arrow (e.g. tab root screens)
-  rightActions?: RightAction[]; // optional icons on the right (search, cart…)
+  showBack?: boolean;           // hide the back arrow (tab-root screens)
+  rightActions?: RightAction[]; // optional cream icons on the right
 }
 
-// H3 · Left title + gold accent — a consistent header for every page:
-// white bar, back arrow + left-aligned Glorify title with a short gold
-// underline, and optional action icons on the right.
+// T2 · Maroon curved app-bar — a bold, premium header used on every page:
+// a maroon gradient bar with a curved bottom, cream centered Glorify title,
+// a cream back arrow and optional cream action icons. Sits below the status
+// row (screens keep their existing top padding as the safe-area gap).
 const CustomHeader: React.FC<CustomHeaderProps> = ({
   title,
   onBack,
@@ -27,84 +28,88 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   const navigation = useNavigation();
 
   return (
-    <View style={styles.wrap}>
+    <LinearGradient
+      colors={["#5D0829", "#6B0D33"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.bar}
+    >
       <View style={styles.row}>
         {showBack ? (
           <TouchableOpacity
             onPress={onBack || (() => (navigation as any).goBack())}
-            style={styles.backBtn}
+            style={styles.side}
           >
-            <Image
-              source={require('../../assets/img/common/backarrow.png')}
-              style={styles.backArrow}
-            />
+            <Image source={require('../../assets/img/common/backarrow.png')} style={styles.backArrow} />
           </TouchableOpacity>
-        ) : null}
+        ) : (
+          <View style={styles.side} />
+        )}
 
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
 
-        <View style={{ flex: 1 }} />
-
-        {rightActions.map((action, i) => (
-          <TouchableOpacity key={i} onPress={action.onPress} style={styles.actionBtn}>
-            <Image
-              source={action.icon}
-              style={[styles.actionIcon, action.tint ? { tintColor: action.tint } : null]}
-            />
-          </TouchableOpacity>
-        ))}
+        <View style={[styles.side, styles.rightSide]}>
+          {rightActions.map((action, i) => (
+            <TouchableOpacity key={i} onPress={action.onPress} style={styles.actionBtn}>
+              <Image source={action.icon} style={styles.actionIcon} />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-
-      {/* short gold underline aligned under the title */}
-      <View style={[styles.accent, { marginLeft: showBack ? 36 : 20 }]} />
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  wrap: {
-    backgroundColor: '#fff',
-    paddingTop: 6,
-    paddingBottom: 8,
-    marginBottom: 6,
+  bar: {
+    paddingTop: 14,
+    paddingBottom: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    // soft drop shadow under the bar
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    elevation: 6,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
   },
-  backBtn: {
-    padding: 4,
-    marginRight: 4,
+  side: {
+    width: 56,
+    height: 40,
+    justifyContent: 'center',
+  },
+  rightSide: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   backArrow: {
-    width: 26,
-    height: 26,
+    width: 24,
+    height: 24,
     resizeMode: 'contain',
-    tintColor: '#5D0829',
+    tintColor: '#FCE2BF',
   },
   title: {
-    color: '#5D0829',
-    fontSize: 24,
+    flex: 1,
+    textAlign: 'center',
+    color: '#FCE2BF',
+    fontSize: 20,
     fontWeight: '700',
     fontFamily: 'GlorifyDEMO',
   },
   actionBtn: {
-    padding: 6,
-    marginLeft: 4,
+    paddingHorizontal: 6,
   },
   actionIcon: {
     width: 22,
     height: 22,
     resizeMode: 'contain',
-    tintColor: '#5D0829',
-  },
-  accent: {
-    width: 44,
-    height: 3,
-    borderRadius: 3,
-    backgroundColor: '#C09E83',
-    marginTop: 6,
+    tintColor: '#FCE2BF',
   },
 });
 
