@@ -23,6 +23,10 @@ concurrency:
   group: android-apk-build
   cancel-in-progress: true
 
+# Needed to publish the APK to a GitHub Release.
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build test APK
@@ -71,3 +75,23 @@ jobs:
           path: Frontend/Amrut/android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
+
+      # Publish the APK to a rolling GitHub Release so it always has a stable
+      # download link on the repo's Releases page (tag: android-test-latest).
+      - name: Publish APK to GitHub Release
+        if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-test-latest
+          name: "Amrut B2B — Test APK (build ${{ github.run_number }})"
+          body: |
+            Standalone test APK of the Amrut B2B app.
+
+            - Commit: `${{ github.sha }}`
+            - Build: #${{ github.run_number }}
+            - Install `app-release.apk` on any Android device (enable "install from unknown sources").
+
+            This release is updated automatically on every app change to `main`.
+          prerelease: true
+          make_latest: "true"
+          files: Frontend/Amrut/android/app/build/outputs/apk/release/app-release.apk
