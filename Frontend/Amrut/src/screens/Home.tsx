@@ -5,8 +5,7 @@ import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
-import CustomLoader from '../components/common/CustomLoader';
-import ScreenLoader from '../components/common/ScreenLoader';
+import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -18,12 +17,13 @@ import Toast from 'react-native-toast-message';
 
 
 
-type ProductCardProps = { 
+type ProductCardProps = {
   product: any;
   onPress: () => void;
+  index?: number;
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }) => {
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
   const imageSource = imageUrl
@@ -34,13 +34,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
     ? String(product.category_name)
     : '';
   return (
-  <TouchableOpacity style={productCardStyles.card} onPress={onPress} activeOpacity={0.85}>
+  <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
+    <PressableScale style={productCardStyles.card} onPress={onPress}>
       <View style={productCardStyles.imageWrap}>
         <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
       </View>
       <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
       {subLabel ? <Text style={productCardStyles.sku} numberOfLines={1}>{subLabel.toUpperCase()}</Text> : null}
-  </TouchableOpacity>
+    </PressableScale>
+  </FadeInSlide>
 );
 };
 
@@ -50,7 +52,7 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]); // Store all products
-  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [userId, setUserId] = useState<number | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -422,11 +424,6 @@ const Home = () => {
     );
   }
 
-  // Show screen loader when categories are loading
-  if (categoriesLoading) {
-    return <ScreenLoader text="Loading Home..." />;
-  }
-
   return (
     <ScrollView 
       style={styles.container}
@@ -460,9 +457,7 @@ const Home = () => {
       </View>
       <View style={styles.sectionAccent} />
       {slidersLoading ? (
-        <View style={styles.loadingContainer}>
-          <CustomLoader size="large" text="Loading categories..." textColor="#5D0829" />
-        </View>
+        <BannerSkeleton height={150} />
       ) : sliders && sliders.length > 0 ? (
         <CustomSlider
           sliders={sliders}
@@ -507,14 +502,13 @@ const Home = () => {
       {/* Product Cards */}
       <ScrollView contentContainerStyle={productCardStyles.container} showsVerticalScrollIndicator={false}>
         {productsLoading ? (
-          <View style={styles.loadingContainer}>
-            <CustomLoader size="large" text="Loading products..." textColor="#5D0829" />
-          </View>
+          <ProductGridSkeleton count={6} />
         ) : products.length > 0 ? (
           products.map((product, idx) => (
-          <ProductCard 
+          <ProductCard
               product={product}
-              key={(product as any).id || idx} 
+              key={(product as any).id || idx}
+              index={idx}
               onPress={() => handleProductPress(product)}
             />
           ))
@@ -683,6 +677,10 @@ const productCardStyles = StyleSheet.create({
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
   // shadow, larger image, name in Glorify with an optional category sub-label.
   // Two per row (47% width + space-between).
+  cardWrap: {
+    width: '47%',
+    marginBottom: hp('1.6%'),
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: wp('4.5%'),
@@ -692,8 +690,7 @@ const productCardStyles = StyleSheet.create({
     paddingTop: hp('1%'),
     paddingBottom: hp('1%'),
     paddingHorizontal: wp('2%'),
-    marginBottom: hp('1.6%'),
-    width: '47%',
+    width: '100%',
     height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.2%') : hp('17.6%'),
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },

@@ -8,8 +8,8 @@ import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { getApprovedProductsForUser } from '../services/Api';
-import CustomLoader from '../components/common/CustomLoader';
 import ScreenLoader from '../components/common/ScreenLoader';
+import { ProductGridSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 
 import Toast from 'react-native-toast-message';
@@ -391,10 +391,6 @@ const Product = () => {
     return <ScreenLoader text="Loading Category..." />;
   }
 
-  if (loading) {
-    return <ScreenLoader text="Loading Products..." />;
-  }
-
   return (
     <View style={styles.container}>
       <CustomHeader
@@ -413,12 +409,9 @@ const Product = () => {
 
       {/* Product grid */}
       {productsLoading ? (
-        <CustomLoader 
-          size="large" 
-          text="Loading products..." 
-          textColor="#5D0829"
-          containerStyle={{ marginTop: 40 }}
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <ProductGridSkeleton count={6} />
+        </ScrollView>
       ) : (error && !filteredProducts.length) ? (
         <Text style={styles.errorText}>{error}</Text>
       ) : filteredProducts.length === 0 ? (
@@ -427,26 +420,26 @@ const Product = () => {
         <ScrollView contentContainerStyle={styles.productGrid} showsVerticalScrollIndicator={false}>
           {filteredProducts.map((item, idx) => {
             return (
-              <TouchableOpacity
-                key={item.id || idx}
-                style={styles.card}
-                activeOpacity={0.85}
-                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-              >
-                {/* Cart icon at top-right */}
-                <TouchableOpacity 
-                  style={styles.cartIconContainer} 
-                  onPress={() => addToCartDirectly(item)}
-                  activeOpacity={0.7}
+              <FadeInSlide key={item.id || idx} delay={Math.min(idx, 8) * 55} style={styles.cardWrap}>
+                <PressableScale
+                  style={styles.card}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 >
-                  <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
-                </TouchableOpacity>
-                
-                {/* Product Image - Using our custom render function */}
-                {renderProductImage(item)}
-                
-                <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
-              </TouchableOpacity>
+                  {/* Cart icon at top-right */}
+                  <TouchableOpacity
+                    style={styles.cartIconContainer}
+                    onPress={() => addToCartDirectly(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
+                  </TouchableOpacity>
+
+                  {/* Product Image - Using our custom render function */}
+                  {renderProductImage(item)}
+
+                  <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
+                </PressableScale>
+              </FadeInSlide>
             );
           })}
         </ScrollView>
@@ -549,6 +542,10 @@ const styles = StyleSheet.create({
   },
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
   // shadow, rounded image; keeps the quick add-to-cart icon. Two per row.
+  cardWrap: {
+    width: '47%',
+    marginBottom: 14,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 18,
@@ -558,8 +555,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     paddingHorizontal: 8,
-    marginBottom: 14,
-    width: '47%',
+    width: '100%',
     height: 178,
     position: 'relative', // for absolute positioning of cart icon
     shadowColor: '#5D0829',
