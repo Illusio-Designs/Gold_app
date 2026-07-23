@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/common/CustomHeader';
@@ -244,9 +245,9 @@ const Collection = () => {
                   key={category.id ? String(category.id) : String(index)}
                   style={productCardStyles.card}
                   onPress={() => handleCategoryPress(category)}
-                  activeOpacity={0.85}
+                  activeOpacity={0.9}
                 >
-                  {/* Category Image */}
+                  {/* Category Image fills the whole tile */}
                   {category.image ? (
                     <Image
                       source={{ uri: getCategoryImageUrl(category.image) || undefined }}
@@ -254,20 +255,20 @@ const Collection = () => {
                       resizeMode="cover"
                     />
                   ) : (
-                    <View style={[productCardStyles.image, productCardStyles.placeholderImage]}>
-                      <Text style={productCardStyles.placeholderText}>No Image</Text>
-                    </View>
+                    <View style={[productCardStyles.image, productCardStyles.placeholderImage]} />
                   )}
 
-                  {/* Category Name */}
-                  <Text style={productCardStyles.name}>{category.name}</Text>
+                  {/* Maroon fade so the name is always readable over the photo */}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(58,5,25,0.9)']}
+                    style={productCardStyles.overlay}
+                  />
 
-                  {/* Category Description */}
-                  {category.description && (
-                    <Text style={productCardStyles.description} numberOfLines={2}>
-                      {category.description}
-                    </Text>
-                  )}
+                  {/* Category name (cream Glorify) + arrow, over the image */}
+                  <View style={productCardStyles.labelRow}>
+                    <Text style={productCardStyles.name} numberOfLines={1}>{category.name}</Text>
+                    <Text style={productCardStyles.arrow}>›</Text>
+                  </View>
                 </TouchableOpacity>
               ))
             )}
@@ -427,46 +428,61 @@ const productCardStyles = StyleSheet.create({
     justifyContent: 'center',
     paddingBottom: getResponsiveSpacing(24, 30, 36),
   },
+  // Option A · Lookbook overlay — the image fills the tile, a maroon fade sits
+  // over the bottom, and the category name (cream Glorify) + arrow overlay it.
   card: {
-    backgroundColor: '#fff',
-    borderRadius: getResponsiveSpacing(12, 16, 22),
-    borderWidth: 0.5,
-    borderColor: '#5D0829',
-    alignItems: 'center',
-    paddingTop: getResponsiveSpacing(6, 8, 10),
-    margin: getResponsiveSpacing(6, 8, 12),
-    width: isSmallScreen() ? wp('38%') : isMediumScreen() ? wp('38%') : wp('40%'),
-    height: isSmallScreen() ? hp('16.5%') : isMediumScreen() ? hp('16.8%') : hp('16%'),
+    borderRadius: getResponsiveSpacing(16, 18, 22),
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: '#5D0829',
+    margin: getResponsiveSpacing(6, 8, 10),
+    width: isSmallScreen() ? wp('42%') : isMediumScreen() ? wp('42%') : wp('43%'),
+    height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.5%') : hp('18%'),
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.18,
+    shadowRadius: 9,
+    elevation: 4,
   },
   image: {
-    width: isSmallScreen() ? wp('34%') : isMediumScreen() ? wp('34%') : wp('35%'),
-    height: isSmallScreen() ? hp('11.5%') : isMediumScreen() ? hp('11.5%') : hp('11%'),
-    borderRadius: getResponsiveSpacing(10, 12, 16),
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
   },
   placeholderImage: {
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#5D0829',
   },
-  placeholderText: {
-    color: '#888',
-    fontSize: 14,
-    fontWeight: '500',
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '58%',
+  },
+  labelRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    paddingHorizontal: getResponsiveSpacing(12, 13, 14),
+    paddingBottom: getResponsiveSpacing(11, 12, 13),
   },
   name: {
-    color: '#6B0D33',
+    flex: 1,
+    color: '#FCE2BF',
     fontFamily: 'GlorifyDEMO',
-    fontSize: isSmallScreen() ? wp('3.2%') : isMediumScreen() ? wp('3.7%') : wp('3.5%'),
+    fontSize: isSmallScreen() ? wp('4%') : isMediumScreen() ? wp('4.3%') : wp('4.2%'),
     fontWeight: '700',
-    marginTop: getResponsiveSpacing(4, 6, 8),
-    textAlign: 'center',
   },
-  description: {
-    color: '#666',
-    fontSize: isSmallScreen() ? wp('2.8%') : isMediumScreen() ? wp('3.2%') : wp('3%'),
-    fontFamily: 'GlorifyDEMO',
-    marginTop: getResponsiveSpacing(2, 3, 4),
-    textAlign: 'center',
+  arrow: {
+    color: '#FCE2BF',
+    fontSize: isSmallScreen() ? wp('5%') : wp('5.4%'),
+    fontWeight: '700',
+    marginLeft: 6,
+    marginBottom: -2,
   },
 });
 

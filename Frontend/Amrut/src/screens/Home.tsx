@@ -29,10 +29,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
+  // Optional sub-label under the name (category) — only when it adds info.
+  const subLabel = product.category_name && product.category_name !== product.name
+    ? String(product.category_name)
+    : '';
   return (
-  <TouchableOpacity style={productCardStyles.card} onPress={onPress} activeOpacity={0.7}>
-      <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
-      <Text style={productCardStyles.name}>{product.name || 'Product'}</Text>
+  <TouchableOpacity style={productCardStyles.card} onPress={onPress} activeOpacity={0.85}>
+      <View style={productCardStyles.imageWrap}>
+        <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
+      </View>
+      <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
+      {subLabel ? <Text style={productCardStyles.sku} numberOfLines={1}>{subLabel.toUpperCase()}</Text> : null}
   </TouchableOpacity>
 );
 };
@@ -584,29 +591,51 @@ const productCardStyles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
+  // Option A · Clean boutique — white card, soft gold hairline border, gentle
+  // shadow, larger image, name in Glorify with an optional category sub-label.
   card: {
     backgroundColor: '#fff',
-    borderRadius: wp('4%'),
-    borderWidth: isSmallScreen() ? 0.5 : isMediumScreen() ? 0.5 : isLargeScreen() ? 0.8 : 0.5,
-    borderColor: '#5D0829',
+    borderRadius: wp('4.5%'),
+    borderWidth: 1,
+    borderColor: '#EADBC8',
     alignItems: 'center',
-    paddingTop: hp('0.7%'),
+    paddingTop: hp('1%'),
+    paddingBottom: hp('1%'),
+    paddingHorizontal: wp('2%'),
     margin: wp('2%'),
-    width: isSmallScreen() ? wp('38%') : isMediumScreen() ? wp('38%') : wp('40%'),
-    height: isSmallScreen() ? hp('16.5%') : isMediumScreen() ? hp('16.8%') : hp('16%'),
+    width: isSmallScreen() ? wp('40%') : isMediumScreen() ? wp('41%') : wp('42%'),
+    height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.2%') : hp('17.6%'),
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  imageWrap: {
+    width: '100%',
+    borderRadius: wp('3.2%'),
+    overflow: 'hidden',
+    backgroundColor: '#F7F1E8',
   },
   image: {
-    width: isSmallScreen() ? wp('34%') : isMediumScreen() ? wp('34%') : wp('35%'),
-    height: isSmallScreen() ? hp('11.5%') : isMediumScreen() ? hp('11.5%') : hp('11%'),
-    borderRadius: wp('3%'),
-    borderColor: '#5D0829',
+    width: '100%',
+    height: isSmallScreen() ? hp('11.8%') : isMediumScreen() ? hp('11.8%') : hp('11.4%'),
+    borderRadius: wp('3.2%'),
   },
   name: {
-    color: '#6B0D33',
+    color: '#5D0829',
     fontFamily: 'Glorifydemo-BW3J3',
-    fontSize: isSmallScreen() ? wp('3.2%') : isMediumScreen() ? wp('3.7%') : wp('3.5%'),
+    fontSize: isSmallScreen() ? wp('3.6%') : isMediumScreen() ? wp('3.9%') : wp('3.8%'),
     fontWeight: '700',
-    marginTop: isSmallScreen() ? hp('0.7%') : isMediumScreen() ? hp('1.2%') : isLargeScreen() ? hp('1.2%') : hp('1.2%'),
+    marginTop: hp('0.9%'),
+    textAlign: 'center',
+  },
+  sku: {
+    color: '#C09E83',
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontSize: wp('2.7%'),
+    letterSpacing: 0.6,
+    marginTop: hp('0.2%'),
     textAlign: 'center',
   },
 });
