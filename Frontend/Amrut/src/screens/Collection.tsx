@@ -425,7 +425,8 @@ const productCardStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
     paddingBottom: getResponsiveSpacing(24, 30, 36),
   },
   // Option A · Lookbook overlay — the image fills the tile, a maroon fade sits
@@ -435,11 +436,10 @@ const productCardStyles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: '#5D0829',
-    // Fixed 2-per-row grid: 46% width + 2% side margins = 50% each → always
-    // two columns, never collapses to one.
-    marginHorizontal: '2%',
-    marginVertical: 8,
-    width: '46%',
+    // Reliable 2-per-row grid: container uses space-between and each card is
+    // 47% wide (sum < 100%, so it never collapses to a single column).
+    width: '47%',
+    marginBottom: 14,
     height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.5%') : hp('18%'),
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 5 },
