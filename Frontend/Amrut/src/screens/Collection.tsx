@@ -188,15 +188,17 @@ const Collection = () => {
   return (
     <ErrorBoundary>
       <View style={styles.container}>
-        <CustomHeader title="Collection" timer={true} />
-
-        {/* Search Bar */}
-        <View style={{ paddingHorizontal: 25, marginTop: 10 }}>
-          <SearchBar value={search} onChangeText={setSearch} onPress={() => {
-            // @ts-ignore
-            navigation.navigate('Search');
-          }} />
-        </View>
+        <CustomHeader
+          title="Collection"
+          showBack={false}
+          rightActions={[
+            {
+              icon: require('../assets/img/common/searchicon.png'),
+              // @ts-ignore
+              onPress: () => navigation.navigate('Search'),
+            },
+          ]}
+        />
 
         {/* Category Filter Header */}
         {selectedCategoryId && categoryName && (

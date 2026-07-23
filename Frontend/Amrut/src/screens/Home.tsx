@@ -435,7 +435,7 @@ const Home = () => {
       }
       showsVerticalScrollIndicator={false}
     >
-      {/* Modern top bar — logo + greeting */}
+      {/* Modern top bar — logo + greeting + search icon */}
       <View style={styles.topBar}>
         <Image
           source={require('../assets/img/common/maroonlogo.png')}
@@ -446,10 +446,13 @@ const Home = () => {
           <Text style={styles.greetSmall}>Welcome back</Text>
           <Text style={styles.greetName}>Amrut Jewels</Text>
         </View>
-      </View>
-
-      <View style={{ paddingHorizontal: 18 }}>
-        <SearchBar value={search} onChangeText={setSearch} onPress={() => (navigation as any).navigate('Search')} />
+        <TouchableOpacity
+          style={styles.searchIconBtn}
+          onPress={() => (navigation as any).navigate('Search')}
+          activeOpacity={0.8}
+        >
+          <Image source={require('../assets/img/common/searchicon.png')} style={styles.searchIconImg} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.sectionHeader}>
@@ -549,6 +552,22 @@ const styles = StyleSheet.create({
   },
   greet: {
     flex: 1,
+  },
+  searchIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchIconImg: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    tintColor: '#5D0829',
   },
   greetSmall: {
     fontSize: 11,
@@ -658,10 +677,12 @@ const productCardStyles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
   },
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
   // shadow, larger image, name in Glorify with an optional category sub-label.
+  // Two per row (47% width + space-between).
   card: {
     backgroundColor: '#fff',
     borderRadius: wp('4.5%'),
@@ -671,8 +692,8 @@ const productCardStyles = StyleSheet.create({
     paddingTop: hp('1%'),
     paddingBottom: hp('1%'),
     paddingHorizontal: wp('2%'),
-    margin: wp('2%'),
-    width: isSmallScreen() ? wp('40%') : isMediumScreen() ? wp('41%') : wp('42%'),
+    marginBottom: hp('1.6%'),
+    width: '47%',
     height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.2%') : hp('17.6%'),
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },

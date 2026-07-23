@@ -397,17 +397,20 @@ const Product = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title={categoryName} timer={true} />
-      {/* Search bar with filter button */}
-      <View style={styles.searchRow}>
-        <View style={{ flex: 1 }}>
-          <SearchBar value={search} onChangeText={setSearch} />
-        </View>
-        <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterVisible(true)}>
-          <Image source={require('../assets/img/common/filtericon.png')} style={styles.filterIcon} />
-        </TouchableOpacity>
-      </View>
-      
+      <CustomHeader
+        title={categoryName || 'Products'}
+        rightActions={[
+          {
+            icon: require('../assets/img/common/searchicon.png'),
+            onPress: () => (navigation as any).navigate('Search'),
+          },
+          {
+            icon: require('../assets/img/common/filtericon.png'),
+            onPress: () => setFilterVisible(true),
+          },
+        ]}
+      />
+
       {/* Product grid */}
       {productsLoading ? (
         <CustomLoader 
@@ -540,11 +543,12 @@ const styles = StyleSheet.create({
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
     paddingBottom: 30,
   },
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
-  // shadow, rounded image; keeps the quick add-to-cart icon.
+  // shadow, rounded image; keeps the quick add-to-cart icon. Two per row.
   card: {
     backgroundColor: '#fff',
     borderRadius: 18,
@@ -554,9 +558,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     paddingHorizontal: 8,
-    margin: 8,
-    width: 150,
-    height: 158,
+    marginBottom: 14,
+    width: '47%',
+    height: 178,
     position: 'relative', // for absolute positioning of cart icon
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },
@@ -588,13 +592,13 @@ const styles = StyleSheet.create({
     tintColor: '#5D0829', // Dark maroon shopping bag icon
   },
   image: {
-    width: 132,
-    height: 96,
+    width: '100%',
+    height: 108,
     borderRadius: 13,
   },
   noImageContainer: {
-    width: 132,
-    height: 96,
+    width: '100%',
+    height: 108,
     borderRadius: 13,
     backgroundColor: '#F7F1E8',
     justifyContent: 'center',
