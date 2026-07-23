@@ -6,6 +6,7 @@ import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
 import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
+import { useWishlist } from '../context/WishlistContext';
 import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -24,17 +25,43 @@ type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }) => {
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const saved = isWishlisted(product.id);
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
+
+  const onHeart = () =>
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      sku: product.sku,
+      category_name: product.category_name,
+      gross_weight: product.gross_weight,
+      net_weight: product.net_weight,
+      size: product.size,
+      length: product.length,
+    });
+
   return (
   <FadeInSlide delay={Math.min(index, 8) * 55}>
-    <PressableScale style={productCardStyles.card} onPress={onPress}>
-      <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
-      <Text style={productCardStyles.name}>{product.name || 'Product'}</Text>
-    </PressableScale>
+    <View style={productCardStyles.card}>
+      <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+        <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
+        <Text style={productCardStyles.name}>{product.name || 'Product'}</Text>
+      </TouchableOpacity>
+      {/* Wishlist heart */}
+      <TouchableOpacity style={productCardStyles.heartBtn} onPress={onHeart} activeOpacity={0.7}>
+        <Text style={[productCardStyles.heartGlyph, saved && productCardStyles.heartActive]}>{saved ? '♥' : '♡'}</Text>
+      </TouchableOpacity>
+      {/* View button */}
+      <PressableScale style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
+        <Text style={productCardStyles.viewText}>View</Text>
+      </PressableScale>
+    </View>
   </FadeInSlide>
 );
 };
@@ -641,9 +668,51 @@ const productCardStyles = StyleSheet.create({
     borderColor: '#5D0829',
     alignItems: 'center',
     paddingTop: hp('0.7%'),
+    paddingBottom: hp('1%'),
+    paddingHorizontal: wp('2%'),
     margin: wp('2%'),
+    position: 'relative',
     width: isSmallScreen() ? wp('38%') : isMediumScreen() ? wp('38%') : wp('40%'),
-    height: isSmallScreen() ? hp('16.5%') : isMediumScreen() ? hp('16.8%') : hp('16%'),
+  },
+  heartBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FCE2BF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  heartGlyph: {
+    color: '#5D0829',
+    fontSize: 15,
+    marginTop: -1,
+  },
+  heartActive: {
+    color: '#C0392B',
+  },
+  viewBtn: {
+    marginTop: hp('0.8%'),
+    backgroundColor: '#5D0829',
+    borderRadius: 8,
+    paddingVertical: hp('0.7%'),
+    paddingHorizontal: wp('7%'),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewText: {
+    color: '#FCE2BF',
+    fontFamily: 'Glorifydemo-BW3J3',
+    fontSize: wp('3.2%'),
+    fontWeight: '700',
   },
   image: {
     width: isSmallScreen() ? wp('34%') : isMediumScreen() ? wp('34%') : wp('35%'),
