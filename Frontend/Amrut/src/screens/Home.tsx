@@ -435,12 +435,27 @@ const Home = () => {
       }
       showsVerticalScrollIndicator={false}
     >
-      <Header />
-      <View style={{paddingHorizontal:25}}>
+      {/* Modern top bar — logo + greeting */}
+      <View style={styles.topBar}>
+        <Image
+          source={require('../assets/img/common/maroonlogo.png')}
+          style={styles.topLogo}
+          resizeMode="contain"
+        />
+        <View style={styles.greet}>
+          <Text style={styles.greetSmall}>Welcome back</Text>
+          <Text style={styles.greetName}>Amrut Jewels</Text>
+        </View>
+      </View>
+
+      <View style={{ paddingHorizontal: 18 }}>
         <SearchBar value={search} onChangeText={setSearch} onPress={() => (navigation as any).navigate('Search')} />
       </View>
-      
-      <Text style={styles.categoryHeading}>Category</Text>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Shop by Category</Text>
+      </View>
+      <View style={styles.sectionAccent} />
       {slidersLoading ? (
         <View style={styles.loadingContainer}>
           <CustomLoader size="large" text="Loading categories..." textColor="#5D0829" />
@@ -480,6 +495,12 @@ const Home = () => {
         }}
       />
       
+      {/* Products section */}
+      <View style={[styles.sectionHeader, { marginTop: hp('1%') }]}>
+        <Text style={styles.sectionTitle}>New Arrivals</Text>
+      </View>
+      <View style={styles.sectionAccent} />
+
       {/* Product Cards */}
       <ScrollView contentContainerStyle={productCardStyles.container} showsVerticalScrollIndicator={false}>
         {productsLoading ? (
@@ -513,6 +534,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: hp('2.5%'),
     paddingHorizontal: wp('1.5%'),
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 18,
+    paddingTop: 4,
+    paddingBottom: 12,
+  },
+  topLogo: {
+    width: 44,
+    height: 44,
+    marginRight: 11,
+  },
+  greet: {
+    flex: 1,
+  },
+  greetSmall: {
+    fontSize: 11,
+    color: '#8A7A80',
+    fontFamily: 'Glorifydemo-BW3J3',
+  },
+  greetName: {
+    fontSize: 18,
+    color: '#5D0829',
+    fontFamily: 'Glorifydemo-BW3J3',
+    marginTop: 1,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 18,
+    marginTop: hp('1.6%'),
+  },
+  sectionTitle: {
+    fontSize: 19,
+    color: '#5D0829',
+    fontWeight: '700',
+    fontFamily: 'Glorifydemo-BW3J3',
+  },
+  sectionAccent: {
+    width: 44,
+    height: 3,
+    borderRadius: 3,
+    backgroundColor: '#C09E83',
+    marginLeft: 18,
+    marginTop: 6,
+    marginBottom: 4,
   },
   categoryHeading: {
     color: '#6B0D33',
