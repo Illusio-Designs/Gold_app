@@ -8,6 +8,7 @@ import ShreenathjiScreen from '../screens/Splash/ShreenathjiScreen';
 import FamilyTree from '../screens/Splash/FamilyTree';
 import Register from '../screens/authorization/Register';
 import Login from '../screens/authorization/Login';
+import OtpVerify from '../screens/authorization/OtpVerify';
 import Product from '../screens/Product';
 import ProductDetail from '../screens/ProductDetail';
 import Search from '../screens/Search';
@@ -50,6 +51,7 @@ const StackNavigation = () => {
               <Stack.Screen name="FamilyTree" component={FamilyTree} />
               <Stack.Screen name="Register" component={Register} />
               <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="OtpVerify" component={OtpVerify} />
               <Stack.Screen name="MainTabs" component={BottomNavigation} />
               <Stack.Screen name="Product" component={Product} />
               <Stack.Screen name="ProductDetail" component={ProductDetail} />
