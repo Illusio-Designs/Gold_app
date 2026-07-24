@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNOtpVerify from 'react-native-otp-verify';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { isShortScreen, isTallScreen, getResponsiveFontSize } from '../../utils/responsive';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 
 const RESEND_SECONDS = 30;
 
@@ -42,6 +43,7 @@ const OtpVerify = () => {
   const route = useRoute<any>();
   const { phone = '', countryCode = '+91', requestId: initialRequestId = '' } = route.params || {};
   const { onLogin } = useNotifications();
+  const keyboardHeight = useKeyboardHeight();
 
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
@@ -193,8 +195,8 @@ const OtpVerify = () => {
           </View>
         </ScrollView>
 
-        {/* Verify button — stays at the bottom, does not stick to the keyboard */}
-        <View style={styles.bottomBar}>
+        {/* Verify button — pinned above the keyboard so it stays reachable */}
+        <View style={[styles.bottomBar, { marginBottom: keyboardHeight }]}>
           <Button onPress={handleVerifyOtp} title={loading ? 'Verifying…' : 'Verify Code'} disabled={loading} style={{ marginTop: 0 }} textStyle={{}} />
         </View>
       </View>
