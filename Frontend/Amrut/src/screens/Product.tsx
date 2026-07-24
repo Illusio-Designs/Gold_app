@@ -470,7 +470,6 @@ const Product = () => {
           setFilterVisible(false);
         }}
       />
-      <Toast />
     </View>
   );
 };

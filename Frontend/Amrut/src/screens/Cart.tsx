@@ -303,8 +303,6 @@ const Cart = () => {
         </View>
       </Modal>
 
-      {/* Toast for notifications */}
-      <Toast />
 
       {/* Login Prompt Modal */}
       <LoginPromptModal

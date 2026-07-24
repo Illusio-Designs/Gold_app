@@ -352,8 +352,6 @@ const Search = () => {
         </View>
       )}
 
-      {/* Toast for notifications */}
-      <Toast />
     </View>
   );
 };

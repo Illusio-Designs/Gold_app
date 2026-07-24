@@ -15,8 +15,8 @@ import {
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import Toast from 'react-native-toast-message';
 import CustomHeader from '../components/common/CustomHeader';
+import SuccessOverlay from '../components/common/SuccessOverlay';
 import LoginPromptModal from '../components/common/LoginPromptModal';
 import { useLoginPrompt } from '../hooks/useLoginPrompt';
 import { createCustomOrder } from '../services/Api';
@@ -143,6 +143,7 @@ const CustomOrder = () => {
   const [remark, setRemark] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   React.useEffect(() => {
     if (isFocused) checkAndPromptLogin();
@@ -179,15 +180,15 @@ const CustomOrder = () => {
 
   const handleSubmit = async () => {
     if (images.length === 0) {
-      Toast.show({ type: 'error', text1: 'Add a photo', text2: 'Please add at least one design photo.', position: 'top' });
+      Alert.alert('Add a photo', 'Please add at least one design photo.');
       return;
     }
     if (!weight.trim()) {
-      Toast.show({ type: 'error', text1: 'Weight required', text2: 'Please enter the desired weight.', position: 'top' });
+      Alert.alert('Weight required', 'Please enter the desired weight.');
       return;
     }
     if (!deliveryDate) {
-      Toast.show({ type: 'error', text1: 'Delivery date', text2: 'Please choose a delivery date.', position: 'top' });
+      Alert.alert('Delivery date', 'Please choose a delivery date.');
       return;
     }
 
@@ -211,9 +212,9 @@ const CustomOrder = () => {
 
       const res = await createCustomOrder(form, token);
 
-      // reset
+      // reset + show the in-screen success animation
       setImages([]); setWeight(''); setPurity(''); setQuantity(1); setDeliveryDate(null); setRemark('');
-      navigation.navigate('Home');
+      setShowSuccess(true);
       return res;
     } catch (err: any) {
       if (err?.code === 'BUSINESS_NOT_APPROVED') {
@@ -223,12 +224,7 @@ const CustomOrder = () => {
           [{ text: 'OK' }],
         );
       } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Could not submit',
-          text2: err?.error || err?.message || 'Please try again.',
-          position: 'top',
-        });
+        Alert.alert('Could not submit', err?.error || err?.message || 'Please try again.');
       }
     } finally {
       setSubmitting(false);
@@ -362,14 +358,22 @@ const CustomOrder = () => {
         title="Login Required"
         message="Please login to place a custom order"
       />
-      <Toast />
+
+      <SuccessOverlay
+        visible={showSuccess}
+        message={'Custom Order\nPlaced'}
+        onDone={() => {
+          setShowSuccess(false);
+          navigation.navigate('Orders');
+        }}
+      />
     </View>
   );
 };
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingTop: 44 },
-  body: { paddingHorizontal: 18, paddingBottom: 30 },
+  container: { flex: 1, backgroundColor: '#fff' },
+  body: { paddingHorizontal: 18, paddingTop: 16, paddingBottom: 30 },
   lead: { fontSize: 12.5, color: '#7a6a70', lineHeight: 19, marginBottom: 14, fontFamily: 'GlorifyDEMO' },
   label: { fontSize: 13, color: '#2a1a20', fontWeight: '700', marginBottom: 6, fontFamily: 'GlorifyDEMO' },
   req: { color: '#b3261e' },

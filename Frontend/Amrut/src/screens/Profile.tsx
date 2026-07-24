@@ -13,7 +13,6 @@ import { useCart } from '../context/CartContext';
 // NotificationService removed as requested
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
-import Toast from 'react-native-toast-message';
 import { useNavigationLoader } from '../context/NavigationContext';
 import LoginPromptModal from '../components/common/LoginPromptModal';
 import { useLoginPrompt } from '../hooks/useLoginPrompt';
@@ -361,7 +360,8 @@ const Profile = () => {
 
   return (
     <View style={styles.baseBg}>
-      <CustomHeader title="My Profile" />
+      <CustomHeader title="My Profile" showBack={false} />
+      <View style={styles.body}>
       <ProfilePhotoName
         photoSource={photoUri}
         cameraIconSource={require('../assets/img/profile/editprofile.png')}
@@ -369,7 +369,7 @@ const Profile = () => {
         onCameraPress={handleCameraPress}
       />
       {uploading && <CustomLoader size="small" text="Uploading..." textColor="#5D0829" />}
-      
+
       {/* Menu Buttons */}
       <View style={styles.menuWrap}>
         <TouchableOpacity
@@ -406,9 +406,7 @@ const Profile = () => {
       <View style={styles.versionLineContainer}>
         <Text style={styles.versionLineText}>v{appVersion}</Text>
       </View>
-      
-      {/* Toast for notifications */}
-      <Toast />
+      </View>
 
       {/* Login Prompt Modal */}
       <LoginPromptModal
@@ -425,8 +423,11 @@ const styles = StyleSheet.create({
   baseBg: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  body: {
+    flex: 1,
     alignItems: 'center',
-    paddingVertical: isShortScreen() ? 40 : isTallScreen() ? 60 : 50,
+    paddingTop: getResponsiveSpacing(16, 20, 24),
   },
   headerRow: {
     flexDirection: 'row',

@@ -458,8 +458,6 @@ const Orders = () => {
         )}
       </ScrollView>
 
-      {/* Toast for notifications */}
-      <Toast />
 
       {/* Login Prompt Modal */}
       <LoginPromptModal

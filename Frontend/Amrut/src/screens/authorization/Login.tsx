@@ -16,6 +16,7 @@ import Button from '../../components/common/Button';
 import CustomLoader from '../../components/common/CustomLoader';
 
 import OtpInput from '../../components/common/OtpInput';
+import SuccessOverlay from '../../components/common/SuccessOverlay';
 import CountryPickerModal from '../../components/common/CountryPickerModal';
 import { Country } from '../../data/countries';
 import { useNavigation } from '@react-navigation/native';
@@ -48,6 +49,7 @@ const Login = () => {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [requestId, setRequestId] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     OTPWidget.initializeWidget(WIDGET_ID, TOKEN_AUTH);
@@ -164,7 +166,7 @@ const Login = () => {
       } else {
         setOtpSent(false); // Only on real failure
         console.log('[MSG91] Failed to send OTP:', hasMessage ? response.message : 'Failed to send OTP. Please try again.');
-        Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? response.message : 'Failed to send OTP. Please try again.') });
+        Alert.alert('Error', (hasMessage ? response.message : 'Failed to send OTP. Please try again.'));
       }
     } catch (err) {
       const error = err as any;
@@ -192,7 +194,7 @@ const Login = () => {
       } else {
         setOtpSent(false); // Only on real failure
         console.log('[MSG91] Failed to send OTP (error case):', hasMessage ? error.message : 'Failed to send OTP. Please try again.');
-        Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? error.message : 'Failed to send OTP. Please try again.') });
+        Alert.alert('Error', (hasMessage ? error.message : 'Failed to send OTP. Please try again.'));
       }
     } finally {
       setSendingOtp(false);
@@ -295,11 +297,11 @@ const Login = () => {
           // connection so order/cart push events start flowing.
           RealtimeDataService.reconnectWithAuth?.();
 
-          Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
-          navigation.navigate('MainTabs');
+          // In-screen success animation, then continue into the app.
+          setShowSuccess(true);
         } else {
           // No token returned — surface whatever error the backend sent.
-          Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
+          Alert.alert('Login Failed', loginResult.error || 'Could not log you in.');
         }
       } else {
         console.log('[MSG91] OTP verification failed:', response.message || response.errors || 'The OTP is incorrect.');
@@ -328,7 +330,7 @@ const Login = () => {
       >
       <ScrollView
         contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
         <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
@@ -358,9 +360,14 @@ const Login = () => {
                 error={otpError}
                 disabled={loading}
               />
-              <TouchableOpacity onPress={handleSendOtp} style={{ marginTop: 10, alignSelf: 'flex-end' }}>
-                <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Resend OTP</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+                <TouchableOpacity onPress={() => { setOtpSent(false); setOtp(''); setOtpError(''); }}>
+                  <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Change number</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSendOtp}>
+                  <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Resend OTP</Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
 
@@ -403,9 +410,17 @@ const Login = () => {
           onClose={() => setCountryModalVisible(false)}
           onSelect={handleSelectCountry}
         />
-        <Toast />
       </ScrollView>
       </KeyboardAvoidingView>
+
+      <SuccessOverlay
+        visible={showSuccess}
+        message={'OTP Verified'}
+        onDone={() => {
+          setShowSuccess(false);
+          navigation.navigate('MainTabs');
+        }}
+      />
     </ImageBackground>
   );
 };

@@ -282,8 +282,6 @@ const Collection = () => {
           </ScrollView>
         )}
 
-        {/* Toast for notifications */}
-        <Toast />
       </View>
     </ErrorBoundary>
   );

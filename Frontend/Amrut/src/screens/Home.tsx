@@ -564,8 +564,6 @@ const Home = () => {
         )}
       </ScrollView>
 
-      {/* Toast for notifications */}
-      <Toast />
     </ScrollView>
   );
 };

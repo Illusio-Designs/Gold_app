@@ -290,7 +290,6 @@ const ProductDetail = () => {
         </View>
       </Modal>
 
-      <Toast />
     </View>
   );
 };
