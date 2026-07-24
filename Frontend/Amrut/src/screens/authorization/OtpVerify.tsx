@@ -23,6 +23,7 @@ import { useNotifications } from '../../context/NotificationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNOtpVerify from 'react-native-otp-verify';
 import { wp, hp } from '../../utils/responsiveConfig';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { isShortScreen, isTallScreen, getResponsiveFontSize } from '../../utils/responsive';
 
 const RESEND_SECONDS = 30;
@@ -50,6 +51,7 @@ const OtpVerify = () => {
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [showSuccess, setShowSuccess] = useState(false);
   const timerRef = useRef<any>(null);
+  const keyboardHeight = useKeyboardHeight();
 
   // Countdown for the resend button.
   useEffect(() => {
@@ -157,7 +159,7 @@ const OtpVerify = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <KeyboardAvoidingView style={styles.flex} behavior="padding" keyboardVerticalOffset={0}>
+      <View style={styles.flex}>
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
@@ -194,10 +196,10 @@ const OtpVerify = () => {
         </ScrollView>
 
         {/* Verify pinned above the keyboard */}
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { marginBottom: keyboardHeight }]}>
           <Button onPress={handleVerifyOtp} title={loading ? 'Verifying…' : 'Verify Code'} disabled={loading} style={{ marginTop: 0 }} textStyle={{}} />
         </View>
-      </KeyboardAvoidingView>
+      </View>
 
       <SuccessOverlay
         visible={showSuccess}

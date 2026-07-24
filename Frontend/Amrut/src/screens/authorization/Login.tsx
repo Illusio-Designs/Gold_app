@@ -20,6 +20,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import { wp, hp } from '../../utils/responsiveConfig';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
 
 // --- MSG91 Configuration (from .env via @env — not hardcoded in source) ---
@@ -35,6 +36,7 @@ const Login = () => {
   const [countryFlag, setCountryFlag] = useState('🇮🇳');
   const [countryCode, setCountryCode] = useState('+91');
   const [sendingOtp, setSendingOtp] = useState(false);
+  const keyboardHeight = useKeyboardHeight();
 
   useEffect(() => {
     OTPWidget.initializeWidget(WIDGET_ID, TOKEN_AUTH);
@@ -102,11 +104,7 @@ const Login = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior="padding"
-        keyboardVerticalOffset={0}
-      >
+      <View style={styles.flex}>
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
@@ -163,10 +161,10 @@ const Login = () => {
         </ScrollView>
 
         {/* Primary action pinned above the keyboard */}
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { marginBottom: keyboardHeight }]}>
           <Button onPress={handleSendOtp} title={sendingOtp ? 'Sending…' : 'Continue'} disabled={sendingOtp} style={{ marginTop: 0 }} textStyle={{}} />
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </ImageBackground>
   );
 };
