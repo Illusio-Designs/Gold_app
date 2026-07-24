@@ -149,6 +149,15 @@ async function startServer() {
   }
 }
 
+// Process-level safety nets: log and keep the API alive instead of letting a
+// stray promise rejection or async error take the whole process down.
+process.on("unhandledRejection", (reason) => {
+  console.error("[process] Unhandled promise rejection:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[process] Uncaught exception:", err);
+});
+
 // Only start server if this file is run directly
 if (require.main === module) {
   startServer();

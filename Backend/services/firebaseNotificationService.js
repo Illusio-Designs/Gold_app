@@ -14,21 +14,35 @@ const firebaseConfig = {
 // VAPID key for web push notifications
 const VAPID_KEY = "BOaREbot4mZreAvnnsmWMtEpDD5G85fbW_0EXnMZcP7rJFjoQGDEIZckigVi-YPNPp9uTC06hti_e4Zhb9HPRVw";
 
-// Load Firebase service account credentials
-const serviceAccount = require('../amrut-9cc5e-firebase-adminsdk-fbsvc-c0150a05ed.json');
+// Load Firebase service account credentials. Guarded so a missing/misplaced
+// credentials file disables PUSH only — it must never crash the whole API.
+let serviceAccount = null;
+try {
+  serviceAccount = require('../amrut-9cc5e-firebase-adminsdk-fbsvc-c0150a05ed.json');
+} catch (e) {
+  console.error(
+    '[firebase] Service account file not found — push notifications disabled:',
+    e.message,
+  );
+}
 
 // Initialize Firebase Admin SDK (for server-side operations)
-let adminApp;
+let adminApp = null;
 try {
-  // Check if already initialized
+  // Reuse if already initialized
   adminApp = admin.app();
 } catch (error) {
-  // Initialize if not already done
-  adminApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: firebaseConfig.projectId,
-  });
+  if (serviceAccount) {
+    try {
+      adminApp = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: firebaseConfig.projectId,
+      });
+    } catch (initErr) {
+      console.error('[firebase] Admin init failed — push disabled:', initErr.message);
+    }
   }
+}
 
 /**
  * Send notification to a specific user by FCM token
@@ -39,6 +53,7 @@ try {
  * @returns {Promise<Object>} - Firebase response
  */
 async function sendNotification(fcmToken, title, body, data = {}) {
+  if (!adminApp) return { success: false, disabled: true };
   try {
     const message = {
       token: fcmToken,
@@ -83,6 +98,7 @@ async function sendNotification(fcmToken, title, body, data = {}) {
  * @returns {Promise<Object>} - Firebase response
  */
 async function sendMulticastNotification(fcmTokens, title, body, data = {}) {
+  if (!adminApp) return { success: false, disabled: true };
   try {
     const message = {
       notification: {
@@ -111,7 +127,8 @@ async function sendMulticastNotification(fcmTokens, title, body, data = {}) {
       tokens: fcmTokens,
     };
 
-    const response = await admin.messaging().sendMulticast(message);
+    // firebase-admin v11+ removed sendMulticast() — use sendEachForMulticast().
+    const response = await admin.messaging().sendEachForMulticast(message);
     return {
       success: true,
       successCount: response.successCount,
@@ -132,6 +149,7 @@ async function sendMulticastNotification(fcmTokens, title, body, data = {}) {
  * @returns {Promise<Object>} - Firebase response
  */
 async function sendTopicNotification(topic, title, body, data = {}) {
+  if (!adminApp) return { success: false, disabled: true };
   try {
     const message = {
       topic: topic,
