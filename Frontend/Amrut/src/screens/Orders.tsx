@@ -3,6 +3,8 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Image, RefreshCon
 import CustomHeader from '../components/common/CustomHeader';
 import CartItemCard from '../components/common/CartItemCard';
 import { ListSkeleton } from '../components/common/Motion';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PackageIcon } from '@hugeicons/core-free-icons';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, getMyCustomOrders } from '../services/Api';
 import Toast from 'react-native-toast-message';
@@ -283,7 +285,7 @@ const Orders = () => {
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyIconGlyph}>🧾</Text>
+              <HugeiconsIcon icon={PackageIcon} size={46} color="#C09E83" strokeWidth={1.8} />
             </View>
             <Text style={styles.emptyText}>
               {selectedTab === 'all' 

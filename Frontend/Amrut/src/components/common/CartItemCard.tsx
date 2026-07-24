@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { getProductImageUrl } from '../../utils/imageUtils';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { Delete02Icon } from '@hugeicons/core-free-icons';
 // Removed client-side watermark overlay; backend already embeds watermark
 
 interface CartItemCardProps {
@@ -104,7 +106,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
               </View>
               {!readonly && (
                 <TouchableOpacity onPress={onRemove} style={styles.removeBtn}>
-                  <Text style={styles.removeText}>×</Text>
+                  <HugeiconsIcon icon={Delete02Icon} size={18} color="#C0392B" strokeWidth={1.8} />
                 </TouchableOpacity>
               )}
             </View>

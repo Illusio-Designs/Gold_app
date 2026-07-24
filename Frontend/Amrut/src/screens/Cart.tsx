@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, RefreshControl, Alert } from 'react-native';
 import CartItemCard from '../components/common/CartItemCard';
 import CustomHeader from '../components/common/CustomHeader';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ShoppingBag01Icon } from '@hugeicons/core-free-icons';
 import Button from '../components/common/Button';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
@@ -207,7 +209,7 @@ const Cart = () => {
         {cartItems.length === 0 ? (
           <View style={styles.emptyCartContainer}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyIconGlyph}>🛍</Text>
+              <HugeiconsIcon icon={ShoppingBag01Icon} size={46} color="#C09E83" strokeWidth={1.8} />
             </View>
             <Text style={styles.emptyCartText}>Your cart is empty</Text>
             <Text style={styles.emptyCartSubtext}>Start shopping to add items to your cart</Text>
