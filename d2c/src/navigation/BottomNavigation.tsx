@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Collection from '../screens/Collection';
 import Cart from '../screens/Cart';
@@ -6,29 +6,26 @@ import Profile from '../screens/Profile';
 import Home from '../screens/Home';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import {
+  Home01Icon,
+  Diamond01Icon,
+  ShoppingBag03Icon,
+  UserIcon,
+} from '@hugeicons/core-free-icons';
 
 const Tab = createBottomTabNavigator();
 const CollectionStackNav = createNativeStackNavigator();
 
-const icons = {
-  Home: {
-    active: require('../assets/img/bottombar/activehome.png'),
-    inactive: require('../assets/img/bottombar/inactivehome.png'),
-  },
-  Collection: {
-    active: require('../assets/img/bottombar/activecollection.png'),
-    inactive: require('../assets/img/bottombar/inactivecollection.png'),
-  },
-  Cart: {
-    active: require('../assets/img/bottombar/activecart.png'),
-    inactive: require('../assets/img/bottombar/inactivecart.png'),
-  },
-  Profile: {
-    active: require('../assets/img/bottombar/activeprofile.png'),
-    inactive: require('../assets/img/bottombar/inactiveprofile.png'),
-  },
+// Rounded Hugeicons for each consumer tab (matches the B2B look).
+const tabIcons = {
+  Home: Home01Icon,
+  Collection: Diamond01Icon,
+  Cart: ShoppingBag03Icon,
+  Profile: UserIcon,
 };
 
 const labels = {
@@ -41,9 +38,60 @@ const labels = {
 const tabNames = ['Home', 'Collection', 'Cart', 'Profile'] as const;
 type TabName = typeof tabNames[number];
 
-const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+// A flat, in-bar tab. When active the icon sits inside a perfect-circle gold
+// pill that stays fully within the bar.
+const TabItem = ({
+  name,
+  isFocused,
+  onPress,
+  accessibilityLabel,
+}: {
+  name: TabName;
+  isFocused: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+}) => {
+  const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(anim, {
+      toValue: isFocused ? 1 : 0,
+      useNativeDriver: true,
+      friction: 7,
+      tension: 90,
+    }).start();
+  }, [isFocused, anim]);
+
+  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
+
   return (
-    <View style={styles.tabBarContainer}>
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      style={styles.tabBtn}
+      activeOpacity={0.8}
+    >
+      <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <HugeiconsIcon
+            icon={tabIcons[name]}
+            size={23}
+            color={isFocused ? '#5D0829' : '#FCE2BF'}
+            strokeWidth={1.8}
+          />
+        </Animated.View>
+      </View>
+      <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[name]}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;
@@ -57,40 +105,17 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             navigation.navigate(route.name);
           }
         };
-        // Type guard for route.name
         const isTabName = (name: string): name is TabName => tabNames.includes(name as TabName);
+        if (!isTabName(route.name)) return null;
+
         return (
-          <TouchableOpacity
+          <TabItem
             key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
+            name={route.name}
+            isFocused={isFocused}
             onPress={onPress}
-            style={styles.tabBtn}
-            activeOpacity={0.8}
-          >
-            {isFocused && isTabName(route.name) ? (
-              <View style={styles.activeIconWrapper}>
-                <Image
-                  source={icons[route.name].active}
-                  style={styles.activeIcon}
-                  resizeMode="contain"
-                />
-                <Text style={styles.activeLabelInside}>{labels[route.name]}</Text>
-              </View>
-            ) : isTabName(route.name) ? (
-              <>
-                <View style={styles.iconWrapper}>
-                  <Image
-                    source={icons[route.name].inactive}
-                    style={styles.icon}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text style={styles.label}>{labels[route.name]}</Text>
-              </>
-            ) : null}
-          </TouchableOpacity>
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+          />
         );
       })}
     </View>
@@ -118,75 +143,48 @@ const BottomNavigation = () => (
 );
 
 const styles = StyleSheet.create({
+  // Flat maroon bar — every tab equal, active tab highlighted inside the bar.
   tabBarContainer: {
     flexDirection: 'row',
     backgroundColor: '#5D0829',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    height: 70,
-    alignItems: 'flex-end',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: Platform.OS === 'ios' ? 15 : 10,
-    paddingTop: 20,
-    // shadowColor: '#000',
-    // shadowOpacity: 0.08,
-    // shadowRadius: 8,
-    // elevation: 10,
+    paddingTop: 10,
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 12,
   },
   tabBtn: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    height: '100%',
+    justifyContent: 'center',
+    gap: 3,
   },
-  iconWrapper: {
-    backgroundColor: 'transparent',
-    borderRadius: 24,
-    padding: 8,
-    marginBottom: 0 ,
-  },
-  activeIconWrapper: {
-    backgroundColor: '#FCE2BF', // your highlight color
-    borderRadius: 12,           // rounded square
-    paddingHorizontal: 8,      // square shape
-    paddingVertical: 12,
-    marginBottom: 0,            // move square down
-    marginTop: 0,              // move square down
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22, // exactly half -> perfect circle
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'column',
-    minWidth: 60,
+    overflow: 'hidden',
   },
-  activeLabelInside: {
-    color: '#5D0829', // maroon
-    fontSize: 12,
-    fontFamily: 'GlorifyDEMO',
-    fontWeight: 'bold',
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    tintColor: '#FCE2BF',
-  },
-  activeIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#5D0829',
+  iconWrapActive: {
+    backgroundColor: '#FCE2BF',
   },
   label: {
     color: '#FCE2BF',
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'GlorifyDEMO',
     marginTop: 2,
+    opacity: 0.75,
   },
-  activeLabel: {
-    color: '#FCE2BF',
-    fontSize: 12,
-    fontFamily: 'GlorifyDEMO',
+  labelActive: {
+    opacity: 1,
     fontWeight: 'bold',
-    marginTop: 2,
   },
 });
 
