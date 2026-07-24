@@ -230,6 +230,22 @@ function updateProductStockStatus(productId, newStatus, callback) {
   db.query(sql, [newStatus, productId], callback);
 }
 
+// Atomically reserve a product for an order (race-safe sell).
+// The conditional UPDATE flips 'available' -> 'out_of_stock' only when the row
+// is still active AND available, so of two concurrent buyers (e.g. one in the
+// B2B app, one in the D2C app) hitting the same piece, exactly one wins.
+// callback(err, reserved) where `reserved` is true only for the winning caller.
+function reserveProductForOrder(productId, callback) {
+  const sql =
+    "UPDATE products SET stock_status = 'out_of_stock', updated_at = NOW() WHERE id = ? AND status = 'active' AND stock_status = 'available'";
+  db.query(sql, [productId], (err, result) => {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, result.affectedRows === 1);
+  });
+}
+
 // Get product stock status
 function getProductStockStatus(productId, callback) {
   const sql = "SELECT stock_status FROM products WHERE id = ?";
@@ -310,6 +326,7 @@ module.exports = {
   deleteProduct,
   getProductsByCategory,
   updateProductStockStatus,
+  reserveProductForOrder,
   getProductStockStatus,
   isProductAvailableForOrder,
   recordStockHistory,

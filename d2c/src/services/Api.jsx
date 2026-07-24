@@ -1,10 +1,33 @@
 import axios from 'axios';
 import { API_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configure axios defaults
-axios.defaults.timeout = 10000; // 10 seconds timeout
-axios.defaults.retry = 2; // Retry failed requests
-axios.defaults.retryDelay = 1000; // Wait 1 second between retries
+axios.defaults.timeout = 15000; // 15 seconds timeout
+
+// Session-expiry handling: when the backend returns 401 (token invalid or
+// expired) we clear the stored credentials and let the app bounce to Login.
+// A screen registers the redirect via setUnauthorizedHandler so this service
+// stays UI-agnostic.
+let onUnauthorized = null;
+export const setUnauthorizedHandler = fn => {
+  onUnauthorized = fn;
+};
+
+axios.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error && error.response && error.response.status === 401) {
+      try {
+        await AsyncStorage.multiRemove(['accessToken', 'userId']);
+      } catch (e) {
+        // ignore storage errors — we still surface the 401 below
+      }
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Prevent stale data due to cached GET responses (browser/proxy/CDN).
 // Mobile app expects "read-after-write" after admin updates.
@@ -26,9 +49,9 @@ axios.interceptors.request.use(
   error => Promise.reject(error),
 );
 
-// ✅ Fallback if API_URL is undefined
-export const BASE_URL = API_URL || 'http://172.20.10.10:3001/api';
-// Use your LAN IP if on physical device
+// ✅ Fallback if API_URL is undefined — must be the production host so the app
+// still reaches the backend if @env injection fails in a release build.
+export const BASE_URL = API_URL || 'https://api.amrutkumargovinddasllp.com/api';
 
 console.log('🌍 API_URL from @env:', API_URL);
 console.log('🌍 Using BASE_URL:', BASE_URL);

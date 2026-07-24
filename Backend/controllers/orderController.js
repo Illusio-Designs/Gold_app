@@ -95,14 +95,15 @@ function createOrder(req, res) {
       return res.status(500).json({ error: err.message });
     }
 
-    // Mark the ordered product as sold out so it no longer appears in the
-    // storefront for other users.
+    // The order model has already atomically reserved the piece
+    // (available -> out_of_stock). Broadcast a product-update so every
+    // connected storefront (B2B and D2C) drops it in real time instead of
+    // waiting for the next manual refresh.
     if (product_id) {
-      productModel.updateProductStockStatus(product_id, "out_of_stock", (stockErr) => {
-        if (stockErr) {
-          console.error("[orderController] mark out_of_stock:", stockErr.message);
-        }
-      });
+      socketService.notifyProductUpdate(
+        { id: product_id, stock_status: "out_of_stock" },
+        "stock-updated"
+      );
     }
 
     // Get order details for notification and real-time update
@@ -142,7 +143,7 @@ function createOrder(req, res) {
 
           // Emit specific update to the user's room
           socketService.emitToRoom(
-            `user-${business_user_id}`,
+            `user_${business_user_id}`,
             "order-created",
             {
               order: orderDetails,
@@ -192,12 +193,15 @@ function createOrderFromCart(req, res) {
           return res.status(500).json({ error: err.message });
         }
 
-        // Mark every ordered product as sold out so it drops off the storefront.
+        // Each piece was already atomically reserved as it was ordered.
+        // Broadcast a product-update per item so both apps' storefronts drop
+        // the sold pieces live.
         cartResults.forEach((item) => {
           if (item.product_id) {
-            productModel.updateProductStockStatus(item.product_id, "out_of_stock", (e) => {
-              if (e) console.error("[orderController] mark out_of_stock (cart):", e.message);
-            });
+            socketService.notifyProductUpdate(
+              { id: item.product_id, stock_status: "out_of_stock" },
+              "stock-updated"
+            );
           }
         });
 
@@ -218,7 +222,7 @@ function createOrderFromCart(req, res) {
 
           // Emit specific update to the user's room
           socketService.emitToRoom(
-            `user-${user_id}`,
+            `user_${user_id}`,
             "orders-created-from-cart",
             {
               orderIds: orderIds,
@@ -417,7 +421,7 @@ function updateOrderStatus(req, res) {
           const roomUserId = updatedOrder.user_id || updatedOrder.business_user_id;
           if (roomUserId) {
             socketService.emitToRoom(
-              `user-${roomUserId}`,
+              `user_${roomUserId}`,
               "order-status-updated",
               {
                 order: updatedOrder,
@@ -435,13 +439,21 @@ function updateOrderStatus(req, res) {
             );
           }
 
-          // If the order is cancelled, put the product back on the storefront.
+          // If the order is cancelled, put the product back on the storefront
+          // and broadcast so both apps show it as available again in real time.
           if (status === "cancelled" && updatedOrder.product_id) {
             productModel.updateProductStockStatus(
               updatedOrder.product_id,
               "available",
               (e) => {
-                if (e) console.error("[orderController] restore stock:", e.message);
+                if (e) {
+                  console.error("[orderController] restore stock:", e.message);
+                  return;
+                }
+                socketService.notifyProductUpdate(
+                  { id: updatedOrder.product_id, stock_status: "available" },
+                  "stock-updated"
+                );
               }
             );
           }
@@ -516,7 +528,7 @@ function updateOrder(req, res) {
 
         // Emit specific update to the user's room
         socketService.emitToRoom(
-          `user-${updatedOrder.business_user_id}`,
+          `user_${updatedOrder.business_user_id}`,
           "order-updated",
           {
             order: updatedOrder,
@@ -540,22 +552,60 @@ function updateOrder(req, res) {
 // Delete order
 function deleteOrder(req, res) {
   const { id } = req.params;
-  orderModel.deleteOrder(id, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Order not found" });
+
+  // Look the order up first so that, when we delete it, we can release the
+  // reserved piece back onto the storefront. Without this a deleted order
+  // would strand its product as out_of_stock forever in BOTH apps.
+  orderModel.getOrderById(id, (lookupErr, lookupResults) => {
+    if (lookupErr) {
+      return res.status(500).json({ error: lookupErr.message });
     }
 
-    // Emit real-time order deletion
-    socketService.emitToAll("order-update", {
-      action: "order-deleted",
-      orderId: parseInt(id),
-      timestamp: new Date().toISOString(),
+    const existingOrder =
+      lookupResults && lookupResults.length > 0 ? lookupResults[0] : null;
+
+    orderModel.deleteOrder(id, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+
+      // Release the piece unless it was already delivered (a delivered order
+      // means the item genuinely left inventory and must stay sold) or already
+      // cancelled (its stock was restored when it was cancelled).
+      if (
+        existingOrder &&
+        existingOrder.product_id &&
+        existingOrder.status !== "delivered" &&
+        existingOrder.status !== "cancelled"
+      ) {
+        productModel.updateProductStockStatus(
+          existingOrder.product_id,
+          "available",
+          (e) => {
+            if (e) {
+              console.error("[orderController] release stock on delete:", e.message);
+              return;
+            }
+            socketService.notifyProductUpdate(
+              { id: existingOrder.product_id, stock_status: "available" },
+              "stock-updated"
+            );
+          }
+        );
+      }
+
+      // Emit real-time order deletion
+      socketService.emitToAll("order-update", {
+        action: "order-deleted",
+        orderId: parseInt(id),
+        timestamp: new Date().toISOString(),
+      });
+
+      res.json({ message: "Order deleted successfully" });
     });
-
-    res.json({ message: "Order deleted successfully" });
   });
 }
 

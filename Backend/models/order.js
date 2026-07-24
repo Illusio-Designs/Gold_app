@@ -1,86 +1,68 @@
 const { db } = require("../config/db");
 const productModel = require("./product");
 
-// Create new order with individual product status tracking
+// Create new order with individual product status tracking.
+// Reserving the piece and creating the order is now race-safe: the atomic
+// conditional flip in reserveProductForOrder guarantees that two concurrent
+// buyers (e.g. one in the B2B app and one in the D2C app) can never both claim
+// the same physical item — the second caller gets "not available".
 function createOrder(order, callback) {
-  // First, check if product is available for order
-  productModel.isProductAvailableForOrder(
+  productModel.reserveProductForOrder(
     order.product_id,
-    (err, isAvailable) => {
-      if (err) {
-        return callback(err);
+    (reserveErr, reserved) => {
+      if (reserveErr) {
+        return callback(reserveErr);
       }
 
-      if (!isAvailable) {
+      if (!reserved) {
+        // Either already sold, reserved, or not active — reject cleanly.
         return callback(new Error("Product is not available for order"));
       }
 
-      // Get current stock status for history tracking
-      productModel.getProductStockStatus(
-        order.product_id,
-        (err, stockResult) => {
-          if (err) {
-            return callback(err);
-          }
-
-          const previousStatus = stockResult[0]?.stock_status || "available";
-
-          // Create the order
-          const sql = `INSERT INTO orders (
+      // The piece is now reserved (out_of_stock). Create the order row.
+      const sql = `INSERT INTO orders (
         user_id, product_id, quantity, total_amount, status, remark, courier_company
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-          const values = [
-            order.user_id,
+      const values = [
+        order.user_id,
+        order.product_id,
+        order.quantity,
+        order.total_amount,
+        order.status || "pending",
+        order.remark || null,
+        order.courier_company || null,
+      ];
+
+      db.query(sql, values, (err, result) => {
+        if (err) {
+          // Roll the reservation back so a failed insert doesn't strand the
+          // piece as permanently out_of_stock.
+          productModel.updateProductStockStatus(
             order.product_id,
-            order.quantity,
-            order.total_amount,
-            order.status || "pending",
-            order.remark || null,
-            order.courier_company || null,
-          ];
-
-          db.query(sql, values, (err, result) => {
-            if (err) {
-              return callback(err);
-            }
-
-            const orderId = result.insertId;
-            // Update product stock status to 'out_of_stock'
-            productModel.updateProductStockStatus(
-              order.product_id,
-              "out_of_stock",
-              (err) => {
-                if (err) {
-                  // Don't fail the order creation if stock update fails
-                } else {
-                  }
-
-                // Record stock history
-                const historyData = {
-                  product_id: order.product_id,
-                  action: "ordered",
-                  quantity: order.quantity,
-                  order_id: orderId,
-                  user_id: order.user_id,
-                  previous_status: previousStatus,
-                  new_status: "out_of_stock",
-                  notes: `Order ${orderId} placed - Product marked as out of stock`,
-                };
-
-                productModel.recordStockHistory(historyData, (err) => {
-                  if (err) {
-                    // Don't fail the order creation if history recording fails
-                  } else {
-                    }
-
-                  // Return the order result
-                  callback(null, result);
-                });
-              }
-            );
-          });
+            "available",
+            () => {}
+          );
+          return callback(err);
         }
-      );
+
+        const orderId = result.insertId;
+
+        // Record stock history (best-effort — never fail the order for this).
+        const historyData = {
+          product_id: order.product_id,
+          action: "ordered",
+          quantity: order.quantity,
+          order_id: orderId,
+          user_id: order.user_id,
+          previous_status: "available",
+          new_status: "out_of_stock",
+          notes: `Order ${orderId} placed - Product marked as out of stock`,
+        };
+
+        productModel.recordStockHistory(historyData, () => {
+          callback(null, result);
+        });
+      });
     }
   );
 }
