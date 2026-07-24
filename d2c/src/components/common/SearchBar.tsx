@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#5D0829',
     fontWeight: '400',
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'GlorifyDEMO',
     paddingVertical: 0,
     backgroundColor: 'transparent',
   },
