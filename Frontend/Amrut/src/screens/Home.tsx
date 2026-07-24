@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingVertical: hp('2.5%'),
+    paddingBottom: hp('2.5%'),
     paddingHorizontal: wp('1.5%'),
   },
   topBar: {

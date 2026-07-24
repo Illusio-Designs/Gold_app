@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: isShortScreen() ? 40 : isTallScreen() ? 60 : 50,
+    paddingTop: 0,
   },
   searchContainer: {
     paddingHorizontal: getResponsiveSpacing(20, 25, 30),

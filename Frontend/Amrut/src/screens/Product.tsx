@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 40,
+    paddingTop: 0,
   },
   searchRow: {
     flexDirection: 'row',

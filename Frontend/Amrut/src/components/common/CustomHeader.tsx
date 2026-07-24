@@ -41,7 +41,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       colors={["#5D0829", "#6B0D33"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.bar, { paddingTop: insets.top + 12 }]}
+      style={[styles.bar, { paddingTop: insets.top + 8 }]}
     >
       <View style={styles.row}>
         {showBack ? (
