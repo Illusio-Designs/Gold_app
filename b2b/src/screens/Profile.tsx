@@ -254,11 +254,17 @@ const Profile = () => {
           text: 'Copy token',
           onPress: () => {
             try {
-              const Clipboard = require('@react-native-clipboard/clipboard').default;
-              Clipboard.setString(deviceToken);
-              Alert.alert('Copied', 'Token copied. Paste it into Firebase Console → Cloud Messaging → Send test message.');
+              const mod = require('@react-native-clipboard/clipboard');
+              const Clipboard = mod && (mod.default || mod);
+              if (Clipboard && typeof Clipboard.setString === 'function') {
+                Clipboard.setString(deviceToken);
+                Alert.alert('Copied', 'Token copied. Paste it into Firebase Console → Cloud Messaging → Send test message.');
+              } else {
+                // Clipboard native module not available — just show the token.
+                Alert.alert('Device FCM token', deviceToken);
+              }
             } catch {
-              Alert.alert('Token', deviceToken);
+              Alert.alert('Device FCM token', deviceToken);
             }
           },
         });
