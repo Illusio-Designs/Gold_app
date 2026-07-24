@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 // import NotificationManager from './src/components/NotificationManager';
 // import UserNotificationManager from './src/components/UserNotificationManager';
 
@@ -190,7 +190,7 @@ const App = () => {
   console.log('🔔 [APP] App loaded, userId:', userId);
 
   return (
-    <>
+    <SafeAreaProvider>
     <SafeAreaView style={{ flex: 1 }}>
 
       <StackNavigation />
@@ -234,7 +234,7 @@ const App = () => {
       )} */}
 
 
-    </>
+    </SafeAreaProvider>
   );
 };
 
