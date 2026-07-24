@@ -1,5 +1,9 @@
 const customOrderModel = require("../models/customOrder");
 const { getBaseUrl } = require("../config/environment");
+const {
+  notifyOrderStatusChange,
+  notifyNewCustomOrder,
+} = require("../services/adminNotificationService");
 
 // Turn stored image filenames into full URLs the apps/dashboard can render.
 function toImageUrls(images) {
@@ -47,6 +51,17 @@ function createCustomOrder(req, res) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
+      // Alert admins about the new custom order (push + dashboard).
+      notifyNewCustomOrder({
+        id: result.insertId,
+        userId,
+        weight,
+        purity,
+        quantity: quantity ? parseInt(quantity, 10) : 1,
+      }).catch((e) =>
+        console.error("[customOrderController] notifyNewCustomOrder:", e.message)
+      );
+
       customOrderModel.getById(result.insertId, (getErr, rows) => {
         if (getErr || !rows || rows.length === 0) {
           return res.status(201).json({
@@ -111,6 +126,21 @@ function updateCustomOrderStatus(req, res) {
     if (!result || result.affectedRows === 0) {
       return res.status(404).json({ error: "Custom order not found" });
     }
+
+    // Notify the customer (push + in-app bell) about the custom-order update.
+    customOrderModel.getById(id, (getErr, rows) => {
+      const order = !getErr && rows && rows[0];
+      if (order && order.user_id) {
+        notifyOrderStatusChange({
+          id: `C${order.id}`,
+          status,
+          userId: order.user_id,
+        }).catch((e) =>
+          console.error("[customOrderController] notify:", e.message)
+        );
+      }
+    });
+
     res.json({ success: true, message: "Status updated" });
   });
 }

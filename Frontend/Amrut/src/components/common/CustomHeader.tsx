@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
+import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../context/NotificationContext';
+import FocusAwareStatusBar from './FocusAwareStatusBar';
 
 type RightAction = {
   icon: any;            // require(...) image source
@@ -12,6 +18,8 @@ interface CustomHeaderProps {
   title: string;
   onBack?: () => void;
   showBack?: boolean;           // hide the back arrow (tab-root screens)
+  showCart?: boolean;           // show the cart icon on the right (default true)
+  showBell?: boolean;           // show the notifications bell (default true)
   rightActions?: RightAction[]; // optional cream icons on the right
 }
 
@@ -23,17 +31,25 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   title,
   onBack,
   showBack = true,
+  showCart = true,
+  showBell = true,
   rightActions = [],
 }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const { getTotalQuantity } = useCart();
+  const cartCount = typeof getTotalQuantity === 'function' ? getTotalQuantity() : 0;
+  const { unreadCount } = useNotifications();
 
   return (
     <LinearGradient
       colors={["#5D0829", "#6B0D33"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.bar}
+      style={[styles.bar, { paddingTop: insets.top + 8 }]}
     >
+      {/* Light battery/clock icons so they stay visible on the maroon bar */}
+      <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <View style={styles.row}>
         {showBack ? (
           <TouchableOpacity
@@ -48,12 +64,32 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
         <Text style={styles.title} numberOfLines={1}>{title}</Text>
 
-        <View style={[styles.side, styles.rightSide]}>
+        <View style={styles.rightSide}>
           {rightActions.map((action, i) => (
             <TouchableOpacity key={i} onPress={action.onPress} style={styles.actionBtn}>
               <Image source={action.icon} style={styles.actionIcon} />
             </TouchableOpacity>
           ))}
+          {showBell ? (
+            <TouchableOpacity onPress={() => (navigation as any).navigate('Notifications')} style={styles.actionBtn}>
+              <HugeiconsIcon icon={Notification03Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />
+              {unreadCount > 0 ? (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeTxt}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          ) : null}
+          {showCart ? (
+            <TouchableOpacity onPress={() => (navigation as any).navigate('Cart')} style={styles.actionBtn}>
+              <HugeiconsIcon icon={ShoppingCart01Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />
+              {cartCount > 0 ? (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeTxt}>{cartCount > 9 ? '9+' : cartCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </LinearGradient>
@@ -62,7 +98,6 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 
 const styles = StyleSheet.create({
   bar: {
-    paddingTop: 14,
     paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
@@ -84,9 +119,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rightSide: {
+    minWidth: 56,
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#C0392B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
+    borderColor: '#5D0829',
+  },
+  cartBadgeTxt: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '800',
   },
   backArrow: {
     width: 24,

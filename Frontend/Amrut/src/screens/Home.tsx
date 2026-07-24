@@ -5,9 +5,14 @@ import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
-import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton } from '../components/common/Motion';
-import { useWishlist } from '../context/WishlistContext';
+import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton, ShimmerImage } from '../components/common/Motion';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
+import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
+import { useNotifications } from '../context/NotificationContext';
+import { useCart } from '../context/CartContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { useRealtimeData } from '../hooks/useRealtimeData';
@@ -26,45 +31,33 @@ type ProductCardProps = {
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }) => {
-  const { isWishlisted, toggleWishlist } = useWishlist();
-  const saved = isWishlisted(product.id);
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
 
-  const onHeart = () =>
-    toggleWishlist({
-      id: product.id,
-      name: product.name,
-      image: product.image,
-      sku: product.sku,
-      category_name: product.category_name,
-      gross_weight: product.gross_weight,
-      net_weight: product.net_weight,
-      size: product.size,
-      length: product.length,
-    });
-
   return (
-  <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
-    <View style={productCardStyles.card}>
-      <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
-        <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
-      </TouchableOpacity>
-      {/* Wishlist heart */}
-      <TouchableOpacity style={productCardStyles.heartBtn} onPress={onHeart} activeOpacity={0.7}>
-        <Text style={[productCardStyles.heartGlyph, saved && productCardStyles.heartActive]}>{saved ? '♥' : '♡'}</Text>
-      </TouchableOpacity>
-      <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
-      {/* View button */}
-      <PressableScale style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
-        <Text style={productCardStyles.viewText}>View</Text>
-      </PressableScale>
+    // No entrance animation here — re-animating the whole grid on every
+    // category change looked like a full page reload.
+    <View style={productCardStyles.cardWrap}>
+      <View style={productCardStyles.card}>
+        <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
+          <ShimmerImage
+            source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')}
+            style={productCardStyles.image}
+            radius={14}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+        <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
+        {/* View button */}
+        <PressableScale containerStyle={productCardStyles.viewBtnWrap} style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
+          <Text style={productCardStyles.viewText}>View</Text>
+        </PressableScale>
+      </View>
     </View>
-  </FadeInSlide>
-);
+  );
 };
 
 const Home = () => {
@@ -78,7 +71,10 @@ const Home = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const navigation = useNavigation();
-  const { count: wishCount } = useWishlist();
+  const insets = useSafeAreaInsets();
+  const { getTotalQuantity } = useCart();
+  const cartCount = typeof getTotalQuantity === 'function' ? getTotalQuantity() : 0;
+  const { unreadCount } = useNotifications();
 
   // Add error boundary
   const [hasError, setHasError] = useState(false);
@@ -326,13 +322,6 @@ const Home = () => {
     try {
       await fetchCategories();
       await loadProducts();
-      Toast.show({
-        type: 'success',
-        text1: 'Home Updated',
-        text2: 'Your home page has been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error: any) {
       Toast.show({
         type: 'error',
@@ -407,31 +396,22 @@ const Home = () => {
       
       console.log('[Home] Best products filtered:', filteredProducts.length);
     } else {
-      // Handle actual category names (like "antique buti", "cz ladies viti")
-      console.log('[Home] Filtering by actual category name:', category);
-      
+      // Handle actual category names — match by category_id (reliable) with a
+      // category_name fallback, since some products only carry the id.
+      const selectedName = category.toLowerCase();
+      const matchedCat = (categories || []).find(
+        (c: any) => c && c.name && String(c.name).toLowerCase() === selectedName,
+      );
+
       filteredProducts = allProducts.filter((product: any) => {
-        const productCategoryName = product.category_name?.toLowerCase();
-        const selectedCategoryName = category.toLowerCase();
-        const matches = productCategoryName === selectedCategoryName;
-        
-        console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
-        return matches;
+        if (matchedCat && product.category_id != null) {
+          return String(product.category_id) === String(matchedCat.id);
+        }
+        return (product.category_name || '').toLowerCase() === selectedName;
       });
-      
-      console.log('[Home] Category-specific products filtered:', filteredProducts.length);
     }
-    
-    console.log('[Home] Final filtered products count:', filteredProducts.length);
+
     setProducts(filteredProducts);
-    
-    Toast.show({
-      type: 'info',
-      text1: 'Category Selected',
-      text2: `Showing ${filteredProducts.length} ${category} products`,
-      position: 'top',
-      visibilityTime: 1500
-    });
   };
 
   // Show error state if something went wrong
@@ -454,8 +434,10 @@ const Home = () => {
       }
       showsVerticalScrollIndicator={false}
     >
+      {/* Dark battery/clock icons so they stay visible on the light top bar */}
+      <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
       {/* Modern top bar — logo + greeting + search icon */}
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { paddingTop: insets.top + 4 }]}>
         <Image
           source={require('../assets/img/common/maroonlogo.png')}
           style={styles.topLogo}
@@ -466,14 +448,26 @@ const Home = () => {
           <Text style={styles.greetName}>Amrut Jewels</Text>
         </View>
         <TouchableOpacity
-          style={styles.wishIconBtn}
-          onPress={() => (navigation as any).navigate('Wishlist')}
+          style={styles.cartIconBtn}
+          onPress={() => (navigation as any).navigate('Notifications')}
           activeOpacity={0.8}
         >
-          <Text style={styles.wishIconGlyph}>♥</Text>
-          {wishCount > 0 ? (
-            <View style={styles.wishBadge}>
-              <Text style={styles.wishBadgeText}>{wishCount > 9 ? '9+' : wishCount}</Text>
+          <HugeiconsIcon icon={Notification03Icon} size={20} color="#5D0829" strokeWidth={1.8} />
+          {unreadCount > 0 ? (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeTxt}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          ) : null}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cartIconBtn}
+          onPress={() => (navigation as any).navigate('Cart')}
+          activeOpacity={0.8}
+        >
+          <HugeiconsIcon icon={ShoppingCart01Icon} size={20} color="#5D0829" strokeWidth={1.8} />
+          {cartCount > 0 ? (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeTxt}>{cartCount > 9 ? '9+' : cartCount}</Text>
             </View>
           ) : null}
         </TouchableOpacity>
@@ -496,13 +490,6 @@ const Home = () => {
           onSliderPress={(slider) => {
             if (slider.link) {
               // Handle slider link navigation
-              Toast.show({
-                type: 'info',
-                text1: 'Slider Action',
-                text2: `Opening: ${slider.title}`,
-                position: 'top',
-                visibilityTime: 2000
-              });
             }
           }}
           onShowMore={handleSliderShowMore}
@@ -593,8 +580,6 @@ const Home = () => {
         )}
       </ScrollView>
 
-      {/* Toast for notifications */}
-      <Toast />
     </ScrollView>
   );
 };
@@ -603,7 +588,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingVertical: hp('2.5%'),
+    paddingBottom: hp('2.5%'),
     paddingHorizontal: wp('1.5%'),
   },
   topBar: {
@@ -631,7 +616,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  wishIconBtn: {
+  searchIconImg: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    tintColor: '#5D0829',
+  },
+  cartIconBtn: {
     width: 42,
     height: 42,
     borderRadius: 12,
@@ -642,12 +633,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 10,
   },
-  wishIconGlyph: {
-    color: '#5D0829',
-    fontSize: 20,
-    marginTop: -1,
-  },
-  wishBadge: {
+  cartBadge: {
     position: 'absolute',
     top: -4,
     right: -4,
@@ -661,16 +647,10 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#fff',
   },
-  wishBadgeText: {
+  cartBadgeTxt: {
     color: '#fff',
     fontSize: 10,
     fontWeight: '800',
-  },
-  searchIconImg: {
-    width: 20,
-    height: 20,
-    resizeMode: 'contain',
-    tintColor: '#5D0829',
   },
   greetSmall: {
     fontSize: 11,
@@ -881,8 +861,11 @@ const productCardStyles = StyleSheet.create({
     marginTop: hp('0.9%'),
     textAlign: 'center',
   },
-  viewBtn: {
+  viewBtnWrap: {
+    width: '100%',
     marginTop: hp('0.9%'),
+  },
+  viewBtn: {
     backgroundColor: '#5D0829',
     borderRadius: 10,
     paddingVertical: hp('0.9%'),

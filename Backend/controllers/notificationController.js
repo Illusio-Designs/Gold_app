@@ -10,10 +10,9 @@ const {
 const {
   sendAdminNotification,
   notifyUserRegistration,
-  notifyLoginRequest,
   notifyNewOrder,
+  notifyNewCustomOrder,
   notifyRegistrationStatusChange,
-  notifyLoginRequestStatusChange,
   notifyOrderStatusChange,
   sendUserNotification,
   getAdminNotificationStats,
@@ -141,16 +140,18 @@ function getUserNotifications(req, res) {
   const { page = 1, limit = 20 } = req.query;
   const offset = (page - 1) * limit;
 
+  // Show this user's own notifications plus global broadcasts (user_id IS NULL).
   const sql = `
-    SELECT n.*, 
+    SELECT n.*,
            CASE WHEN un.user_id IS NOT NULL THEN 1 ELSE 0 END as is_read
     FROM notifications n
     LEFT JOIN user_notifications un ON n.id = un.notification_id AND un.user_id = ?
+    WHERE (n.user_id = ? OR n.user_id IS NULL)
     ORDER BY n.created_at DESC
     LIMIT ? OFFSET ?
   `;
 
-  db.query(sql, [userId, parseInt(limit), offset], (err, results) => {
+  db.query(sql, [userId, userId, parseInt(limit), offset], (err, results) => {
     if (err) {
       return res.status(500).json({ error: "Failed to get notifications" });
     }
@@ -172,9 +173,10 @@ function getUnreadCount(req, res) {
     FROM notifications n
     LEFT JOIN user_notifications un ON n.id = un.notification_id AND un.user_id = ?
     WHERE un.user_id IS NULL
+      AND (n.user_id = ? OR n.user_id IS NULL)
   `;
 
-  db.query(sql, [userId], (err, results) => {
+  db.query(sql, [userId, userId], (err, results) => {
     if (err) {
       return res.status(500).json({ error: "Failed to get unread count" });
     }
@@ -398,10 +400,9 @@ module.exports = {
   sseNotifications,
   sendAdminNotification,
   notifyUserRegistration,
-  notifyLoginRequest,
   notifyNewOrder,
+  notifyNewCustomOrder,
   notifyRegistrationStatusChange,
-  notifyLoginRequestStatusChange,
   notifyOrderStatusChange,
   sendUserNotification,
   getAdminNotificationStats,

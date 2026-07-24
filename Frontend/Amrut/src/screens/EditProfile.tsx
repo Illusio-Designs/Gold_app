@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Platform, ScrollView, Alert, KeyboardAvoidingView } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
 import Button from '../components/common/Button';
@@ -341,22 +341,19 @@ const EditProfile = () => {
     }
   };
 
-  // Show screen loader when processing profile update
-  if (loading) {
-    return <ScreenLoader text="Updating Profile..." />;
-  }
-
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <CustomHeader title="Edit Profile" />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <CustomHeader title="Edit Profile" />
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="always" showsVerticalScrollIndicator={false}>
         <ProfilePhotoName
           photoSource={photoUri || require('../assets/img/profile/profilephoto.png')}
           cameraIconSource={require('../assets/img/profile/editprofile.png')}
           userName={name}
           onCameraPress={handleCameraPress}
         />
-        {loading && <View style={styles.loadingContainer} />}
         <View style={styles.form}>
           <CustomTextInput placeholder="Name" value={name} onChangeText={setName} />
           <CustomTextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
@@ -483,7 +480,7 @@ const EditProfile = () => {
         onClose={() => setCountryModalVisible(false)}
         onSelect={handleSelectCountry}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -491,13 +488,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    paddingVertical:40,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingVertical: 0,
+    paddingTop: 8,
+    paddingBottom: 28,
   },
   form: {
     width: '90%',

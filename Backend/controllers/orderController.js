@@ -1,7 +1,10 @@
 const { db } = require("../config/db");
 const orderModel = require("../models/order");
 const cartModel = require("../models/cart");
-const { notifyNewOrder } = require("../services/adminNotificationService");
+const {
+  notifyNewOrder,
+  notifyOrderStatusChange,
+} = require("../services/adminNotificationService");
 const socketService = require("../services/socketService");
 const pdfService = require("../services/pdfService");
 
@@ -400,6 +403,15 @@ function updateOrderStatus(req, res) {
                 order: updatedOrder,
                 timestamp: new Date().toISOString(),
               }
+            );
+
+            // Notify the customer (push + in-app bell) about the status change.
+            notifyOrderStatusChange({
+              id: updatedOrder.id,
+              status,
+              userId: roomUserId,
+            }).catch((e) =>
+              console.error("[orderController] notifyOrderStatusChange:", e.message)
             );
           }
 

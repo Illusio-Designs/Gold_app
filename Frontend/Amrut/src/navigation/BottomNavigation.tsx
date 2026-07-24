@@ -1,20 +1,20 @@
 import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Collection from '../screens/Collection';
-import Cart from '../screens/Cart';
+import Orders from '../screens/Orders';
 import Profile from '../screens/Profile';
 import Home from '../screens/Home';
 import CustomOrder from '../screens/CustomOrder';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
 import { View, TouchableOpacity, Text, StyleSheet, Platform, Animated } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import {
   Home01Icon,
   Diamond01Icon,
-  ShoppingCart01Icon,
+  PackageIcon,
   UserIcon,
   SparklesIcon,
 } from '@hugeicons/core-free-icons';
@@ -22,11 +22,12 @@ import {
 const Tab = createBottomTabNavigator();
 const CollectionStackNav = createNativeStackNavigator();
 
-// Rounded Hugeicons for each tab.
+// Rounded Hugeicons for each tab — Custom is now a normal tab like the others.
 const tabIcons = {
   Home: Home01Icon,
   Collection: Diamond01Icon,
-  Cart: ShoppingCart01Icon,
+  Custom: SparklesIcon,
+  Orders: PackageIcon,
   Profile: UserIcon,
 };
 
@@ -34,15 +35,15 @@ const labels = {
   Home: 'Home',
   Collection: 'Collection',
   Custom: 'Custom',
-  Cart: 'Cart',
+  Orders: 'Orders',
   Profile: 'Profile',
 };
 
-const tabNames = ['Home', 'Collection', 'Cart', 'Profile'] as const;
+const tabNames = ['Home', 'Collection', 'Custom', 'Orders', 'Profile'] as const;
 type TabName = typeof tabNames[number];
 
-// A regular tab that, when active, springs up into a gold circle — the same
-// raised treatment as the center Custom button.
+// A flat, in-bar tab. When active the icon sits inside a soft gold pill that
+// stays fully within the bar (no upward overlap into the screen content).
 const TabItem = ({
   name,
   isFocused,
@@ -65,8 +66,7 @@ const TabItem = ({
     }).start();
   }, [isFocused, anim]);
 
-  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
-  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
+  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
 
   return (
     <TouchableOpacity
@@ -77,31 +77,25 @@ const TabItem = ({
       style={styles.tabBtn}
       activeOpacity={0.8}
     >
-      <Animated.View style={[styles.iconWrap, { transform: [{ translateY }, { scale }] }]}>
-        {/* Gold circle that fades in behind the icon when active */}
-        <Animated.View style={[styles.activeCircle, { opacity: anim }]}>
-          <LinearGradient
-            colors={['#FCE2BF', '#C09E83']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.activeCircleGradient}
+      <View style={[styles.iconWrap, isFocused && styles.iconWrapActive]}>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <HugeiconsIcon
+            icon={tabIcons[name]}
+            size={23}
+            color={isFocused ? '#5D0829' : '#FCE2BF'}
+            strokeWidth={1.8}
           />
         </Animated.View>
-        <HugeiconsIcon
-          icon={tabIcons[name]}
-          size={24}
-          color={isFocused ? '#5D0829' : '#FCE2BF'}
-          strokeWidth={1.8}
-        />
-      </Animated.View>
+      </View>
       <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[name]}</Text>
     </TouchableOpacity>
   );
 };
 
 const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.tabBarContainer}>
+    <View style={[styles.tabBarContainer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;
@@ -115,35 +109,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             navigation.navigate(route.name);
           }
         };
-        // Type guard for route.name
         const isTabName = (name: string): name is TabName => tabNames.includes(name as TabName);
-
-        // Center-raised Custom Order button (B2).
-        if (route.name === 'Custom') {
-          return (
-            <TouchableOpacity
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              onPress={onPress}
-              style={styles.customTab}
-              activeOpacity={0.9}
-            >
-              <LinearGradient
-                colors={isFocused ? ['#FCE2BF', '#C09E83'] : ['#E9C9A0', '#C09E83']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.fab}
-              >
-                <HugeiconsIcon icon={SparklesIcon} size={26} color="#5D0829" strokeWidth={1.8} />
-              </LinearGradient>
-              <Text style={[styles.label, styles.customLabel, isFocused && styles.labelActive]}>
-                {labels.Custom}
-              </Text>
-            </TouchableOpacity>
-          );
-        }
-
         if (!isTabName(route.name)) return null;
 
         return (
@@ -176,24 +142,21 @@ const BottomNavigation = () => (
     <Tab.Screen name="Home" component={Home} />
     <Tab.Screen name="Collection" component={CollectionStack} />
     <Tab.Screen name="Custom" component={CustomOrder} />
-    <Tab.Screen name="Cart" component={Cart} />
+    <Tab.Screen name="Orders" component={Orders} />
     <Tab.Screen name="Profile" component={Profile} />
   </Tab.Navigator>
 );
 
 const styles = StyleSheet.create({
-  // B2 · Center-raised Custom — maroon bar with a raised gold Custom button.
+  // Flat maroon bar — every tab equal, active tab highlighted inside the bar.
   tabBarContainer: {
     flexDirection: 'row',
     backgroundColor: '#5D0829',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: 66,
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: Platform.OS === 'ios' ? 12 : 8,
-    paddingTop: 8,
-    overflow: 'visible',
+    paddingTop: 10,
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.15,
@@ -207,83 +170,25 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   iconWrap: {
-    width: 46,
-    height: 46,
+    width: 44,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  activeCircle: {
-    position: 'absolute',
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 4,
-    borderColor: '#5D0829',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  activeCircleGradient: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 23,
-  },
-  icon: {
-    width: 22,
-    height: 22,
-    tintColor: '#FCE2BF',
-  },
-  iconActive: {
-    opacity: 1,
-  },
-  iconInactive: {
-    opacity: 0.6,
+  iconWrapActive: {
+    backgroundColor: '#FCE2BF',
   },
   label: {
     color: '#FCE2BF',
     fontSize: 11,
     fontFamily: 'GlorifyDEMO',
-    marginTop: 3,
+    marginTop: 2,
     opacity: 0.75,
   },
   labelActive: {
     opacity: 1,
     fontWeight: 'bold',
-  },
-  // Raised center Custom button
-  customTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    height: '100%',
-  },
-  fab: {
-    position: 'absolute',
-    top: -26,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 4,
-    borderColor: '#5D0829',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  fabGlyph: {
-    fontSize: 24,
-    lineHeight: 26,
-    color: '#5D0829',
-    fontWeight: 'bold',
-  },
-  customLabel: {
-    marginTop: 0,
-    marginBottom: 2,
   },
 });
 

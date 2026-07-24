@@ -125,10 +125,18 @@ const sliderStyles = StyleSheet.create({
   },
 });
 
+export type SelectedFilters = {
+  category: string;
+  size: string;
+  length: string;
+  purity: string;
+  weight: number;
+};
+
 type FilterProps = {
   visible: boolean;
   onClose: () => void;
-  onApply: () => void;
+  onApply: (filters: SelectedFilters) => void;
 };
 
 const Filter = ({ visible, onClose, onApply }: FilterProps) => {
@@ -169,14 +177,35 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
     fetchCategories();
   }, []);
 
+  const handleReset = () => {
+    setSelectedCategory(categories.length > 0 ? categories[0].name : '');
+    setSelectedSize('5.5"');
+    setSelectedLength('16-18');
+    setSelectedPurity('18K');
+    setWeight(5);
+  };
+
+  const handleApply = () => {
+    onApply({
+      category: selectedCategory,
+      size: selectedSize,
+      length: selectedLength,
+      purity: selectedPurity,
+      weight,
+    });
+  };
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.headerRow}>
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={styles.closeGlyph}>✕</Text>
+              </TouchableOpacity>
               <Text style={styles.header}>Filter</Text>
-              <TouchableOpacity onPress={onClose}><Text style={styles.reset}>Reset</Text></TouchableOpacity>
+              <TouchableOpacity onPress={handleReset}><Text style={styles.reset}>Reset</Text></TouchableOpacity>
             </View>
             <Text style={styles.label}>Categories</Text>
                          {loading ? (
@@ -238,7 +267,7 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
                 </TouchableOpacity>
               ))}
             </View>
-            <Button title="Show Results" onPress={onApply} style={{ marginTop: 30, marginBottom: 10, alignSelf: 'center', width: '100%' }} textStyle={{}} />
+            <Button title="Show Results" onPress={handleApply} style={{ marginTop: 30, marginBottom: 10, alignSelf: 'center', width: '100%' }} textStyle={{}} />
           </ScrollView>
         </View>
       </View>
@@ -265,6 +294,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  closeBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeGlyph: {
+    color: '#5D0829',
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: -1,
   },
   loadingContainer: {
     paddingVertical: 20,

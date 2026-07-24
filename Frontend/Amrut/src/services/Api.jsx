@@ -669,6 +669,21 @@ export const markNotificationAsRead = async (notificationId, token) => {
   }
 };
 
+// ✅ Register this device's FCM push token for the logged-in user
+export const registerFcmToken = async (fcmToken, deviceType, authToken) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/notifications/register-token`,
+      { token: fcmToken, deviceType },
+      { headers: { Authorization: `Bearer ${authToken}` } },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('❌ registerFcmToken error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
 // ✅ Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId, token) => {
   try {
@@ -682,62 +697,6 @@ export const markAllNotificationsAsRead = async (userId, token) => {
     return response.data;
   } catch (error) {
     console.error('❌ markAllNotificationsAsRead error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Check app update
-export const checkAppUpdate = async (platform, versionCode) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/app-versions/check-update`, {
-      params: { platform, version_code: versionCode },
-    });
-    console.log('📱 checkAppUpdate response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ checkAppUpdate error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get latest version info
-export const getLatestVersion = async platform => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-versions/latest/${platform}`,
-    );
-    console.log('📱 getLatestVersion response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getLatestVersion error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get current app icon
-export const getCurrentAppIcon = async (platform, type = 'primary') => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-icons/current/${platform}/${type}`,
-    );
-    console.log('🎨 getCurrentAppIcon response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getCurrentAppIcon error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get all active app icons for platform
-export const getActiveAppIcons = async platform => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-icons/active/${platform}`,
-    );
-    console.log('🎨 getActiveAppIcons response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getActiveAppIcons error:', error);
     throw error.response?.data || { error: error.message };
   }
 };

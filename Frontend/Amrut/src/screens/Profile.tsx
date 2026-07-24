@@ -8,12 +8,11 @@ import ScreenLoader from '../components/common/ScreenLoader';
 import { launchCamera } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
-import { getLatestVersion } from '../services/Api';
+import { APP_VERSION } from '../config/appInfo';
 import { useCart } from '../context/CartContext';
-// NotificationService removed as requested
+import { useNotifications } from '../context/NotificationContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
-import Toast from 'react-native-toast-message';
 import { useNavigationLoader } from '../context/NavigationContext';
 import LoginPromptModal from '../components/common/LoginPromptModal';
 import { useLoginPrompt } from '../hooks/useLoginPrompt';
@@ -27,10 +26,10 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [userName, setUserName] = useState('Guest');
   const [loading, setLoading] = useState(true);
-  const [appVersion, setAppVersion] = useState('1.0.0');
   const [userId, setUserId] = useState(null);
   const isFocused = useIsFocused();
   const { clearCartOnLogout } = useCart();
+  const { onLogout } = useNotifications();
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
 
   // Check if user is logged in whenever screen comes into focus
@@ -103,32 +102,6 @@ const Profile = () => {
     };
     fetchUser();
   }, [isFocused]);
-
-
-  // Get current app version info from API
-  useEffect(() => {
-    const getCurrentAppVersion = async () => {
-      try {
-        console.log('[Profile] Fetching app version from API...');
-        const platform = Platform.OS; // Dynamic platform detection
-        const versionInfo = await getLatestVersion(platform);
-        
-        if (versionInfo && versionInfo.version) {
-          console.log('[Profile] Version info received:', versionInfo);
-          setAppVersion(versionInfo.version);
-        } else {
-          console.log('[Profile] No version info received, using fallback');
-          setAppVersion('1.0.0'); // Fallback version
-        }
-      } catch (error) {
-        console.error('[Profile] Error getting app version from API:', error);
-        // Use fallback version if API fails
-        setAppVersion('1.0.0');
-      }
-    };
-    getCurrentAppVersion();
-  }, []);
-
 
 
   const handleCameraPress = async () => {
@@ -239,7 +212,6 @@ const Profile = () => {
           : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${refreshedUser.image}?t=${Date.now()}`;
         setPhotoUri({ uri: imgUrl });
       }
-      Toast.show({ type: 'success', text1: 'Profile updated', text2: 'Profile photo updated successfully.' });
     } catch (err) {
       console.log('[Profile] Profile photo update error:', err);
       Alert.alert('Error', 'Failed to update profile photo');
@@ -327,7 +299,8 @@ const Profile = () => {
       // Clear local storage
       await AsyncStorage.removeItem('accessToken');
       await AsyncStorage.removeItem('userId');
-      
+      await onLogout();
+
       // Navigate to login screen
       if ((navigation as any).reset) {
         (navigation as any).reset({
@@ -357,50 +330,27 @@ const Profile = () => {
 
   // Show loading state while profile is being fetched
   if (loading) {
-    return <ScreenLoader text="Loading Profile..." />;
+    return null;
   }
 
   return (
     <View style={styles.baseBg}>
-      <CustomHeader title="My Profile" />
+      <CustomHeader title="My Profile" showBack={false} />
+      <View style={styles.body}>
       <ProfilePhotoName
         photoSource={photoUri}
         cameraIconSource={require('../assets/img/profile/editprofile.png')}
         userName={userName}
-        onCameraPress={handleCameraPress}
-      />
-      {uploading && <CustomLoader size="small" text="Uploading..." textColor="#5D0829" />}
-      
+      />{/* photo upload is done in Edit Profile */}
+
       {/* Menu Buttons */}
       <View style={styles.menuWrap}>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
-          onPress={() => {
-            showLoader('Loading Edit Profile...', 2000);
-            (navigation as any).navigate('EditProfile');
-          }}
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => (navigation as any).navigate('EditProfile')}
         >
           <Image source={require('../assets/img/profile/profile.png')} style={styles.menuIcon} />
           <Text style={styles.menuText}>Edit Profile</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
-          onPress={() => {
-            showLoader('Loading Orders...', 2500);
-            (navigation as any).navigate('Orders');
-          }}
-        >
-          <Image source={require('../assets/img/profile/order.png')} style={styles.menuIcon} />
-          <Text style={styles.menuText}>My Orders</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuBtn}
-          onPress={() => (navigation as any).navigate('Wishlist')}
-        >
-          <Text style={styles.menuGlyph}>♥</Text>
-          <Text style={styles.menuText}>Wishlist</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
         <TouchableOpacity
@@ -425,13 +375,11 @@ const Profile = () => {
         </TouchableOpacity>
       </View>
       
-      {/* Simple App Version */}
+      {/* App version — the installed store build */}
       <View style={styles.versionLineContainer}>
-        <Text style={styles.versionLineText}>v{appVersion}</Text>
+        <Text style={styles.versionLineText}>v{APP_VERSION}</Text>
       </View>
-      
-      {/* Toast for notifications */}
-      <Toast />
+      </View>
 
       {/* Login Prompt Modal */}
       <LoginPromptModal
@@ -448,8 +396,11 @@ const styles = StyleSheet.create({
   baseBg: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  body: {
+    flex: 1,
     alignItems: 'center',
-    paddingVertical: isShortScreen() ? 40 : isTallScreen() ? 60 : 50,
+    paddingTop: getResponsiveSpacing(16, 20, 24),
   },
   headerRow: {
     flexDirection: 'row',
@@ -545,7 +496,6 @@ const styles = StyleSheet.create({
     fontFamily: 'GlorifyDEMO',
     opacity: 0.7,
   },
-
 });
 
 export default Profile; 

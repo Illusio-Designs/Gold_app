@@ -7,13 +7,16 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView
 } from 'react-native';
 import CustomTextInput from '../../components/common/CustomTextInput';
 import Button from '../../components/common/Button';
 import CustomLoader from '../../components/common/CustomLoader';
 
 import OtpInput from '../../components/common/OtpInput';
+import SuccessOverlay from '../../components/common/SuccessOverlay';
 import CountryPickerModal from '../../components/common/CountryPickerModal';
 import { Country } from '../../data/countries';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +25,7 @@ import { verifyBusinessOTP } from '../../services/Api';
 import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import RealtimeDataService from '../../services/RealtimeDataService';
+import { useNotifications } from '../../context/NotificationContext';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
@@ -46,6 +50,8 @@ const Login = () => {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [requestId, setRequestId] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { onLogin } = useNotifications();
 
   useEffect(() => {
     OTPWidget.initializeWidget(WIDGET_ID, TOKEN_AUTH);
@@ -162,7 +168,7 @@ const Login = () => {
       } else {
         setOtpSent(false); // Only on real failure
         console.log('[MSG91] Failed to send OTP:', hasMessage ? response.message : 'Failed to send OTP. Please try again.');
-        Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? response.message : 'Failed to send OTP. Please try again.') });
+        Alert.alert('Error', (hasMessage ? response.message : 'Failed to send OTP. Please try again.'));
       }
     } catch (err) {
       const error = err as any;
@@ -190,7 +196,7 @@ const Login = () => {
       } else {
         setOtpSent(false); // Only on real failure
         console.log('[MSG91] Failed to send OTP (error case):', hasMessage ? error.message : 'Failed to send OTP. Please try again.');
-        Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? error.message : 'Failed to send OTP. Please try again.') });
+        Alert.alert('Error', (hasMessage ? error.message : 'Failed to send OTP. Please try again.'));
       }
     } finally {
       setSendingOtp(false);
@@ -293,11 +299,14 @@ const Login = () => {
           // connection so order/cart push events start flowing.
           RealtimeDataService.reconnectWithAuth?.();
 
-          Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
-          navigation.navigate('MainTabs');
+          // Ask for notification permission + register this device for push.
+          onLogin().catch(() => {});
+
+          // In-screen success animation, then continue into the app.
+          setShowSuccess(true);
         } else {
           // No token returned — surface whatever error the backend sent.
-          Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
+          Alert.alert('Login Failed', loginResult.error || 'Could not log you in.');
         }
       } else {
         console.log('[MSG91] OTP verification failed:', response.message || response.errors || 'The OTP is incorrect.');
@@ -320,7 +329,16 @@ const Login = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.content}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="always"
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
         <View style={styles.form}>
           <View style={styles.row}>
@@ -348,24 +366,15 @@ const Login = () => {
                 error={otpError}
                 disabled={loading}
               />
-              <TouchableOpacity onPress={handleSendOtp} style={{ marginTop: 10, alignSelf: 'flex-end' }}>
-                <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Resend OTP</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+                <TouchableOpacity onPress={() => { setOtpSent(false); setOtp(''); setOtpError(''); }}>
+                  <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Change number</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSendOtp}>
+                  <Text style={{ color: '#5D0829', fontWeight: 'bold', fontSize: 15 }}>Resend OTP</Text>
+                </TouchableOpacity>
+              </View>
             </>
-          )}
-
-
-          
-          {loading && (
-            <View style={{ marginTop: 16, alignItems: 'center' }}>
-              <CustomLoader size="small" text="Verifying OTP..." textColor="#5D0829" />
-            </View>
-          )}
-          
-          {!otpSent ? (
-            <Button onPress={handleSendOtp} title="Send OTP" disabled={sendingOtp} style={{ marginTop: 24 }} textStyle={{}} />
-          ) : (
-            <Button onPress={handleVerifyOtp} title="Verify OTP" disabled={loading} style={{ marginTop: 24 }} textStyle={{}} />
           )}
         </View>
         <View style={styles.orContinueWithRow}>
@@ -393,8 +402,26 @@ const Login = () => {
           onClose={() => setCountryModalVisible(false)}
           onSelect={handleSelectCountry}
         />
-        <Toast />
+      </ScrollView>
+
+      {/* Primary action pinned above the keyboard (professional OTP flow) */}
+      <View style={styles.bottomBar}>
+        {!otpSent ? (
+          <Button onPress={handleSendOtp} title="Send OTP" disabled={sendingOtp} style={{ marginTop: 0 }} textStyle={{}} />
+        ) : (
+          <Button onPress={handleVerifyOtp} title="Verify OTP" disabled={loading} style={{ marginTop: 0 }} textStyle={{}} />
+        )}
       </View>
+      </KeyboardAvoidingView>
+
+      <SuccessOverlay
+        visible={showSuccess}
+        message={'OTP Verified'}
+        onDone={() => {
+          setShowSuccess(false);
+          navigation.navigate('MainTabs');
+        }}
+      />
     </ImageBackground>
   );
 };
@@ -404,11 +431,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  content: {
+  flex: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingVertical: isShortScreen() ? hp('12%') : isTallScreen() ? hp('18%') : hp('15%'),
+    paddingTop: isShortScreen() ? hp('12%') : isTallScreen() ? hp('18%') : hp('15%'),
+    paddingBottom: hp('3%'),
+  },
+  bottomBar: {
+    paddingHorizontal: wp('7.5%'),
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderTopWidth: 1,
+    borderTopColor: '#F0E7DA',
   },
   logo: {
     width: isSmallScreen() ? wp('35%') : isMediumScreen() ? wp('32%') : wp('30%'),

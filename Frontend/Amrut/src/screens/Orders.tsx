@@ -3,8 +3,12 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Image, RefreshCon
 import CustomHeader from '../components/common/CustomHeader';
 import CartItemCard from '../components/common/CartItemCard';
 import { ListSkeleton } from '../components/common/Motion';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PackageIcon } from '@hugeicons/core-free-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, getMyCustomOrders } from '../services/Api';
+import { getCustomOrderImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPromptModal from '../components/common/LoginPromptModal';
@@ -31,11 +35,16 @@ const orderTabs = [
 const Orders = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const navigation = useNavigation<any>();
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
 
   // Check if user is logged in when component mounts
   useEffect(() => {
-    checkAndPromptLogin();
+    (async () => {
+      const token = await AsyncStorage.getItem('accessToken');
+      setIsLoggedIn(!!token);
+    })();
   }, []);
 
   // Custom fetch function for orders that gets the authentication token
@@ -134,13 +143,6 @@ const Orders = () => {
     try {
       await refresh();
       await fetchCustomOrders();
-      Toast.show({
-        type: 'success',
-        text1: 'Orders Updated',
-        text2: 'Your orders have been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -216,8 +218,27 @@ const Orders = () => {
   if (loading && orders.length === 0) {
     return (
       <View style={styles.container}>
-        <CustomHeader title="My Orders" timer={true} />
+        <CustomHeader title="My Orders" showBack={false} />
         <ListSkeleton count={5} />
+      </View>
+    );
+  }
+
+  // Not logged in → invite the user to log in (instead of a load error).
+  if (isLoggedIn === false && orders.length === 0) {
+    return (
+      <View style={styles.container}>
+        <CustomHeader title="My Orders" showBack={false} />
+        <View style={styles.errorContainer}>
+          <View style={styles.loginIconCircle}>
+            <HugeiconsIcon icon={PackageIcon} size={44} color="#C09E83" strokeWidth={1.8} />
+          </View>
+          <Text style={styles.loginTitle}>Login to see your orders</Text>
+          <Text style={styles.loginSubtitle}>Sign in to track and view all your orders in one place.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.retryButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -225,9 +246,9 @@ const Orders = () => {
   if (error && orders.length === 0) {
     return (
       <View style={styles.container}>
-        <CustomHeader title="My Orders" timer={true} />
+        <CustomHeader title="My Orders" showBack={false} />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Failed to load orders</Text>
+          <Text style={styles.errorText}>We couldn't load your orders</Text>
           <TouchableOpacity style={styles.retryButton} onPress={refresh}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
@@ -238,7 +259,7 @@ const Orders = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="My Orders" timer={true} />
+      <CustomHeader title="My Orders" showBack={false} />
       
       {/* Order Status Tabs */}
       <ScrollView
@@ -247,36 +268,48 @@ const Orders = () => {
         contentContainerStyle={styles.tabBar}
         style={styles.tabBarScroll}
       >
-        {orderTabs.map(tab => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[
-              styles.tabBtn,
-              selectedTab === tab.key ? styles.tabBtnActive : styles.tabBtnInactive,
-            ]}
-            onPress={() => setSelectedTab(tab.key)}
-            activeOpacity={0.8}
-          >
-            <Text
+        {orderTabs.map(tab => {
+          const isActive = selectedTab === tab.key;
+          const count =
+            tab.key === 'all'
+              ? combinedOrders.length
+              : combinedOrders.filter(order => order.status === tab.key).length;
+          return (
+            <TouchableOpacity
+              key={tab.key}
               style={[
-                styles.tabText,
-                selectedTab === tab.key ? styles.tabTextActive : styles.tabTextInactive,
+                styles.tabBtn,
+                isActive ? styles.tabBtnActive : styles.tabBtnInactive,
               ]}
+              onPress={() => setSelectedTab(tab.key)}
+              activeOpacity={0.8}
             >
-              {tab.label}
-            </Text>
-            {tab.key !== 'all' && (
-              <View style={[
-                styles.tabBadge,
-                { backgroundColor: getStatusColor(tab.key) }
-              ]}>
-                <Text style={styles.tabBadgeText}>
-                  {orders.filter(order => order.status === tab.key).length}
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive ? styles.tabTextActive : styles.tabTextInactive,
+                ]}
+              >
+                {tab.label}
+              </Text>
+              <View
+                style={[
+                  styles.tabCount,
+                  isActive ? styles.tabCountActive : styles.tabCountInactive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tabCountText,
+                    isActive ? styles.tabCountTextActive : styles.tabCountTextInactive,
+                  ]}
+                >
+                  {count}
                 </Text>
               </View>
-            )}
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       {/* Orders List */}
@@ -290,7 +323,7 @@ const Orders = () => {
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconCircle}>
-              <Text style={styles.emptyIconGlyph}>🧾</Text>
+              <HugeiconsIcon icon={PackageIcon} size={46} color="#C09E83" strokeWidth={1.8} />
             </View>
             <Text style={styles.emptyText}>
               {selectedTab === 'all' 
@@ -337,42 +370,60 @@ const Orders = () => {
               </View>
 
               {order.isCustom ? (
-                /* Custom (bespoke) order body */
-                <View>
-                  {Array.isArray(order.images) && order.images.length > 0 ? (
+                /* Custom (bespoke) order — same maroon card look as a normal order */
+                <>
+                  {(() => {
+                    const imgs: string[] = Array.isArray(order.images) ? order.images : [];
+                    const firstUrl = getCustomOrderImageUrl(imgs[0]);
+                    const mainSource = firstUrl
+                      ? { uri: firstUrl }
+                      : require('../assets/img/home/p1.png');
+                    return (
+                      <View style={ccStyles.bgContainer}>
+                        <View style={ccStyles.cardContainer}>
+                          <View style={ccStyles.row}>
+                            <Image source={mainSource} style={ccStyles.productImage} resizeMode="cover" />
+                            <View style={ccStyles.infoContainer}>
+                              <Text style={ccStyles.title}>Custom Order</Text>
+                              <Text style={ccStyles.subtitle}>{order.purity || 'Bespoke'}</Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View style={ccStyles.maroonSection}>
+                          <View style={ccStyles.weightsRow}>
+                            <Text style={ccStyles.weightText}>Wt: {order.weight || '—'}</Text>
+                            <Text style={ccStyles.weightText}>Qty: {order.quantity || 1}</Text>
+                            <Text style={ccStyles.weightText}>By: {formatDate(order.delivery_date)}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  })()}
+                  {/* Extra reference photos */}
+                  {Array.isArray(order.images) && order.images.length > 1 ? (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
-                      {order.images.map((u: string, i: number) => (
-                        <Image key={i} source={{ uri: u }} style={styles.customThumb} resizeMode="cover" />
-                      ))}
+                      {order.images.slice(1).map((u: string, i: number) => {
+                        const url = getCustomOrderImageUrl(u);
+                        return (
+                          <Image
+                            key={i}
+                            source={url ? { uri: url } : require('../assets/img/home/p1.png')}
+                            style={styles.customThumb}
+                            resizeMode="cover"
+                          />
+                        );
+                      })}
                     </ScrollView>
                   ) : null}
-                  <View style={styles.orderSummary}>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Weight:</Text>
-                      <Text style={styles.summaryValue}>{order.weight || '—'}</Text>
-                    </View>
-                    {order.purity ? (
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Purity:</Text>
-                        <Text style={styles.summaryValue}>{order.purity}</Text>
-                      </View>
-                    ) : null}
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Quantity:</Text>
-                      <Text style={styles.summaryValue}>{order.quantity || 1}</Text>
-                    </View>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Delivery by:</Text>
-                      <Text style={styles.summaryValue}>{formatDate(order.delivery_date)}</Text>
-                    </View>
-                    {order.remark ? (
+                  {order.remark ? (
+                    <View style={styles.orderSummary}>
                       <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Remark:</Text>
                         <Text style={[styles.summaryValue, { flexShrink: 1, textAlign: 'right' }]} numberOfLines={2}>{order.remark}</Text>
                       </View>
-                    ) : null}
-                  </View>
-                </View>
+                    </View>
+                  ) : null}
+                </>
               ) : (
                 <>
                   {/* Order Items */}
@@ -410,8 +461,6 @@ const Orders = () => {
         )}
       </ScrollView>
 
-      {/* Toast for notifications */}
-      <Toast />
 
       {/* Login Prompt Modal */}
       <LoginPromptModal
@@ -428,29 +477,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingVertical: 50,
+    paddingTop: 0,
   },
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     gap: 6,
-    position: 'absolute',
-    top: 0,
-    zIndex: 10,
   },
   tabBarScroll: {
     height: 50,
     backgroundColor: '#fff',
-    marginTop: 60,
+    marginTop: 12,
   },
   tabBtn: {
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 16,
     borderWidth: 0.8,
     marginRight: 10,
-    position: 'relative',
   },
   tabBtnActive: {
     backgroundColor: '#5D0829',
@@ -461,7 +509,7 @@ const styles = StyleSheet.create({
     borderColor: '#5D0829',
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'GlorifyDEMO',
     fontWeight: '700',
   },
@@ -471,24 +519,33 @@ const styles = StyleSheet.create({
   tabTextInactive: {
     color: '#5D0829',
   },
-  tabBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
+  tabCount: {
     minWidth: 20,
     height: 20,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
   },
-  tabBadgeText: {
-    color: '#fff',
-    fontSize: 10,
+  tabCountActive: {
+    backgroundColor: '#FCE2BF',
+  },
+  tabCountInactive: {
+    backgroundColor: '#F1E4D6',
+  },
+  tabCountText: {
+    fontSize: 11,
     fontWeight: 'bold',
+    fontFamily: 'GlorifyDEMO',
+  },
+  tabCountTextActive: {
+    color: '#5D0829',
+  },
+  tabCountTextInactive: {
+    color: '#5D0829',
   },
   cardsContent: {
-    paddingTop: 80,
+    paddingTop: 16,
     paddingBottom: 40,
     paddingHorizontal: 20,
   },
@@ -618,6 +675,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
+  loginIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  loginTitle: {
+    fontSize: 19,
+    color: '#5D0829',
+    fontFamily: 'GlorifyDEMO',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  loginSubtitle: {
+    fontSize: 13,
+    color: '#8A7A80',
+    fontFamily: 'GlorifyDEMO',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+    lineHeight: 19,
+    paddingHorizontal: 20,
+  },
   retryButton: {
     backgroundColor: '#5D0829',
     paddingVertical: 12,
@@ -734,4 +819,66 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Orders; 
+// Maroon card styles matching CartItemCard so custom orders look the same
+// as regular orders.
+const ccStyles = StyleSheet.create({
+  bgContainer: {
+    backgroundColor: '#5D0829',
+    borderRadius: 22,
+    borderWidth: 0.5,
+    borderColor: '#5D0829',
+    alignSelf: 'stretch',
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  productImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 14,
+    marginRight: 12,
+    backgroundColor: '#F7F1E8',
+  },
+  infoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#5D0829',
+    fontFamily: 'GlorifyDEMO',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#5D0829',
+    marginTop: 2,
+  },
+  maroonSection: {
+    backgroundColor: '#5D0829',
+    paddingTop: 10,
+    paddingBottom: 12,
+    paddingHorizontal: 12,
+  },
+  weightsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  weightText: {
+    color: '#FCE2BF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+});
+
+export default Orders;

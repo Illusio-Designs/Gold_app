@@ -11,7 +11,6 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import { API_URL } from '@env';
 import { getSliderImageUrl } from '../../utils/imageUtils';
 
@@ -46,7 +45,9 @@ interface SliderItem {
   title: string;
   description?: string;
   image: string;
+  image_url?: string;
   link?: string;
+  link_url?: string;
   category_id?: number;
   category_name?: string;
   created_at?: string;
@@ -148,18 +149,18 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
             activeOpacity={0.9}
           >
             <ImageBackground
-              source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image}
+              source={slide.bg}
               style={styles.slide}
               imageStyle={styles.slideBg}
               resizeMode="cover"
-              onError={(error) => console.log('Slider image load error:', error?.nativeEvent?.error)}
             >
-              {/* Maroon gradient so the title/button stay readable over any photo */}
-              <LinearGradient
-                colors={['rgba(67,5,29,0.05)', 'rgba(67,5,29,0.75)']}
-                style={styles.overlay}
-              />
               <Text style={styles.title}>{slide.title}</Text>
+              <Image
+                source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image}
+                style={styles.jewelryImg}
+                resizeMode="contain"
+                onError={(error) => console.log('Slider image load error:', error?.nativeEvent?.error)}
+              />
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
@@ -207,14 +208,18 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 28,
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 28,
+  jewelryImg: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    right: 100,
+    bottom: 5,
+    zIndex: 1,
   },
   title: {
     position: 'absolute',
-    left: 22,
-    bottom: 22,
+    left: 40,
+    bottom: 25,
     color: '#F8D7C5',
     fontSize: 30,
     fontWeight: 'bold',

@@ -519,7 +519,6 @@ const Register = () => {
         onClose={() => setCountryModalVisible(false)}
         onSelect={handleSelectCountry}
       />
-      <Toast />
     </ImageBackground>
 
   );
