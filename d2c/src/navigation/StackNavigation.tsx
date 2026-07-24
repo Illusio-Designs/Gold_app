@@ -18,11 +18,22 @@ import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { NavigationProvider } from '../context/NavigationContext';
 import NavigationLoader from '../components/common/NavigationLoader';
+import { setUnauthorizedHandler } from '../services/Api';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
-  const navigationRef = useRef(null);
+  const navigationRef = useRef<any>(null);
+
+  // On session expiry (401), clear-and-reset back to Login.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      try {
+        navigationRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
+      } catch {}
+    });
+    return () => setUnauthorizedHandler(null);
+  }, []);
 
   return (
     <NavigationProvider>

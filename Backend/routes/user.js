@@ -22,6 +22,8 @@ router.post("/verify-otp", userController.verifyBusinessOTP);
 
 // Protected routes
 router.get("/", verifyToken, requireAdmin, userController.getAllUsers);
+// D2C consumer accounts (admin only) — must precede the "/:id" route.
+router.get("/consumers", verifyToken, requireAdmin, userController.getAllConsumers);
 // COMMENTED OUT - Session management removed (no sessions needed)
 // router.get(
 //   "/validate-session",

@@ -14,6 +14,7 @@ const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const OrdersPage = React.lazy(() => import("./pages/OrdersPage"));
 const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
 const UsersPage = React.lazy(() => import("./pages/UsersPage"));
+const ConsumersPage = React.lazy(() => import("./pages/ConsumersPage"));
 const CategoriesPage = React.lazy(() => import("./pages/CategoriesPage"));
 const MediaGalleryPage = React.lazy(() => import("./pages/MediaGalleryPage"));
 const SliderPage = React.lazy(() => import("./pages/SliderPage"));
@@ -95,6 +96,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="consumers" element={<ConsumersPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="orders" element={<OrdersPage />} />

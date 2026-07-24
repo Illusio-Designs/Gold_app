@@ -18,7 +18,9 @@ import {
   removeFromCart,
   clearUserCart,
   createOrderFromCart,
+  getPublicSettings,
 } from '../../services/Api';
+import { computeConsumerPrice, formatRupees } from '../../utils/pricing';
 import { colors } from '../../theme/colors';
 
 interface CartItem {
@@ -47,10 +49,16 @@ const Cart: React.FC<CartProps> = ({ userId, token, onCartUpdate, onCheckout }) 
   const [editingQuantity, setEditingQuantity] = useState<number | null>(null);
   const [quantityInput, setQuantityInput] = useState('');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [pricing, setPricing] = useState({ gold_rate: 0, making_charge_percent: 0 });
 
   useEffect(() => {
     loadCart();
+    // Pull the live gold rate so displayed prices match what's charged.
+    getPublicSettings().then(setPricing).catch(() => {});
   }, [userId]);
+
+  // Per-unit consumer price (gold rate + making %, falls back to mark_amount).
+  const unitPrice = (item: CartItem) => computeConsumerPrice(item, pricing);
 
   const loadCart = async () => {
     try {
@@ -159,7 +167,7 @@ const Cart: React.FC<CartProps> = ({ userId, token, onCartUpdate, onCheckout }) 
                   mark_amount: item.mark_amount,
                   net_weight: item.net_weight,
                 })),
-                total_amount: cartItems.reduce((sum, item) => sum + (item.mark_amount * item.quantity), 0),
+                total_amount: cartItems.reduce((sum, item) => sum + unitPrice(item) * item.quantity, 0),
                 total_quantity: cartItems.reduce((sum, item) => sum + item.quantity, 0),
                 total_weight: cartItems.reduce((sum, item) => sum + (item.net_weight * item.quantity), 0),
               };
@@ -223,7 +231,7 @@ const Cart: React.FC<CartProps> = ({ userId, token, onCartUpdate, onCheckout }) 
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((sum, item) => sum + (item.mark_amount * item.quantity), 0);
+    return cartItems.reduce((sum, item) => sum + unitPrice(item) * item.quantity, 0);
   };
 
   const calculateTotalQuantity = () => {
@@ -339,8 +347,8 @@ const Cart: React.FC<CartProps> = ({ userId, token, onCartUpdate, onCheckout }) 
 
             {/* Price and Actions */}
             <View style={styles.priceActions}>
-              <Text style={styles.itemPrice}>₹{item.mark_amount}</Text>
-              <Text style={styles.totalPrice}>₹{item.mark_amount * item.quantity}</Text>
+              <Text style={styles.itemPrice}>{formatRupees(unitPrice(item))}</Text>
+              <Text style={styles.totalPrice}>{formatRupees(unitPrice(item) * item.quantity)}</Text>
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => removeItem(item.id)}
@@ -364,7 +372,7 @@ const Cart: React.FC<CartProps> = ({ userId, token, onCartUpdate, onCheckout }) 
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Total Amount:</Text>
-          <Text style={styles.summaryValue}>₹{calculateTotal()}</Text>
+          <Text style={styles.summaryValue}>{formatRupees(calculateTotal())}</Text>
         </View>
         
         <TouchableOpacity

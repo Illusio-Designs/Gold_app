@@ -63,6 +63,23 @@ export const getAllUsers = (token) =>
     .get("/users", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+// D2C consumer accounts (separate from B2B businesses).
+export const getConsumers = (token) =>
+  axiosInstance
+    .get("/users/consumers", { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
+
+// App settings (gold rate, making charge % — drives D2C pricing).
+export const getAppSettings = (token) =>
+  axiosInstance
+    .get("/settings/all", { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
+
+export const updateAppSettings = (data, token) =>
+  axiosInstance
+    .put("/settings", data, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
+
 export const createUser = (data, token) => {
   // If data is already FormData, use it directly
   if (data instanceof FormData) {

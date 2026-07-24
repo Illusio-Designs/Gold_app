@@ -1,86 +1,68 @@
 const { db } = require("../config/db");
 const productModel = require("./product");
 
-// Create new order with individual product status tracking
+// Create new order with individual product status tracking.
+// Reserving the piece and creating the order is now race-safe: the atomic
+// conditional flip in reserveProductForOrder guarantees that two concurrent
+// buyers (e.g. one in the B2B app and one in the D2C app) can never both claim
+// the same physical item — the second caller gets "not available".
 function createOrder(order, callback) {
-  // First, check if product is available for order
-  productModel.isProductAvailableForOrder(
+  productModel.reserveProductForOrder(
     order.product_id,
-    (err, isAvailable) => {
-      if (err) {
-        return callback(err);
+    (reserveErr, reserved) => {
+      if (reserveErr) {
+        return callback(reserveErr);
       }
 
-      if (!isAvailable) {
+      if (!reserved) {
+        // Either already sold, reserved, or not active — reject cleanly.
         return callback(new Error("Product is not available for order"));
       }
 
-      // Get current stock status for history tracking
-      productModel.getProductStockStatus(
-        order.product_id,
-        (err, stockResult) => {
-          if (err) {
-            return callback(err);
-          }
-
-          const previousStatus = stockResult[0]?.stock_status || "available";
-
-          // Create the order
-          const sql = `INSERT INTO orders (
+      // The piece is now reserved (out_of_stock). Create the order row.
+      const sql = `INSERT INTO orders (
         user_id, product_id, quantity, total_amount, status, remark, courier_company
       ) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-          const values = [
-            order.user_id,
+      const values = [
+        order.user_id,
+        order.product_id,
+        order.quantity,
+        order.total_amount,
+        order.status || "pending",
+        order.remark || null,
+        order.courier_company || null,
+      ];
+
+      db.query(sql, values, (err, result) => {
+        if (err) {
+          // Roll the reservation back so a failed insert doesn't strand the
+          // piece as permanently out_of_stock.
+          productModel.updateProductStockStatus(
             order.product_id,
-            order.quantity,
-            order.total_amount,
-            order.status || "pending",
-            order.remark || null,
-            order.courier_company || null,
-          ];
-
-          db.query(sql, values, (err, result) => {
-            if (err) {
-              return callback(err);
-            }
-
-            const orderId = result.insertId;
-            // Update product stock status to 'out_of_stock'
-            productModel.updateProductStockStatus(
-              order.product_id,
-              "out_of_stock",
-              (err) => {
-                if (err) {
-                  // Don't fail the order creation if stock update fails
-                } else {
-                  }
-
-                // Record stock history
-                const historyData = {
-                  product_id: order.product_id,
-                  action: "ordered",
-                  quantity: order.quantity,
-                  order_id: orderId,
-                  user_id: order.user_id,
-                  previous_status: previousStatus,
-                  new_status: "out_of_stock",
-                  notes: `Order ${orderId} placed - Product marked as out of stock`,
-                };
-
-                productModel.recordStockHistory(historyData, (err) => {
-                  if (err) {
-                    // Don't fail the order creation if history recording fails
-                  } else {
-                    }
-
-                  // Return the order result
-                  callback(null, result);
-                });
-              }
-            );
-          });
+            "available",
+            () => {}
+          );
+          return callback(err);
         }
-      );
+
+        const orderId = result.insertId;
+
+        // Record stock history (best-effort — never fail the order for this).
+        const historyData = {
+          product_id: order.product_id,
+          action: "ordered",
+          quantity: order.quantity,
+          order_id: orderId,
+          user_id: order.user_id,
+          previous_status: "available",
+          new_status: "out_of_stock",
+          notes: `Order ${orderId} placed - Product marked as out of stock`,
+        };
+
+        productModel.recordStockHistory(historyData, () => {
+          callback(null, result);
+        });
+      });
     }
   );
 }
@@ -135,8 +117,9 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 // Get all orders with user and product details
 function getAllOrders(callback) {
   const sql = `
-    SELECT o.*, 
-           u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status,
+    SELECT o.*,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
@@ -149,7 +132,8 @@ function getAllOrders(callback) {
 // Get orders by user ID with individual product status
 function getOrdersByUserId(userId, callback) {
   const sql = `
-    SELECT o.*, 
+    SELECT o.*,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
            p.name as product_name, p.image as product_image, p.sku as product_sku,
            c.name as category_name
     FROM orders o
@@ -165,7 +149,8 @@ function getOrdersByUserId(userId, callback) {
 function getOrderById(id, callback) {
   const sql = `
     SELECT o.*,
-           u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            u.address_line1, u.address_line2, u.landmark, u.city, u.state, u.country,
            p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
@@ -198,6 +183,51 @@ function updateOrderStatus(orderId, status, callback) {
     WHERE id = ?`;
 
   db.query(sql, [status, orderId], callback);
+}
+
+// Fetch orders (by id) with the data needed to compute an authoritative
+// payment total server-side: the stored amount, the product net weight, and
+// the buyer's account type (consumer prices come from the gold rate).
+function getOrdersForPayment(orderIds, callback) {
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return callback(null, []);
+  }
+  const placeholders = orderIds.map(() => "?").join(",");
+  const sql = `
+    SELECT o.id, o.total_amount, o.quantity,
+           p.net_weight AS net_weight,
+           u.type AS user_type
+    FROM orders o
+    LEFT JOIN products p ON o.product_id = p.id
+    LEFT JOIN users u ON o.user_id = u.id
+    WHERE o.id IN (${placeholders})
+  `;
+  db.query(sql, orderIds, callback);
+}
+
+// Overwrite an order's total (used to record the gold-rate price actually
+// charged to a consumer at payment time).
+function updateOrderTotal(orderId, totalAmount, callback) {
+  db.query(
+    "UPDATE orders SET total_amount = ?, updated_at = NOW() WHERE id = ?",
+    [totalAmount, orderId],
+    callback
+  );
+}
+
+// Update an order's payment fields (D2C Razorpay flow).
+function updateOrderPayment(orderId, payment, callback) {
+  const sql = `UPDATE orders SET
+    payment_status = ?, payment_method = ?, razorpay_order_id = ?, razorpay_payment_id = ?, updated_at = NOW()
+    WHERE id = ?`;
+  const values = [
+    payment.payment_status || "pending",
+    payment.payment_method || null,
+    payment.razorpay_order_id || null,
+    payment.razorpay_payment_id || null,
+    orderId,
+  ];
+  db.query(sql, values, callback);
 }
 
 // Update order with full details
@@ -247,6 +277,9 @@ module.exports = {
   getOrderById,
   getOrdersByIds,
   updateOrderStatus,
+  updateOrderPayment,
+  getOrdersForPayment,
+  updateOrderTotal,
   updateOrder,
   deleteOrder,
   getOrderStatistics,

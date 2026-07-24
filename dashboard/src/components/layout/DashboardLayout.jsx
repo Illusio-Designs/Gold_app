@@ -30,6 +30,7 @@ const SidebarLinks = [
   { name: "Dashboard", path: "/dashboard", icon: DashboardSquare01Icon },
   { name: "Sliders", path: "/dashboard/sliders", icon: Image01Icon },
   { name: "Users", path: "/dashboard/users", icon: UserGroupIcon },
+  { name: "Consumers", path: "/dashboard/consumers", icon: UserIcon },
   { name: "Categories", path: "/dashboard/categories", icon: Layers01Icon },
   { name: "Products", path: "/dashboard/products", icon: PackageIcon },
   { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart01Icon },

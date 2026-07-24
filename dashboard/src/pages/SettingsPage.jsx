@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Settings as SettingsIcon } from "lucide-react";
-import { wipeAllData } from "../services/adminApiService";
+import {
+  wipeAllData,
+  getAppSettings,
+  updateAppSettings,
+} from "../services/adminApiService";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
@@ -13,7 +17,46 @@ const CONFIRM_PHRASE = "DELETE ALL DATA";
 const SettingsPage = () => {
   const [confirmText, setConfirmText] = useState("");
   const [wiping, setWiping] = useState(false);
+  const [goldRate, setGoldRate] = useState("");
+  const [makingPct, setMakingPct] = useState("");
+  const [savingPricing, setSavingPricing] = useState(false);
   const navigate = useNavigate();
+
+  // Load current pricing settings.
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = getAdminToken();
+        const s = await getAppSettings(token);
+        setGoldRate(s?.gold_rate ?? "");
+        setMakingPct(s?.making_charge_percent ?? "");
+      } catch (e) {
+        // non-fatal — admin can still set them
+      }
+    })();
+  }, []);
+
+  const handleSavePricing = async () => {
+    const rate = Number(goldRate);
+    const making = Number(makingPct);
+    if (!isFinite(rate) || rate < 0 || !isFinite(making) || making < 0) {
+      showErrorToast("Enter a valid gold rate and making %");
+      return;
+    }
+    try {
+      setSavingPricing(true);
+      const token = getAdminToken();
+      await updateAppSettings(
+        { gold_rate: rate, making_charge_percent: making },
+        token
+      );
+      showSuccessToast("Pricing settings saved");
+    } catch (err) {
+      showErrorToast(err?.response?.data?.error || "Failed to save pricing");
+    } finally {
+      setSavingPricing(false);
+    }
+  };
 
   const canWipe = confirmText === CONFIRM_PHRASE && !wiping;
 
@@ -46,6 +89,47 @@ const SettingsPage = () => {
   return (
     <div className="settings-page">
       <PageHeader title="Settings" subtitle="Manage administrative settings" icon={SettingsIcon} />
+
+      <section className="settings-card">
+        <h2>D2C Pricing</h2>
+        <p>
+          The consumer app prices are calculated as
+          {" "}<strong>(net weight × gold rate) + making&nbsp;%</strong>.
+          Update today's gold rate here and it applies across the D2C app.
+        </p>
+
+        <div className="settings-field">
+          <label htmlFor="gold-rate">Gold rate (₹ per gram)</label>
+          <input
+            id="gold-rate"
+            type="number"
+            min="0"
+            step="0.01"
+            value={goldRate}
+            onChange={(e) => setGoldRate(e.target.value)}
+            placeholder="e.g. 6250"
+          />
+        </div>
+
+        <div className="settings-field">
+          <label htmlFor="making-pct">Making charge (%)</label>
+          <input
+            id="making-pct"
+            type="number"
+            min="0"
+            step="0.01"
+            value={makingPct}
+            onChange={(e) => setMakingPct(e.target.value)}
+            placeholder="e.g. 12"
+          />
+        </div>
+
+        <div className="settings-actions">
+          <Button onClick={handleSavePricing} disabled={savingPricing}>
+            {savingPricing ? "Saving…" : "Save Pricing"}
+          </Button>
+        </div>
+      </section>
 
       <section className="danger-zone">
         <div className="danger-zone__head">

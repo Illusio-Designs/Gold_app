@@ -424,6 +424,18 @@ const OrdersPage = () => {
       ),
     },
     {
+      header: "Source",
+      accessor: "user_type",
+      cell: (row) => {
+        // Orders placed from the D2C consumer app vs the B2B wholesale app,
+        // distinguished by the account type on the order.
+        const isD2C = row.user_type === 'consumer';
+        return (
+          <Badge tone={isD2C ? 'info' : 'brand'}>{isD2C ? 'D2C' : 'B2B'}</Badge>
+        );
+      },
+    },
+    {
       header: "User Status",
       accessor: "user_status",
       cell: (row) =>

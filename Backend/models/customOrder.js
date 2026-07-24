@@ -58,6 +58,24 @@ function getById(id, callback) {
   db.query(`SELECT * FROM custom_orders WHERE id = ?`, [id], callback);
 }
 
+// Custom order joined with the requesting user's details (for the PDF).
+function getByIdWithUser(id, callback) {
+  db.query(
+    `SELECT co.*,
+            CONCAT('CUS-', LPAD(co.id, 6, '0')) AS order_number,
+            u.name AS user_name,
+            u.business_name AS business_name,
+            u.email AS user_email,
+            u.phone_number AS user_phone,
+            u.address_line1, u.address_line2, u.landmark, u.city, u.state, u.country
+     FROM custom_orders co
+     LEFT JOIN users u ON co.user_id = u.id
+     WHERE co.id = ?`,
+    [id],
+    callback
+  );
+}
+
 // Admin: all custom orders with the requesting business's details.
 function getAll(callback) {
   db.query(
@@ -81,4 +99,4 @@ function updateStatus(id, status, callback) {
   );
 }
 
-module.exports = { createCustomOrder, getByUser, getById, getAll, updateStatus };
+module.exports = { createCustomOrder, getByUser, getById, getByIdWithUser, getAll, updateStatus };

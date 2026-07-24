@@ -47,7 +47,7 @@ function addToCart(req, res) {
           });
           
           // Emit specific update to the user's room only
-          socketService.emitToRoom(`user-${user_id}`, 'cart-item-added', {
+          socketService.emitToRoom(`user_${user_id}`, 'cart-item-added', {
             cartItem: cartItemDetails,
             timestamp: new Date().toISOString()
           });
@@ -114,7 +114,7 @@ function updateCartItemQuantity(req, res) {
         const updatedCartItem = detailsResults[0];
         
         // Emit specific update to the user's room only
-        socketService.emitToRoom(`user-${updatedCartItem.user_id}`, 'cart-item-updated', {
+        socketService.emitToRoom(`user_${updatedCartItem.user_id}`, 'cart-item-updated', {
           cartItem: updatedCartItem,
           timestamp: new Date().toISOString()
         });
@@ -159,7 +159,7 @@ function clearUserCart(req, res) {
     }
 
     // Emit specific update to the user's room only
-    socketService.emitToRoom(`user-${user_id}`, 'cart-cleared', {
+    socketService.emitToRoom(`user_${user_id}`, 'cart-cleared', {
       timestamp: new Date().toISOString()
     });
 

@@ -1,4 +1,5 @@
 const customOrderModel = require("../models/customOrder");
+const pdfService = require("../services/pdfService");
 const { getBaseUrl } = require("../config/environment");
 const {
   notifyOrderStatusChange,
@@ -145,6 +146,33 @@ function updateCustomOrderStatus(req, res) {
   });
 }
 
+// Download a branded PDF for a custom order. A customer may only fetch their
+// own; an admin may fetch any.
+function downloadCustomOrderPDF(req, res) {
+  const { id } = req.params;
+  customOrderModel.getByIdWithUser(id, (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ error: "Custom order not found" });
+    }
+    const order = rows[0];
+
+    const isAdmin = req.user && req.user.type === "admin";
+    if (!isAdmin && req.user && String(order.user_id) !== String(req.user.id)) {
+      return res.status(403).json({ error: "Not allowed" });
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="custom-order-${order.id}.pdf"`
+    );
+    pdfService.generateCustomOrderPDF(order, res);
+  });
+}
+
 function safeParse(s) {
   try {
     return JSON.parse(s);
@@ -158,4 +186,5 @@ module.exports = {
   getMyCustomOrders,
   getAllCustomOrders,
   updateCustomOrderStatus,
+  downloadCustomOrderPDF,
 };

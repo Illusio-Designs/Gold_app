@@ -157,8 +157,26 @@ function getProductById(req, res) {
       });
     }
 
-    // Process product images
     const product = result[0];
+
+    // Storefront (token-less) callers must not see draft or sold-out pieces —
+    // otherwise a stale detail link could open an item that's already gone in
+    // the other app. Admin/dashboard requests (Bearer token) still see all.
+    const isFrontendRequest =
+      !req.headers.authorization ||
+      !req.headers.authorization.startsWith("Bearer ");
+    if (
+      isFrontendRequest &&
+      (product.status !== "active" || product.stock_status === "out_of_stock")
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+        error: "Product not available",
+      });
+    }
+
+    // Process product images
     let images = [];
     if (product.image) {
       try {
@@ -872,6 +890,14 @@ function updateProductStockStatus(req, res) {
         if (historyErr) {
           // Don't fail the request if history recording fails
         }
+
+        // Broadcast so both storefront apps reflect the admin's change live
+        // (item disappears when marked out_of_stock/reserved, reappears when
+        // set back to available).
+        socketService.notifyProductUpdate(
+          { id: parseInt(id), stock_status },
+          "stock-updated"
+        );
 
         res.json({
           message: "Product stock status updated successfully",

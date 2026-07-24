@@ -23,6 +23,8 @@ const seoRoutes = require("./routes/seo");
 const accountDeletionRoutes = require("./routes/accountDeletion");
 const systemRoutes = require("./routes/system");
 const customOrderRoutes = require("./routes/customOrder");
+const paymentRoutes = require("./routes/payment");
+const settingsRoutes = require("./routes/settings");
 
 const app = express();
 
@@ -137,6 +139,8 @@ app.use("/api/seo", seoRoutes);
 app.use("/api/account-deletion", accountDeletionRoutes);
 app.use("/api/system", systemRoutes);
 app.use("/api/custom-orders", customOrderRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

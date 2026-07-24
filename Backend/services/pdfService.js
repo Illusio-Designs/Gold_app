@@ -245,4 +245,118 @@ function generateOrderPDF(order, stream) {
   doc.end();
 }
 
-module.exports = { generateOrderPDF };
+/**
+ * Branded PDF for a CUSTOM (bespoke) order. `order` is the joined row from
+ * customOrderModel.getByIdWithUser. Same house style as the invoice, but laid
+ * out for the bespoke fields (weight/purity/qty/delivery/remark).
+ */
+function generateCustomOrderPDF(order, stream) {
+  const doc = new PDFDocument({ margin: 0, size: "A4" });
+  doc.on("error", () => {
+    try {
+      stream.end();
+    } catch (e) {
+      /* noop */
+    }
+  });
+  doc.pipe(stream);
+
+  const pageW = doc.page.width;
+  const M = 48;
+  const contentW = pageW - M * 2;
+  const number = order.order_number || `CUS-${String(order.id ?? "").padStart(6, "0")}`;
+
+  // ---- Header band ---------------------------------------------------------
+  doc.rect(0, 0, pageW, 96).fill(BRAND);
+  doc.rect(0, 96, pageW, 4).fill(GOLD);
+  doc.fillColor(CREAM).font("Helvetica-Bold").fontSize(24).text("AMRUT JEWELS", M, 28);
+  doc
+    .fillColor(GOLD)
+    .font("Helvetica")
+    .fontSize(10)
+    .text("Amrutkumar Govinddas LLP", M, 60)
+    .text("Soni Bazar, Main Road, Rajkot - 360001", M, 73);
+  doc
+    .fillColor(CREAM)
+    .font("Helvetica-Bold")
+    .fontSize(20)
+    .text("CUSTOM ORDER", pageW - M - 260, 30, { width: 260, align: "right" });
+  doc
+    .fillColor(GOLD)
+    .font("Helvetica")
+    .fontSize(11)
+    .text(number, pageW - M - 260, 60, { width: 260, align: "right" });
+
+  // ---- Customer + meta -----------------------------------------------------
+  let y = 130;
+  const label = (t, x, yy) =>
+    doc.fillColor(MUTED).font("Helvetica").fontSize(9).text(t, x, yy);
+  const value = (t, x, yy, w) =>
+    doc
+      .fillColor(INK)
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .text(String(t ?? "-"), x, yy, { width: w || contentW / 2 - 10 });
+
+  label("CUSTOMER", M, y);
+  label("STATUS", M + contentW / 2, y);
+  value(order.business_name || order.user_name || "-", M, y + 12);
+  value(String(order.status || "pending").toUpperCase(), M + contentW / 2, y + 12);
+
+  y += 48;
+  label("PHONE", M, y);
+  label("DELIVERY DATE", M + contentW / 2, y);
+  value(order.user_phone || "-", M, y + 12);
+  value(
+    order.delivery_date ? new Date(order.delivery_date).toLocaleDateString("en-IN") : "-",
+    M + contentW / 2,
+    y + 12
+  );
+
+  // ---- Spec table ----------------------------------------------------------
+  y += 60;
+  doc.rect(M, y, contentW, 30).fill(BRAND);
+  doc
+    .fillColor(CREAM)
+    .font("Helvetica-Bold")
+    .fontSize(11)
+    .text("SPECIFICATION", M + 14, y + 9)
+    .text("VALUE", M + contentW - 200, y + 9, { width: 186, align: "right" });
+
+  const rows = [
+    ["Weight", order.weight || "-"],
+    ["Purity", order.purity || "-"],
+    ["Quantity", order.quantity || 1],
+    ["Remark", order.remark || "-"],
+  ];
+  y += 30;
+  rows.forEach((r, i) => {
+    const rowY = y + i * 30;
+    if (i % 2 === 0) doc.rect(M, rowY, contentW, 30).fill("#faf5ee");
+    doc.fillColor(INK).font("Helvetica").fontSize(11).text(r[0], M + 14, rowY + 9);
+    doc
+      .fillColor(INK)
+      .font("Helvetica-Bold")
+      .fontSize(11)
+      .text(String(r[1]), M + contentW - 260, rowY + 9, { width: 246, align: "right" });
+    doc.moveTo(M, rowY + 30).lineTo(M + contentW, rowY + 30).strokeColor(LINE).stroke();
+  });
+
+  // ---- Footer --------------------------------------------------------------
+  const footerY = y + rows.length * 30 + 40;
+  doc.rect(0, footerY, pageW, 2).fill(GOLD);
+  doc
+    .fillColor(MUTED)
+    .font("Helvetica")
+    .fontSize(9)
+    .text(
+      "This is a bespoke order request. Final pricing is confirmed on approval.  •  Amrutkumar Govinddas LLP",
+      M,
+      footerY + 10,
+      { width: contentW, align: "center" }
+    );
+
+  doc.end();
+}
+
+module.exports = { generateOrderPDF, generateCustomOrderPDF };
