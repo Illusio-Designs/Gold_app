@@ -20,7 +20,8 @@ import Modal from '../components/common/Modal';
 import { SkeletonTable, SkeletonStats } from '../components/common/Skeleton';
 import StatCards from '../components/common/StatCards';
 import Badge from '../components/common/Badge';
-import { ShoppingCart, Image as ImageIcon, FileDown, Trash2 } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { ShoppingCart01Icon, Image01Icon, Download01Icon, Delete02Icon } from '@hugeicons/core-free-icons';
 import { getProductImageUrl } from '../utils/imageUtils';
 import '../styles/pages/OrdersPage.css';
 
@@ -384,7 +385,7 @@ const OrdersPage = () => {
             />
           ) : (
             <div className="product-thumbnail no-image">
-              <ImageIcon size={12} />
+              <HugeiconsIcon icon={Image01Icon} size={12} />
             </div>
           )}
           <div className="product-details">
@@ -509,7 +510,7 @@ const OrdersPage = () => {
             onClick={() => viewUserCart(row.user_id || row.business_user_id)}
             title="View User Cart"
           >
-            <ShoppingCart size={16} />
+            <HugeiconsIcon icon={ShoppingCart01Icon} size={16} />
           </Button>
           {!row.isCustom && (
             <>
@@ -519,7 +520,7 @@ const OrdersPage = () => {
                 onClick={() => handleDownloadPdf(row)}
                 title="Download PDF"
               >
-                <FileDown size={16} />
+                <HugeiconsIcon icon={Download01Icon} size={16} />
               </Button>
               <Button
                 variant="danger"
@@ -527,7 +528,7 @@ const OrdersPage = () => {
                 onClick={() => setDeleteOrderItem(row)}
                 title="Delete Order"
               >
-                <Trash2 size={16} />
+                <HugeiconsIcon icon={Delete02Icon} size={16} />
               </Button>
             </>
           )}
