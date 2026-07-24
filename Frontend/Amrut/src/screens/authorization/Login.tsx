@@ -7,7 +7,9 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Platform
+  Platform,
+  KeyboardAvoidingView,
+  ScrollView
 } from 'react-native';
 import CustomTextInput from '../../components/common/CustomTextInput';
 import Button from '../../components/common/Button';
@@ -320,7 +322,15 @@ const Login = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.content}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
         <View style={styles.form}>
           <View style={styles.row}>
@@ -394,7 +404,8 @@ const Login = () => {
           onSelect={handleSelectCountry}
         />
         <Toast />
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 };
@@ -404,8 +415,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
-  content: {
+  flex: {
     flex: 1,
+  },
+  content: {
+    flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingVertical: isShortScreen() ? hp('12%') : isTallScreen() ? hp('18%') : hp('15%'),

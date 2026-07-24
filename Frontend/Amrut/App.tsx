@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState } from 'react-native';
+import './src/utils/globalFont'; // apply Glorify as the default font app-wide
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
