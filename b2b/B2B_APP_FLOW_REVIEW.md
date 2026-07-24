@@ -1,6 +1,6 @@
 # Amrut Jewels — B2B App Flow Review & Alignment Plan
 
-> **App:** `Frontend/Amrut` — React Native (TypeScript) **B2B / wholesale** mobile app
+> **App:** `b2b` — React Native (TypeScript) **B2B / wholesale** mobile app
 > **Reviewed against:** production backend `https://api.amrutkumargovinddasllp.com/api`
 > **Purpose:** map the end-to-end user flow, list every break / stale / inconsistency,
 > and give a prioritized plan to make the app behave correctly against the current backend.

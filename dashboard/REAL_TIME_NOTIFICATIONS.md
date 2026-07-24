@@ -34,19 +34,19 @@ This document explains how to use and test the real-time notifications system fo
 
 ### Frontend Components
 
-1. **Admin Socket Service** (`Frontend/Dashboard/src/services/adminSocketService.js`)
+1. **Admin Socket Service** (`dashboard/src/services/adminSocketService.js`)
 
    - WebSocket client implementation
    - Connection management and reconnection
    - Event handling and room management
 
-2. **useAdminSocket Hook** (`Frontend/Dashboard/src/hooks/useAdminSocket.js`)
+2. **useAdminSocket Hook** (`dashboard/src/hooks/useAdminSocket.js`)
 
    - React hook for easy socket integration
    - Connection status management
    - Event listener management
 
-3. **Real-Time Notifications Component** (`Frontend/Dashboard/src/components/RealTimeNotifications.jsx`)
+3. **Real-Time Notifications Component** (`dashboard/src/components/RealTimeNotifications.jsx`)
    - Notification display interface
    - Connection status indicator
    - Notification management (mark as read, clear, etc.)
@@ -78,7 +78,7 @@ This document explains how to use and test the real-time notifications system fo
 1. **Install Dependencies**
 
    ```bash
-   cd Frontend/Dashboard
+   cd dashboard
    npm install
    # socket.io-client should be installed
    ```

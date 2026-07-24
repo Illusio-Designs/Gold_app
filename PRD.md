@@ -16,8 +16,8 @@ manage its catalog, customers, and orders, and lets approved wholesale buyers br
 approved products and place orders from a mobile app. It consists of three parts backed
 by one API:
 
-- **Mobile app** (React Native, `Frontend/Amrut`) — the buyer/B2B client
-- **Admin dashboard** (React + Vite, `Frontend/Dashboard`) — the business operator console
+- **Mobile app** (React Native, `b2b`) — the buyer/B2B client
+- **Admin dashboard** (React + Vite, `dashboard`) — the business operator console
 - **Backend API** (Node.js + Express + MySQL, `Backend`) — shared services, real-time, storage
 
 ## 2. Goals & Objectives
@@ -110,7 +110,7 @@ generation (present in code but **not wired up** — see §9).
 - **Mobile:** React Native (TS), React Navigation, AsyncStorage, Socket.io client, Axios, FCM.
 - **Dashboard:** React, Vite, React Router, Axios, Socket.io client.
 - See `Backend/FUNCTION_LIST.md` for the request/real-time/notification **flow** and the full
-  function inventory; `Frontend/Amrut/FUNCTION_LIST.md` and `Frontend/Dashboard/FUNCTION_LIST.md`
+  function inventory; `b2b/FUNCTION_LIST.md` and `dashboard/FUNCTION_LIST.md`
   for the clients.
 
 ## 8. High-level Data Model
@@ -147,7 +147,7 @@ Tracked in detail in **`Backend/BUG_LIST.md`**. Highlights:
 
 - Should PDF invoicing be built or dropped?
 - Is `PATCH /orders/:id/status` meant to be buyer-usable (cancel) or admin-only?
-- Is the D2C app (`Frontend/Amrut D2C`) a planned product line or a stale duplicate to remove?
+- Is the D2C app (`d2c`) a planned product line or a stale duplicate to remove?
 - Target scale (buyers, catalog size, concurrent sockets) to size DB/socket infra?
 
 ---

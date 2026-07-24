@@ -1,6 +1,6 @@
 # Amrut B2B App — Function List
 
-A reference catalog of the functions in the **B2B mobile app** (`Frontend/Amrut`),
+A reference catalog of the functions in the **B2B mobile app** (`b2b`),
 grouped by module. Each entry lists the function name, where it lives, and what it does.
 
 > App: React Native (TypeScript). Source root: `src/`

@@ -1,6 +1,6 @@
 # Amrut Dashboard — Function List
 
-Reference for the **React + Vite admin web dashboard** (`Frontend/Dashboard`).
+Reference for the **React + Vite admin web dashboard** (`dashboard`).
 Entry: `src/index.jsx` → `src/App.jsx` (routing). API base from `.env`.
 
 > Structure: `pages/` (admin screens) · `components/` (UI) · `services/` (API + sockets) ·
