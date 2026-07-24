@@ -4,7 +4,7 @@ import CustomHeader from '../components/common/CustomHeader';
 import CartItemCard from '../components/common/CartItemCard';
 import { ListSkeleton } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
-import { getCurrentUserOrders } from '../services/Api';
+import { getCurrentUserOrders, getMyCustomOrders } from '../services/Api';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPromptModal from '../components/common/LoginPromptModal';
@@ -94,8 +94,36 @@ const Orders = () => {
   // Extract orders from response
   const orders = ordersResponse?.data || ordersResponse || [];
 
-  // Filter orders based on selected tab
-  const filteredOrders = orders.filter(order => {
+  // Custom orders (bespoke) — fetched separately and shown in the same list.
+  const [customOrders, setCustomOrders] = useState<any[]>([]);
+
+  const fetchCustomOrders = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (!token) { setCustomOrders([]); return; }
+      const res = await getMyCustomOrders(token);
+      setCustomOrders(res?.data || []);
+    } catch (e) {
+      console.error('[Orders] Error fetching custom orders:', e);
+      setCustomOrders([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomOrders();
+  }, []);
+
+  // Merge regular + custom orders into one list, newest first.
+  const combinedOrders = [
+    ...(orders || []).map((o: any) => ({ ...o, isCustom: false })),
+    ...(customOrders || []).map((o: any) => ({ ...o, isCustom: true })),
+  ].sort(
+    (a: any, b: any) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  // Filter orders based on selected tab (status applies to both types)
+  const filteredOrders = combinedOrders.filter(order => {
     if (selectedTab === 'all') return true;
     return order.status === selectedTab;
   });
@@ -105,6 +133,7 @@ const Orders = () => {
     setRefreshing(true);
     try {
       await refresh();
+      await fetchCustomOrders();
       Toast.show({
         type: 'success',
         text1: 'Orders Updated',
@@ -278,11 +307,20 @@ const Orders = () => {
           </View>
         ) : (
           filteredOrders.map(order => (
-            <View key={order.id} style={styles.orderCard}>
+            <View key={(order.isCustom ? 'c' : 'o') + order.id} style={styles.orderCard}>
               {/* Order Header */}
               <View style={styles.orderHeader}>
                 <View style={styles.orderInfo}>
-                  <Text style={styles.orderId}>Order #{order.id}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.orderId}>
+                      {order.isCustom ? `Custom #${order.id}` : `Order #${order.id}`}
+                    </Text>
+                    {order.isCustom ? (
+                      <View style={styles.customTag}>
+                        <Text style={styles.customTagText}>CUSTOM</Text>
+                      </View>
+                    ) : null}
+                  </View>
                   <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
                 </View>
                 <View style={[
@@ -298,34 +336,75 @@ const Orders = () => {
                 </View>
               </View>
 
-              {/* Order Items */}
-              {order.items && order.items.map((item, index) => (
-                <CartItemCard
-                  key={item.id || index}
-                  image={item.product_image ? { uri: item.product_image } : require('../assets/img/home/p1.png')}
-                  title={item.product_name || 'Product'}
-                  subtitle={item.category_name || 'Category'}
-                  gWeight={item.gross_weight || '0'}
-                  nWeight={item.net_weight || '0'}
-                  showRemarkAndAmount={true}
-                  readonly={true}
-                  maroonPaddingBottom={12}
-                  customAmount={formatCurrency(item.mark_amount)}
-                  customQuantity={item.quantity}
-                />
-              ))}
+              {order.isCustom ? (
+                /* Custom (bespoke) order body */
+                <View>
+                  {Array.isArray(order.images) && order.images.length > 0 ? (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
+                      {order.images.map((u: string, i: number) => (
+                        <Image key={i} source={{ uri: u }} style={styles.customThumb} resizeMode="cover" />
+                      ))}
+                    </ScrollView>
+                  ) : null}
+                  <View style={styles.orderSummary}>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Weight:</Text>
+                      <Text style={styles.summaryValue}>{order.weight || '—'}</Text>
+                    </View>
+                    {order.purity ? (
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Purity:</Text>
+                        <Text style={styles.summaryValue}>{order.purity}</Text>
+                      </View>
+                    ) : null}
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Quantity:</Text>
+                      <Text style={styles.summaryValue}>{order.quantity || 1}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Delivery by:</Text>
+                      <Text style={styles.summaryValue}>{formatDate(order.delivery_date)}</Text>
+                    </View>
+                    {order.remark ? (
+                      <View style={styles.summaryRow}>
+                        <Text style={styles.summaryLabel}>Remark:</Text>
+                        <Text style={[styles.summaryValue, { flexShrink: 1, textAlign: 'right' }]} numberOfLines={2}>{order.remark}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </View>
+              ) : (
+                <>
+                  {/* Order Items */}
+                  {order.items && order.items.map((item, index) => (
+                    <CartItemCard
+                      key={item.id || index}
+                      image={item.product_image ? { uri: item.product_image } : require('../assets/img/home/p1.png')}
+                      title={item.product_name || 'Product'}
+                      subtitle={item.category_name || 'Category'}
+                      gWeight={item.gross_weight || '0'}
+                      nWeight={item.net_weight || '0'}
+                      showRemarkAndAmount={true}
+                      readonly={true}
+                      maroonPaddingBottom={12}
+                      customAmount={formatCurrency(item.mark_amount)}
+                      customQuantity={item.quantity}
+                    />
+                  ))}
 
-              {/* Order Summary */}
-              <View style={styles.orderSummary}>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Total Items:</Text>
-                  <Text style={styles.summaryValue}>{order.total_items || 0}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Total Amount:</Text>
-                  <Text style={styles.summaryValue}>{formatCurrency(order.total_mark_amount)}</Text>
-                </View>
-              </View>
+                  {/* Order Summary */}
+                  <View style={styles.orderSummary}>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Total Items:</Text>
+                      <Text style={styles.summaryValue}>{order.total_items || 0}</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Total Amount:</Text>
+                      <Text style={styles.summaryValue}>{formatCurrency(order.total_mark_amount)}</Text>
+                    </View>
+                  </View>
+                </>
+              )}
             </View>
           ))
         )}
@@ -445,6 +524,31 @@ const styles = StyleSheet.create({
   orderDate: {
     fontSize: 12,
     color: '#7f8c8d',
+  },
+  customTag: {
+    marginLeft: 8,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#C09E83',
+    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  customTagText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#5D0829',
+    letterSpacing: 0.5,
+  },
+  customThumb: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 8,
+    marginTop: 4,
+    backgroundColor: '#F7F1E8',
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
   },
   statusBadge: {
     paddingHorizontal: 12,
