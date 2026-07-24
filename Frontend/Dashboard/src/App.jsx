@@ -8,23 +8,24 @@ import {
   useLocation,
 } from "react-router-dom";
 import DashboardLayout from "./components/layout/DashboardLayout";
-import DashboardPage from "./pages/DashboardPage";
-import OrdersPage from "./pages/OrdersPage";
-import ProductsPage from "./pages/ProductsPage";
-import UsersPage from "./pages/UsersPage";
-import CategoriesPage from "./pages/CategoriesPage";
-import MediaGalleryPage from "./pages/MediaGalleryPage";
-import SliderPage from "./pages/SliderPage";
-import AccountDeletionPage from "./pages/AccountDeletionPage";
-import SettingsPage from "./pages/SettingsPage";
-import ProfilePage from "./pages/ProfilePage";
-import NotificationsPage from "./pages/NotificationsPage";
 import AuthLayout from "./components/layout/AuthLayout";
-import AuthPage from "./pages/AuthPage";
-import HomePage from "./webpage/HomePage";
-import PrivacyPolicy from "./webpage/PrivacyPolicy";
-import DeletePage from "./webpage/DeletePage";
-import ContactUs from "./webpage/ContactUs";
+// Route pages are code-split (lazy) so the initial bundle stays small.
+const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
+const OrdersPage = React.lazy(() => import("./pages/OrdersPage"));
+const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
+const UsersPage = React.lazy(() => import("./pages/UsersPage"));
+const CategoriesPage = React.lazy(() => import("./pages/CategoriesPage"));
+const MediaGalleryPage = React.lazy(() => import("./pages/MediaGalleryPage"));
+const SliderPage = React.lazy(() => import("./pages/SliderPage"));
+const AccountDeletionPage = React.lazy(() => import("./pages/AccountDeletionPage"));
+const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
+const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage"));
+const AuthPage = React.lazy(() => import("./pages/AuthPage"));
+const HomePage = React.lazy(() => import("./webpage/HomePage"));
+const PrivacyPolicy = React.lazy(() => import("./webpage/PrivacyPolicy"));
+const DeletePage = React.lazy(() => import("./webpage/DeletePage"));
+const ContactUs = React.lazy(() => import("./webpage/ContactUs"));
 import { isAuthenticated, autoLogout } from "./utils/authUtils";
 import { showToast } from "./utils/toast";
 import ToastManager from "./components/common/ToastManager";
@@ -63,6 +64,22 @@ function App() {
       {/* Mounted at the root so login/logout/session toasts render on every
           route, not only inside the dashboard. */}
       <ToastManager />
+      <React.Suspense
+        fallback={
+          <div
+            style={{
+              minHeight: "60vh",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#5D0829",
+              fontFamily: "system-ui, sans-serif",
+            }}
+          >
+            Loading…
+          </div>
+        }
+      >
       <Routes>
         {/* Public webpage routes */}
         <Route path="/" element={<HomePage />} />
@@ -93,6 +110,7 @@ function App() {
         {/* Catch all other routes and redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </React.Suspense>
     </Router>
   );
 }
