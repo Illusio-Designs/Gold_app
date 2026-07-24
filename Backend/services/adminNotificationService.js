@@ -9,25 +9,15 @@ const NOTIFICATION_TYPES = {
     icon: '👤',
     color: '#2196F3'
   },
-  LOGIN_REQUEST: {
-    sound: 'login_request.mp3',
-    icon: '🔐',
-    color: '#FF9800'
-  },
-  LOGIN_APPROVED: {
-    sound: 'login_approved.mp3',
-    icon: '✅',
-    color: '#4CAF50'
-  },
-  LOGIN_REJECTED: {
-    sound: 'login_rejected.mp3',
-    icon: '❌',
-    color: '#F44336'
-  },
   NEW_ORDER: {
     sound: 'new_order.mp3',
     icon: '🛒',
     color: '#FF9800'
+  },
+  NEW_CUSTOM_ORDER: {
+    sound: 'new_order.mp3',
+    icon: '✨',
+    color: '#5D0829'
   }
 };
 
@@ -214,29 +204,6 @@ async function notifyUserRegistration(userData) {
 }
 
 /**
- * Send login request notification to admin
- * @param {Object} loginRequestData - Login request data
- * @returns {Promise<Object>} - Result of notification sending
- */
-async function notifyLoginRequest(loginRequestData) {
-  const title = 'New Login Request';
-  const body = `${loginRequestData.userName} has requested login access for ${loginRequestData.sessionTimeMinutes} minutes.`;
-  
-  const data = {
-    action: 'view_login_request',
-    requestId: loginRequestData.id,
-    userId: loginRequestData.userId,
-    userName: loginRequestData.userName,
-    phoneNumber: loginRequestData.userName, // Add phone number for frontend compatibility
-    sessionTimeMinutes: loginRequestData.sessionTimeMinutes,
-    categoryIds: loginRequestData.categoryIds,
-    notificationType: 'login_request' // Ensure this is set for frontend compatibility
-  };
-
-  return sendAdminNotification('login_request', title, body, data);
-}
-
-/**
  * Send new order notification to admin
  * @param {Object} orderData - Order data
  * @returns {Promise<Object>} - Result of notification sending
@@ -258,6 +225,30 @@ async function notifyNewOrder(orderData) {
   };
 
   return sendAdminNotification('new_order', title, body, data);
+}
+
+/**
+ * Send new custom-order notification to admin
+ * @param {Object} orderData - Custom order data
+ * @returns {Promise<Object>} - Result of notification sending
+ */
+async function notifyNewCustomOrder(orderData) {
+  const title = 'New Custom Order';
+  const body = `Custom order #${orderData.id} from ${orderData.userName || 'a customer'}${
+    orderData.weight ? ` — ${orderData.weight}g` : ''
+  }.`;
+
+  const data = {
+    action: 'view_custom_order',
+    orderId: orderData.id,
+    userId: orderData.userId,
+    userName: orderData.userName,
+    weight: orderData.weight,
+    purity: orderData.purity,
+    quantity: orderData.quantity,
+  };
+
+  return sendAdminNotification('new_custom_order', title, body, data);
 }
 
 /**
@@ -287,48 +278,6 @@ async function notifyRegistrationStatusChange(userData) {
       name: userData.name || 'User',
       status: userData.status,
       remarks: userData.remarks || '',
-      timestamp: new Date().toISOString()
-    });
-    } catch (socketError) {
-    // Don't fail the main notification if socket fails
-  }
-
-  return pushResult;
-}
-
-/**
- * Send login request status change notification to user
- * @param {Object} requestData - Login request data with status change
- * @returns {Promise<Object>} - Result of notification sending
- */
-async function notifyLoginRequestStatusChange(requestData) {
-  const title = 'Login Request Status Updated';
-  const body = `Your login request has been ${requestData.status}. ${requestData.remarks ? `Remarks: ${requestData.remarks}` : ''}`;
-  
-  const data = {
-    action: 'view_login_request',
-    requestId: requestData.id,
-    userId: requestData.userId,
-    status: requestData.status,
-    remarks: requestData.remarks || '',
-    sessionTimeMinutes: requestData.sessionTimeMinutes,
-    timestamp: new Date().toISOString()
-  };
-
-  // Use a more specific notification type for status changes
-  const notificationType = requestData.status === 'approved' ? 'login_approved' : 'login_rejected';
-
-  // Send FCM push notification first
-  const pushResult = await sendUserNotification(requestData.userId, notificationType, title, body, data);
-  
-  // Send real-time WebSocket notification to mobile app
-  try {
-    socketService.notifyLoginRequestStatusChange({
-      userId: requestData.userId,
-      status: requestData.status,
-      remarks: requestData.remarks || '',
-      sessionTimeMinutes: requestData.sessionTimeMinutes,
-      userName: requestData.userName || 'User',
       timestamp: new Date().toISOString()
     });
     } catch (socketError) {
@@ -580,10 +529,9 @@ async function getAdminNotificationStats() {
 module.exports = {
   sendAdminNotification,
   notifyUserRegistration,
-  notifyLoginRequest,
   notifyNewOrder,
+  notifyNewCustomOrder,
   notifyRegistrationStatusChange,
-  notifyLoginRequestStatusChange,
   notifyOrderStatusChange,
   sendUserNotification,
   getAdminNotificationStats,

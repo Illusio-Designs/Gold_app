@@ -334,6 +334,7 @@ const Login = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
       <ScrollView
+        style={styles.flex}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
@@ -375,14 +376,6 @@ const Login = () => {
               </View>
             </>
           )}
-
-
-          
-          {!otpSent ? (
-            <Button onPress={handleSendOtp} title="Send OTP" disabled={sendingOtp} style={{ marginTop: 24 }} textStyle={{}} />
-          ) : (
-            <Button onPress={handleVerifyOtp} title="Verify OTP" disabled={loading} style={{ marginTop: 24 }} textStyle={{}} />
-          )}
         </View>
         <View style={styles.orContinueWithRow}>
           <View style={styles.line} />
@@ -410,6 +403,15 @@ const Login = () => {
           onSelect={handleSelectCountry}
         />
       </ScrollView>
+
+      {/* Primary action pinned above the keyboard (professional OTP flow) */}
+      <View style={styles.bottomBar}>
+        {!otpSent ? (
+          <Button onPress={handleSendOtp} title="Send OTP" disabled={sendingOtp} style={{ marginTop: 0 }} textStyle={{}} />
+        ) : (
+          <Button onPress={handleVerifyOtp} title="Verify OTP" disabled={loading} style={{ marginTop: 0 }} textStyle={{}} />
+        )}
+      </View>
       </KeyboardAvoidingView>
 
       <SuccessOverlay
@@ -436,7 +438,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingVertical: isShortScreen() ? hp('12%') : isTallScreen() ? hp('18%') : hp('15%'),
+    paddingTop: isShortScreen() ? hp('12%') : isTallScreen() ? hp('18%') : hp('15%'),
+    paddingBottom: hp('3%'),
+  },
+  bottomBar: {
+    paddingHorizontal: wp('7.5%'),
+    paddingTop: 10,
+    paddingBottom: 16,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderTopWidth: 1,
+    borderTopColor: '#F0E7DA',
   },
   logo: {
     width: isSmallScreen() ? wp('35%') : isMediumScreen() ? wp('32%') : wp('30%'),

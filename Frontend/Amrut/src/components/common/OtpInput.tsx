@@ -60,6 +60,10 @@ const OtpInput: React.FC<OtpInputProps> = ({ value, onChange, style, boxStyle })
           placeholderTextColor="#A47C8C"
           textAlign="center"
           returnKeyType="next"
+          // OS one-time-code autofill (the "From Messages 2413…" suggestion)
+          autoComplete={idx === 0 ? 'sms-otp' : 'off'}
+          textContentType={idx === 0 ? 'oneTimeCode' : 'none'}
+          importantForAutofill={idx === 0 ? 'yes' : 'no'}
         />
       ))}
     </View>

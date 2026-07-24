@@ -1,6 +1,9 @@
 const customOrderModel = require("../models/customOrder");
 const { getBaseUrl } = require("../config/environment");
-const { notifyOrderStatusChange } = require("../services/adminNotificationService");
+const {
+  notifyOrderStatusChange,
+  notifyNewCustomOrder,
+} = require("../services/adminNotificationService");
 
 // Turn stored image filenames into full URLs the apps/dashboard can render.
 function toImageUrls(images) {
@@ -48,6 +51,17 @@ function createCustomOrder(req, res) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
+      // Alert admins about the new custom order (push + dashboard).
+      notifyNewCustomOrder({
+        id: result.insertId,
+        userId,
+        weight,
+        purity,
+        quantity: quantity ? parseInt(quantity, 10) : 1,
+      }).catch((e) =>
+        console.error("[customOrderController] notifyNewCustomOrder:", e.message)
+      );
+
       customOrderModel.getById(result.insertId, (getErr, rows) => {
         if (getErr || !rows || rows.length === 0) {
           return res.status(201).json({
