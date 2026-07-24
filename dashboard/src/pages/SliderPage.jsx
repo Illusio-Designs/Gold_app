@@ -398,7 +398,8 @@ const SliderPage = () => {
             <div className="file-help-text">
               <small>
                 Click the upload area to select an image. Supported formats:
-                JPG, PNG, GIF
+                JPG, PNG, GIF. Recommended: <strong>1200 × 600 px</strong> (2:1
+                wide banner) for a proper full-width look in the app.
               </small>
             </div>
           </div>

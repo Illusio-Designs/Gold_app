@@ -502,6 +502,9 @@ const ProductsPage = () => {
           onChange={handleInputChange}
           className="form-control"
         />
+        <small style={{ display: "block", marginTop: -6, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
+          Recommended: square <strong>1080 × 1080 px</strong> (1:1). The app crops product images to a square.
+        </small>
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
             <img
