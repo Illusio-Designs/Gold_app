@@ -684,6 +684,20 @@ export const registerFcmToken = async (fcmToken, deviceType, authToken) => {
   }
 };
 
+// ✅ Check whether this user has a push token registered on the backend
+export const getPushTokenStatus = async (authToken) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/notifications/token-status`,
+      { headers: { Authorization: `Bearer ${authToken}` } },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('❌ getPushTokenStatus error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
 // ✅ Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId, token) => {
   try {

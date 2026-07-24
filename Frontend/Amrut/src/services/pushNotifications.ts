@@ -146,6 +146,18 @@ export function onNotificationOpened(handler: (data: any) => void): () => void {
   }
 }
 
+// Read the device's current FCM token (for diagnostics). Never throws.
+export async function getCurrentFcmToken(): Promise<string | null> {
+  try {
+    const inst = messagingInstance();
+    if (!inst) return null;
+    return (await inst.getToken()) || null;
+  } catch (e) {
+    console.log('[push] getCurrentFcmToken error:', (e as any)?.message);
+    return null;
+  }
+}
+
 // Clear the stored token on logout so the next user re-registers cleanly.
 export async function clearDeviceToken(): Promise<void> {
   try {

@@ -220,6 +220,55 @@ const Profile = () => {
     }
   };
 
+  // Diagnostic: is this device's push token registered on the backend?
+  const handleCheckPush = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem('accessToken');
+      if (!authToken) {
+        Alert.alert('Not logged in', 'Please log in to check push status.');
+        return;
+      }
+      const { getPushTokenStatus } = require('../services/Api');
+      const { getCurrentFcmToken, registerDeviceToken } = require('../services/pushNotifications');
+
+      // Try to (re)register first, then read status + device token.
+      await registerDeviceToken();
+      const [status, deviceToken] = await Promise.all([
+        getPushTokenStatus(authToken).catch(() => null),
+        getCurrentFcmToken(),
+      ]);
+
+      const registered = status && status.registered;
+      const lines = [
+        `Backend registered: ${registered ? 'YES ✓' : 'NO ✗'}`,
+        `Tokens on server: ${status ? status.count : 0}`,
+        '',
+        'Device FCM token:',
+        deviceToken ? deviceToken : '(none — Firebase/Play services unavailable)',
+      ];
+      if (deviceToken) console.log('[Push] FCM token:', deviceToken);
+
+      const buttons: any[] = [{ text: 'OK' }];
+      if (deviceToken) {
+        buttons.unshift({
+          text: 'Copy token',
+          onPress: () => {
+            try {
+              const Clipboard = require('@react-native-clipboard/clipboard').default;
+              Clipboard.setString(deviceToken);
+              Alert.alert('Copied', 'Token copied. Paste it into Firebase Console → Cloud Messaging → Send test message.');
+            } catch {
+              Alert.alert('Token', deviceToken);
+            }
+          },
+        });
+      }
+      Alert.alert('Push notification status', lines.join('\n'), buttons);
+    } catch (e) {
+      Alert.alert('Error', 'Could not check push status.');
+    }
+  };
+
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
@@ -359,6 +408,14 @@ const Profile = () => {
         >
           <Text style={styles.menuGlyph}>✦</Text>
           <Text style={styles.menuText}>Custom Order</Text>
+          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={handleCheckPush}
+        >
+          <Text style={styles.menuGlyph}>🔔</Text>
+          <Text style={styles.menuText}>Notification Status</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
         <TouchableOpacity

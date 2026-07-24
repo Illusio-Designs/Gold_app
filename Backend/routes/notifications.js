@@ -24,6 +24,9 @@ router.delete("/:notificationId", verifyToken, notificationController.deleteNoti
 // Register FCM token for admin
 router.post("/register-token", verifyToken, notificationController.registerFCMToken);
 
+// Check whether the logged-in user has a push token registered
+router.get("/token-status", verifyToken, notificationController.getTokenStatus);
+
 
 // Subscribe user to topic
 router.post("/subscribe-topic", verifyToken, notificationController.subscribeUserToTopic);
