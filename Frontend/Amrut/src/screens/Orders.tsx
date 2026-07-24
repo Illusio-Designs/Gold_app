@@ -5,6 +5,7 @@ import CartItemCard from '../components/common/CartItemCard';
 import { ListSkeleton } from '../components/common/Motion';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { PackageIcon } from '@hugeicons/core-free-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, getMyCustomOrders } from '../services/Api';
 import Toast from 'react-native-toast-message';
@@ -33,11 +34,16 @@ const orderTabs = [
 const Orders = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const navigation = useNavigation<any>();
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
 
   // Check if user is logged in when component mounts
   useEffect(() => {
-    checkAndPromptLogin();
+    (async () => {
+      const token = await AsyncStorage.getItem('accessToken');
+      setIsLoggedIn(!!token);
+    })();
   }, []);
 
   // Custom fetch function for orders that gets the authentication token
@@ -217,12 +223,31 @@ const Orders = () => {
     );
   }
 
+  // Not logged in → invite the user to log in (instead of a load error).
+  if (isLoggedIn === false && orders.length === 0) {
+    return (
+      <View style={styles.container}>
+        <CustomHeader title="My Orders" showBack={false} />
+        <View style={styles.errorContainer}>
+          <View style={styles.loginIconCircle}>
+            <HugeiconsIcon icon={PackageIcon} size={44} color="#C09E83" strokeWidth={1.8} />
+          </View>
+          <Text style={styles.loginTitle}>Login to see your orders</Text>
+          <Text style={styles.loginSubtitle}>Sign in to track and view all your orders in one place.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.retryButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   if (error && orders.length === 0) {
     return (
       <View style={styles.container}>
         <CustomHeader title="My Orders" showBack={false} />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Failed to load orders</Text>
+          <Text style={styles.errorText}>We couldn't load your orders</Text>
           <TouchableOpacity style={styles.retryButton} onPress={refresh}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
@@ -612,6 +637,34 @@ const styles = StyleSheet.create({
     color: '#e74c3c',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  loginIconCircle: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  loginTitle: {
+    fontSize: 19,
+    color: '#5D0829',
+    fontFamily: 'GlorifyDEMO',
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  loginSubtitle: {
+    fontSize: 13,
+    color: '#8A7A80',
+    fontFamily: 'GlorifyDEMO',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 20,
+    lineHeight: 19,
+    paddingHorizontal: 20,
   },
   retryButton: {
     backgroundColor: '#5D0829',
