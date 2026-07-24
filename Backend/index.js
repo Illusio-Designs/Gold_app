@@ -78,6 +78,33 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Security headers + rate limiting. Loaded optionally so the server still
+// runs if the packages aren't installed yet (FTP deploy doesn't npm install).
+// To enable: run `npm install helmet express-rate-limit` on the server.
+try {
+  const helmet = require("helmet");
+  app.use(helmet({ crossOriginResourcePolicy: false })); // allow image loads
+} catch (e) {
+  console.warn("[security] helmet not installed — run `npm install helmet`");
+}
+try {
+  const rateLimit = require("express-rate-limit");
+  // Throttle OTP / auth endpoints to curb abuse.
+  const authLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many attempts. Please try again later." },
+  });
+  app.use("/api/users/verify-otp", authLimiter);
+  app.use("/api/users/send-otp", authLimiter);
+} catch (e) {
+  console.warn(
+    "[security] express-rate-limit not installed — run `npm install express-rate-limit`",
+  );
+}
+
 // Body parsing middleware
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));

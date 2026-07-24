@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, FlatList } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from '../context/CartContext';
@@ -423,44 +423,51 @@ const Product = () => {
       ) : filteredProducts.length === 0 ? (
         <Text style={styles.noProductsText}>No products found in this category.</Text>
       ) : (
-        <ScrollView contentContainerStyle={styles.productGrid} showsVerticalScrollIndicator={false}>
-          {filteredProducts.map((item, idx) => {
-            return (
-              <FadeInSlide key={item.id || idx} delay={Math.min(idx, 8) * 55} style={styles.cardWrap}>
-                <View style={styles.card}>
-                  {/* Cart icon at top-right */}
-                  <TouchableOpacity
-                    style={styles.cartIconContainer}
-                    onPress={() => addToCartDirectly(item)}
-                    activeOpacity={0.7}
-                  >
-                    <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
-                  </TouchableOpacity>
+        <FlatList
+          data={filteredProducts}
+          keyExtractor={(item, idx) => String(item.id || idx)}
+          numColumns={2}
+          columnWrapperStyle={styles.gridRow}
+          contentContainerStyle={styles.gridContent}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={8}
+          windowSize={7}
+          removeClippedSubviews
+          renderItem={({ item }) => (
+            <View style={styles.cardWrap}>
+              <View style={styles.card}>
+                {/* Cart icon at top-right */}
+                <TouchableOpacity
+                  style={styles.cartIconContainer}
+                  onPress={() => addToCartDirectly(item)}
+                  activeOpacity={0.7}
+                >
+                  <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
+                </TouchableOpacity>
 
-                  {/* Product Image - tap to view */}
-                  <TouchableOpacity
-                    style={styles.imageTouch}
-                    activeOpacity={0.85}
-                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-                  >
-                    {renderProductImage(item)}
-                    <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
-                  </TouchableOpacity>
+                {/* Product Image - tap to view */}
+                <TouchableOpacity
+                  style={styles.imageTouch}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                >
+                  {renderProductImage(item)}
+                  <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
+                </TouchableOpacity>
 
-                  {/* View button */}
-                  <PressableScale
-                    containerStyle={styles.viewBtnWrap}
-                    style={styles.viewBtn}
-                    activeScale={0.96}
-                    onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-                  >
-                    <Text style={styles.viewText}>View</Text>
-                  </PressableScale>
-                </View>
-              </FadeInSlide>
-            );
-          })}
-        </ScrollView>
+                {/* View button */}
+                <PressableScale
+                  containerStyle={styles.viewBtnWrap}
+                  style={styles.viewBtn}
+                  activeScale={0.96}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                >
+                  <Text style={styles.viewText}>View</Text>
+                </PressableScale>
+              </View>
+            </View>
+          )}
+        />
       )}
       <Filter
         visible={filterVisible}
@@ -563,6 +570,14 @@ const styles = StyleSheet.create({
   },
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
   // shadow, rounded image; keeps the quick add-to-cart icon. Two per row.
+  gridContent: {
+    paddingHorizontal: 14,
+    paddingTop: 16,
+    paddingBottom: 30,
+  },
+  gridRow: {
+    justifyContent: 'space-between',
+  },
   cardWrap: {
     width: '47%',
     marginBottom: 14,

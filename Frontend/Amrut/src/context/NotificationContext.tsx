@@ -130,10 +130,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setUnreadCount(0);
   }, []);
 
-  // On mount: load for an already-logged-in user, register push, and listen
-  // for foreground messages (banner + badge bump).
+  // On mount: load for an already-logged-in user and register the push token
+  // if we already have one (no permission prompt here — that's requested at
+  // login via onLogin(), so guests aren't nagged on the splash screen).
   useEffect(() => {
-    initPushForUser();
+    registerDeviceToken();
     refresh();
     const unsub = onForegroundMessage(msg => {
       showBanner(msg.title || 'Notification', msg.body || '');
