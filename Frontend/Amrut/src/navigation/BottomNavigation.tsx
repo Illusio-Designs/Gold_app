@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Collection from '../screens/Collection';
-import Cart from '../screens/Cart';
+import Orders from '../screens/Orders';
 import Profile from '../screens/Profile';
 import Home from '../screens/Home';
 import CustomOrder from '../screens/CustomOrder';
@@ -14,7 +14,7 @@ import { HugeiconsIcon } from '@hugeicons/react-native';
 import {
   Home01Icon,
   Diamond01Icon,
-  ShoppingCart01Icon,
+  PackageIcon,
   UserIcon,
   SparklesIcon,
 } from '@hugeicons/core-free-icons';
@@ -26,7 +26,7 @@ const CollectionStackNav = createNativeStackNavigator();
 const tabIcons = {
   Home: Home01Icon,
   Collection: Diamond01Icon,
-  Cart: ShoppingCart01Icon,
+  Orders: PackageIcon,
   Profile: UserIcon,
 };
 
@@ -34,11 +34,11 @@ const labels = {
   Home: 'Home',
   Collection: 'Collection',
   Custom: 'Custom',
-  Cart: 'Cart',
+  Orders: 'Orders',
   Profile: 'Profile',
 };
 
-const tabNames = ['Home', 'Collection', 'Cart', 'Profile'] as const;
+const tabNames = ['Home', 'Collection', 'Orders', 'Profile'] as const;
 type TabName = typeof tabNames[number];
 
 // A regular tab that, when active, springs up into a gold circle — the same
@@ -130,12 +130,17 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
               activeOpacity={0.9}
             >
               <LinearGradient
-                colors={isFocused ? ['#FCE2BF', '#C09E83'] : ['#E9C9A0', '#C09E83']}
+                colors={isFocused ? ['#FCE2BF', '#C09E83'] : ['#7A1540', '#6B0D33']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.fab}
+                style={[styles.fab, { borderColor: isFocused ? '#5D0829' : '#C09E83' }]}
               >
-                <HugeiconsIcon icon={SparklesIcon} size={26} color="#5D0829" strokeWidth={1.8} />
+                <HugeiconsIcon
+                  icon={SparklesIcon}
+                  size={26}
+                  color={isFocused ? '#5D0829' : '#FCE2BF'}
+                  strokeWidth={1.8}
+                />
               </LinearGradient>
               <Text style={[styles.label, styles.customLabel, isFocused && styles.labelActive]}>
                 {labels.Custom}
@@ -176,7 +181,7 @@ const BottomNavigation = () => (
     <Tab.Screen name="Home" component={Home} />
     <Tab.Screen name="Collection" component={CollectionStack} />
     <Tab.Screen name="Custom" component={CustomOrder} />
-    <Tab.Screen name="Cart" component={Cart} />
+    <Tab.Screen name="Orders" component={Orders} />
     <Tab.Screen name="Profile" component={Profile} />
   </Tab.Navigator>
 );

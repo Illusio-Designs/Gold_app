@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, Platform, ScrollView, Alert, KeyboardAvoidingView } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
 import Button from '../components/common/Button';
@@ -347,7 +347,10 @@ const EditProfile = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <CustomHeader title="Edit Profile" />
         <ProfilePhotoName
@@ -483,7 +486,7 @@ const EditProfile = () => {
         onClose={() => setCountryModalVisible(false)}
         onSelect={handleSelectCountry}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

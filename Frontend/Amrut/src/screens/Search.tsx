@@ -105,13 +105,6 @@ const Search = () => {
 
   const removeRecent = (item: string) => {
     setRecent(recent.filter(r => r !== item));
-    Toast.show({
-      type: 'success',
-      text1: 'Removed',
-      text2: `"${item}" removed from recent searches`,
-      position: 'top',
-      visibilityTime: 1500
-    });
   };
 
   const performSearch = useCallback(async (text: string) => {
@@ -123,13 +116,6 @@ const Search = () => {
     setSearched(true);
     
     // Show loading toast
-            Toast.show({
-          type: 'info',
-          text1: 'Searching...',
-          text2: `Looking for "${text}"`,
-          position: 'top',
-          visibilityTime: 1000
-        });
   }, []);
 
   // Handle pull-to-refresh
@@ -139,13 +125,6 @@ const Search = () => {
     setRefreshing(true);
     try {
       await refresh();
-      Toast.show({
-        type: 'success',
-        text1: 'Search Updated',
-        text2: 'Your search results have been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -268,20 +247,20 @@ const Search = () => {
 
   // Show screen loader when initially loading
   if (loading && !searched) {
-    return <ScreenLoader text="Loading Search..." />;
+    return null;
   }
 
   return (
     <View style={styles.container}>
       <CustomHeader title="Search" timer={true} />
       
-      {/* Search Bar */}
+      {/* Search Bar — editable (no onPress so the input is focusable) */}
       <View style={styles.searchContainer}>
-        <SearchBar 
-          value={search} 
-          onChangeText={setSearch} 
-          onPress={() => {}} 
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
           placeholder="Search for products or categories..."
+          onSubmitEditing={() => performSearch(search)}
         />
       </View>
 

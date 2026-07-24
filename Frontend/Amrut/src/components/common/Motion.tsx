@@ -187,6 +187,7 @@ type PressableScaleProps = {
   onLongPress?: () => void;
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>; // applied to the outer Pressable (layout)
   activeScale?: number;
   disabled?: boolean;
   hitSlop?: number;
@@ -198,6 +199,7 @@ export const PressableScale: React.FC<PressableScaleProps> = ({
   onLongPress,
   children,
   style,
+  containerStyle,
   activeScale = 0.96,
   disabled,
   hitSlop,
@@ -214,6 +216,7 @@ export const PressableScale: React.FC<PressableScaleProps> = ({
 
   return (
     <Pressable
+      style={containerStyle}
       onPress={onPress}
       onLongPress={onLongPress}
       disabled={disabled}

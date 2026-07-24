@@ -13,11 +13,9 @@ import ProductDetail from '../screens/ProductDetail';
 import Search from '../screens/Search';
 import EditProfile from '../screens/EditProfile';
 import Orders from '../screens/Orders';
-import Wishlist from '../screens/Wishlist';
+import Cart from '../screens/Cart';
 import { CartProvider } from '../context/CartContext';
-import { WishlistProvider } from '../context/WishlistContext';
 import { NavigationProvider } from '../context/NavigationContext';
-import NavigationLoader from '../components/common/NavigationLoader';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +25,6 @@ const StackNavigation = () => {
   return (
     <NavigationProvider>
       <CartProvider>
-        <WishlistProvider>
         <NavigationContainer ref={navigationRef}>
           {/* Start app on Splash screen */}
           <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
@@ -43,11 +40,9 @@ const StackNavigation = () => {
             <Stack.Screen name="Search" component={Search} />
             <Stack.Screen name="EditProfile" component={EditProfile} />
             <Stack.Screen name="Orders" component={Orders} />
-            <Stack.Screen name="Wishlist" component={Wishlist} />
+            <Stack.Screen name="Cart" component={Cart} />
           </Stack.Navigator>
-          <NavigationLoader />
         </NavigationContainer>
-        </WishlistProvider>
       </CartProvider>
     </NavigationProvider>
   );

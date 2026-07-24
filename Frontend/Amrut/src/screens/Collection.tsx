@@ -152,13 +152,6 @@ const Collection = () => {
     setRefreshing(true);
     try {
       await fetchCategories();
-      Toast.show({
-        type: 'success',
-        text1: 'Categories Updated',
-        text2: 'Your collections have been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (err) {
       Toast.show({
         type: 'error',

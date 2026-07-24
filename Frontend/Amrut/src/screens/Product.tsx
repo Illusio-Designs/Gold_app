@@ -3,7 +3,6 @@ import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'rea
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
 import CustomHeader from '../components/common/CustomHeader';
 import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
@@ -40,6 +39,7 @@ type Product = {
 const Product = () => {
   const [search, setSearch] = useState('');
   const [filterVisible, setFilterVisible] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<any>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,20 +63,6 @@ const Product = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { addToCart } = useCart();
-  const { isWishlisted, toggleWishlist } = useWishlist();
-
-  const onHeart = (item: any) =>
-    toggleWishlist({
-      id: item.id,
-      name: item.name,
-      image: item.image,
-      sku: item.sku,
-      category_name: item.category_name,
-      gross_weight: item.gross_weight,
-      net_weight: item.net_weight,
-      size: item.size,
-      length: item.length,
-    });
 
   // Check if user is logged in
   useEffect(() => {
@@ -184,20 +170,36 @@ const Product = () => {
     }
   }, [isValidCategoryId, resolvingCategory]);
 
-  // Filter products to exclude out-of-stock items and apply search
+  // A product matches a chosen filter value only when it actually has that
+  // field set and it differs — missing data never hides a product.
+  const matchesFilter = (productVal: any, selected: any) => {
+    if (!selected) return true;
+    const pv = productVal != null ? String(productVal).trim().toLowerCase() : '';
+    if (pv === '') return true; // no data on this product → don't exclude
+    return pv === String(selected).trim().toLowerCase();
+  };
+
+  // Filter products to exclude out-of-stock items and apply search + filters
   const filteredProducts = (products || []).filter(p => {
     if (!p) return false;
-    
+
     // Filter out out-of-stock products
     if (p.stock_status === 'out_of_stock') {
-      console.log(`[Product] Filtering out out-of-stock product: ${p.name || p.sku} (Status: ${p.stock_status})`);
       return false;
     }
-    
+
     // Filter by search term
     const name = p.name || p.sku || '';
-    const matches = name.toLowerCase().includes(search.toLowerCase());
-    return matches;
+    if (!name.toLowerCase().includes(search.toLowerCase())) return false;
+
+    // Applied filters (from the Filter sheet)
+    if (appliedFilters) {
+      if (!matchesFilter((p as any).size, appliedFilters.size)) return false;
+      if (!matchesFilter((p as any).length, appliedFilters.length)) return false;
+      if (!matchesFilter((p as any).purity, appliedFilters.purity)) return false;
+    }
+
+    return true;
   });
 
   // Update loading state based on products loading
@@ -330,13 +332,6 @@ const Product = () => {
       }, 1, '');
 
       // Show success toast
-      Toast.show({
-        type: 'success',
-        text1: 'Added to Cart',
-        text2: `${product.name || product.sku} added to cart`,
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       console.error('[Product] Error adding to cart:', error);
       Toast.show({
@@ -403,7 +398,7 @@ const Product = () => {
 
   // Show screen loader when initially loading
   if (resolvingCategory) {
-    return <ScreenLoader text="Loading Category..." />;
+    return null;
   }
 
   return (
@@ -437,17 +432,6 @@ const Product = () => {
             return (
               <FadeInSlide key={item.id || idx} delay={Math.min(idx, 8) * 55} style={styles.cardWrap}>
                 <View style={styles.card}>
-                  {/* Wishlist heart at top-left */}
-                  <TouchableOpacity
-                    style={styles.heartBtn}
-                    onPress={() => onHeart(item)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={[styles.heartGlyph, isWishlisted(item.id) && styles.heartActive]}>
-                      {isWishlisted(item.id) ? '♥' : '♡'}
-                    </Text>
-                  </TouchableOpacity>
-
                   {/* Cart icon at top-right */}
                   <TouchableOpacity
                     style={styles.cartIconContainer}
@@ -469,6 +453,7 @@ const Product = () => {
 
                   {/* View button */}
                   <PressableScale
+                    containerStyle={styles.viewBtnWrap}
                     style={styles.viewBtn}
                     activeScale={0.96}
                     onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
@@ -484,7 +469,10 @@ const Product = () => {
       <Filter
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
-        onApply={() => setFilterVisible(false)}
+        onApply={(filters) => {
+          setAppliedFilters(filters);
+          setFilterVisible(false);
+        }}
       />
       <Toast />
     </View>
@@ -628,8 +616,11 @@ const styles = StyleSheet.create({
   heartActive: {
     color: '#C0392B',
   },
-  viewBtn: {
+  viewBtnWrap: {
+    width: '100%',
     marginTop: 10,
+  },
+  viewBtn: {
     backgroundColor: '#5D0829',
     borderRadius: 10,
     paddingVertical: 8,

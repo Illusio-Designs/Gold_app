@@ -239,7 +239,6 @@ const Profile = () => {
           : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${refreshedUser.image}?t=${Date.now()}`;
         setPhotoUri({ uri: imgUrl });
       }
-      Toast.show({ type: 'success', text1: 'Profile updated', text2: 'Profile photo updated successfully.' });
     } catch (err) {
       console.log('[Profile] Profile photo update error:', err);
       Alert.alert('Error', 'Failed to update profile photo');
@@ -357,7 +356,7 @@ const Profile = () => {
 
   // Show loading state while profile is being fetched
   if (loading) {
-    return <ScreenLoader text="Loading Profile..." />;
+    return null;
   }
 
   return (
@@ -373,34 +372,12 @@ const Profile = () => {
       
       {/* Menu Buttons */}
       <View style={styles.menuWrap}>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
-          onPress={() => {
-            showLoader('Loading Edit Profile...', 2000);
-            (navigation as any).navigate('EditProfile');
-          }}
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => (navigation as any).navigate('EditProfile')}
         >
           <Image source={require('../assets/img/profile/profile.png')} style={styles.menuIcon} />
           <Text style={styles.menuText}>Edit Profile</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
-          onPress={() => {
-            showLoader('Loading Orders...', 2500);
-            (navigation as any).navigate('Orders');
-          }}
-        >
-          <Image source={require('../assets/img/profile/order.png')} style={styles.menuIcon} />
-          <Text style={styles.menuText}>My Orders</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuBtn}
-          onPress={() => (navigation as any).navigate('Wishlist')}
-        >
-          <Text style={styles.menuGlyph}>♥</Text>
-          <Text style={styles.menuText}>Wishlist</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
         <TouchableOpacity

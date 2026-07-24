@@ -211,13 +211,6 @@ const CustomOrder = () => {
 
       const res = await createCustomOrder(form, token);
 
-      Toast.show({
-        type: 'success',
-        text1: 'Custom order sent',
-        text2: 'Our team will review your design and follow up.',
-        position: 'top',
-        visibilityTime: 2500,
-      });
       // reset
       setImages([]); setWeight(''); setPurity(''); setQuantity(1); setDeliveryDate(null); setRemark('');
       navigation.navigate('Home');
@@ -262,7 +255,7 @@ const CustomOrder = () => {
         <View style={s.imgGrid}>
           {images.map((img, i) => (
             <View key={i} style={s.thumbWrap}>
-              <Image source={{ uri: img.uri }} style={s.thumb} />
+              <Image source={{ uri: img.uri }} style={s.thumb} resizeMode="cover" />
               <TouchableOpacity style={s.thumbX} onPress={() => removeImage(i)}>
                 <Text style={s.thumbXTxt}>×</Text>
               </TouchableOpacity>

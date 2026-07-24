@@ -102,13 +102,6 @@ const Cart = () => {
     setRefreshing(true);
     try {
       await refreshCart();
-      Toast.show({
-        type: 'success',
-        text1: 'Cart Updated',
-        text2: 'Your cart has been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -125,13 +118,6 @@ const Cart = () => {
   const handleRemove = async (id: string) => {
     try {
       await removeFromCart(id);
-      Toast.show({
-        type: 'success',
-        text1: 'Item Removed',
-        text2: 'Item removed from cart',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       console.error('[Cart] Error removing item:', error);
       Toast.show({
@@ -163,13 +149,6 @@ const Cart = () => {
           handleCloseModal();
         }, 5000);
         
-        Toast.show({
-          type: 'success',
-          text1: 'Order Placed',
-          text2: 'Your order has been placed successfully',
-          position: 'top',
-          visibilityTime: 3000
-        });
       } else if (result.code === 'BUSINESS_NOT_APPROVED') {
         // Account still pending admin approval — explain clearly. The cart is
         // preserved so they can order once approved.
@@ -217,7 +196,7 @@ const Cart = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="My Cart" />
+      <CustomHeader title="My Cart" showCart={false} />
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         refreshControl={

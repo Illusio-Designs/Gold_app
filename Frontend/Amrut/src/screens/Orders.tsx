@@ -134,13 +134,6 @@ const Orders = () => {
     try {
       await refresh();
       await fetchCustomOrders();
-      Toast.show({
-        type: 'success',
-        text1: 'Orders Updated',
-        text2: 'Your orders have been refreshed',
-        position: 'top',
-        visibilityTime: 2000
-      });
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -216,7 +209,7 @@ const Orders = () => {
   if (loading && orders.length === 0) {
     return (
       <View style={styles.container}>
-        <CustomHeader title="My Orders" timer={true} />
+        <CustomHeader title="My Orders" showBack={false} />
         <ListSkeleton count={5} />
       </View>
     );
@@ -225,7 +218,7 @@ const Orders = () => {
   if (error && orders.length === 0) {
     return (
       <View style={styles.container}>
-        <CustomHeader title="My Orders" timer={true} />
+        <CustomHeader title="My Orders" showBack={false} />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load orders</Text>
           <TouchableOpacity style={styles.retryButton} onPress={refresh}>
@@ -238,7 +231,7 @@ const Orders = () => {
 
   return (
     <View style={styles.container}>
-      <CustomHeader title="My Orders" timer={true} />
+      <CustomHeader title="My Orders" showBack={false} />
       
       {/* Order Status Tabs */}
       <ScrollView

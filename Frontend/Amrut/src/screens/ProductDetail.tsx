@@ -51,25 +51,11 @@ const ProductDetail = () => {
         setLoading(true);
         setError(null);
         
-        Toast.show({
-          type: 'info',
-          text1: 'Loading',
-          text2: 'Fetching product details',
-          position: 'top',
-          visibilityTime: 1000
-        });
 
         const response = await getProductById(productId);
         
         if (response.success && response.data) {
           setProduct(response.data);
-          Toast.show({
-            type: 'success',
-            text1: 'Loaded',
-            text2: 'Product details loaded successfully',
-            position: 'top',
-            visibilityTime: 1500
-          });
         } else {
           setError('Failed to load product details');
           Toast.show({
@@ -198,13 +184,6 @@ const ProductDetail = () => {
       length: product.length || 'N/A',
       quantity: 1,
     }, 1, amount);
-    Toast.show({
-      type: 'success',
-      text1: 'Added to Cart',
-      text2: `${product.name || product.sku} added to cart`,
-      position: 'top',
-      visibilityTime: 2000,
-    });
     navigation.goBack();
   };
 
@@ -218,7 +197,7 @@ const ProductDetail = () => {
         end={{ x: 0.5, y: 1 }}
         style={styles.hero}
       >
-        <View style={styles.heroHeader}>
+        <View style={[styles.heroHeader, { paddingTop: insets.top + 10 }]}>
           <TouchableOpacity
             style={styles.heroBackBtn}
             onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
@@ -339,7 +318,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: isShortScreen() ? 40 : isTallScreen() ? 58 : 50,
     paddingHorizontal: 16,
   },
   heroBackBtn: {
