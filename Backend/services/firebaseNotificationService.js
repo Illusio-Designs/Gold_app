@@ -14,16 +14,33 @@ const firebaseConfig = {
 // VAPID key for web push notifications
 const VAPID_KEY = "BOaREbot4mZreAvnnsmWMtEpDD5G85fbW_0EXnMZcP7rJFjoQGDEIZckigVi-YPNPp9uTC06hti_e4Zhb9HPRVw";
 
-// Load Firebase service account credentials. Guarded so a missing/misplaced
-// credentials file disables PUSH only — it must never crash the whole API.
+// Load Firebase service account credentials. Tried in order:
+//   1) FIREBASE_SERVICE_ACCOUNT env var (path, absolute or relative to Backend/)
+//   2) Backend/firebase-service-account.json  <-- put the new key here
+//   3) the legacy amrut-9cc5e filename (backward compatibility)
+// Guarded so a missing/misplaced file disables PUSH only — never crashes the API.
+const path = require('path');
 let serviceAccount = null;
-try {
-  serviceAccount = require('../amrut-9cc5e-firebase-adminsdk-fbsvc-c0150a05ed.json');
-} catch (e) {
-  console.error(
-    '[firebase] Service account file not found — push notifications disabled:',
-    e.message,
-  );
+const candidatePaths = [];
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const envPath = process.env.FIREBASE_SERVICE_ACCOUNT;
+  candidatePaths.push(path.isAbsolute(envPath) ? envPath : path.join(__dirname, '..', envPath));
+}
+candidatePaths.push(path.join(__dirname, '..', 'firebase-service-account.json'));
+candidatePaths.push(path.join(__dirname, '..', 'amrut-9cc5e-firebase-adminsdk-fbsvc-c0150a05ed.json'));
+for (const p of candidatePaths) {
+  try {
+    serviceAccount = require(p);
+    if (serviceAccount) {
+      console.log(`[firebase] Loaded service account (project: ${serviceAccount.project_id})`);
+      break;
+    }
+  } catch (e) {
+    // try next candidate
+  }
+}
+if (!serviceAccount) {
+  console.error('[firebase] No service account file found — push notifications disabled.');
 }
 
 // Initialize Firebase Admin SDK (for server-side operations)
@@ -36,7 +53,9 @@ try {
     try {
       adminApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        projectId: firebaseConfig.projectId,
+        // Use the project from the key itself so it always matches the key,
+        // regardless of which Firebase project it belongs to.
+        projectId: serviceAccount.project_id,
       });
     } catch (initErr) {
       console.error('[firebase] Admin init failed — push disabled:', initErr.message);
