@@ -1,10 +1,16 @@
 import React from 'react';
 import { Text, TextInput } from 'react-native';
 
-// Apply the brand font (Glorify) as the default for every Text / TextInput
-// across the whole app. The font is injected FIRST in the style array so any
-// component that explicitly sets its own fontFamily still wins.
-const BRAND_FONT = { fontFamily: 'GlorifyDEMO' };
+// Force the brand font (Glorify) on every Text / TextInput across the app.
+//
+// Glorify ships as a SINGLE weight (GlorifyDEMO.otf) with no bold file. On
+// Android, `fontFamily: 'GlorifyDEMO'` + a bold `fontWeight` makes the OS look
+// for a bold Glorify, fail, and fall back to the system font (Roboto) — which
+// is why bold headings/buttons/active tabs looked "not Glorify". To guarantee
+// Glorify everywhere we apply the font LAST (so it wins over any explicit
+// fontFamily) and normalise the weight so the single Glorify file is always
+// used. Visual hierarchy is kept via font size, not weight.
+const BRAND_FONT = { fontFamily: 'GlorifyDEMO', fontWeight: 'normal' as const };
 
 function applyDefaultFont(Component: any) {
   const original = Component.render;
@@ -13,7 +19,7 @@ function applyDefaultFont(Component: any) {
     const element = original.apply(this, args);
     if (!element) return element;
     return React.cloneElement(element, {
-      style: [BRAND_FONT, element.props.style],
+      style: [element.props.style, BRAND_FONT],
     });
   };
   Component.__glorifyPatched = true;

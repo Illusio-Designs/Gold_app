@@ -265,6 +265,9 @@ const CategoriesPage = () => {
           onChange={handleInputChange}
           className="form-control"
         />
+        <small style={{ display: "block", marginTop: -6, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
+          Recommended: square <strong>500 × 500 px</strong> (1:1). Shown as a circle in the app.
+        </small>
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
             <img
