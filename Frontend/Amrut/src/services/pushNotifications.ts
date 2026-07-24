@@ -79,11 +79,13 @@ export async function registerDeviceToken(): Promise<string | null> {
 }
 
 // Ask permission + register the token (used after login and on app start for an
-// already-logged-in user). Never throws.
+// already-logged-in user). Never throws. The token is registered REGARDLESS of
+// the display permission — the FCM token exists either way, and the backend
+// needs it; the permission only controls whether the OS shows the banner.
 export async function initPushForUser(): Promise<void> {
   try {
-    const ok = await requestNotificationPermission();
-    if (ok) await registerDeviceToken();
+    await requestNotificationPermission();
+    await registerDeviceToken();
   } catch (e) {
     console.log('[push] initPushForUser error:', (e as any)?.message);
   }

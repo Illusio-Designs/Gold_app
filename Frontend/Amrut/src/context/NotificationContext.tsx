@@ -16,6 +16,7 @@ import {
 } from '../services/Api';
 import {
   initPushForUser,
+  registerDeviceToken,
   onForegroundMessage,
   clearDeviceToken,
 } from '../services/pushNotifications';
@@ -162,9 +163,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // socket not available — in-app list still refreshes on open
     }
 
-    // Refresh whenever the app returns to the foreground.
+    // Refresh + make sure the push token is registered whenever the app
+    // returns to the foreground (covers users who were already logged in).
     const appStateSub = AppState.addEventListener('change', s => {
-      if (s === 'active') refresh();
+      if (s === 'active') {
+        refresh();
+        registerDeviceToken();
+      }
     });
 
     return () => {
