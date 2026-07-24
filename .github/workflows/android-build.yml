@@ -13,7 +13,9 @@ name: Android Build (test APK)
 on:
   workflow_dispatch:
   push:
-    branches: [main, claude/code-updates-review-4lp01q]
+    # Test APKs build from the feature branch or on demand (workflow_dispatch).
+    # Merges to main deploy the backend but intentionally do NOT build an APK.
+    branches: [claude/code-updates-review-4lp01q]
     paths:
       - "Frontend/Amrut/**"
       - ".github/workflows/android-build.yml"
