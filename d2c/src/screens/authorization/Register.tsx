@@ -256,7 +256,9 @@ const Register = () => {
     console.log('Starting registration...');
     try {
       const userData = {
-        type: 'business', // or 'admin', adjust as needed
+        // D2C shoppers are 'consumer' accounts — they can order without the
+        // wholesale admin-approval step and are labelled D2C in the dashboard.
+        type: 'consumer',
         name: name.trim(),
         email: email.trim(),
         password,

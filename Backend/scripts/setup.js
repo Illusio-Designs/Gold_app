@@ -51,7 +51,7 @@ async function createTablesAndAdmin() {
       name: "users",
       sql: `CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        type ENUM('admin', 'business') NOT NULL,
+        type ENUM('admin', 'business', 'consumer') NOT NULL,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
@@ -134,6 +134,10 @@ async function createTablesAndAdmin() {
         status ENUM('pending', 'approved', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
         remark TEXT,
         courier_company VARCHAR(255),
+        payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
+        payment_method VARCHAR(50),
+        razorpay_order_id VARCHAR(100),
+        razorpay_payment_id VARCHAR(100),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -439,6 +443,31 @@ async function updateExistingTables() {
       );
     } else {
       }
+
+    // Widen users.type to allow D2C consumers. Running MODIFY is idempotent —
+    // safe to re-run; it just re-asserts the enum. Existing rows are untouched.
+    await executeQuery(
+      "ALTER TABLE users MODIFY COLUMN type ENUM('admin', 'business', 'consumer') NOT NULL",
+      "users.type widened to include 'consumer'"
+    );
+
+    // Add payment columns to orders (for the D2C Razorpay flow) if missing.
+    const hasPaymentStatus = await new Promise((resolve, reject) => {
+      db.query("SHOW COLUMNS FROM orders LIKE 'payment_status'", (err, results) => {
+        if (err) reject(err);
+        else resolve(results.length > 0);
+      });
+    });
+    if (!hasPaymentStatus) {
+      await executeQuery(
+        "ALTER TABLE orders " +
+          "ADD COLUMN payment_status ENUM('pending','paid','failed','refunded') DEFAULT 'pending' AFTER courier_company, " +
+          "ADD COLUMN payment_method VARCHAR(50) AFTER payment_status, " +
+          "ADD COLUMN razorpay_order_id VARCHAR(100) AFTER payment_method, " +
+          "ADD COLUMN razorpay_payment_id VARCHAR(100) AFTER razorpay_order_id",
+        "payment columns added to orders table"
+      );
+    }
 
     } catch (error) {
   }

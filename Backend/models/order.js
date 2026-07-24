@@ -117,8 +117,9 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 // Get all orders with user and product details
 function getAllOrders(callback) {
   const sql = `
-    SELECT o.*, 
-           u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status,
+    SELECT o.*,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
     LEFT JOIN users u ON o.user_id = u.id
@@ -131,7 +132,8 @@ function getAllOrders(callback) {
 // Get orders by user ID with individual product status
 function getOrdersByUserId(userId, callback) {
   const sql = `
-    SELECT o.*, 
+    SELECT o.*,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
            p.name as product_name, p.image as product_image, p.sku as product_sku,
            c.name as category_name
     FROM orders o
@@ -147,7 +149,8 @@ function getOrdersByUserId(userId, callback) {
 function getOrderById(id, callback) {
   const sql = `
     SELECT o.*,
-           u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status,
+           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            u.address_line1, u.address_line2, u.landmark, u.city, u.state, u.country,
            p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
@@ -180,6 +183,21 @@ function updateOrderStatus(orderId, status, callback) {
     WHERE id = ?`;
 
   db.query(sql, [status, orderId], callback);
+}
+
+// Update an order's payment fields (D2C Razorpay flow).
+function updateOrderPayment(orderId, payment, callback) {
+  const sql = `UPDATE orders SET
+    payment_status = ?, payment_method = ?, razorpay_order_id = ?, razorpay_payment_id = ?, updated_at = NOW()
+    WHERE id = ?`;
+  const values = [
+    payment.payment_status || "pending",
+    payment.payment_method || null,
+    payment.razorpay_order_id || null,
+    payment.razorpay_payment_id || null,
+    orderId,
+  ];
+  db.query(sql, values, callback);
 }
 
 // Update order with full details
@@ -229,6 +247,7 @@ module.exports = {
   getOrderById,
   getOrdersByIds,
   updateOrderStatus,
+  updateOrderPayment,
   updateOrder,
   deleteOrder,
   getOrderStatistics,

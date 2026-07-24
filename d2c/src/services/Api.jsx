@@ -547,6 +547,34 @@ export const createOrderFromCart = async (cartOrderData, token) => {
   }
 };
 
+// --- D2C payments (Razorpay) -------------------------------------------------
+// Ask the backend to create a Razorpay order. Returns { key, order } where
+// `order` is the Razorpay order object handed to the Razorpay checkout sheet.
+export const createRazorpayPaymentOrder = async (payload, token) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/payments/razorpay/order`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ createRazorpayPaymentOrder error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
+// Verify the Razorpay payment signature server-side and mark the order paid.
+export const verifyRazorpayPayment = async (payload, token) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/payments/razorpay/verify`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('❌ verifyRazorpayPayment error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
 export const getUserOrders = async (userId, token) => {
   try {
     console.log('📦 Getting user orders for user:', userId);

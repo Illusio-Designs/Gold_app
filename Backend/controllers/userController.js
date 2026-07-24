@@ -357,7 +357,7 @@ async function updateUserStatus(req, res) {
   }
 }
 
-// Get all users
+// Get all users (B2B businesses — the wholesale accounts)
 function getAllUsers(req, res) {
   db.query("SELECT * FROM users WHERE type = 'business'", (err, results) => {
     if (err) {
@@ -365,6 +365,19 @@ function getAllUsers(req, res) {
     }
     res.json(results);
   });
+}
+
+// Get all D2C consumer accounts (for the dashboard Consumers page)
+function getAllConsumers(req, res) {
+  db.query(
+    "SELECT * FROM users WHERE type = 'consumer' ORDER BY created_at DESC",
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
+    }
+  );
 }
 
 // Create a new user (admin function)
@@ -700,9 +713,11 @@ async function verifyBusinessOTP(req, res) {
   }
 
   try {
-    // Find the user by phone number
+    // Find the user by phone number. Storefront accounts are either wholesale
+    // 'business' (B2B) or 'consumer' (D2C); both log in with a phone OTP, so
+    // match any non-admin account (admins sign in with email/password).
     db.query(
-      'SELECT * FROM users WHERE phone_number = ? AND type = "business"',
+      'SELECT * FROM users WHERE phone_number = ? AND type != "admin"',
       [phoneNumber],
       async (err, results) => {
         if (err) {
@@ -1234,6 +1249,7 @@ module.exports = {
   businessLogin,
   updateUserStatus,
   getAllUsers,
+  getAllConsumers,
   createUser,
   updateUser,
   deleteUser,
