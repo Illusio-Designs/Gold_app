@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
+import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../context/NotificationContext';
 import FocusAwareStatusBar from './FocusAwareStatusBar';
@@ -82,7 +82,7 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
           ) : null}
           {showCart ? (
             <TouchableOpacity onPress={() => (navigation as any).navigate('Cart')} style={styles.actionBtn}>
-              <HugeiconsIcon icon={ShoppingCart01Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />
+              <HugeiconsIcon icon={ShoppingBag03Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />
               {cartCount > 0 ? (
                 <View style={styles.cartBadge}>
                   <Text style={styles.cartBadgeTxt}>{cartCount > 9 ? '9+' : cartCount}</Text>

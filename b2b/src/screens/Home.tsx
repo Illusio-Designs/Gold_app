@@ -9,7 +9,7 @@ import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skele
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
+import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
 import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
@@ -464,7 +464,7 @@ const Home = () => {
           onPress={() => (navigation as any).navigate('Cart')}
           activeOpacity={0.8}
         >
-          <HugeiconsIcon icon={ShoppingCart01Icon} size={20} color="#5D0829" strokeWidth={1.8} />
+          <HugeiconsIcon icon={ShoppingBag03Icon} size={20} color="#5D0829" strokeWidth={1.8} />
           {cartCount > 0 ? (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeTxt}>{cartCount > 9 ? '9+' : cartCount}</Text>
