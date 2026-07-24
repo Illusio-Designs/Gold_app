@@ -5,7 +5,7 @@ import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
-import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
+import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton } from '../components/common/Motion';
 import { useWishlist } from '../context/WishlistContext';
 import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
@@ -14,6 +14,7 @@ import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getApprovedCategoriesForUser, getApprovedProductsForUser, getSliders } from '../services/Api';
 import { BASE_URL } from '../services/Api';
 import { getProductImageUrl } from '../utils/imageUtils';
+import { getCategoryImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
 
 
@@ -485,10 +486,7 @@ const Home = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Shop by Category</Text>
-      </View>
-      <View style={styles.sectionAccent} />
+      {/* Slider first */}
       {slidersLoading ? (
         <BannerSkeleton height={150} />
       ) : sliders && sliders.length > 0 ? (
@@ -509,15 +507,58 @@ const Home = () => {
           }}
           onShowMore={handleSliderShowMore}
         />
+      ) : null}
+
+      {/* Shop by Category — shown AFTER the slider, in Glorify, with category cards */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Shop by Category</Text>
+      </View>
+      <View style={styles.sectionAccent} />
+
+      {categoriesLoading ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <View key={i} style={styles.catCard}>
+              <Skeleton width={72} height={72} radius={36} />
+              <Skeleton width={54} height={10} radius={5} style={{ marginTop: 8 }} />
+            </View>
+          ))}
+        </ScrollView>
+      ) : categories && categories.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+          {categories.map((cat: any, i: number) => (
+            <FadeInSlide key={cat.id || i} delay={Math.min(i, 8) * 45}>
+              <PressableScale
+                style={styles.catCard}
+                onPress={() =>
+                  (navigation as any).navigate('Product', { categoryId: cat.id, categoryName: cat.name })
+                }
+              >
+                <View style={styles.catImgWrap}>
+                  <Image
+                    source={
+                      getCategoryImageUrl(cat.image)
+                        ? { uri: getCategoryImageUrl(cat.image) as string }
+                        : require('../assets/img/home/p1.png')
+                    }
+                    style={styles.catImg}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text style={styles.catName} numberOfLines={1}>{cat.name}</Text>
+              </PressableScale>
+            </FadeInSlide>
+          ))}
+        </ScrollView>
       ) : (
         <View style={styles.noSlidersContainer}>
           <Text style={styles.noSlidersText}>No categories available</Text>
         </View>
       )}
-      
-      {/* Responsive padding for CategoryFilterGroup */}
-      <CategoryFilterGroup 
-        selected={selectedCategory} 
+
+      {/* Category filter for the product grid */}
+      <CategoryFilterGroup
+        selected={selectedCategory}
         onSelect={handleCategorySelect}
         categories={categories}
         loading={categoriesLoading}
@@ -634,12 +675,12 @@ const styles = StyleSheet.create({
   greetSmall: {
     fontSize: 11,
     color: '#8A7A80',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   greetName: {
     fontSize: 18,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginTop: 1,
   },
   sectionHeader: {
@@ -653,7 +694,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: '#5D0829',
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   sectionAccent: {
     width: 44,
@@ -664,6 +705,37 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 4,
   },
+  catRow: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  catCard: {
+    alignItems: 'center',
+    marginRight: 16,
+    width: 76,
+  },
+  catImgWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    overflow: 'hidden',
+    backgroundColor: '#F7F1E8',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+  },
+  catImg: {
+    width: '100%',
+    height: '100%',
+  },
+  catName: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#5D0829',
+    fontFamily: 'GlorifyDEMO',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   categoryHeading: {
     color: '#6B0D33',
     fontSize: wp('5.5%'),
@@ -672,7 +744,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('7%'),
     marginTop: hp('2%'),
     marginBottom: hp('1.2%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   loadingContainer: {
     paddingVertical: 20,
@@ -682,7 +754,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noSlidersContainer: {
@@ -693,7 +765,7 @@ const styles = StyleSheet.create({
   noSlidersText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noProductsContainer: {
@@ -704,7 +776,7 @@ const styles = StyleSheet.create({
   noProductsText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   errorContainer: {
@@ -717,7 +789,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#6B0D33',
     fontSize: 18,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -730,7 +802,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
 });
@@ -803,7 +875,7 @@ const productCardStyles = StyleSheet.create({
   },
   name: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: isSmallScreen() ? wp('3.6%') : isMediumScreen() ? wp('3.9%') : wp('3.8%'),
     fontWeight: '700',
     marginTop: hp('0.9%'),
@@ -820,13 +892,13 @@ const productCardStyles = StyleSheet.create({
   },
   viewText: {
     color: '#FCE2BF',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('3.4%'),
     fontWeight: '700',
   },
   sku: {
     color: '#C09E83',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('2.7%'),
     letterSpacing: 0.6,
     marginTop: hp('0.2%'),

@@ -241,14 +241,14 @@ const styles = StyleSheet.create({
   },
   name: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('3.8%'),
     fontWeight: '700',
     marginTop: 10,
   },
   sku: {
     color: '#C09E83',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('2.7%'),
     letterSpacing: 0.6,
     marginTop: 2,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   viewText: {
     color: '#FCE2BF',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('3.4%'),
     fontWeight: '700',
   },
@@ -314,14 +314,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 19,
     fontWeight: '700',
     textAlign: 'center',
   },
   emptySub: {
     color: '#8A7A80',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 13,
     textAlign: 'center',
     marginTop: 8,
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
   },
   browseText: {
     color: '#FCE2BF',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 15,
     fontWeight: '700',
   },

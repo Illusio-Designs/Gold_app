@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
   },
   viewText: {
     color: '#FCE2BF',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: 13,
     fontWeight: '700',
   },

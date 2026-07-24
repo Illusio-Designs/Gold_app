@@ -11,6 +11,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { API_URL } from '@env';
 import { getSliderImageUrl } from '../../utils/imageUtils';
 
@@ -147,19 +148,19 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
             activeOpacity={0.9}
           >
             <ImageBackground
-              source={slide.bg}
+              source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image}
               style={styles.slide}
               imageStyle={styles.slideBg}
               resizeMode="cover"
+              onError={(error) => console.log('Slider image load error:', error?.nativeEvent?.error)}
             >
-              <Text style={styles.title}>{slide.title}</Text>
-              <Image 
-                source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image} 
-                style={styles.jewelryImg} 
-                resizeMode="contain" 
-                onError={(error) => console.log('Image load error:', error.nativeEvent.error)}
+              {/* Maroon gradient so the title/button stay readable over any photo */}
+              <LinearGradient
+                colors={['rgba(67,5,29,0.05)', 'rgba(67,5,29,0.75)']}
+                style={styles.overlay}
               />
-              <TouchableOpacity 
+              <Text style={styles.title}>{slide.title}</Text>
+              <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
                   if (slide.category_id && onShowMore) {
@@ -206,24 +207,23 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 28,
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 28,
+  },
   title: {
+    position: 'absolute',
+    left: 22,
+    bottom: 22,
     color: '#F8D7C5',
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
     fontFamily: 'GlorifyDEMO',
     letterSpacing: 1,
     zIndex: 2,
-    flex: 1,
-    bottom:25,
-    left:40,
-  },
-  jewelryImg: {
-    width: 120,
-    height: 120,
-    marginLeft: 0,
-    zIndex: 2,
-    right:100,
-    bottom:5,
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   button: {
     position: 'absolute',
