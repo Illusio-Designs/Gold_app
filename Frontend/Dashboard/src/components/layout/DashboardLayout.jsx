@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  LayoutDashboard,
-  Users,
-  Package,
-  Layers,
-  Store,
-  Star,
-  Settings,
-  ShoppingCart,
-  FileText,
-  User,
-  Bell,
-  LogOut,
-  ChevronsLeft,
-  Maximize,
-  Minimize,
-  Image as ImageIcon,
-  Smartphone,
-  Palette,
-  UserX,
-} from "lucide-react";
+  DashboardSquare01Icon,
+  UserGroupIcon,
+  PackageIcon,
+  Layers01Icon,
+  Settings01Icon,
+  ShoppingCart01Icon,
+  UserIcon,
+  Notification03Icon,
+  Logout01Icon,
+  ArrowLeftDoubleIcon,
+  Maximize01Icon,
+  Minimize01Icon,
+  Image01Icon,
+  SmartPhone01Icon,
+  PaintBoardIcon,
+  UserRemove01Icon,
+} from "@hugeicons/core-free-icons";
 import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
 import NotificationManager from "../common/NotificationManager";
@@ -31,16 +29,16 @@ import notificationSoundService from "../../services/notificationSoundService";
 import RealtimeNotificationService from "../../services/realtimeNotificationService";
 
 const SidebarLinks = [
-  { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { name: "Sliders", path: "/dashboard/sliders", icon: ImageIcon },
-  { name: "Users", path: "/dashboard/users", icon: Users },
-  { name: "Categories", path: "/dashboard/categories", icon: Layers },
-  { name: "Products", path: "/dashboard/products", icon: Package },
-  { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart },
-  { name: "Media Gallery", path: "/dashboard/media-gallery", icon: ImageIcon },
-  { name: "App Versions", path: "/dashboard/app-versions", icon: Smartphone },
-  { name: "App Icons", path: "/dashboard/app-icons", icon: Palette },
-  { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserX },
+  { name: "Dashboard", path: "/dashboard", icon: DashboardSquare01Icon },
+  { name: "Sliders", path: "/dashboard/sliders", icon: Image01Icon },
+  { name: "Users", path: "/dashboard/users", icon: UserGroupIcon },
+  { name: "Categories", path: "/dashboard/categories", icon: Layers01Icon },
+  { name: "Products", path: "/dashboard/products", icon: PackageIcon },
+  { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart01Icon },
+  { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },
+  { name: "App Versions", path: "/dashboard/app-versions", icon: SmartPhone01Icon },
+  { name: "App Icons", path: "/dashboard/app-icons", icon: PaintBoardIcon },
+  { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
 ];
 
 export default function DashboardLayout() {
@@ -267,7 +265,7 @@ export default function DashboardLayout() {
         <nav className="sidebar-nav">
           <ul>
             {SidebarLinks.map((link) => {
-              const Icon = link.icon;
+              const iconDef = link.icon;
               const isActive =
                 link.path === "/dashboard"
                   ? location.pathname === "/dashboard"
@@ -298,7 +296,7 @@ export default function DashboardLayout() {
                       setTooltip({ show: false, text: '', x: 0, y: 0 });
                     }}
                   >
-                    <Icon size={22} className="sidebar-icon" />
+                    <HugeiconsIcon icon={iconDef} size={22} className="sidebar-icon" />
                     <span className="link-text">{link.name}</span>
                   </Link>
                 </li>
@@ -311,14 +309,14 @@ export default function DashboardLayout() {
         className="sidebar-toggle-btn"
         onClick={() => setCollapsed((c) => !c)}
       >
-        <ChevronsLeft size={20} />
+        <HugeiconsIcon icon={ArrowLeftDoubleIcon} size={20} />
       </button>
       <div className="dashboard-main-wrapper">
         <header className="dashboard-header">
           <h1 className="dashboard-title">{getPageTitle()}</h1>
           <div className="header-actions">
             <button className="header-icon-btn" onClick={handleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
-              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+              {isFullscreen ? <HugeiconsIcon icon={Minimize01Icon} size={24} /> : <HugeiconsIcon icon={Maximize01Icon} size={24} />}
             </button>
 
             {/* Notification Bell */}
@@ -328,7 +326,7 @@ export default function DashboardLayout() {
                 onClick={handleNotificationClick}
                 title="Notifications"
               >
-                <Bell size={24} />
+                <HugeiconsIcon icon={Notification03Icon} size={24} />
               </button>
               {showNotificationMenu && (
                 <div className="notification-dropdown">
@@ -342,21 +340,21 @@ export default function DashboardLayout() {
                 className="profile-trigger"
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                <User size={24} />
+                <HugeiconsIcon icon={UserIcon} size={24} />
                 <span className="admin-name">Admin</span>
               </button>
               {showProfileMenu && (
                 <div className="profile-dropdown">
                   <Link to="/dashboard/profile" className="dropdown-item">
-                    <User size={18} />
+                    <HugeiconsIcon icon={UserIcon} size={18} />
                     <span>Profile</span>
                   </Link>
                   <Link to="/dashboard/notifications" className="dropdown-item">
-                    <Bell size={18} />
+                    <HugeiconsIcon icon={Notification03Icon} size={18} />
                     <span>Notifications</span>
                   </Link>
                   <Link to="/dashboard/settings" className="dropdown-item">
-                    <Settings size={18} />
+                    <HugeiconsIcon icon={Settings01Icon} size={18} />
                     <span>Settings</span>
                   </Link>
                   <div className="dropdown-divider"></div>
@@ -364,7 +362,7 @@ export default function DashboardLayout() {
                     className="dropdown-item logout"
                     onClick={handleLogout}
                   >
-                    <LogOut size={18} />
+                    <HugeiconsIcon icon={Logout01Icon} size={18} />
                     <span>Logout</span>
                   </button>
                 </div>

@@ -7,30 +7,27 @@ import Home from '../screens/Home';
 import CustomOrder from '../screens/CustomOrder';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Platform, Animated } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Platform, Animated } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import {
+  Home01Icon,
+  Diamond01Icon,
+  ShoppingCart01Icon,
+  UserIcon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons';
 
 const Tab = createBottomTabNavigator();
 const CollectionStackNav = createNativeStackNavigator();
 
-const icons = {
-  Home: {
-    active: require('../assets/img/bottombar/activehome.png'),
-    inactive: require('../assets/img/bottombar/inactivehome.png'),
-  },
-  Collection: {
-    active: require('../assets/img/bottombar/activecollection.png'),
-    inactive: require('../assets/img/bottombar/inactivecollection.png'),
-  },
-  Cart: {
-    active: require('../assets/img/bottombar/activecart.png'),
-    inactive: require('../assets/img/bottombar/inactivecart.png'),
-  },
-  Profile: {
-    active: require('../assets/img/bottombar/activeprofile.png'),
-    inactive: require('../assets/img/bottombar/inactiveprofile.png'),
-  },
+// Rounded Hugeicons for each tab.
+const tabIcons = {
+  Home: Home01Icon,
+  Collection: Diamond01Icon,
+  Cart: ShoppingCart01Icon,
+  Profile: UserIcon,
 };
 
 const labels = {
@@ -90,10 +87,11 @@ const TabItem = ({
             style={styles.activeCircleGradient}
           />
         </Animated.View>
-        <Image
-          source={isFocused ? icons[name].active : icons[name].inactive}
-          style={[styles.icon, { tintColor: isFocused ? '#5D0829' : '#FCE2BF' }]}
-          resizeMode="contain"
+        <HugeiconsIcon
+          icon={tabIcons[name]}
+          size={24}
+          color={isFocused ? '#5D0829' : '#FCE2BF'}
+          strokeWidth={1.8}
         />
       </Animated.View>
       <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[name]}</Text>
@@ -137,7 +135,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                 end={{ x: 1, y: 1 }}
                 style={styles.fab}
               >
-                <Text style={styles.fabGlyph}>✦</Text>
+                <HugeiconsIcon icon={SparklesIcon} size={26} color="#5D0829" strokeWidth={1.8} />
               </LinearGradient>
               <Text style={[styles.label, styles.customLabel, isFocused && styles.labelActive]}>
                 {labels.Custom}
