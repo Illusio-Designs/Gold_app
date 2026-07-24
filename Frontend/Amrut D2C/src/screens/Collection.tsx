@@ -11,6 +11,7 @@ import { wp, hp } from '../utils/responsiveConfig';
 import { getApprovedCategoriesForUser } from '../services/Api';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ScreenLoader from '../components/common/ScreenLoader';
+import { Skeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import Toast from 'react-native-toast-message';
 
 type Category = {
@@ -179,10 +180,8 @@ const Collection = () => {
     });
   };
 
-  // Show screen loader when initially loading
-  if (loading) {
-    return <ScreenLoader text="Loading Collection..." />;
-  }
+  const tileW = isSmallScreen() ? wp('38%') : isMediumScreen() ? wp('38%') : wp('40%');
+  const tileH = isSmallScreen() ? hp('16.5%') : isMediumScreen() ? hp('16.8%') : hp('16%');
 
   return (
     <ErrorBoundary>
@@ -214,7 +213,11 @@ const Collection = () => {
 
         {/* Loading/Error State */}
         {loading ? (
-          <View style={styles.loadingContainer} />
+          <View style={productCardStyles.container}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} width={tileW} height={tileH} radius={16} style={{ marginBottom: 14 }} />
+            ))}
+          </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{String(error)}</Text>
@@ -240,35 +243,38 @@ const Collection = () => {
               </View>
             ) : (
               filteredCategories.map((category: Category, index: number) => (
-                <TouchableOpacity
+                <FadeInSlide
                   key={category.id ? String(category.id) : String(index)}
-                  style={productCardStyles.card}
-                  onPress={() => handleCategoryPress(category)}
-                  activeOpacity={0.85}
+                  delay={Math.min(index, 8) * 55}
                 >
-                  {/* Category Image */}
-                  {category.image ? (
-                    <Image
-                      source={{ uri: getCategoryImageUrl(category.image) || undefined }}
-                      style={productCardStyles.image}
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <View style={[productCardStyles.image, productCardStyles.placeholderImage]}>
-                      <Text style={productCardStyles.placeholderText}>No Image</Text>
-                    </View>
-                  )}
+                  <PressableScale
+                    style={productCardStyles.card}
+                    onPress={() => handleCategoryPress(category)}
+                  >
+                    {/* Category Image */}
+                    {category.image ? (
+                      <Image
+                        source={{ uri: getCategoryImageUrl(category.image) || undefined }}
+                        style={productCardStyles.image}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={[productCardStyles.image, productCardStyles.placeholderImage]}>
+                        <Text style={productCardStyles.placeholderText}>No Image</Text>
+                      </View>
+                    )}
 
-                  {/* Category Name */}
-                  <Text style={productCardStyles.name}>{category.name}</Text>
+                    {/* Category Name */}
+                    <Text style={productCardStyles.name}>{category.name}</Text>
 
-                  {/* Category Description */}
-                  {category.description && (
-                    <Text style={productCardStyles.description} numberOfLines={2}>
-                      {category.description}
-                    </Text>
-                  )}
-                </TouchableOpacity>
+                    {/* Category Description */}
+                    {category.description && (
+                      <Text style={productCardStyles.description} numberOfLines={2}>
+                        {category.description}
+                      </Text>
+                    )}
+                  </PressableScale>
+                </FadeInSlide>
               ))
             )}
           </ScrollView>

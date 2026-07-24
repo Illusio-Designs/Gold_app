@@ -4,8 +4,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { getProductById } from '../services/Api';
 import { useCart } from '../context/CartContext';
 import CustomHeader from '../components/common/CustomHeader';
-import CustomLoader from '../components/common/CustomLoader';
-import ScreenLoader from '../components/common/ScreenLoader';
+import { DetailSkeleton, PressableScale } from '../components/common/Motion';
 import { getProductImageUrl } from '../utils/imageUtils';
 import LinearGradient from 'react-native-linear-gradient';
 import { wp, hp } from '../utils/responsiveConfig';
@@ -116,9 +115,9 @@ const ProductDetail = () => {
     }
   };
 
-  // Show loading state
+  // Show loading state — brand shimmer skeleton
   if (loading) {
-    return <ScreenLoader text="Loading Product Details..." backgroundColor="#43051D" textColor="#FCE2BF" />;
+    return <DetailSkeleton />;
   }
 
   // Show error state
@@ -318,8 +317,9 @@ const ProductDetail = () => {
         {/* More content goes here */}
       </LinearGradient>
               {/* Add to Cart Button at the bottom */}
-        <TouchableOpacity 
+        <PressableScale
           style={styles.addToCartBtn}
+          activeScale={0.97}
           onPress={() => {
             addToCart({
               image: getProductImage(),
@@ -347,8 +347,8 @@ const ProductDetail = () => {
           }}
         >
           <Text style={styles.addToCartText}>Add to Cart</Text>
-        </TouchableOpacity>
-        
+        </PressableScale>
+
         {/* Toast component for notifications */}
         <Toast />
     </View>

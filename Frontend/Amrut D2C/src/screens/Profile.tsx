@@ -401,8 +401,16 @@ const Profile = () => {
           <Text style={styles.menuText}>My Orders</Text>
           <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.menuBtn} 
+        <TouchableOpacity
+          style={styles.menuBtn}
+          onPress={() => (navigation as any).navigate('Wishlist')}
+        >
+          <Text style={styles.menuHeart}>♥</Text>
+          <Text style={styles.menuText}>Wishlist</Text>
+          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuBtn}
           onPress={handleDeleteAccount}
         >
           <Image source={require('../assets/img/profile/logout.png')} style={[styles.menuIcon, {tintColor: '#dc2626'}]} />
@@ -489,6 +497,13 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginRight: getResponsiveSpacing(12, 16, 20),
     tintColor: '#5D0829',
+  },
+  menuHeart: {
+    width: getResponsiveSpacing(24, 28, 32),
+    color: '#5D0829',
+    fontSize: getResponsiveFontSize(18, 20, 22),
+    textAlign: 'center',
+    marginRight: getResponsiveSpacing(12, 16, 20),
   },
   menuText: {
     color: '#5D0829',
