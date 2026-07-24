@@ -7,7 +7,9 @@ import SidePanel from "../components/common/SidePanel";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
-import { getCategoryImageUrl } from "../utils/imageUtils";
+import IconPicker from "../components/common/IconPicker";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { resolveCategoryIcon } from "../utils/categoryIcons";
 import "../styles/pages/CategoriesPage.css";
 import {
   getAllCategories,
@@ -23,32 +25,36 @@ const CategoriesPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editCategory, setEditCategory] = useState(null);
   const [deleteCategory, setDeleteCategory] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "", image: null });
-  const [imagePreview, setImagePreview] = useState("");
+  const [form, setForm] = useState({ name: "", description: "", icon: "" });
 
   // Table shows summary fields only
   const columns = [
     { header: "Name", accessor: "name" },
     { header: "Description", accessor: "description" },
     {
-      header: "Image",
-      accessor: "image",
+      header: "Icon",
+      accessor: "icon",
       cell: (row) => {
-        if (!row.image) {
+        if (!row.icon) {
           return (
-            <span style={{ color: "#999", fontSize: "12px" }}>No image</span>
+            <span style={{ color: "#999", fontSize: "12px" }}>No icon</span>
           );
         }
 
         return (
-          <img
-            src={getCategoryImageUrl(row.image)}
-            alt={row.name}
-            style={{ width: 40, height: 40, objectFit: "cover" }}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
+          <span
+            style={{
+              display: "inline-grid",
+              placeItems: "center",
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              background: "#fbf3e6",
+              color: "#5d0829",
             }}
-          />
+          >
+            <HugeiconsIcon icon={resolveCategoryIcon(row.icon)} size={22} />
+          </span>
         );
       },
     },
@@ -68,11 +74,8 @@ const CategoriesPage = () => {
                 setForm({
                   name: row.name || "",
                   description: row.description || "",
-                  image: null,
+                  icon: row.icon || "",
                 });
-                setImagePreview(
-                  row.image ? getCategoryImageUrl(row.image) : ""
-                );
                 setModalOpen(true);
               }}
               tooltip="Edit"
@@ -116,14 +119,8 @@ const CategoriesPage = () => {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image") {
-      const file = files[0];
-      setForm((prev) => ({ ...prev, image: file }));
-      setImagePreview(file ? URL.createObjectURL(file) : "");
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = async () => {
@@ -131,6 +128,10 @@ const CategoriesPage = () => {
       // Validation
       if (!form.name || form.name.trim() === "") {
         setError("Category name is required");
+        return;
+      }
+      if (!form.icon) {
+        setError("Please pick a category icon");
         return;
       }
 
@@ -143,10 +144,11 @@ const CategoriesPage = () => {
         return;
       }
 
-      const data = new FormData();
-      data.append("name", form.name.trim());
-      data.append("description", form.description || "");
-      if (form.image) data.append("image", form.image);
+      const data = {
+        name: form.name.trim(),
+        description: form.description || "",
+        icon: form.icon,
+      };
 
       if (editCategory) {
         await updateCategory(editCategory.id, data, token);
@@ -156,8 +158,7 @@ const CategoriesPage = () => {
 
       setModalOpen(false);
       setEditCategory(null);
-      setForm({ name: "", description: "", image: null });
-      setImagePreview("");
+      setForm({ name: "", description: "", icon: "" });
 
       // Refresh
       const response = await getAllCategories(token);
@@ -191,15 +192,14 @@ const CategoriesPage = () => {
   const handleCancel = () => {
     setModalOpen(false);
     setEditCategory(null);
-    setForm({ name: "", description: "", image: null });
-    setImagePreview("");
+    setForm({ name: "", description: "", icon: "" });
   };
 
-  const withImage = categories.filter((c) => c.image).length;
+  const withIcon = categories.filter((c) => c.icon).length;
   const categoryStats = [
     { label: "Total Categories", value: categories.length, tone: "brand" },
-    { label: "With Image", value: withImage, tone: "success" },
-    { label: "No Image", value: categories.length - withImage, tone: "neutral" },
+    { label: "With Icon", value: withIcon, tone: "success" },
+    { label: "No Icon", value: categories.length - withIcon, tone: "neutral" },
   ];
 
   return (
@@ -222,8 +222,7 @@ const CategoriesPage = () => {
           <Button
             onClick={() => {
               setEditCategory(null);
-              setForm({ name: "", description: "", image: null });
-              setImagePreview("");
+              setForm({ name: "", description: "", icon: "" });
               setModalOpen(true);
             }}
           >
@@ -257,31 +256,14 @@ const CategoriesPage = () => {
           onChange={handleInputChange}
           className="form-control"
         />
-        <InputField
-          label="Image"
-          name="image"
-          type="file"
-          accept="image/*"
-          onChange={handleInputChange}
-          className="form-control"
+        <IconPicker
+          label="Icon"
+          value={form.icon}
+          onChange={(name) => setForm((prev) => ({ ...prev, icon: name }))}
         />
-        <small style={{ display: "block", marginTop: -6, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
-          Recommended: square <strong>500 × 500 px</strong> (1:1). Shown as a circle in the app.
+        <small style={{ display: "block", marginTop: -2, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
+          Pick an icon — it's shown for this category across the apps.
         </small>
-        {imagePreview && (
-          <div style={{ margin: "10px 0" }}>
-            <img
-              src={imagePreview}
-              alt="Preview"
-              style={{
-                width: 80,
-                height: 80,
-                objectFit: "cover",
-                borderRadius: 8,
-              }}
-            />
-          </div>
-        )}
         <div className="modal-actions">
           <Button onClick={handleSave} variant="primary" disabled={loading}>
             {loading ? "Saving..." : "Save"}

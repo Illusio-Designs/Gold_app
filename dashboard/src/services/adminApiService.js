@@ -155,55 +155,20 @@ export const getCategoryById = (id, token) =>
     .get(`/categories/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-export const createCategory = (data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .post("/categories", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .post("/categories", formData, {
+// Categories are icon-based — create/update send plain JSON { name, description, icon }.
+export const createCategory = (data, token) =>
+  axiosInstance
+    .post("/categories", data, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
-export const updateCategory = (id, data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .put(`/categories/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .put(`/categories/${id}`, formData, {
+export const updateCategory = (id, data, token) =>
+  axiosInstance
+    .put(`/categories/${id}`, data, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
 export const deleteCategory = (id, token) =>
   axiosInstance

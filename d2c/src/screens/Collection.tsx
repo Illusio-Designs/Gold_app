@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/common/CustomHeader';
 import SearchBar from '../components/common/SearchBar';
 
-import { getCategoryImageUrl } from '../utils/imageUtils';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { resolveCategoryIcon } from '../utils/categoryIcons';
 import { isSmallScreen, isMediumScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { wp, hp } from '../utils/responsiveConfig';
 import { getApprovedCategoriesForUser } from '../services/Api';
@@ -18,11 +19,7 @@ type Category = {
   id: number;
   name: string;
   description?: string;
-  image?: string;
-  processedImageUrl?: string;
-  originalImageUrl?: string;
-  imageUrl?: string;
-  hasProcessedImage?: boolean;
+  icon?: string;
   status: string;
 };
 
@@ -251,18 +248,15 @@ const Collection = () => {
                     style={productCardStyles.card}
                     onPress={() => handleCategoryPress(category)}
                   >
-                    {/* Category Image */}
-                    {category.image ? (
-                      <Image
-                        source={{ uri: getCategoryImageUrl(category.image) || undefined }}
-                        style={productCardStyles.image}
-                        resizeMode="cover"
+                    {/* Category Icon */}
+                    <View style={[productCardStyles.image, productCardStyles.iconTile]}>
+                      <HugeiconsIcon
+                        icon={resolveCategoryIcon(category.icon)}
+                        size={44}
+                        color="#A17C57"
+                        strokeWidth={1.6}
                       />
-                    ) : (
-                      <View style={[productCardStyles.image, productCardStyles.placeholderImage]}>
-                        <Text style={productCardStyles.placeholderText}>No Image</Text>
-                      </View>
-                    )}
+                    </View>
 
                     {/* Category Name */}
                     <Text style={productCardStyles.name}>{category.name}</Text>
@@ -451,6 +445,11 @@ const productCardStyles = StyleSheet.create({
   },
   placeholderImage: {
     backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconTile: {
+    backgroundColor: '#F7F1E8',
     justifyContent: 'center',
     alignItems: 'center',
   },

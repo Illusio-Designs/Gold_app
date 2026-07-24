@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
+import { resolveCategoryIcon } from '../utils/categoryIcons';
 import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
 import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
@@ -19,7 +20,6 @@ import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getApprovedCategoriesForUser, getApprovedProductsForUser, getSliders } from '../services/Api';
 import { BASE_URL } from '../services/Api';
 import { getProductImageUrl } from '../utils/imageUtils';
-import { getCategoryImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
 
 
@@ -522,15 +522,7 @@ const Home = () => {
                 }
               >
                 <View style={styles.catImgWrap}>
-                  <Image
-                    source={
-                      getCategoryImageUrl(cat.image)
-                        ? { uri: getCategoryImageUrl(cat.image) as string }
-                        : require('../assets/img/home/p1.png')
-                    }
-                    style={styles.catImg}
-                    resizeMode="cover"
-                  />
+                  <HugeiconsIcon icon={resolveCategoryIcon(cat.icon)} size={40} color="#A17C57" strokeWidth={1.7} />
                 </View>
                 <Text style={styles.catName} numberOfLines={1}>{cat.name}</Text>
               </PressableScale>
@@ -704,6 +696,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F1E8',
     borderWidth: 1,
     borderColor: '#EADBC8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   catImg: {
     width: '100%',

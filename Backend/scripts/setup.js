@@ -77,7 +77,7 @@ async function createTablesAndAdmin() {
       sql: `CREATE TABLE IF NOT EXISTS categories (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        image VARCHAR(255),
+        icon VARCHAR(255),
         description TEXT,
         status ENUM('draft', 'active') DEFAULT 'draft',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
