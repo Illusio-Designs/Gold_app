@@ -18,19 +18,26 @@ function consumerLineAmount(order, settings) {
 
 // Compute the authoritative payable total for a set of orders (server-side —
 // never trust an amount sent by the client). Consumer orders are priced from
-// the gold rate; anything else uses the stored order amount.
+// the gold rate; anything else uses the stored order amount. As a side effect
+// each consumer order's stored total is updated to the charged amount so the
+// order history matches what was paid.
 function computeAuthoritativeTotal(orderIds) {
   return new Promise((resolve, reject) => {
     settingsModel.getAllSettings((sErr, settings) => {
       if (sErr) return reject(sErr);
       orderModel.getOrdersForPayment(orderIds, (oErr, rows) => {
         if (oErr) return reject(oErr);
-        const total = (rows || []).reduce((sum, o) => {
+        let total = 0;
+        (rows || []).forEach((o) => {
           const isConsumer = o.user_type === "consumer";
-          return sum + (isConsumer
-            ? consumerLineAmount(o, settings)
-            : Number(o.total_amount || 0));
-        }, 0);
+          const line = isConsumer
+            ? Math.round(consumerLineAmount(o, settings))
+            : Number(o.total_amount || 0);
+          total += line;
+          if (isConsumer) {
+            orderModel.updateOrderTotal(o.id, line, () => {});
+          }
+        });
         resolve(Math.round(total));
       });
     });

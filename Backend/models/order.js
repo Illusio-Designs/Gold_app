@@ -205,6 +205,16 @@ function getOrdersForPayment(orderIds, callback) {
   db.query(sql, orderIds, callback);
 }
 
+// Overwrite an order's total (used to record the gold-rate price actually
+// charged to a consumer at payment time).
+function updateOrderTotal(orderId, totalAmount, callback) {
+  db.query(
+    "UPDATE orders SET total_amount = ?, updated_at = NOW() WHERE id = ?",
+    [totalAmount, orderId],
+    callback
+  );
+}
+
 // Update an order's payment fields (D2C Razorpay flow).
 function updateOrderPayment(orderId, payment, callback) {
   const sql = `UPDATE orders SET
@@ -269,6 +279,7 @@ module.exports = {
   updateOrderStatus,
   updateOrderPayment,
   getOrdersForPayment,
+  updateOrderTotal,
   updateOrder,
   deleteOrder,
   getOrderStatistics,
