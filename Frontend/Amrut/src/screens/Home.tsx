@@ -9,8 +9,9 @@ import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skele
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { ShoppingCart01Icon } from '@hugeicons/core-free-icons';
+import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
+import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -73,6 +74,7 @@ const Home = () => {
   const insets = useSafeAreaInsets();
   const { getTotalQuantity } = useCart();
   const cartCount = typeof getTotalQuantity === 'function' ? getTotalQuantity() : 0;
+  const { unreadCount } = useNotifications();
 
   // Add error boundary
   const [hasError, setHasError] = useState(false);
@@ -445,6 +447,18 @@ const Home = () => {
           <Text style={styles.greetSmall}>Welcome back</Text>
           <Text style={styles.greetName}>Amrut Jewels</Text>
         </View>
+        <TouchableOpacity
+          style={styles.cartIconBtn}
+          onPress={() => (navigation as any).navigate('Notifications')}
+          activeOpacity={0.8}
+        >
+          <HugeiconsIcon icon={Notification03Icon} size={20} color="#5D0829" strokeWidth={1.8} />
+          {unreadCount > 0 ? (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeTxt}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+            </View>
+          ) : null}
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.cartIconBtn}
           onPress={() => (navigation as any).navigate('Cart')}

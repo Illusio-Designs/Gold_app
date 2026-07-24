@@ -669,6 +669,21 @@ export const markNotificationAsRead = async (notificationId, token) => {
   }
 };
 
+// ✅ Register this device's FCM push token for the logged-in user
+export const registerFcmToken = async (fcmToken, deviceType, authToken) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/notifications/register-token`,
+      { token: fcmToken, deviceType },
+      { headers: { Authorization: `Bearer ${authToken}` } },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('❌ registerFcmToken error:', error);
+    throw error.response?.data || { error: error.message };
+  }
+};
+
 // ✅ Mark all notifications as read
 export const markAllNotificationsAsRead = async (userId, token) => {
   try {

@@ -32,6 +32,31 @@ const NOTIFICATION_TYPES = {
 };
 
 /**
+ * Persist a notification row targeted at a specific user so it appears in the
+ * app's in-app notifications list (the "bell"). Push delivery is separate.
+ * @param {number} userId
+ * @param {string} type
+ * @param {string} title
+ * @param {string} body
+ * @param {Object} data
+ */
+function persistUserNotification(userId, type, title, body, data = {}) {
+  const sql = `
+    INSERT INTO notifications (user_id, title, body, type, data, created_at)
+    VALUES (?, ?, ?, ?, ?, NOW())
+  `;
+  db.query(
+    sql,
+    [userId, title, body, type || 'general', data ? JSON.stringify(data) : null],
+    (err) => {
+      if (err) {
+        console.error('[adminNotificationService] persist notification error:', err.message);
+      }
+    }
+  );
+}
+
+/**
  * Send notification to admin
  * @param {string} type - Notification type (user_registration, login_request, new_order)
  * @param {string} title - Notification title
@@ -347,6 +372,9 @@ async function notifyOrderStatusChange(orderData) {
  */
 async function sendUserNotification(userId, type, title, body, data = {}) {
   try {
+    // Save it to the user's in-app notifications list (bell) first, so it's
+    // there whether or not a push token is registered.
+    persistUserNotification(userId, type, title, body, data);
     // For login approval notifications, also check for unauthenticated tokens
     // This handles the case where user hasn't logged in yet but has the app installed
     let getTokensSql;

@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
 import { APP_VERSION } from '../config/appInfo';
 import { useCart } from '../context/CartContext';
-// NotificationService removed as requested
+import { useNotifications } from '../context/NotificationContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { useNavigationLoader } from '../context/NavigationContext';
@@ -29,6 +29,7 @@ const Profile = () => {
   const [userId, setUserId] = useState(null);
   const isFocused = useIsFocused();
   const { clearCartOnLogout } = useCart();
+  const { onLogout } = useNotifications();
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
 
   // Check if user is logged in whenever screen comes into focus
@@ -298,7 +299,8 @@ const Profile = () => {
       // Clear local storage
       await AsyncStorage.removeItem('accessToken');
       await AsyncStorage.removeItem('userId');
-      
+      await onLogout();
+
       // Navigate to login screen
       if ((navigation as any).reset) {
         (navigation as any).reset({
@@ -339,9 +341,7 @@ const Profile = () => {
         photoSource={photoUri}
         cameraIconSource={require('../assets/img/profile/editprofile.png')}
         userName={userName}
-        onCameraPress={handleCameraPress}
-      />
-      {uploading && <CustomLoader size="small" text="Uploading..." textColor="#5D0829" />}
+      />{/* photo upload is done in Edit Profile */}
 
       {/* Menu Buttons */}
       <View style={styles.menuWrap}>

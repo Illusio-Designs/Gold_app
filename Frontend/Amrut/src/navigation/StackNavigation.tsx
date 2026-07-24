@@ -14,39 +14,58 @@ import Search from '../screens/Search';
 import EditProfile from '../screens/EditProfile';
 import Orders from '../screens/Orders';
 import Cart from '../screens/Cart';
+import Notifications from '../screens/Notifications';
 import { CartProvider } from '../context/CartContext';
 import { NavigationProvider } from '../context/NavigationContext';
+import { NotificationProvider } from '../context/NotificationContext';
+import InAppBanner from '../components/common/InAppBanner';
+import { onNotificationOpened } from '../services/pushNotifications';
 
 const Stack = createNativeStackNavigator();
 
 const StackNavigation = () => {
-  const navigationRef = useRef(null);
+  const navigationRef = useRef<any>(null);
+
+  // When a push notification is tapped (background / cold start), open the
+  // Notifications screen once navigation is ready.
+  useEffect(() => {
+    const unsub = onNotificationOpened(() => {
+      try {
+        navigationRef.current?.navigate('Notifications');
+      } catch {}
+    });
+    return () => unsub();
+  }, []);
 
   return (
     <NavigationProvider>
       <CartProvider>
-        <NavigationContainer ref={navigationRef}>
-          {/* Start app on Splash screen */}
-          <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Splash" component={Splash} />
-            <Stack.Screen name="JourneyPane" component={JourneyPane} />
-            <Stack.Screen name="ShreenathjiScreen" component={ShreenathjiScreen} />
-            <Stack.Screen name="FamilyTree" component={FamilyTree} />
-            <Stack.Screen name="Register" component={Register} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="MainTabs" component={BottomNavigation} />
-            <Stack.Screen name="Product" component={Product} />
-            <Stack.Screen name="ProductDetail" component={ProductDetail} />
-            <Stack.Screen name="Search" component={Search} />
-            <Stack.Screen name="EditProfile" component={EditProfile} />
-            <Stack.Screen name="Orders" component={Orders} />
-            <Stack.Screen name="Cart" component={Cart} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <NotificationProvider>
+          <NavigationContainer ref={navigationRef}>
+            {/* Start app on Splash screen */}
+            <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Splash" component={Splash} />
+              <Stack.Screen name="JourneyPane" component={JourneyPane} />
+              <Stack.Screen name="ShreenathjiScreen" component={ShreenathjiScreen} />
+              <Stack.Screen name="FamilyTree" component={FamilyTree} />
+              <Stack.Screen name="Register" component={Register} />
+              <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="MainTabs" component={BottomNavigation} />
+              <Stack.Screen name="Product" component={Product} />
+              <Stack.Screen name="ProductDetail" component={ProductDetail} />
+              <Stack.Screen name="Search" component={Search} />
+              <Stack.Screen name="EditProfile" component={EditProfile} />
+              <Stack.Screen name="Orders" component={Orders} />
+              <Stack.Screen name="Cart" component={Cart} />
+              <Stack.Screen name="Notifications" component={Notifications} />
+            </Stack.Navigator>
+          </NavigationContainer>
+          {/* Foreground push banner overlays every screen */}
+          <InAppBanner onPress={() => navigationRef.current?.navigate('Notifications')} />
+        </NotificationProvider>
       </CartProvider>
     </NavigationProvider>
   );
 };
 
 export default StackNavigation;
-

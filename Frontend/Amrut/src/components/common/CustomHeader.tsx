@@ -4,8 +4,9 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { ShoppingCart01Icon } from '@hugeicons/core-free-icons';
+import { ShoppingCart01Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import { useCart } from '../../context/CartContext';
+import { useNotifications } from '../../context/NotificationContext';
 import FocusAwareStatusBar from './FocusAwareStatusBar';
 
 type RightAction = {
@@ -18,6 +19,7 @@ interface CustomHeaderProps {
   onBack?: () => void;
   showBack?: boolean;           // hide the back arrow (tab-root screens)
   showCart?: boolean;           // show the cart icon on the right (default true)
+  showBell?: boolean;           // show the notifications bell (default true)
   rightActions?: RightAction[]; // optional cream icons on the right
 }
 
@@ -30,12 +32,14 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   onBack,
   showBack = true,
   showCart = true,
+  showBell = true,
   rightActions = [],
 }) => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { getTotalQuantity } = useCart();
   const cartCount = typeof getTotalQuantity === 'function' ? getTotalQuantity() : 0;
+  const { unreadCount } = useNotifications();
 
   return (
     <LinearGradient
@@ -66,6 +70,16 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
               <Image source={action.icon} style={styles.actionIcon} />
             </TouchableOpacity>
           ))}
+          {showBell ? (
+            <TouchableOpacity onPress={() => (navigation as any).navigate('Notifications')} style={styles.actionBtn}>
+              <HugeiconsIcon icon={Notification03Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />
+              {unreadCount > 0 ? (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeTxt}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          ) : null}
           {showCart ? (
             <TouchableOpacity onPress={() => (navigation as any).navigate('Cart')} style={styles.actionBtn}>
               <HugeiconsIcon icon={ShoppingCart01Icon} size={22} color="#FCE2BF" strokeWidth={1.8} />

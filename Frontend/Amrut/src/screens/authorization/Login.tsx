@@ -25,6 +25,7 @@ import { verifyBusinessOTP } from '../../services/Api';
 import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import RealtimeDataService from '../../services/RealtimeDataService';
+import { useNotifications } from '../../context/NotificationContext';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
@@ -50,6 +51,7 @@ const Login = () => {
   const [requestId, setRequestId] = useState('');
   const [otpError, setOtpError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const { onLogin } = useNotifications();
 
   useEffect(() => {
     OTPWidget.initializeWidget(WIDGET_ID, TOKEN_AUTH);
@@ -297,6 +299,9 @@ const Login = () => {
           // connection so order/cart push events start flowing.
           RealtimeDataService.reconnectWithAuth?.();
 
+          // Ask for notification permission + register this device for push.
+          onLogin().catch(() => {});
+
           // In-screen success animation, then continue into the app.
           setShowSuccess(true);
         } else {
@@ -372,12 +377,6 @@ const Login = () => {
           )}
 
 
-          
-          {loading && (
-            <View style={{ marginTop: 16, alignItems: 'center' }}>
-              <CustomLoader size="small" text="Verifying OTP..." textColor="#5D0829" />
-            </View>
-          )}
           
           {!otpSent ? (
             <Button onPress={handleSendOtp} title="Send OTP" disabled={sendingOtp} style={{ marginTop: 24 }} textStyle={{}} />

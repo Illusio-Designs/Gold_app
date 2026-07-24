@@ -17,18 +17,16 @@ const ProfilePhotoName: React.FC<ProfilePhotoNameProps> = ({
   <>
     <View style={styles.profilePhotoWrap}>
       <Image source={photoSource} style={styles.profilePhoto} />
-      <TouchableOpacity 
-        style={styles.cameraBtn} 
-        onPress={() => {
-          console.log('[ProfilePhotoName] Camera button pressed');
-          if (onCameraPress) {
-            onCameraPress();
-          }
-        }}
-        activeOpacity={0.7}
-      >
-        <Image source={cameraIconSource} style={styles.cameraIcon} />
-      </TouchableOpacity>
+      {/* Camera button only appears where editing is allowed (Edit Profile). */}
+      {onCameraPress ? (
+        <TouchableOpacity
+          style={styles.cameraBtn}
+          onPress={onCameraPress}
+          activeOpacity={0.7}
+        >
+          <Image source={cameraIconSource} style={styles.cameraIcon} />
+        </TouchableOpacity>
+      ) : null}
     </View>
     <Text style={styles.profileName}>{userName}</Text>
   </>
