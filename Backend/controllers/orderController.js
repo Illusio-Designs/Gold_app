@@ -1,5 +1,6 @@
 const { db } = require("../config/db");
 const orderModel = require("../models/order");
+const productModel = require("../models/product");
 const cartModel = require("../models/cart");
 const {
   notifyNewOrder,
@@ -94,6 +95,16 @@ function createOrder(req, res) {
       return res.status(500).json({ error: err.message });
     }
 
+    // Mark the ordered product as sold out so it no longer appears in the
+    // storefront for other users.
+    if (product_id) {
+      productModel.updateProductStockStatus(product_id, "out_of_stock", (stockErr) => {
+        if (stockErr) {
+          console.error("[orderController] mark out_of_stock:", stockErr.message);
+        }
+      });
+    }
+
     // Get order details for notification and real-time update
     orderModel.getOrderById(
       result.insertId,
@@ -180,6 +191,15 @@ function createOrderFromCart(req, res) {
         if (err) {
           return res.status(500).json({ error: err.message });
         }
+
+        // Mark every ordered product as sold out so it drops off the storefront.
+        cartResults.forEach((item) => {
+          if (item.product_id) {
+            productModel.updateProductStockStatus(item.product_id, "out_of_stock", (e) => {
+              if (e) console.error("[orderController] mark out_of_stock (cart):", e.message);
+            });
+          }
+        });
 
         // Clear user's cart after successful order creation
         cartModel.clearUserCart(user_id, (clearErr) => {
@@ -412,6 +432,17 @@ function updateOrderStatus(req, res) {
               userId: roomUserId,
             }).catch((e) =>
               console.error("[orderController] notifyOrderStatusChange:", e.message)
+            );
+          }
+
+          // If the order is cancelled, put the product back on the storefront.
+          if (status === "cancelled" && updatedOrder.product_id) {
+            productModel.updateProductStockStatus(
+              updatedOrder.product_id,
+              "available",
+              (e) => {
+                if (e) console.error("[orderController] restore stock:", e.message);
+              }
             );
           }
 

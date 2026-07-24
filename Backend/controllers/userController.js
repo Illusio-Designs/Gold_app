@@ -479,16 +479,23 @@ async function updateUser(req, res) {
 
     let imageFilename = req.body.image || null; // Keep existing image if no new one uploaded
     let oldImageFilename = null;
-    // Fetch old image filename before updating
+    let existingStatus = null;
+    // Fetch old image filename (and current status) before updating
     const userModel = require("../models/user");
     await new Promise((resolve) => {
       userModel.getUserById(id, (err, results) => {
         if (!err && results && results.length > 0) {
           oldImageFilename = results[0].image;
+          existingStatus = results[0].status;
         }
         resolve();
       });
     });
+
+    // Only admins may change approval status — a user editing their own profile
+    // can never approve/alter their own status.
+    const isAdmin = req.user.type === "admin";
+    const resolvedStatus = isAdmin ? (req.body.status || existingStatus) : existingStatus;
 
     // Process uploaded image if present
     if (req.file) {
@@ -538,7 +545,7 @@ async function updateUser(req, res) {
       gst_number: req.body.gst_number || null,
       pan_number: req.body.pan_number || null,
       business_name: req.body.business_name || null,
-      status: req.body.status || null,
+      status: resolvedStatus || null,
       remarks: req.body.remarks || null,
     };
 

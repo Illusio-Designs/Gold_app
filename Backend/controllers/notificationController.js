@@ -277,6 +277,29 @@ function registerFCMToken(req, res) {
     res.json({ message: "FCM token registered successfully" });
   });
 }
+
+// Report whether the logged-in user has an active push token registered.
+function getTokenStatus(req, res) {
+  const userId = req.user.id;
+  const sql = `
+    SELECT COUNT(*) AS count, MAX(updated_at) AS last_updated,
+           MAX(device_type) AS device_type
+    FROM notification_tokens
+    WHERE user_id = ? AND active = true
+  `;
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to get token status" });
+    }
+    const row = results[0] || {};
+    res.json({
+      registered: (row.count || 0) > 0,
+      count: row.count || 0,
+      deviceType: row.device_type || null,
+      lastUpdated: row.last_updated || null,
+    });
+  });
+}
 function subscribeUserToTopic(req, res) {
   const { userId, topic } = req.body;
 
@@ -394,6 +417,7 @@ module.exports = {
   markAllAsRead,
   deleteNotification,
   registerFCMToken,
+  getTokenStatus,
   subscribeUserToTopic,
   unsubscribeUserFromTopic,
   getVapidKey,

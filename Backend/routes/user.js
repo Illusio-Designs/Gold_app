@@ -49,10 +49,11 @@ router.post(
   upload.single("image"),
   userController.createUser
 );
+// A user can update their OWN profile; admins can update anyone. The
+// self-or-admin check (and status protection) is enforced in updateUser.
 router.put(
   "/:id",
   verifyToken,
-  requireAdmin,
   upload.single("image"),
   userController.updateUser
 );

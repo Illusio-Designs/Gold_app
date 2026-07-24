@@ -1,7 +1,7 @@
 # Amrut Jewels - B2B Jewelry Platform
 
 <div align="center">
-  <img src="Frontend/Dashboard/src/assests/loginlogo.png" alt="Amrut Jewels Logo" width="200"/>
+  <img src="dashboard/src/assests/loginlogo.png" alt="Amrut Jewels Logo" width="200"/>
   
   <h3>🏆 Premium B2B Jewelry Management Platform</h3>
   
@@ -35,10 +35,9 @@ A comprehensive B2B jewelry platform consisting of a React Native mobile app, Re
 ```
 Gold_app/
 ├── Backend/                 # Node.js API Server (Express + MySQL)
-├── Frontend/
-│   ├── Amrut/              # React Native — B2B wholesale app
-│   ├── Amrut D2C/          # React Native — D2C consumer app (in progress)
-│   └── Dashboard/          # React Web Dashboard (Admin Panel)
+├── b2b/                     # React Native — B2B wholesale app
+├── d2c/                     # React Native — D2C consumer app (in progress)
+├── dashboard/               # React Web Dashboard (Admin Panel)
 └── .github/workflows/       # CI/CD (backend deploy + Android test APK)
 ```
 
@@ -181,7 +180,7 @@ npm start
 
 ### 3. Mobile App Setup
 ```bash
-cd Frontend/Amrut
+cd b2b
 npm install
 ```
 
@@ -209,7 +208,7 @@ npm run ios
 
 ### 4. Web Dashboard Setup
 ```bash
-cd Frontend/Dashboard
+cd dashboard
 npm install
 ```
 
@@ -316,7 +315,7 @@ Workflows live in `.github/workflows/`:
 | Workflow | File | Trigger | What it does |
 |---|---|---|---|
 | Backend deploy | `backend-deploy.yml` | push to `main` (Backend/**) | Deploys the API over FTPS |
-| Android test APK | `android-build.yml` | push to `main` (Frontend/Amrut/**) or **Run workflow** | Builds an installable **release** APK of the B2B app and publishes it |
+| Android test APK | `android-build.yml` | push to `main` (b2b/**) or **Run workflow** | Builds an installable **release** APK of the B2B app and publishes it |
 | Split branches | `sync-split-branches.yml` | push | Keeps the per-area branches in sync |
 
 ### 📦 Building & getting the B2B test APK
@@ -325,7 +324,7 @@ The `android-build.yml` workflow bundles the JS (Hermes, so no Metro server is
 needed) and produces a standalone release APK.
 
 **Trigger a build**
-- Automatically: push changes under `Frontend/Amrut/**` to `main`, **or**
+- Automatically: push changes under `b2b/**` to `main`, **or**
 - Manually: GitHub → **Actions → “Android Build (test APK)” → Run workflow →**
   pick the branch → **Run** (use this to test a feature branch without merging).
 
@@ -359,9 +358,9 @@ and passes the passwords via `-P` Gradle properties from `${{ secrets.* }}` —
 nothing sensitive is committed.
 
 ### ⚠️ Remove these from the repo (currently committed — should not be)
-- `Frontend/Amrut/android/app/amrut-release-key.keystore`
-- `Frontend/Amrut D2C/android/app/amrut-release-key.keystore`
-- The plaintext passwords in `Frontend/Amrut/android/gradle.properties`
+- `b2b/android/app/amrut-release-key.keystore`
+- `d2c/android/app/amrut-release-key.keystore`
+- The plaintext passwords in `b2b/android/gradle.properties`
   (`MYAPP_RELEASE_STORE_PASSWORD`, `MYAPP_RELEASE_KEY_PASSWORD`)
 
 After removing them, **rotate the keystore password** (and regenerate the
