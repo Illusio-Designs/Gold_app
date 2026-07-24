@@ -170,11 +170,12 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22, // exactly half of width/height -> perfect circle
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   iconWrapActive: {
     backgroundColor: '#FCE2BF',
