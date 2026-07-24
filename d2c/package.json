@@ -24,6 +24,8 @@
     "react-native": "0.80.2",
     "react-native-dotenv": "^3.4.11",
     "react-native-image-picker": "^8.2.1",
+    "@hugeicons/core-free-icons": "^4.2.3",
+    "@hugeicons/react-native": "^1.0.15",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-razorpay": "^2.3.0",
     "react-native-otp-inputs": "^7.4.0",
