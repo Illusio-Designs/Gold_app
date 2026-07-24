@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "76051395970",
-    "project_id": "amrut-9cc5e",
-    "storage_bucket": "amrut-9cc5e.firebasestorage.app"
+    "project_number": "1071847770226",
+    "project_id": "amrut-jewels",
+    "storage_bucket": "amrut-jewels.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:76051395970:android:f1bc7159f214eb6bb4cb9b",
+        "mobilesdk_app_id": "1:1071847770226:android:3d2700e00d45bb7df79aeb",
         "android_client_info": {
           "package_name": "com.goldapp.amrutkumargovinddasllp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCbvnLum5aTvMEK3atPqJR7Hm2CdQqArvw"
+          "current_key": "AIzaSyDmFrIU-XgXIZgMnkgaN4z05u9c4T83IKQ"
         }
       ],
       "services": {
@@ -26,4 +26,4 @@
     }
   ],
   "configuration_version": "1"
-} 
+}
