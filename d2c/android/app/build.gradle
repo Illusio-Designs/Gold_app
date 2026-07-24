@@ -79,7 +79,9 @@ android {
 
     namespace "com.goldapp.amrutkumargovinddasllp"
     defaultConfig {
-        applicationId "com.goldapp.amrutkumargovinddasllp"
+        // Distinct install identity so the D2C consumer app installs alongside
+        // the B2B app instead of overwriting it. Code namespace stays the same.
+        applicationId "com.goldapp.amrutd2c"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 3

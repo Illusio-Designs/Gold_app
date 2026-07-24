@@ -5,6 +5,7 @@
  * @format
  */
 
+import './src/utils/globalFont';
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';

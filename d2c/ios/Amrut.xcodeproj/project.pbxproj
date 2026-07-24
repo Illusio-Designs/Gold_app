@@ -354,7 +354,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.Amrutt;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Amrutt.d2c;
 				PRODUCT_NAME = Amrut;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -384,7 +384,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.Amrutt;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Amrutt.d2c;
 				PRODUCT_NAME = Amrut;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
