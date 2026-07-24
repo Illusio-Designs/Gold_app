@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -244,7 +246,15 @@ const CustomOrder = () => {
     <View style={s.container}>
       <CustomHeader title="Custom Order" showBack={false} />
 
-      <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
+        contentContainerStyle={s.body}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={s.lead}>Can't find it in the catalogue? Add photo(s) of the design you want and we'll craft it for you.</Text>
 
         {/* Photos */}
@@ -344,6 +354,7 @@ const CustomOrder = () => {
           <Text style={s.noteTxt}>After you submit, our team reviews your design and follows up. It appears in My Orders tagged B2B Custom.</Text>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <BrandDatePicker
         visible={pickerVisible}

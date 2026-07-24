@@ -3,7 +3,7 @@ const router = express.Router();
 const customOrderController = require("../controllers/customOrderController");
 const orderController = require("../controllers/orderController");
 const { bulkUpload } = require("../config/multerConfig");
-const { verifyToken } = require("../middlewares/auth");
+const { verifyToken, requireAdmin } = require("../middlewares/auth");
 
 // All custom-order routes require authentication.
 router.use(verifyToken);
@@ -19,5 +19,9 @@ router.post(
 
 // The signed-in user's own custom orders.
 router.get("/my", customOrderController.getMyCustomOrders);
+
+// Admin: list all custom orders + update a custom order's status.
+router.get("/", requireAdmin, customOrderController.getAllCustomOrders);
+router.put("/:id/status", requireAdmin, customOrderController.updateCustomOrderStatus);
 
 module.exports = router;

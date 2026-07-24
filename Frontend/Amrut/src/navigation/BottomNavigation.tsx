@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Collection from '../screens/Collection';
 import Cart from '../screens/Cart';
@@ -7,30 +7,27 @@ import Home from '../screens/Home';
 import CustomOrder from '../screens/CustomOrder';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Product from '../screens/Product';
-import { View, TouchableOpacity, Image, Text, StyleSheet, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Platform, Animated } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import {
+  Home01Icon,
+  Diamond01Icon,
+  ShoppingCart01Icon,
+  UserIcon,
+  SparklesIcon,
+} from '@hugeicons/core-free-icons';
 
 const Tab = createBottomTabNavigator();
 const CollectionStackNav = createNativeStackNavigator();
 
-const icons = {
-  Home: {
-    active: require('../assets/img/bottombar/activehome.png'),
-    inactive: require('../assets/img/bottombar/inactivehome.png'),
-  },
-  Collection: {
-    active: require('../assets/img/bottombar/activecollection.png'),
-    inactive: require('../assets/img/bottombar/inactivecollection.png'),
-  },
-  Cart: {
-    active: require('../assets/img/bottombar/activecart.png'),
-    inactive: require('../assets/img/bottombar/inactivecart.png'),
-  },
-  Profile: {
-    active: require('../assets/img/bottombar/activeprofile.png'),
-    inactive: require('../assets/img/bottombar/inactiveprofile.png'),
-  },
+// Rounded Hugeicons for each tab.
+const tabIcons = {
+  Home: Home01Icon,
+  Collection: Diamond01Icon,
+  Cart: ShoppingCart01Icon,
+  Profile: UserIcon,
 };
 
 const labels = {
@@ -43,6 +40,64 @@ const labels = {
 
 const tabNames = ['Home', 'Collection', 'Cart', 'Profile'] as const;
 type TabName = typeof tabNames[number];
+
+// A regular tab that, when active, springs up into a gold circle — the same
+// raised treatment as the center Custom button.
+const TabItem = ({
+  name,
+  isFocused,
+  onPress,
+  accessibilityLabel,
+}: {
+  name: TabName;
+  isFocused: boolean;
+  onPress: () => void;
+  accessibilityLabel?: string;
+}) => {
+  const anim = useRef(new Animated.Value(isFocused ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(anim, {
+      toValue: isFocused ? 1 : 0,
+      useNativeDriver: true,
+      friction: 7,
+      tension: 90,
+    }).start();
+  }, [isFocused, anim]);
+
+  const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -18] });
+  const scale = anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      style={styles.tabBtn}
+      activeOpacity={0.8}
+    >
+      <Animated.View style={[styles.iconWrap, { transform: [{ translateY }, { scale }] }]}>
+        {/* Gold circle that fades in behind the icon when active */}
+        <Animated.View style={[styles.activeCircle, { opacity: anim }]}>
+          <LinearGradient
+            colors={['#FCE2BF', '#C09E83']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.activeCircleGradient}
+          />
+        </Animated.View>
+        <HugeiconsIcon
+          icon={tabIcons[name]}
+          size={24}
+          color={isFocused ? '#5D0829' : '#FCE2BF'}
+          strokeWidth={1.8}
+        />
+      </Animated.View>
+      <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[name]}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
   return (
@@ -80,7 +135,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                 end={{ x: 1, y: 1 }}
                 style={styles.fab}
               >
-                <Text style={styles.fabGlyph}>✦</Text>
+                <HugeiconsIcon icon={SparklesIcon} size={26} color="#5D0829" strokeWidth={1.8} />
               </LinearGradient>
               <Text style={[styles.label, styles.customLabel, isFocused && styles.labelActive]}>
                 {labels.Custom}
@@ -92,22 +147,13 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
         if (!isTabName(route.name)) return null;
 
         return (
-          <TouchableOpacity
+          <TabItem
             key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
+            name={route.name}
+            isFocused={isFocused}
             onPress={onPress}
-            style={styles.tabBtn}
-            activeOpacity={0.8}
-          >
-            <Image
-              source={isFocused ? icons[route.name].active : icons[route.name].inactive}
-              style={[styles.icon, isFocused ? styles.iconActive : styles.iconInactive]}
-              resizeMode="contain"
-            />
-            <Text style={[styles.label, isFocused && styles.labelActive]}>{labels[route.name]}</Text>
-          </TouchableOpacity>
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+          />
         );
       })}
     </View>
@@ -159,6 +205,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 3,
+  },
+  iconWrap: {
+    width: 46,
+    height: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeCircle: {
+    position: 'absolute',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 4,
+    borderColor: '#5D0829',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  activeCircleGradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 23,
   },
   icon: {
     width: 22,

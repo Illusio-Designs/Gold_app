@@ -58,4 +58,27 @@ function getById(id, callback) {
   db.query(`SELECT * FROM custom_orders WHERE id = ?`, [id], callback);
 }
 
-module.exports = { createCustomOrder, getByUser, getById };
+// Admin: all custom orders with the requesting business's details.
+function getAll(callback) {
+  db.query(
+    `SELECT co.*,
+            u.name AS user_name,
+            u.business_name AS business_name,
+            u.email AS user_email,
+            u.phone_number AS user_phone
+     FROM custom_orders co
+     LEFT JOIN users u ON co.user_id = u.id
+     ORDER BY co.created_at DESC`,
+    callback
+  );
+}
+
+function updateStatus(id, status, callback) {
+  db.query(
+    `UPDATE custom_orders SET status = ? WHERE id = ?`,
+    [status, id],
+    callback
+  );
+}
+
+module.exports = { createCustomOrder, getByUser, getById, getAll, updateStatus };

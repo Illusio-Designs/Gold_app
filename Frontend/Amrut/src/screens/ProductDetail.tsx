@@ -5,8 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getProductById } from '../services/Api';
 import { useCart } from '../context/CartContext';
 import CustomHeader from '../components/common/CustomHeader';
-import CustomLoader from '../components/common/CustomLoader';
-import ScreenLoader from '../components/common/ScreenLoader';
+import { DetailSkeleton, PressableScale } from '../components/common/Motion';
 import { getProductImageUrl } from '../utils/imageUtils';
 import LinearGradient from 'react-native-linear-gradient';
 import { wp, hp } from '../utils/responsiveConfig';
@@ -118,9 +117,9 @@ const ProductDetail = () => {
     }
   };
 
-  // Show loading state
+  // Show loading state — brand shimmer skeleton
   if (loading) {
-    return <ScreenLoader text="Loading Product Details..." backgroundColor="#43051D" textColor="#FCE2BF" />;
+    return <DetailSkeleton />;
   }
 
   // Show error state
@@ -286,9 +285,9 @@ const ProductDetail = () => {
 
       {/* Sticky Add to Cart */}
       <View style={[styles.addBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <TouchableOpacity style={styles.addBtn} activeOpacity={0.9} onPress={handleAddToCart}>
+        <PressableScale style={styles.addBtn} activeScale={0.97} onPress={handleAddToCart}>
           <Text style={styles.addText}>Add to Cart</Text>
-        </TouchableOpacity>
+        </PressableScale>
       </View>
 
       {/* Full-screen image preview */}

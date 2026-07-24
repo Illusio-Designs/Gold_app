@@ -5,8 +5,8 @@ import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
-import CustomLoader from '../components/common/CustomLoader';
-import ScreenLoader from '../components/common/ScreenLoader';
+import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton } from '../components/common/Motion';
+import { useWishlist } from '../context/WishlistContext';
 import { useNavigation } from '@react-navigation/native';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -14,33 +14,56 @@ import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getApprovedCategoriesForUser, getApprovedProductsForUser, getSliders } from '../services/Api';
 import { BASE_URL } from '../services/Api';
 import { getProductImageUrl } from '../utils/imageUtils';
+import { getCategoryImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
 
 
 
-type ProductCardProps = { 
+type ProductCardProps = {
   product: any;
   onPress: () => void;
+  index?: number;
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }) => {
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const saved = isWishlisted(product.id);
   // Handle image source - use product image if available, otherwise fallback
   const imageUrl = getProductImageUrl(product.image);
   const imageSource = imageUrl
     ? { uri: imageUrl }
     : require('../assets/img/home/p1.png'); // Fallback image
-  // Optional sub-label under the name (category) — only when it adds info.
-  const subLabel = product.category_name && product.category_name !== product.name
-    ? String(product.category_name)
-    : '';
+
+  const onHeart = () =>
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      sku: product.sku,
+      category_name: product.category_name,
+      gross_weight: product.gross_weight,
+      net_weight: product.net_weight,
+      size: product.size,
+      length: product.length,
+    });
+
   return (
-  <TouchableOpacity style={productCardStyles.card} onPress={onPress} activeOpacity={0.85}>
-      <View style={productCardStyles.imageWrap}>
+  <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
+    <View style={productCardStyles.card}>
+      <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
         <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
-      </View>
+      </TouchableOpacity>
+      {/* Wishlist heart */}
+      <TouchableOpacity style={productCardStyles.heartBtn} onPress={onHeart} activeOpacity={0.7}>
+        <Text style={[productCardStyles.heartGlyph, saved && productCardStyles.heartActive]}>{saved ? '♥' : '♡'}</Text>
+      </TouchableOpacity>
       <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
-      {subLabel ? <Text style={productCardStyles.sku} numberOfLines={1}>{subLabel.toUpperCase()}</Text> : null}
-  </TouchableOpacity>
+      {/* View button */}
+      <PressableScale style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
+        <Text style={productCardStyles.viewText}>View</Text>
+      </PressableScale>
+    </View>
+  </FadeInSlide>
 );
 };
 
@@ -50,11 +73,12 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]); // Store all products
-  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [userId, setUserId] = useState<number | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const navigation = useNavigation();
+  const { count: wishCount } = useWishlist();
 
   // Add error boundary
   const [hasError, setHasError] = useState(false);
@@ -422,11 +446,6 @@ const Home = () => {
     );
   }
 
-  // Show screen loader when categories are loading
-  if (categoriesLoading) {
-    return <ScreenLoader text="Loading Home..." />;
-  }
-
   return (
     <ScrollView 
       style={styles.container}
@@ -447,6 +466,18 @@ const Home = () => {
           <Text style={styles.greetName}>Amrut Jewels</Text>
         </View>
         <TouchableOpacity
+          style={styles.wishIconBtn}
+          onPress={() => (navigation as any).navigate('Wishlist')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.wishIconGlyph}>♥</Text>
+          {wishCount > 0 ? (
+            <View style={styles.wishBadge}>
+              <Text style={styles.wishBadgeText}>{wishCount > 9 ? '9+' : wishCount}</Text>
+            </View>
+          ) : null}
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.searchIconBtn}
           onPress={() => (navigation as any).navigate('Search')}
           activeOpacity={0.8}
@@ -455,14 +486,9 @@ const Home = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Shop by Category</Text>
-      </View>
-      <View style={styles.sectionAccent} />
+      {/* Slider first */}
       {slidersLoading ? (
-        <View style={styles.loadingContainer}>
-          <CustomLoader size="large" text="Loading categories..." textColor="#5D0829" />
-        </View>
+        <BannerSkeleton height={150} />
       ) : sliders && sliders.length > 0 ? (
         <CustomSlider
           sliders={sliders}
@@ -481,15 +507,58 @@ const Home = () => {
           }}
           onShowMore={handleSliderShowMore}
         />
+      ) : null}
+
+      {/* Shop by Category — shown AFTER the slider, in Glorify, with category cards */}
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Shop by Category</Text>
+      </View>
+      <View style={styles.sectionAccent} />
+
+      {categoriesLoading ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <View key={i} style={styles.catCard}>
+              <Skeleton width={72} height={72} radius={36} />
+              <Skeleton width={54} height={10} radius={5} style={{ marginTop: 8 }} />
+            </View>
+          ))}
+        </ScrollView>
+      ) : categories && categories.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
+          {categories.map((cat: any, i: number) => (
+            <FadeInSlide key={cat.id || i} delay={Math.min(i, 8) * 45}>
+              <PressableScale
+                style={styles.catCard}
+                onPress={() =>
+                  (navigation as any).navigate('Product', { categoryId: cat.id, categoryName: cat.name })
+                }
+              >
+                <View style={styles.catImgWrap}>
+                  <Image
+                    source={
+                      getCategoryImageUrl(cat.image)
+                        ? { uri: getCategoryImageUrl(cat.image) as string }
+                        : require('../assets/img/home/p1.png')
+                    }
+                    style={styles.catImg}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text style={styles.catName} numberOfLines={1}>{cat.name}</Text>
+              </PressableScale>
+            </FadeInSlide>
+          ))}
+        </ScrollView>
       ) : (
         <View style={styles.noSlidersContainer}>
           <Text style={styles.noSlidersText}>No categories available</Text>
         </View>
       )}
-      
-      {/* Responsive padding for CategoryFilterGroup */}
-      <CategoryFilterGroup 
-        selected={selectedCategory} 
+
+      {/* Category filter for the product grid */}
+      <CategoryFilterGroup
+        selected={selectedCategory}
         onSelect={handleCategorySelect}
         categories={categories}
         loading={categoriesLoading}
@@ -507,14 +576,13 @@ const Home = () => {
       {/* Product Cards */}
       <ScrollView contentContainerStyle={productCardStyles.container} showsVerticalScrollIndicator={false}>
         {productsLoading ? (
-          <View style={styles.loadingContainer}>
-            <CustomLoader size="large" text="Loading products..." textColor="#5D0829" />
-          </View>
+          <ProductGridSkeleton count={6} />
         ) : products.length > 0 ? (
           products.map((product, idx) => (
-          <ProductCard 
+          <ProductCard
               product={product}
-              key={(product as any).id || idx} 
+              key={(product as any).id || idx}
+              index={idx}
               onPress={() => handleProductPress(product)}
             />
           ))
@@ -563,6 +631,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  wishIconBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EEE3D3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  wishIconGlyph: {
+    color: '#5D0829',
+    fontSize: 20,
+    marginTop: -1,
+  },
+  wishBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#C0392B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: '#fff',
+  },
+  wishBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
   searchIconImg: {
     width: 20,
     height: 20,
@@ -572,12 +675,12 @@ const styles = StyleSheet.create({
   greetSmall: {
     fontSize: 11,
     color: '#8A7A80',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   greetName: {
     fontSize: 18,
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     marginTop: 1,
   },
   sectionHeader: {
@@ -591,7 +694,7 @@ const styles = StyleSheet.create({
     fontSize: 19,
     color: '#5D0829',
     fontWeight: '700',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   sectionAccent: {
     width: 44,
@@ -602,6 +705,37 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 4,
   },
+  catRow: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  catCard: {
+    alignItems: 'center',
+    marginRight: 16,
+    width: 76,
+  },
+  catImgWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    overflow: 'hidden',
+    backgroundColor: '#F7F1E8',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+  },
+  catImg: {
+    width: '100%',
+    height: '100%',
+  },
+  catName: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#5D0829',
+    fontFamily: 'GlorifyDEMO',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   categoryHeading: {
     color: '#6B0D33',
     fontSize: wp('5.5%'),
@@ -610,7 +744,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp('7%'),
     marginTop: hp('2%'),
     marginBottom: hp('1.2%'),
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
   },
   loadingContainer: {
     paddingVertical: 20,
@@ -620,7 +754,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noSlidersContainer: {
@@ -631,7 +765,7 @@ const styles = StyleSheet.create({
   noSlidersText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   noProductsContainer: {
@@ -642,7 +776,7 @@ const styles = StyleSheet.create({
   noProductsText: {
     color: '#6B0D33',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
   },
   errorContainer: {
@@ -655,7 +789,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#6B0D33',
     fontSize: 18,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -668,7 +802,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: '#FCE2BF',
     fontSize: 16,
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
 });
@@ -683,6 +817,10 @@ const productCardStyles = StyleSheet.create({
   // Option A · Clean boutique — white card, soft gold hairline border, gentle
   // shadow, larger image, name in Glorify with an optional category sub-label.
   // Two per row (47% width + space-between).
+  cardWrap: {
+    width: '47%',
+    marginBottom: hp('1.6%'),
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: wp('4.5%'),
@@ -690,11 +828,10 @@ const productCardStyles = StyleSheet.create({
     borderColor: '#EADBC8',
     alignItems: 'center',
     paddingTop: hp('1%'),
-    paddingBottom: hp('1%'),
+    paddingBottom: hp('1.2%'),
     paddingHorizontal: wp('2%'),
-    marginBottom: hp('1.6%'),
-    width: '47%',
-    height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.2%') : hp('17.6%'),
+    width: '100%',
+    position: 'relative',
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -712,17 +849,56 @@ const productCardStyles = StyleSheet.create({
     height: isSmallScreen() ? hp('11.8%') : isMediumScreen() ? hp('11.8%') : hp('11.4%'),
     borderRadius: wp('3.2%'),
   },
+  heartBtn: {
+    position: 'absolute',
+    top: hp('1.6%'),
+    right: wp('4%'),
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#FCE2BF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  heartGlyph: {
+    color: '#5D0829',
+    fontSize: 16,
+    marginTop: -1,
+  },
+  heartActive: {
+    color: '#C0392B',
+  },
   name: {
     color: '#5D0829',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: isSmallScreen() ? wp('3.6%') : isMediumScreen() ? wp('3.9%') : wp('3.8%'),
     fontWeight: '700',
     marginTop: hp('0.9%'),
     textAlign: 'center',
   },
+  viewBtn: {
+    marginTop: hp('0.9%'),
+    backgroundColor: '#5D0829',
+    borderRadius: 10,
+    paddingVertical: hp('0.9%'),
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewText: {
+    color: '#FCE2BF',
+    fontFamily: 'GlorifyDEMO',
+    fontSize: wp('3.4%'),
+    fontWeight: '700',
+  },
   sku: {
     color: '#C09E83',
-    fontFamily: 'Glorifydemo-BW3J3',
+    fontFamily: 'GlorifyDEMO',
     fontSize: wp('2.7%'),
     letterSpacing: 0.6,
     marginTop: hp('0.2%'),

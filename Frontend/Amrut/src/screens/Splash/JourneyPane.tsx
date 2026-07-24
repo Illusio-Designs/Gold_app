@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, Dimensions, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
 import colors from '../../theme/colors';
@@ -12,6 +13,8 @@ type Props = {
 const { width, height } = Dimensions.get('window');
 
 const JourneyPane = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     console.log('🔔 [JOURNEY] JourneyPane mounted');
     const timer = setTimeout(() => {
@@ -21,13 +24,30 @@ const JourneyPane = ({ navigation }: Props) => {
     return () => clearTimeout(timer);
   }, [navigation]);
 
+  const markSeen = async () => {
+    try {
+      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+    } catch (error) {
+      console.error('❌ [JOURNEY] Error saving onboarding status:', error);
+    }
+  };
+
+  const handleSkip = async () => {
+    await markSeen();
+    navigation.replace('MainTabs');
+  };
+
+  const handleNext = () => {
+    navigation.replace('ShreenathjiScreen');
+  };
+
   return (
     <ImageBackground
       source={require('../../assets/img/splashimg/splashbackground.png')}
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingTop: insets.top }]}>
         <Image
           source={require('../../assets/img/splashimg/splashlogo.png')}
           style={styles.logo}
@@ -39,22 +59,14 @@ const JourneyPane = ({ navigation }: Props) => {
           Experience our rich heritage, quality products, and exceptional service
         </Text>
       </View>
-      <TouchableOpacity 
-        style={styles.skipButton} 
-        onPress={async () => {
-          // Mark onboarding as seen when user skips
-          try {
-            await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-            console.log('🔔 [JOURNEY] Onboarding marked as seen (skip)');
-          } catch (error) {
-            console.error('❌ [JOURNEY] Error saving onboarding status:', error);
-          }
-          navigation.replace('MainTabs');
-        }}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.skipButtonText}>Skip</Text>
-      </TouchableOpacity>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) + 16 }]}>
+        <TouchableOpacity style={styles.skipButton} onPress={handleSkip} activeOpacity={0.8}>
+          <Text style={styles.skipButtonText}>Skip</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.85}>
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </ImageBackground>
   );
 };
@@ -108,27 +120,51 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  skipButton: {
+  bottomBar: {
     position: 'absolute',
-    bottom: 50,
-    right: 30,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+  },
+  skipButton: {
     backgroundColor: 'rgba(93, 8, 41, 0.8)',
-    paddingHorizontal: 20,
+    paddingHorizontal: 26,
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 2,
     borderColor: '#FCE2BF',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
   skipButtonText: {
     color: '#FCE2BF',
+    fontSize: 16,
+    fontFamily: 'GlorifyDEMO',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  nextButton: {
+    backgroundColor: '#FCE2BF',
+    paddingHorizontal: 34,
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#FCE2BF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  nextButtonText: {
+    color: '#5D0829',
     fontSize: 16,
     fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',

@@ -12,6 +12,7 @@ import { wp, hp } from '../utils/responsiveConfig';
 import { getApprovedCategoriesForUser } from '../services/Api';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ScreenLoader from '../components/common/ScreenLoader';
+import { Skeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import Toast from 'react-native-toast-message';
 
 type Category = {
@@ -180,10 +181,7 @@ const Collection = () => {
     });
   };
 
-  // Show screen loader when initially loading
-  if (loading) {
-    return <ScreenLoader text="Loading Collection..." />;
-  }
+  const tileHeight = isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.5%') : hp('18%');
 
   return (
     <ErrorBoundary>
@@ -217,7 +215,17 @@ const Collection = () => {
 
         {/* Loading/Error State */}
         {loading ? (
-          <View style={styles.loadingContainer} />
+          <View style={productCardStyles.container}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                width="47%"
+                height={tileHeight}
+                radius={getResponsiveSpacing(16, 18, 22)}
+                style={{ marginBottom: 14 }}
+              />
+            ))}
+          </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{String(error)}</Text>
@@ -243,35 +251,39 @@ const Collection = () => {
               </View>
             ) : (
               filteredCategories.map((category: Category, index: number) => (
-                <TouchableOpacity
+                <FadeInSlide
                   key={category.id ? String(category.id) : String(index)}
-                  style={productCardStyles.card}
-                  onPress={() => handleCategoryPress(category)}
-                  activeOpacity={0.9}
+                  delay={Math.min(index, 8) * 55}
+                  style={productCardStyles.cardWrap}
                 >
-                  {/* Category Image fills the whole tile */}
-                  {category.image ? (
-                    <Image
-                      source={{ uri: getCategoryImageUrl(category.image) || undefined }}
-                      style={productCardStyles.image}
-                      resizeMode="cover"
+                  <PressableScale
+                    style={productCardStyles.card}
+                    onPress={() => handleCategoryPress(category)}
+                  >
+                    {/* Category Image fills the whole tile */}
+                    {category.image ? (
+                      <Image
+                        source={{ uri: getCategoryImageUrl(category.image) || undefined }}
+                        style={productCardStyles.image}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={[productCardStyles.image, productCardStyles.placeholderImage]} />
+                    )}
+
+                    {/* Maroon fade so the name is always readable over the photo */}
+                    <LinearGradient
+                      colors={['transparent', 'rgba(58,5,25,0.9)']}
+                      style={productCardStyles.overlay}
                     />
-                  ) : (
-                    <View style={[productCardStyles.image, productCardStyles.placeholderImage]} />
-                  )}
 
-                  {/* Maroon fade so the name is always readable over the photo */}
-                  <LinearGradient
-                    colors={['transparent', 'rgba(58,5,25,0.9)']}
-                    style={productCardStyles.overlay}
-                  />
-
-                  {/* Category name (cream Glorify) + arrow, over the image */}
-                  <View style={productCardStyles.labelRow}>
-                    <Text style={productCardStyles.name} numberOfLines={1}>{category.name}</Text>
-                    <Text style={productCardStyles.arrow}>›</Text>
-                  </View>
-                </TouchableOpacity>
+                    {/* Category name (cream Glorify) + arrow, over the image */}
+                    <View style={productCardStyles.labelRow}>
+                      <Text style={productCardStyles.name} numberOfLines={1}>{category.name}</Text>
+                      <Text style={productCardStyles.arrow}>›</Text>
+                    </View>
+                  </PressableScale>
+                </FadeInSlide>
               ))
             )}
           </ScrollView>
@@ -431,6 +443,12 @@ const productCardStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingBottom: getResponsiveSpacing(24, 30, 36),
   },
+  // Reliable 2-per-row grid: container uses space-between and each wrapper is
+  // 47% wide (sum < 100%, so it never collapses to a single column).
+  cardWrap: {
+    width: '47%',
+    marginBottom: 14,
+  },
   // Option A · Lookbook overlay — the image fills the tile, a maroon fade sits
   // over the bottom, and the category name (cream Glorify) + arrow overlay it.
   card: {
@@ -438,10 +456,7 @@ const productCardStyles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
     backgroundColor: '#5D0829',
-    // Reliable 2-per-row grid: container uses space-between and each card is
-    // 47% wide (sum < 100%, so it never collapses to a single column).
-    width: '47%',
-    marginBottom: 14,
+    width: '100%',
     height: isSmallScreen() ? hp('18%') : isMediumScreen() ? hp('18.5%') : hp('18%'),
     shadowColor: '#5D0829',
     shadowOffset: { width: 0, height: 5 },

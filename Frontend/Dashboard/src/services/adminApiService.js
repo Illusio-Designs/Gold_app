@@ -485,6 +485,21 @@ export const getOrderById = (id, token) =>
     .get(`/orders/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+// Custom (bespoke) orders — listed alongside regular orders in the dashboard.
+export const getAllCustomOrders = (token) =>
+  axiosInstance
+    .get("/custom-orders", { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data?.data || []);
+
+export const updateCustomOrderStatus = (id, status, token) =>
+  axiosInstance
+    .put(
+      `/custom-orders/${id}/status`,
+      { status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then((r) => r.data);
+
 export const getOrdersByUserId = (userId, token) =>
   axiosInstance
     .get(`/orders/user/${userId}`, {

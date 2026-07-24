@@ -397,6 +397,14 @@ const Profile = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBtn}
+          onPress={() => (navigation as any).navigate('Wishlist')}
+        >
+          <Text style={styles.menuGlyph}>♥</Text>
+          <Text style={styles.menuText}>Wishlist</Text>
+          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuBtn}
           onPress={() => (navigation as any).navigate('Custom')}
         >
           <Text style={styles.menuGlyph}>✦</Text>

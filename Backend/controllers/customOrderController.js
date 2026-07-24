@@ -1,4 +1,15 @@
 const customOrderModel = require("../models/customOrder");
+const { getBaseUrl } = require("../config/environment");
+
+// Turn stored image filenames into full URLs the apps/dashboard can render.
+function toImageUrls(images) {
+  const list = Array.isArray(images) ? images : safeParse(images);
+  return (list || []).map((name) =>
+    typeof name === "string" && name.indexOf("http") === 0
+      ? name
+      : `${getBaseUrl()}/uploads/customorders/${encodeURIComponent(name)}`
+  );
+}
 
 // Create a custom order from the app. Identity comes from the verified token
 // (req.user.id). Design photos arrive as multipart files under "images".
@@ -63,10 +74,44 @@ function getMyCustomOrders(req, res) {
     }
     const parsed = (rows || []).map((r) => ({
       ...r,
-      images: r.images ? safeParse(r.images) : [],
+      images: toImageUrls(r.images),
       order_type: r.order_type || "B2B Custom",
     }));
     res.json({ success: true, data: parsed });
+  });
+}
+
+// Admin: list every custom order (with the business's details).
+function getAllCustomOrders(req, res) {
+  customOrderModel.getAll((err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    const parsed = (rows || []).map((r) => ({
+      ...r,
+      images: toImageUrls(r.images),
+      order_type: r.order_type || "B2B Custom",
+    }));
+    res.json({ success: true, data: parsed });
+  });
+}
+
+// Admin: update a custom order's status.
+function updateCustomOrderStatus(req, res) {
+  const { id } = req.params;
+  const { status } = req.body;
+  const allowed = ["pending", "processing", "shipped", "delivered", "cancelled"];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+  customOrderModel.updateStatus(id, status, (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ error: "Custom order not found" });
+    }
+    res.json({ success: true, message: "Status updated" });
   });
 }
 
@@ -78,4 +123,9 @@ function safeParse(s) {
   }
 }
 
-module.exports = { createCustomOrder, getMyCustomOrders };
+module.exports = {
+  createCustomOrder,
+  getMyCustomOrders,
+  getAllCustomOrders,
+  updateCustomOrderStatus,
+};

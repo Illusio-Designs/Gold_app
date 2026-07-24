@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   getAllOrders,
   updateOrderStatus,
   getOrderStatistics,
@@ -7,6 +7,8 @@ import {
   updateUserStatus,
   downloadOrderPDF,
   deleteOrder,
+  getAllCustomOrders,
+  updateCustomOrderStatus,
 } from '../services/adminApiService';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { isAuthenticated, getAdminToken } from '../utils/authUtils';
@@ -92,9 +94,33 @@ const OrdersPage = () => {
         return;
       }
       
-      const response = await getAllOrders(token);
-      setOrders(response);
-      setFilteredOrders(response);
+      const [regular, custom] = await Promise.all([
+        getAllOrders(token),
+        getAllCustomOrders(token).catch(() => []),
+      ]);
+
+      const regularRows = (Array.isArray(regular) ? regular : []).map((o) => ({
+        ...o,
+        isCustom: false,
+      }));
+
+      const customRows = (Array.isArray(custom) ? custom : []).map((c) => ({
+        ...c,
+        isCustom: true,
+        order_type: 'B2B Custom',
+        product_name: `Custom${c.weight ? ' · ' + c.weight + 'g' : ''}`,
+        product_image: Array.isArray(c.images) && c.images.length ? c.images[0] : null,
+        total_qty: c.quantity || 1,
+        total_mark_amount: null,
+        user_name: c.business_name || c.user_name,
+      }));
+
+      const merged = [...regularRows, ...customRows].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setOrders(merged);
+      setFilteredOrders(merged);
     } catch (error) {
       if (error.response?.status === 401) {
         showErrorToast('Session expired. Please login again');
@@ -149,7 +175,7 @@ const OrdersPage = () => {
 
 
 
-  const handleStatusUpdate = async (orderId, newStatus) => {
+  const handleStatusUpdate = async (orderId, newStatus, isCustom = false) => {
     try {
       const token = getAdminToken();
       if (!token) {
@@ -157,16 +183,22 @@ const OrdersPage = () => {
         navigate('/auth');
         return;
       }
-      await updateOrderStatus(orderId, newStatus, token);
-      
-      // Update local state
-      setOrders(prevOrders => 
-        prevOrders.map(order => 
-          order.id === orderId ? { ...order, status: newStatus } : order
+      if (isCustom) {
+        await updateCustomOrderStatus(orderId, newStatus, token);
+      } else {
+        await updateOrderStatus(orderId, newStatus, token);
+      }
+
+      // Update local state (match on id + type so custom/regular don't clash)
+      setOrders(prevOrders =>
+        prevOrders.map(order =>
+          order.id === orderId && !!order.isCustom === !!isCustom
+            ? { ...order, status: newStatus }
+            : order
         )
       );
-      
-      showSuccessToast(`Order ${orderId} status updated to ${newStatus}`);
+
+      showSuccessToast(`${isCustom ? 'Custom order' : 'Order'} ${orderId} status updated to ${newStatus}`);
       loadStatistics(); // Refresh statistics
     } catch (error) {
       if (error.response?.status === 401) {
@@ -356,10 +388,26 @@ const OrdersPage = () => {
             </div>
           )}
           <div className="product-details">
-            <div className="product-name">{row.product_name || 'N/A'}</div>
-            <div className="product-sku">SKU: {row.product_sku || 'N/A'}</div>
-            {row.net_weight && (
-              <div className="product-weight">Weight: {row.net_weight}g</div>
+            <div className="product-name">
+              {row.product_name || 'N/A'}
+              {row.isCustom && (
+                <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: '#5D0829', background: '#F9F2E7', border: '1px solid #C09E83', borderRadius: 6, padding: '1px 6px', letterSpacing: 0.5 }}>CUSTOM</span>
+              )}
+            </div>
+            {row.isCustom ? (
+              <>
+                {row.purity && <div className="product-sku">Purity: {row.purity}</div>}
+                {row.delivery_date && (
+                  <div className="product-weight">Delivery: {formatDate(row.delivery_date)}</div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="product-sku">SKU: {row.product_sku || 'N/A'}</div>
+                {row.net_weight && (
+                  <div className="product-weight">Weight: {row.net_weight}g</div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -414,7 +462,7 @@ const OrdersPage = () => {
             <div style={{ minWidth: 150 }}>
               <DropdownSelect
                 value={row.status}
-                onChange={(opt) => opt && handleStatusUpdate(row.id, opt.value)}
+                onChange={(opt) => opt && handleStatusUpdate(row.id, opt.value, row.isCustom)}
                 options={allowedOptions}
                 isClearable={false}
                 isSearchable={false}
@@ -463,22 +511,26 @@ const OrdersPage = () => {
           >
             <ShoppingCart size={16} />
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => handleDownloadPdf(row)}
-            title="Download PDF"
-          >
-            <FileDown size={16} />
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => setDeleteOrderItem(row)}
-            title="Delete Order"
-          >
-            <Trash2 size={16} />
-          </Button>
+          {!row.isCustom && (
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleDownloadPdf(row)}
+                title="Download PDF"
+              >
+                <FileDown size={16} />
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setDeleteOrderItem(row)}
+                title="Delete Order"
+              >
+                <Trash2 size={16} />
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
