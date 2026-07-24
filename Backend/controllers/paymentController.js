@@ -1,6 +1,41 @@
 const crypto = require("crypto");
 const axios = require("axios");
 const orderModel = require("../models/order");
+const settingsModel = require("../models/settings");
+
+// Consumer price for one order line: (net_weight × gold_rate) + making %.
+// Falls back to the stored order amount if the rate isn't configured.
+function consumerLineAmount(order, settings) {
+  const rate = Number(settings.gold_rate || 0);
+  const makingPct = Number(settings.making_charge_percent || 0);
+  const netWeight = Number(order.net_weight || 0);
+  if (rate > 0 && netWeight > 0) {
+    const qty = Number(order.quantity || 1);
+    return netWeight * rate * (1 + makingPct / 100) * qty;
+  }
+  return Number(order.total_amount || 0);
+}
+
+// Compute the authoritative payable total for a set of orders (server-side —
+// never trust an amount sent by the client). Consumer orders are priced from
+// the gold rate; anything else uses the stored order amount.
+function computeAuthoritativeTotal(orderIds) {
+  return new Promise((resolve, reject) => {
+    settingsModel.getAllSettings((sErr, settings) => {
+      if (sErr) return reject(sErr);
+      orderModel.getOrdersForPayment(orderIds, (oErr, rows) => {
+        if (oErr) return reject(oErr);
+        const total = (rows || []).reduce((sum, o) => {
+          const isConsumer = o.user_type === "consumer";
+          return sum + (isConsumer
+            ? consumerLineAmount(o, settings)
+            : Number(o.total_amount || 0));
+        }, 0);
+        resolve(Math.round(total));
+      });
+    });
+  });
+}
 
 // Razorpay is integrated over its REST API + HMAC signature check (built-in
 // crypto), so the backend needs NO extra npm package — it still deploys over
@@ -19,8 +54,28 @@ async function createRazorpayOrder(req, res) {
     return res.status(503).json({ error: "Payment gateway not configured" });
   }
 
-  const { amount, orderId, currency } = req.body;
-  const amountPaise = Math.round(Number(amount) * 100); // rupees -> paise
+  const { amount, orderId, orderIds, currency } = req.body;
+
+  // Prefer a server-computed total for real orders; fall back to a client
+  // amount only when no order ids are supplied.
+  const ids = Array.isArray(orderIds)
+    ? orderIds
+    : orderId != null
+    ? [orderId]
+    : [];
+
+  let rupees;
+  try {
+    if (ids.length > 0) {
+      rupees = await computeAuthoritativeTotal(ids);
+    } else {
+      rupees = Math.round(Number(amount));
+    }
+  } catch (e) {
+    return res.status(500).json({ error: "Failed to price order", detail: e.message });
+  }
+
+  const amountPaise = Math.round(Number(rupees) * 100); // rupees -> paise
   if (!amountPaise || amountPaise < 100) {
     return res.status(400).json({ error: "A valid amount (>= ₹1) is required" });
   }
@@ -31,16 +86,16 @@ async function createRazorpayOrder(req, res) {
       {
         amount: amountPaise,
         currency: currency || "INR",
-        receipt: orderId ? `order_${orderId}` : `rcpt_${Date.now()}`,
-        notes: orderId ? { internal_order_id: String(orderId) } : {},
+        receipt: ids.length ? `order_${ids[0]}` : `rcpt_${Date.now()}`,
+        notes: ids.length ? { internal_order_ids: ids.join(",") } : {},
       },
       { auth: { username: RAZORPAY_KEY_ID, password: RAZORPAY_KEY_SECRET } }
     );
 
-    // Link the Razorpay order to our order row (payment stays 'pending').
-    if (orderId) {
+    // Link the Razorpay order to every order row (payment stays 'pending').
+    ids.forEach((oid) => {
       orderModel.updateOrderPayment(
-        orderId,
+        oid,
         {
           payment_status: "pending",
           payment_method: "razorpay",
@@ -49,7 +104,7 @@ async function createRazorpayOrder(req, res) {
         },
         () => {}
       );
-    }
+    });
 
     return res.json({ key: RAZORPAY_KEY_ID, order: resp.data });
   } catch (err) {
@@ -76,11 +131,18 @@ function verifyRazorpayPayment(req, res) {
     razorpay_payment_id,
     razorpay_signature,
     orderId,
+    orderIds,
   } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     return res.status(400).json({ error: "Missing payment verification fields" });
   }
+
+  const ids = Array.isArray(orderIds)
+    ? orderIds
+    : orderId != null
+    ? [orderId]
+    : [];
 
   const expected = crypto
     .createHmac("sha256", RAZORPAY_KEY_SECRET)
@@ -94,38 +156,23 @@ function verifyRazorpayPayment(req, res) {
       Buffer.from(razorpay_signature)
     );
 
-  if (!ok) {
-    if (orderId) {
-      orderModel.updateOrderPayment(
-        orderId,
-        {
-          payment_status: "failed",
-          payment_method: "razorpay",
-          razorpay_order_id,
-          razorpay_payment_id,
-        },
-        () => {}
-      );
-    }
-    return res.status(400).json({ error: "Payment signature verification failed" });
-  }
-
-  if (orderId) {
-    return orderModel.updateOrderPayment(
-      orderId,
+  const newStatus = ok ? "paid" : "failed";
+  ids.forEach((oid) => {
+    orderModel.updateOrderPayment(
+      oid,
       {
-        payment_status: "paid",
+        payment_status: newStatus,
         payment_method: "razorpay",
         razorpay_order_id,
         razorpay_payment_id,
       },
-      (e) => {
-        if (e) return res.status(500).json({ error: e.message });
-        return res.json({ success: true, payment_status: "paid" });
-      }
+      () => {}
     );
-  }
+  });
 
+  if (!ok) {
+    return res.status(400).json({ error: "Payment signature verification failed" });
+  }
   return res.json({ success: true, payment_status: "paid" });
 }
 

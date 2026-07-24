@@ -185,6 +185,26 @@ function updateOrderStatus(orderId, status, callback) {
   db.query(sql, [status, orderId], callback);
 }
 
+// Fetch orders (by id) with the data needed to compute an authoritative
+// payment total server-side: the stored amount, the product net weight, and
+// the buyer's account type (consumer prices come from the gold rate).
+function getOrdersForPayment(orderIds, callback) {
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return callback(null, []);
+  }
+  const placeholders = orderIds.map(() => "?").join(",");
+  const sql = `
+    SELECT o.id, o.total_amount, o.quantity,
+           p.net_weight AS net_weight,
+           u.type AS user_type
+    FROM orders o
+    LEFT JOIN products p ON o.product_id = p.id
+    LEFT JOIN users u ON o.user_id = u.id
+    WHERE o.id IN (${placeholders})
+  `;
+  db.query(sql, orderIds, callback);
+}
+
 // Update an order's payment fields (D2C Razorpay flow).
 function updateOrderPayment(orderId, payment, callback) {
   const sql = `UPDATE orders SET
@@ -248,6 +268,7 @@ module.exports = {
   getOrdersByIds,
   updateOrderStatus,
   updateOrderPayment,
+  getOrdersForPayment,
   updateOrder,
   deleteOrder,
   getOrderStatistics,

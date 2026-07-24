@@ -82,3 +82,26 @@
 .danger-zone__actions {
   margin-top: 18px;
 }
+
+/* D2C pricing settings card */
+.settings-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e6d8c8);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  max-width: 560px;
+}
+.settings-card h2 { margin: 0 0 6px; color: var(--brand, #5d0829); font-size: 18px; }
+.settings-card p { margin: 0 0 16px; color: var(--text-secondary, #7a6a5d); font-size: 13px; }
+.settings-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.settings-field label { font-size: 13px; font-weight: 600; color: var(--text, #2b2b2b); }
+.settings-field input {
+  padding: 10px 12px;
+  border: 1px solid var(--border, #e6d8c8);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--input-bg, #fff);
+  color: var(--text, #2b2b2b);
+}
+.settings-actions { margin-top: 8px; }

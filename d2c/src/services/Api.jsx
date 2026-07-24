@@ -547,6 +547,17 @@ export const createOrderFromCart = async (cartOrderData, token) => {
   }
 };
 
+// Public storefront settings (gold rate + making %) for D2C price display.
+export const getPublicSettings = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/settings`);
+    return response.data; // { gold_rate, making_charge_percent }
+  } catch (error) {
+    console.error('❌ getPublicSettings error:', error);
+    return { gold_rate: 0, making_charge_percent: 0 };
+  }
+};
+
 // --- D2C payments (Razorpay) -------------------------------------------------
 // Ask the backend to create a Razorpay order. Returns { key, order } where
 // `order` is the Razorpay order object handed to the Razorpay checkout sheet.

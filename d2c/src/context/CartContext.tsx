@@ -564,17 +564,40 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       }, token);
 
       console.log('✅ [CartContext] Checkout successful, response:', response);
-      
+
+      // Take payment via Razorpay (amount is priced server-side from the gold
+      // rate). If the payment module isn't installed yet the orders are still
+      // created and left 'pending' so nothing is lost.
+      const orderIds: number[] = response.orderIds || [];
+      try {
+        const { payForOrders, isRazorpayAvailable } = require('../services/payment');
+        if (isRazorpayAvailable() && orderIds.length > 0) {
+          const name = (await AsyncStorage.getItem('userName')) || '';
+          const pay = await payForOrders(orderIds, { name }, token);
+          if (!pay.success && !pay.skipped) {
+            // Payment failed/cancelled — keep the cart so the user can retry.
+            return {
+              success: false,
+              message: pay.message || 'Payment was not completed',
+              orderIds,
+            };
+          }
+        }
+      } catch (payErr) {
+        console.error('❌ [CartContext] Payment step error:', payErr);
+        // Fall through — orders exist as pending; don't block the user.
+      }
+
       // Clear both local and backend cart after successful order creation
       setCartItems([]);
       await saveCartItems([]);
-      
+
       console.log('✅ [CartContext] Local cart cleared after successful checkout');
-      
-      return { 
-        success: true, 
-        message: 'Orders created successfully', 
-        orderIds: response.orderIds 
+
+      return {
+        success: true,
+        message: 'Orders created successfully',
+        orderIds: response.orderIds
       };
       
     } catch (error: any) {

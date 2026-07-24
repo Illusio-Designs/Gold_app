@@ -145,6 +145,15 @@ async function createTablesAndAdmin() {
       )`,
     },
     {
+      name: "app_settings",
+      sql: `CREATE TABLE IF NOT EXISTS app_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value VARCHAR(255),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )`,
+    },
+    {
       name: "cart_items",
       sql: `CREATE TABLE IF NOT EXISTS cart_items (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -468,6 +477,14 @@ async function updateExistingTables() {
         "payment columns added to orders table"
       );
     }
+
+    // Seed default pricing settings (used by the D2C gold-rate pricing).
+    // INSERT IGNORE keeps any value an admin has already set.
+    await executeQuery(
+      "INSERT IGNORE INTO app_settings (setting_key, setting_value) VALUES " +
+        "('gold_rate', '0'), ('making_charge_percent', '0')",
+      "default pricing settings seeded"
+    );
 
     } catch (error) {
   }
