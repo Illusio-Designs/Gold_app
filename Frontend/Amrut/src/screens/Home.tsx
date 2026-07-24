@@ -560,8 +560,9 @@ const Home = () => {
       </View>
       <View style={styles.sectionAccent} />
 
-      {/* Product Cards */}
-      <ScrollView contentContainerStyle={productCardStyles.container} showsVerticalScrollIndicator={false}>
+      {/* Product Cards — plain View (not a nested vertical ScrollView) so the
+          page scrolls as one surface. */}
+      <View style={productCardStyles.container}>
         {productsLoading ? (
           <ProductGridSkeleton count={6} />
         ) : products.length > 0 ? (
@@ -578,7 +579,7 @@ const Home = () => {
             <Text style={styles.noProductsText}>No products available</Text>
           </View>
         )}
-      </ScrollView>
+      </View>
 
     </ScrollView>
   );
