@@ -34,23 +34,34 @@ A comprehensive B2B jewelry platform consisting of a React Native mobile app, Re
 
 ```
 Gold_app/
-├── Backend/                 # Node.js API Server
+├── Backend/                 # Node.js API Server (Express + MySQL)
 ├── Frontend/
-│   ├── Amrut/              # React Native Mobile App
+│   ├── Amrut/              # React Native — B2B wholesale app
+│   ├── Amrut D2C/          # React Native — D2C consumer app (in progress)
 │   └── Dashboard/          # React Web Dashboard (Admin Panel)
+└── .github/workflows/       # CI/CD (backend deploy + Android test APK)
 ```
+
+Both mobile apps share **one backend and one inventory**, so a unique piece
+sold in either app is instantly unavailable in the other. The B2B app is for
+approved wholesale businesses (quote/order); the D2C app is the consumer
+storefront (prices + buy).
 
 ## 🚀 Features
 
-### Mobile App (React Native)
+### Mobile Apps (React Native)
 - **User Authentication** - OTP-based login system
-- **Product Catalog** - Browse and search jewelry products
+- **Product Catalog** - Browse and search jewelry products (public catalog)
 - **Shopping Cart** - Add/remove items with real-time updates
+- **Wishlist** - Save favourite pieces (device-local, persists across restarts)
 - **Order Management** - Place and track orders
+- **Custom Order** - Request a custom-made piece with reference photos
+- **Approved-business gate** - Only approved businesses can place B2B orders
+- **Modern UI** - Maroon/cream/gold theme, Glorify font, brand-colour shimmer
+  loaders and micro-animations
 - **Push Notifications** - Real-time notifications via Firebase
 - **Real-time Updates** - Socket.io integration for live data
-- **Image Processing** - Advanced image handling and optimization
-- **Offline Support** - AsyncStorage for offline functionality
+- **Offline Support** - AsyncStorage for local persistence
 
 ### Web Dashboard (React)
 - **Admin Panel** - Complete management interface
@@ -298,6 +309,67 @@ The app supports push notifications through Firebase Cloud Messaging:
 1. Build the production bundle: `npm run build`
 2. Deploy to your web hosting service
 
+## 🤖 CI/CD (GitHub Actions)
+
+Workflows live in `.github/workflows/`:
+
+| Workflow | File | Trigger | What it does |
+|---|---|---|---|
+| Backend deploy | `backend-deploy.yml` | push to `main` (Backend/**) | Deploys the API over FTPS |
+| Android test APK | `android-build.yml` | push to `main` (Frontend/Amrut/**) or **Run workflow** | Builds an installable **release** APK of the B2B app and publishes it |
+| Split branches | `sync-split-branches.yml` | push | Keeps the per-area branches in sync |
+
+### 📦 Building & getting the B2B test APK
+
+The `android-build.yml` workflow bundles the JS (Hermes, so no Metro server is
+needed) and produces a standalone release APK.
+
+**Trigger a build**
+- Automatically: push changes under `Frontend/Amrut/**` to `main`, **or**
+- Manually: GitHub → **Actions → “Android Build (test APK)” → Run workflow →**
+  pick the branch → **Run** (use this to test a feature branch without merging).
+
+**Download the APK** from the finished run:
+- **Actions → the run → Artifacts → `amrut-test-apk`**, or
+- the **GitHub Release** tagged `android-test-latest`.
+
+**Install** the `.apk` on any Android device (enable “Install unknown apps”).
+This test APK is signed with the **debug** keystore — fine for sideloading, but
+**not** valid for the Play Store (see below).
+
+## 🔐 App Signing & GitHub Actions Secrets
+
+For a real Play Store release you need a private **upload keystore**. Keystores
+and passwords must **never** live in the repo — they belong in GitHub Actions
+**Secrets**.
+
+### Add a secret
+GitHub → repo → **Settings → Secrets and variables → Actions → New repository
+secret**. Add:
+
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | your `.keystore`/`.jks` file, base64-encoded (`base64 -w0 upload.keystore`) |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore (store) password |
+| `ANDROID_KEY_ALIAS` | key alias |
+| `ANDROID_KEY_PASSWORD` | key password |
+
+The release job then decodes `ANDROID_KEYSTORE_BASE64` to a file at build time
+and passes the passwords via `-P` Gradle properties from `${{ secrets.* }}` —
+nothing sensitive is committed.
+
+### ⚠️ Remove these from the repo (currently committed — should not be)
+- `Frontend/Amrut/android/app/amrut-release-key.keystore`
+- `Frontend/Amrut D2C/android/app/amrut-release-key.keystore`
+- The plaintext passwords in `Frontend/Amrut/android/gradle.properties`
+  (`MYAPP_RELEASE_STORE_PASSWORD`, `MYAPP_RELEASE_KEY_PASSWORD`)
+
+After removing them, **rotate the keystore password** (and regenerate the
+upload key if this app hasn’t shipped yet), add the values as Actions secrets,
+and keep `*.keystore` out of git via `.gitignore`. Because git keeps history,
+purge the old files from history (e.g. `git filter-repo`) if the secrets must be
+fully expunged.
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -323,13 +395,21 @@ For support and questions:
 
 ## 📈 Roadmap
 
+- [x] Shared inventory across B2B & D2C
+- [x] Wishlist
+- [x] Custom order requests
+- [x] Modern UI refresh (shimmer + micro-animations)
+- [ ] D2C consumer app: live pricing (admin gold rate + making + GST)
+- [ ] D2C: Razorpay online payments
+- [ ] D2C: Sequel Logistics shipment integration (AWB + tracking)
+- [ ] Coupons / discounts
+- [ ] Account-synced wishlist
 - [ ] Advanced analytics dashboard
-- [ ] Multi-language support
-- [ ] Advanced search filters
-- [ ] Inventory management
-- [ ] Customer support chat
 - [ ] Payment gateway integration
 
 ---
 
-**Note**: This is a B2B jewelry platform designed for wholesale jewelry businesses. Ensure proper configuration of all environment variables and third-party services before deployment.
+**Note**: This platform now serves both a **B2B wholesale** app and a **D2C
+consumer** app on a shared backend and inventory. Ensure proper configuration
+of all environment variables, signing secrets, and third-party services before
+deployment.
