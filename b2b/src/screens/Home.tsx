@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import { resolveCategoryIcon } from '../utils/categoryIcons';
+import { AnimatedSearchBar, SectionHeader } from '../components/ui';
 import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
 import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
@@ -471,14 +472,13 @@ const Home = () => {
             </View>
           ) : null}
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.searchIconBtn}
-          onPress={() => (navigation as any).navigate('Search')}
-          activeOpacity={0.8}
-        >
-          <Image source={require('../assets/img/common/searchicon.png')} style={styles.searchIconImg} />
-        </TouchableOpacity>
       </View>
+
+      {/* Prominent search bar with cycling suggestions (opens Search) */}
+      <AnimatedSearchBar
+        style={styles.homeSearch}
+        onPress={() => (navigation as any).navigate('Search')}
+      />
 
       {/* Slider first */}
       {slidersLoading ? (
@@ -496,11 +496,8 @@ const Home = () => {
         />
       ) : null}
 
-      {/* Shop by Category — shown AFTER the slider, in Glorify, with category cards */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Shop by Category</Text>
-      </View>
-      <View style={styles.sectionAccent} />
+      {/* Shop by Category — shown AFTER the slider */}
+      <SectionHeader title="Shop by Category" />
 
       {categoriesLoading ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
@@ -547,10 +544,9 @@ const Home = () => {
       />
       
       {/* Products section */}
-      <View style={[styles.sectionHeader, { marginTop: hp('1%') }]}>
-        <Text style={styles.sectionTitle}>New Arrivals</Text>
+      <View style={{ marginTop: hp('1%') }}>
+        <SectionHeader title="New Arrivals" />
       </View>
-      <View style={styles.sectionAccent} />
 
       {/* Product Cards — plain View (not a nested vertical ScrollView) so the
           page scrolls as one surface. */}
@@ -598,6 +594,10 @@ const styles = StyleSheet.create({
   },
   greet: {
     flex: 1,
+  },
+  homeSearch: {
+    marginHorizontal: 16,
+    marginBottom: 12,
   },
   searchIconBtn: {
     width: 42,
