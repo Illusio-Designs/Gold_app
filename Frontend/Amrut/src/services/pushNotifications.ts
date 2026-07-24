@@ -2,14 +2,26 @@ import { Platform, PermissionsAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerFcmToken } from './Api';
 
-// Firebase messaging is loaded lazily so a missing/native-unavailable module
-// never crashes the app (e.g. in dev without Google Play services).
-function getMessaging(): any | null {
+// Firebase messaging is accessed defensively: the native module may be missing
+// or Firebase may not be initialised on a given device/build. EVERY call is
+// wrapped so a failure degrades gracefully (push simply off) instead of
+// crashing the app on launch.
+function messagingInstance(): any | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@react-native-firebase/messaging').default;
+    return mod ? mod() : null;
+  } catch (e) {
+    console.log('[push] messaging unavailable:', (e as any)?.message);
+    return null;
+  }
+}
+
+function messagingStatic(): any | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('@react-native-firebase/messaging').default;
-  } catch (e) {
-    console.log('[push] messaging module unavailable:', (e as any)?.message);
+  } catch {
     return null;
   }
 }
@@ -27,10 +39,10 @@ export async function requestNotificationPermission(): Promise<boolean> {
       }
       return true;
     }
-    const messaging = getMessaging();
-    if (!messaging) return false;
-    const status = await messaging().requestPermission();
-    const m = messaging;
+    const m = messagingStatic();
+    const inst = messagingInstance();
+    if (!m || !inst) return false;
+    const status = await inst.requestPermission();
     return (
       status === m.AuthorizationStatus.AUTHORIZED ||
       status === m.AuthorizationStatus.PROVISIONAL
@@ -43,17 +55,17 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 // Fetch the device FCM token and register it with the backend for this user.
 export async function registerDeviceToken(): Promise<string | null> {
-  const messaging = getMessaging();
-  if (!messaging) return null;
   try {
+    const inst = messagingInstance();
+    if (!inst) return null;
+
     const authToken = await AsyncStorage.getItem('accessToken');
     if (!authToken) return null; // only register for logged-in users
 
-    const token = await messaging().getToken();
+    const token = await inst.getToken();
     if (!token) return null;
 
     const stored = await AsyncStorage.getItem('fcmToken');
-    // Re-register if the token changed (or was never sent).
     if (stored !== token) {
       await registerFcmToken(token, Platform.OS, authToken);
       await AsyncStorage.setItem('fcmToken', token);
@@ -66,53 +78,70 @@ export async function registerDeviceToken(): Promise<string | null> {
   }
 }
 
-// Ask permission + register the token in one call (used right after login and
-// on app start for an already-logged-in user).
+// Ask permission + register the token (used after login and on app start for an
+// already-logged-in user). Never throws.
 export async function initPushForUser(): Promise<void> {
-  const ok = await requestNotificationPermission();
-  if (ok) await registerDeviceToken();
+  try {
+    const ok = await requestNotificationPermission();
+    if (ok) await registerDeviceToken();
+  } catch (e) {
+    console.log('[push] initPushForUser error:', (e as any)?.message);
+  }
 }
 
 type MessageHandler = (msg: { title?: string; body?: string; data?: any }) => void;
 
 // Subscribe to foreground messages + token refresh. Returns an unsubscribe fn.
+// Any failure yields a no-op unsubscribe instead of throwing.
 export function onForegroundMessage(handler: MessageHandler): () => void {
-  const messaging = getMessaging();
-  if (!messaging) return () => {};
-  const unsubMsg = messaging().onMessage(async (remoteMessage: any) => {
-    handler({
-      title: remoteMessage?.notification?.title,
-      body: remoteMessage?.notification?.body,
-      data: remoteMessage?.data,
+  try {
+    const inst = messagingInstance();
+    if (!inst) return () => {};
+    const unsubMsg = inst.onMessage(async (remoteMessage: any) => {
+      handler({
+        title: remoteMessage?.notification?.title,
+        body: remoteMessage?.notification?.body,
+        data: remoteMessage?.data,
+      });
     });
-  });
-  const unsubRefresh = messaging().onTokenRefresh(async () => {
-    await AsyncStorage.removeItem('fcmToken');
-    registerDeviceToken();
-  });
-  return () => {
-    try { unsubMsg && unsubMsg(); } catch {}
-    try { unsubRefresh && unsubRefresh(); } catch {}
-  };
+    const unsubRefresh = inst.onTokenRefresh(async () => {
+      try {
+        await AsyncStorage.removeItem('fcmToken');
+        registerDeviceToken();
+      } catch {}
+    });
+    return () => {
+      try { unsubMsg && unsubMsg(); } catch {}
+      try { unsubRefresh && unsubRefresh(); } catch {}
+    };
+  } catch (e) {
+    console.log('[push] onForegroundMessage error:', (e as any)?.message);
+    return () => {};
+  }
 }
 
-// Fire `handler` when a notification is tapped to open the app (from background
-// or cold start).
+// Fire `handler` when a notification is tapped to open the app (background or
+// cold start). Never throws.
 export function onNotificationOpened(handler: (data: any) => void): () => void {
-  const messaging = getMessaging();
-  if (!messaging) return () => {};
-  const unsub = messaging().onNotificationOpenedApp((remoteMessage: any) => {
-    if (remoteMessage) handler(remoteMessage?.data || {});
-  });
-  messaging()
-    .getInitialNotification()
-    .then((remoteMessage: any) => {
+  try {
+    const inst = messagingInstance();
+    if (!inst) return () => {};
+    const unsub = inst.onNotificationOpenedApp((remoteMessage: any) => {
       if (remoteMessage) handler(remoteMessage?.data || {});
-    })
-    .catch(() => {});
-  return () => {
-    try { unsub && unsub(); } catch {}
-  };
+    });
+    inst
+      .getInitialNotification()
+      .then((remoteMessage: any) => {
+        if (remoteMessage) handler(remoteMessage?.data || {});
+      })
+      .catch(() => {});
+    return () => {
+      try { unsub && unsub(); } catch {}
+    };
+  } catch (e) {
+    console.log('[push] onNotificationOpened error:', (e as any)?.message);
+    return () => {};
+  }
 }
 
 // Clear the stored token on logout so the next user re-registers cleanly.
