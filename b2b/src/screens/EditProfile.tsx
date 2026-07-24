@@ -15,6 +15,7 @@ import axios from 'axios';
 import { updateUserProfile, getUserById, BASE_URL } from '../services/Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import SuccessOverlay from '../components/common/SuccessOverlay';
 
 const EditProfile = () => {
   const [city, setCity] = useState('');
@@ -22,6 +23,7 @@ const EditProfile = () => {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [pin, setPin] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   const [name, setName] = useState('Guest');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -328,8 +330,8 @@ const EditProfile = () => {
         if (res.remainingTime !== undefined) {
           msg += `\nSession remaining: ${Math.floor(res.remainingTime / 60)} min ${res.remainingTime % 60} sec`;
         }
-        Alert.alert('Success', msg);
-        navigation.goBack();
+        // Show the custom success animation instead of a native alert.
+        setShowSuccess(true);
       } else {
         Alert.alert('Error', 'Update failed');
       }
@@ -479,6 +481,14 @@ const EditProfile = () => {
         visible={countryModalVisible}
         onClose={() => setCountryModalVisible(false)}
         onSelect={handleSelectCountry}
+      />
+      <SuccessOverlay
+        visible={showSuccess}
+        message={'Profile Updated'}
+        onDone={() => {
+          setShowSuccess(false);
+          navigation.goBack();
+        }}
       />
     </KeyboardAvoidingView>
   );
