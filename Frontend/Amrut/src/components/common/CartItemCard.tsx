@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { getProductImageUrl } from '../../utils/imageUtils';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Delete02Icon } from '@hugeicons/core-free-icons';
+import { ShimmerImage } from './Motion';
 // Removed client-side watermark overlay; backend already embeds watermark
 
 interface CartItemCardProps {
@@ -81,12 +82,13 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             
             if (imageSource) {
               return (
-                <Image 
-                  source={imageSource} 
+                <ShimmerImage
+                  source={imageSource}
                   style={styles.productImage}
+                  radius={14}
                   resizeMode="cover"
-                  onError={(error) => {
-                    console.error('[CartItemCard] Image failed to load:', error.nativeEvent);
+                  onError={(error: any) => {
+                    console.error('[CartItemCard] Image failed to load:', error?.nativeEvent);
                   }}
                 />
               );

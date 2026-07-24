@@ -6,6 +6,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingCart01Icon } from '@hugeicons/core-free-icons';
 import { useCart } from '../../context/CartContext';
+import FocusAwareStatusBar from './FocusAwareStatusBar';
 
 type RightAction = {
   icon: any;            // require(...) image source
@@ -43,6 +44,8 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       end={{ x: 1, y: 1 }}
       style={[styles.bar, { paddingTop: insets.top + 8 }]}
     >
+      {/* Light battery/clock icons so they stay visible on the maroon bar */}
+      <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <View style={styles.row}>
         {showBack ? (
           <TouchableOpacity

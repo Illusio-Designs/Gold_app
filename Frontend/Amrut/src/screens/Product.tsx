@@ -9,7 +9,7 @@ import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { getApprovedProductsForUser } from '../services/Api';
 import ScreenLoader from '../components/common/ScreenLoader';
-import { ProductGridSkeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
+import { ProductGridSkeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 
 import Toast from 'react-native-toast-message';
@@ -371,17 +371,13 @@ const Product = () => {
       console.log(`[Product] Image type: ${product.hasProcessedImage ? 'PROCESSED (watermarked)' : 'ORIGINAL'}`);
       
       return (
-        <Image 
-          source={{ uri: imageUrl }} 
+        <ShimmerImage
+          source={{ uri: imageUrl }}
           style={styles.image}
+          radius={14}
           resizeMode="cover"
-          onLoad={() => console.log(`[Product] Image loaded successfully: ${imageUrl}`)}
-          onError={(error) => {
-            console.error(`[Product] Image failed to load: ${imageUrl}`, error.nativeEvent);
-            // If original image fails, try to fall back to processed
-            if (product.image && product.processedImageUrl && product.image !== product.processedImageUrl) {
-              console.log(`[Product] Trying fallback to processed image: ${product.processedImageUrl}`);
-            }
+          onError={(error: any) => {
+            console.error(`[Product] Image failed to load: ${imageUrl}`, error?.nativeEvent);
           }}
         />
       );
@@ -419,7 +415,7 @@ const Product = () => {
 
       {/* Product grid */}
       {productsLoading ? (
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingTop: 16 }} showsVerticalScrollIndicator={false}>
           <ProductGridSkeleton count={6} />
         </ScrollView>
       ) : (error && !filteredProducts.length) ? (
@@ -563,6 +559,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
+    paddingTop: 16,
     paddingBottom: 30,
   },
   // Option A · Clean boutique — white card, soft gold hairline border, gentle

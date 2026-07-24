@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
+  Image,
+  ImageProps,
+  ImageStyle,
   Pressable,
   StyleProp,
   StyleSheet,
@@ -83,6 +86,63 @@ export const Skeleton: React.FC<SkeletonProps> = ({
           />
         </Animated.View>
       )}
+    </View>
+  );
+};
+
+/* ------------------------------------------------------- ShimmerImage */
+
+type ShimmerImageProps = Omit<ImageProps, 'style'> & {
+  style?: StyleProp<ImageStyle>;
+  radius?: number;
+};
+
+/**
+ * An <Image> that shows a brand shimmer placeholder until the photo has
+ * finished loading, then cross-fades the real image in. Use anywhere a
+ * remote product / category / slider image is displayed.
+ */
+export const ShimmerImage: React.FC<ShimmerImageProps> = ({
+  style,
+  radius,
+  onLoadEnd,
+  onError,
+  ...rest
+}) => {
+  const [loaded, setLoaded] = useState(false);
+  const fade = useRef(new Animated.Value(0)).current;
+
+  const reveal = () => {
+    setLoaded(true);
+    Animated.timing(fade, {
+      toValue: 1,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <View style={[style, { overflow: 'hidden' }]}>
+      {!loaded && (
+        <Skeleton
+          width="100%"
+          height="100%"
+          radius={radius ?? 0}
+          style={StyleSheet.absoluteFill as any}
+        />
+      )}
+      <Animated.Image
+        {...(rest as any)}
+        onLoadEnd={e => {
+          reveal();
+          onLoadEnd?.(e as any);
+        }}
+        onError={e => {
+          reveal();
+          onError?.(e as any);
+        }}
+        style={[StyleSheet.absoluteFill, { opacity: fade }]}
+      />
     </View>
   );
 };
@@ -275,6 +335,7 @@ export const FadeInSlide: React.FC<FadeInSlideProps> = ({
 
 export default {
   Skeleton,
+  ShimmerImage,
   ProductCardSkeleton,
   ProductGridSkeleton,
   BannerSkeleton,

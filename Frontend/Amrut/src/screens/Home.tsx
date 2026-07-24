@@ -5,11 +5,12 @@ import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import CustomSlider from '../components/common/CustomSlider';
 import CategoryFilterGroup from '../components/common/CategoryFilterGroup';
-import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton } from '../components/common/Motion';
+import { ProductGridSkeleton, BannerSkeleton, PressableScale, FadeInSlide, Skeleton, ShimmerImage } from '../components/common/Motion';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingCart01Icon } from '@hugeicons/core-free-icons';
+import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
 import { useCart } from '../context/CartContext';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -39,7 +40,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }
   <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
     <View style={productCardStyles.card}>
       <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
-        <Image source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')} style={productCardStyles.image} resizeMode="cover" />
+        <ShimmerImage
+          source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')}
+          style={productCardStyles.image}
+          radius={14}
+          resizeMode="cover"
+        />
       </TouchableOpacity>
       <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
       {/* View button */}
@@ -424,6 +430,8 @@ const Home = () => {
       }
       showsVerticalScrollIndicator={false}
     >
+      {/* Dark battery/clock icons so they stay visible on the light top bar */}
+      <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
       {/* Modern top bar — logo + greeting + search icon */}
       <View style={[styles.topBar, { paddingTop: insets.top + 4 }]}>
         <Image

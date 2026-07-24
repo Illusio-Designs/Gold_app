@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,7 +12,7 @@ import { wp, hp } from '../utils/responsiveConfig';
 import { getApprovedCategoriesForUser } from '../services/Api';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ScreenLoader from '../components/common/ScreenLoader';
-import { Skeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
+import { Skeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
 import Toast from 'react-native-toast-message';
 
 type Category = {
@@ -255,7 +255,7 @@ const Collection = () => {
                   >
                     {/* Category Image fills the whole tile */}
                     {category.image ? (
-                      <Image
+                      <ShimmerImage
                         source={{ uri: getCategoryImageUrl(category.image) || undefined }}
                         style={productCardStyles.image}
                         resizeMode="cover"
@@ -434,6 +434,7 @@ const productCardStyles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
+    paddingTop: getResponsiveSpacing(16, 18, 20),
     paddingBottom: getResponsiveSpacing(24, 30, 36),
   },
   // Reliable 2-per-row grid: container uses space-between and each wrapper is
