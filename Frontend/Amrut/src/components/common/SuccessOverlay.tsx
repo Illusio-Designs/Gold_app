@@ -22,6 +22,11 @@ const SuccessOverlay: React.FC<SuccessOverlayProps> = ({
   const scale = useRef(new Animated.Value(0)).current;
   const check = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  // Keep the latest onDone without re-triggering the timer each render.
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
     if (!visible) return;
@@ -40,9 +45,9 @@ const SuccessOverlay: React.FC<SuccessOverlayProps> = ({
         useNativeDriver: true,
       }),
     ]).start();
-    const t = setTimeout(() => onDone?.(), duration);
+    const t = setTimeout(() => onDoneRef.current && onDoneRef.current(), duration);
     return () => clearTimeout(t);
-  }, [visible, duration, onDone, scale, check, opacity]);
+  }, [visible, duration, scale, check, opacity]);
 
   if (!visible) return null;
 

@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useRef,
 } from 'react';
+import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getUserNotifications,
@@ -138,8 +139,38 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setUnreadCount(c => c + 1);
       refresh();
     });
+
+    // Real-time via socket, so the bell updates live even without an FCM push
+    // (e.g. admin changes an order status while the app is open).
+    let socketCleanup: (() => void) | undefined;
+    try {
+      const SocketService = require('../services/SocketService').default;
+      const onOrder = (payload: any) => {
+        const order = payload?.order || payload;
+        const status = order?.status ? String(order.status) : 'updated';
+        const idText = order?.id ? ` #${order.id}` : '';
+        showBanner('Order update', `Your order${idText} is now ${status}.`);
+        refresh();
+      };
+      const id1 = SocketService.addEventListener('order-status-updated', onOrder);
+      const id2 = SocketService.addEventListener('notification', () => refresh());
+      socketCleanup = () => {
+        SocketService.removeEventListener('order-status-updated', id1);
+        SocketService.removeEventListener('notification', id2);
+      };
+    } catch (e) {
+      // socket not available — in-app list still refreshes on open
+    }
+
+    // Refresh whenever the app returns to the foreground.
+    const appStateSub = AppState.addEventListener('change', s => {
+      if (s === 'active') refresh();
+    });
+
     return () => {
       unsub();
+      if (socketCleanup) socketCleanup();
+      appStateSub.remove();
       if (bannerTimer.current) clearTimeout(bannerTimer.current);
     };
   }, [refresh, showBanner]);

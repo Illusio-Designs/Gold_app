@@ -506,8 +506,8 @@ const Home = () => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catRow}>
           {Array.from({ length: 5 }).map((_, i) => (
             <View key={i} style={styles.catCard}>
-              <Skeleton width={72} height={72} radius={36} />
-              <Skeleton width={54} height={10} radius={5} style={{ marginTop: 8 }} />
+              <Skeleton width={92} height={92} radius={46} />
+              <Skeleton width={64} height={10} radius={5} style={{ marginTop: 8 }} />
             </View>
           ))}
         </ScrollView>
@@ -692,13 +692,13 @@ const styles = StyleSheet.create({
   },
   catCard: {
     alignItems: 'center',
-    marginRight: 16,
-    width: 76,
+    marginRight: 18,
+    width: 96,
   },
   catImgWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     overflow: 'hidden',
     backgroundColor: '#F7F1E8',
     borderWidth: 1,

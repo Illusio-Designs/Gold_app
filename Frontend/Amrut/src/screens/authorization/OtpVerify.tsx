@@ -157,11 +157,11 @@ const OtpVerify = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={styles.flex} behavior="padding" keyboardVerticalOffset={0}>
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: wp('7.5%'),
-    paddingTop: isShortScreen() ? hp('8%') : isTallScreen() ? hp('12%') : hp('10%'),
+    paddingTop: isShortScreen() ? hp('2.5%') : hp('4%'),
     paddingBottom: hp('3%'),
   },
   backBtn: {
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(93,8,41,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: hp('4%'),
+    marginBottom: hp('3%'),
   },
   backArrow: { width: 22, height: 22, resizeMode: 'contain', tintColor: '#5D0829' },
   form: { width: '100%' },

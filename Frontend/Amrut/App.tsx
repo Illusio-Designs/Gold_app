@@ -191,7 +191,9 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-    <SafeAreaView style={{ flex: 1 }}>
+    {/* edges left/right only — each screen's header/topBar handles the top inset,
+        and the bottom nav handles the bottom, so we don't double-pad here. */}
+    <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 
       <StackNavigation />
     </SafeAreaView>

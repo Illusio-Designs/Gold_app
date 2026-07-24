@@ -170,9 +170,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   iconWrap: {
-    width: 44,
-    height: 34,
-    borderRadius: 17,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

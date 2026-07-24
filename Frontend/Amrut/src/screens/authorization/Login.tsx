@@ -104,12 +104,13 @@ const Login = () => {
     >
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior="padding"
+        keyboardVerticalOffset={0}
       >
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <Image source={require('../../assets/img/common/maroonlogo.png')} style={styles.logo} resizeMode="contain" />
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
-    paddingTop: isShortScreen() ? hp('10%') : isTallScreen() ? hp('16%') : hp('13%'),
+    paddingTop: isShortScreen() ? hp('3%') : hp('5%'),
     paddingBottom: hp('3%'),
   },
   bottomBar: {
