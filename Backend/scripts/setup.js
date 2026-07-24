@@ -214,40 +214,6 @@ async function createTablesAndAdmin() {
       )`,
     },
     {
-      name: "app_versions",
-      sql: `CREATE TABLE IF NOT EXISTS app_versions (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        version VARCHAR(50) NOT NULL,
-        build_number INT NOT NULL,
-        platform ENUM('ios', 'android', 'both') NOT NULL,
-        is_forced BOOLEAN DEFAULT FALSE,
-        is_active BOOLEAN DEFAULT TRUE,
-        release_notes TEXT,
-        download_url VARCHAR(500),
-        created_by INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
-        INDEX idx_platform_active (platform, is_active),
-        INDEX idx_build_number (build_number),
-        INDEX idx_platform_build (platform, build_number)
-      )`,
-    },
-    {
-      name: "app_icons",
-      sql: `CREATE TABLE IF NOT EXISTS app_icons (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        image_url VARCHAR(500) NOT NULL,
-        priority INT DEFAULT 0,
-        is_active BOOLEAN DEFAULT TRUE,
-        created_by INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
-      )`,
-    },
-    {
       name: "sliders",
       sql: `CREATE TABLE IF NOT EXISTS sliders (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -398,18 +364,6 @@ async function createIndexes() {
       name: "notification_tokens_user_active_idx",
       sql: "CREATE INDEX notification_tokens_user_active_idx ON notification_tokens(user_id, active)",
     },
-    {
-      name: "app_versions_platform_active_idx",
-      sql: "CREATE INDEX app_versions_platform_active_idx ON app_versions(platform, is_active)",
-    },
-    {
-      name: "app_versions_build_number_idx",
-      sql: "CREATE INDEX app_versions_build_number_idx ON app_versions(build_number)",
-    },
-    {
-      name: "app_versions_platform_build_idx",
-      sql: "CREATE INDEX app_versions_platform_build_idx ON app_versions(platform, build_number)",
-    },
   ];
 
   for (const index of indexes) {
@@ -456,9 +410,6 @@ function getTableNameFromIndex(indexName) {
     product_stock_history_action_idx: "product_stock_history",
     notifications_type_idx: "notifications",
     notification_tokens_user_active_idx: "notification_tokens",
-    app_versions_platform_active_idx: "app_versions",
-    app_versions_build_number_idx: "app_versions",
-    app_versions_platform_build_idx: "app_versions",
   };
   return tableMap[indexName] || "users"; // fallback to users
 }

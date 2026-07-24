@@ -15,8 +15,6 @@ import {
   Maximize01Icon,
   Minimize01Icon,
   Image01Icon,
-  SmartPhone01Icon,
-  PaintBoardIcon,
   UserRemove01Icon,
 } from "@hugeicons/core-free-icons";
 import "./DashboardLayout.css";
@@ -36,8 +34,6 @@ const SidebarLinks = [
   { name: "Products", path: "/dashboard/products", icon: PackageIcon },
   { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart01Icon },
   { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },
-  { name: "App Versions", path: "/dashboard/app-versions", icon: SmartPhone01Icon },
-  { name: "App Icons", path: "/dashboard/app-icons", icon: PaintBoardIcon },
   { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
 ];
 

@@ -12,8 +12,6 @@ const WIPE_TABLES = [
   "orders",
   "notifications",
   "sliders",
-  "app_icons",
-  "app_versions",
   "products",
   "categories",
 ];

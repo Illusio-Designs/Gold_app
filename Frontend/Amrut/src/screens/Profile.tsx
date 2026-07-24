@@ -8,7 +8,7 @@ import ScreenLoader from '../components/common/ScreenLoader';
 import { launchCamera } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from '../services/Api';
-import { getLatestVersion } from '../services/Api';
+import { APP_VERSION } from '../config/appInfo';
 import { useCart } from '../context/CartContext';
 // NotificationService removed as requested
 import { wp, hp } from '../utils/responsiveConfig';
@@ -26,7 +26,6 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [userName, setUserName] = useState('Guest');
   const [loading, setLoading] = useState(true);
-  const [appVersion, setAppVersion] = useState('1.0.0');
   const [userId, setUserId] = useState(null);
   const isFocused = useIsFocused();
   const { clearCartOnLogout } = useCart();
@@ -102,32 +101,6 @@ const Profile = () => {
     };
     fetchUser();
   }, [isFocused]);
-
-
-  // Get current app version info from API
-  useEffect(() => {
-    const getCurrentAppVersion = async () => {
-      try {
-        console.log('[Profile] Fetching app version from API...');
-        const platform = Platform.OS; // Dynamic platform detection
-        const versionInfo = await getLatestVersion(platform);
-        
-        if (versionInfo && versionInfo.version) {
-          console.log('[Profile] Version info received:', versionInfo);
-          setAppVersion(versionInfo.version);
-        } else {
-          console.log('[Profile] No version info received, using fallback');
-          setAppVersion('1.0.0'); // Fallback version
-        }
-      } catch (error) {
-        console.error('[Profile] Error getting app version from API:', error);
-        // Use fallback version if API fails
-        setAppVersion('1.0.0');
-      }
-    };
-    getCurrentAppVersion();
-  }, []);
-
 
 
   const handleCameraPress = async () => {
@@ -402,9 +375,9 @@ const Profile = () => {
         </TouchableOpacity>
       </View>
       
-      {/* Simple App Version */}
+      {/* App version — the installed store build */}
       <View style={styles.versionLineContainer}>
-        <Text style={styles.versionLineText}>v{appVersion}</Text>
+        <Text style={styles.versionLineText}>v{APP_VERSION}</Text>
       </View>
       </View>
 
@@ -523,7 +496,6 @@ const styles = StyleSheet.create({
     fontFamily: 'GlorifyDEMO',
     opacity: 0.7,
   },
-
 });
 
 export default Profile; 

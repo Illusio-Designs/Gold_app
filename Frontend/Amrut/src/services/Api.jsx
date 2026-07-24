@@ -686,62 +686,6 @@ export const markAllNotificationsAsRead = async (userId, token) => {
   }
 };
 
-// ✅ Check app update
-export const checkAppUpdate = async (platform, versionCode) => {
-  try {
-    const response = await axios.get(`${BASE_URL}/app-versions/check-update`, {
-      params: { platform, version_code: versionCode },
-    });
-    console.log('📱 checkAppUpdate response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ checkAppUpdate error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get latest version info
-export const getLatestVersion = async platform => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-versions/latest/${platform}`,
-    );
-    console.log('📱 getLatestVersion response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getLatestVersion error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get current app icon
-export const getCurrentAppIcon = async (platform, type = 'primary') => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-icons/current/${platform}/${type}`,
-    );
-    console.log('🎨 getCurrentAppIcon response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getCurrentAppIcon error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
-// ✅ Get all active app icons for platform
-export const getActiveAppIcons = async platform => {
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/app-icons/active/${platform}`,
-    );
-    console.log('🎨 getActiveAppIcons response:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ getActiveAppIcons error:', error);
-    throw error.response?.data || { error: error.message };
-  }
-};
-
 // ✅ Get sliders/banners
 export const getSliders = async () => {
   try {

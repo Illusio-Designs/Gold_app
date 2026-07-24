@@ -46,7 +46,6 @@ const config = {
     PRODUCTS: "/uploads/products",
     CATEGORIES: "/uploads/categories",
     PROFILE: "/uploads/profile",
-    APP_ICONS: "/uploads/app-icons",
   },
 
   // Image Processing
