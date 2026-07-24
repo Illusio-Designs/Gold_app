@@ -11,6 +11,7 @@ import './src/utils/globalFont'; // apply Glorify as the default font app-wide
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import ErrorBoundary from './src/components/common/ErrorBoundary';
 // import NotificationManager from './src/components/NotificationManager';
 // import UserNotificationManager from './src/components/UserNotificationManager';
 
@@ -195,7 +196,11 @@ const App = () => {
         and the bottom nav handles the bottom, so we don't double-pad here. */}
     <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
 
-      <StackNavigation />
+      {/* App-wide crash guard: a render error shows a friendly retry instead of
+          a white screen. */}
+      <ErrorBoundary>
+        <StackNavigation />
+      </ErrorBoundary>
     </SafeAreaView>
 
       {/* Firebase disabled - NotificationManager and UserNotificationManager commented out */}

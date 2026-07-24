@@ -32,7 +32,7 @@ export const getProductImageUrl = (imagePath: string | null | undefined): string
   
   // Use direct file access for product images (same resolved base as the
   // other image helpers so it never depends on a raw env var being present)
-  const fullUrl = `${BACKEND_URL}/uploads/products/${imagePath}?t=${Date.now()}`;
+  const fullUrl = `${BACKEND_URL}/uploads/products/${imagePath}`;
   return fullUrl;
 };
 
@@ -44,7 +44,7 @@ export const getCategoryImageUrl = (imagePath: string | null | undefined): strin
   }
   
   // Use direct file access for category images
-  const fullUrl = `${BACKEND_URL}/uploads/categories/${imagePath}?t=${Date.now()}`;
+  const fullUrl = `${BACKEND_URL}/uploads/categories/${imagePath}`;
   return fullUrl;
 };
 
@@ -66,7 +66,7 @@ const rebuildUploadUrl = (imagePath: string | null | undefined, folder: string):
     return imagePath;
   }
   const name = imagePath.indexOf('/uploads/') !== -1 ? fileNameOf(imagePath) : imagePath;
-  return `${BACKEND_URL}/uploads/${folder}/${encodeURIComponent(name)}?t=${Date.now()}`;
+  return `${BACKEND_URL}/uploads/${folder}/${encodeURIComponent(name)}`;
 };
 
 export const getSliderImageUrl = (imagePath: string | null | undefined): string | null =>
@@ -83,6 +83,6 @@ export const getProfileImageUrl = (imagePath: string | null | undefined): string
   }
   
   // Use direct file access for profile images
-  const fullUrl = `${BACKEND_URL}/uploads/profile/${imagePath}?t=${Date.now()}`;
+  const fullUrl = `${BACKEND_URL}/uploads/profile/${imagePath}`;
   return fullUrl;
 };

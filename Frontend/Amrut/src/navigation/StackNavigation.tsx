@@ -21,6 +21,7 @@ import { NavigationProvider } from '../context/NavigationContext';
 import { NotificationProvider } from '../context/NotificationContext';
 import InAppBanner from '../components/common/InAppBanner';
 import { onNotificationOpened } from '../services/pushNotifications';
+import { setUnauthorizedHandler } from '../services/Api';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,16 @@ const StackNavigation = () => {
       } catch {}
     });
     return () => unsub();
+  }, []);
+
+  // On session expiry (401), reset back to Login.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      try {
+        navigationRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
+      } catch {}
+    });
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   return (

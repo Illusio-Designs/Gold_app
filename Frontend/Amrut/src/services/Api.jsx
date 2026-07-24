@@ -1,10 +1,30 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@env';
 
 // Configure axios defaults
-axios.defaults.timeout = 10000; // 10 seconds timeout
-axios.defaults.retry = 2; // Retry failed requests
-axios.defaults.retryDelay = 1000; // Wait 1 second between retries
+axios.defaults.timeout = 15000; // 15 seconds timeout
+
+// Session-expiry handling: when any request comes back 401 (token invalid or
+// expired) we clear the stored session and notify the app so it can send the
+// user back to Login. Registered from the navigation layer.
+let onUnauthorized = null;
+export const setUnauthorizedHandler = fn => {
+  onUnauthorized = fn;
+};
+
+axios.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error && error.response && error.response.status === 401) {
+      try {
+        await AsyncStorage.multiRemove(['accessToken', 'userId']);
+      } catch (e) {}
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Prevent stale data due to cached GET responses (browser/proxy/CDN).
 // Mobile app expects "read-after-write" after admin updates.
