@@ -8,6 +8,8 @@ import CustomHeader from '../components/common/CustomHeader';
 import { DetailSkeleton, PressableScale } from '../components/common/Motion';
 import { getProductImageUrl } from '../utils/imageUtils';
 import LinearGradient from 'react-native-linear-gradient';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { Search01Icon } from '@hugeicons/core-free-icons';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 
@@ -22,7 +24,9 @@ type RootStackParamList = {
   // add other routes as needed
 };
 
-const { height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+// Square hero image sized to always fit the maroon hero on any device.
+const HERO_IMG = Math.min(width * 0.62, height * 0.3);
 
 const ProductDetail = () => {
   const route = useRoute();
@@ -215,6 +219,10 @@ const ProductDetail = () => {
           onPress={() => setImagePreviewVisible(true)}
         >
           <Image source={getProductImage()} style={styles.heroImage} resizeMode="cover" />
+          {/* Magnify badge — tap to zoom the photo */}
+          <View style={styles.magnifyBadge}>
+            <HugeiconsIcon icon={Search01Icon} size={18} color="#5D0829" strokeWidth={2} />
+          </View>
         </TouchableOpacity>
       </LinearGradient>
 
@@ -338,10 +346,11 @@ const styles = StyleSheet.create({
     fontFamily: 'GlorifyDEMO',
   },
   heroImageWrap: {
-    flex: 1,
-    marginTop: 6,
+    width: HERO_IMG,
+    height: HERO_IMG, // square image
+    alignSelf: 'center',
+    marginTop: 8,
     marginBottom: 22,
-    aspectRatio: 0.82,
     borderRadius: 18,
     overflow: 'hidden',
     backgroundColor: '#FCE2BF',
@@ -354,6 +363,22 @@ const styles = StyleSheet.create({
   heroImage: {
     width: '100%',
     height: '100%',
+  },
+  magnifyBadge: {
+    position: 'absolute',
+    right: 10,
+    bottom: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(252,226,191,0.95)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   sheet: {
     flex: 1,

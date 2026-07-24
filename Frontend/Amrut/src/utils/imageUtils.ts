@@ -48,17 +48,32 @@ export const getCategoryImageUrl = (imagePath: string | null | undefined): strin
   return fullUrl;
 };
 
-export const getSliderImageUrl = (imagePath: string | null | undefined): string | null => {
+// Pull just the file name out of any path/URL (drops host + query string).
+const fileNameOf = (p: string): string => {
+  const noQuery = p.split('?')[0];
+  const seg = noQuery.substring(noQuery.lastIndexOf('/') + 1);
+  try { return decodeURIComponent(seg); } catch { return seg; }
+};
+
+// Rebuild an /uploads/<folder>/<file> URL against the APP's backend host.
+// The backend sometimes emits these URLs with a localhost/dev host (when
+// NODE_ENV isn't 'production'), which never resolves on a device — so we
+// always reconstruct them from the filename against BACKEND_URL.
+const rebuildUploadUrl = (imagePath: string | null | undefined, folder: string): string | null => {
   if (!imagePath || typeof imagePath !== 'string') return null;
-  
-  if (imagePath.indexOf('http') === 0) {
+  // A real external image that isn't one of our uploads → leave untouched.
+  if (imagePath.indexOf('http') === 0 && imagePath.indexOf('/uploads/') === -1) {
     return imagePath;
   }
-  
-  // Use direct file access for slider images
-  const fullUrl = `${BACKEND_URL}/uploads/slider/${imagePath}?t=${Date.now()}`;
-  return fullUrl;
+  const name = imagePath.indexOf('/uploads/') !== -1 ? fileNameOf(imagePath) : imagePath;
+  return `${BACKEND_URL}/uploads/${folder}/${encodeURIComponent(name)}?t=${Date.now()}`;
 };
+
+export const getSliderImageUrl = (imagePath: string | null | undefined): string | null =>
+  rebuildUploadUrl(imagePath, 'slider');
+
+export const getCustomOrderImageUrl = (imagePath: string | null | undefined): string | null =>
+  rebuildUploadUrl(imagePath, 'customorders');
 
 export const getProfileImageUrl = (imagePath: string | null | undefined): string | null => {
   if (!imagePath || typeof imagePath !== 'string') return null;

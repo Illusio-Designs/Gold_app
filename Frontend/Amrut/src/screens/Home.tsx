@@ -37,24 +37,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, index = 0 }
     : require('../assets/img/home/p1.png'); // Fallback image
 
   return (
-  <FadeInSlide delay={Math.min(index, 8) * 55} style={productCardStyles.cardWrap}>
-    <View style={productCardStyles.card}>
-      <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
-        <ShimmerImage
-          source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')}
-          style={productCardStyles.image}
-          radius={14}
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-      <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
-      {/* View button */}
-      <PressableScale containerStyle={productCardStyles.viewBtnWrap} style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
-        <Text style={productCardStyles.viewText}>View</Text>
-      </PressableScale>
+    // No entrance animation here — re-animating the whole grid on every
+    // category change looked like a full page reload.
+    <View style={productCardStyles.cardWrap}>
+      <View style={productCardStyles.card}>
+        <TouchableOpacity style={productCardStyles.imageWrap} activeOpacity={0.85} onPress={onPress}>
+          <ShimmerImage
+            source={imageSource?.uri ? imageSource : require('../assets/img/home/p1.png')}
+            style={productCardStyles.image}
+            radius={14}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+        <Text style={productCardStyles.name} numberOfLines={1}>{product.name || 'Product'}</Text>
+        {/* View button */}
+        <PressableScale containerStyle={productCardStyles.viewBtnWrap} style={productCardStyles.viewBtn} activeScale={0.96} onPress={onPress}>
+          <Text style={productCardStyles.viewText}>View</Text>
+        </PressableScale>
+      </View>
     </View>
-  </FadeInSlide>
-);
+  );
 };
 
 const Home = () => {

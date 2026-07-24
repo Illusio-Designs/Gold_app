@@ -8,6 +8,7 @@ import { PackageIcon } from '@hugeicons/core-free-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 import { getCurrentUserOrders, getMyCustomOrders } from '../services/Api';
+import { getCustomOrderImageUrl } from '../utils/imageUtils';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoginPromptModal from '../components/common/LoginPromptModal';
@@ -373,11 +374,10 @@ const Orders = () => {
                 <>
                   {(() => {
                     const imgs: string[] = Array.isArray(order.images) ? order.images : [];
-                    const first = imgs[0];
-                    const mainSource =
-                      typeof first === 'string' && first.length > 0
-                        ? { uri: first }
-                        : require('../assets/img/home/p1.png');
+                    const firstUrl = getCustomOrderImageUrl(imgs[0]);
+                    const mainSource = firstUrl
+                      ? { uri: firstUrl }
+                      : require('../assets/img/home/p1.png');
                     return (
                       <View style={ccStyles.bgContainer}>
                         <View style={ccStyles.cardContainer}>
@@ -402,14 +402,17 @@ const Orders = () => {
                   {/* Extra reference photos */}
                   {Array.isArray(order.images) && order.images.length > 1 ? (
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 6 }}>
-                      {order.images.slice(1).map((u: string, i: number) => (
-                        <Image
-                          key={i}
-                          source={typeof u === 'string' && u.length > 0 ? { uri: u } : require('../assets/img/home/p1.png')}
-                          style={styles.customThumb}
-                          resizeMode="cover"
-                        />
-                      ))}
+                      {order.images.slice(1).map((u: string, i: number) => {
+                        const url = getCustomOrderImageUrl(u);
+                        return (
+                          <Image
+                            key={i}
+                            source={url ? { uri: url } : require('../assets/img/home/p1.png')}
+                            style={styles.customThumb}
+                            resizeMode="cover"
+                          />
+                        );
+                      })}
                     </ScrollView>
                   ) : null}
                   {order.remark ? (
@@ -479,16 +482,13 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     gap: 6,
-    position: 'absolute',
-    top: 0,
-    zIndex: 10,
   },
   tabBarScroll: {
     height: 50,
     backgroundColor: '#fff',
-    marginTop: 60,
+    marginTop: 12,
   },
   tabBtn: {
     flexDirection: 'row',
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
     color: '#5D0829',
   },
   cardsContent: {
-    paddingTop: 80,
+    paddingTop: 16,
     paddingBottom: 40,
     paddingHorizontal: 20,
   },

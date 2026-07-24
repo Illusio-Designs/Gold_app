@@ -45,7 +45,9 @@ interface SliderItem {
   title: string;
   description?: string;
   image: string;
+  image_url?: string;
   link?: string;
+  link_url?: string;
   category_id?: number;
   category_name?: string;
   created_at?: string;
