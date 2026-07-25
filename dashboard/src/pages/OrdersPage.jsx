@@ -166,6 +166,7 @@ const OrdersPage = () => {
         order.product_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.id.toString().includes(searchTerm) ||
+        order.order_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.product_sku?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -337,8 +338,22 @@ const OrdersPage = () => {
     }).format(amount);
   };
 
-  // Unique, human-readable order id, e.g. ORD-000012
-  const formatOrderId = (id) => `ORD-${String(id ?? '').padStart(6, '0')}`;
+  // Order number: prefer the value the API already derived (ORD-B2B-8F3A91,
+  // ORD-D2C-…, ORD-CUS-…). Fallback computes the same hash client-side so a
+  // row that somehow lacks it still shows the new format (never the old ORD-000012).
+  const orderHash = (id) => {
+    const n = (BigInt(id || 0) * 2654435761n) % 16777216n;
+    return n.toString(16).toUpperCase().padStart(6, '0');
+  };
+  const formatOrderId = (row) => {
+    if (row && row.order_number) return row.order_number;
+    const channel = row?.isCustom
+      ? 'CUS'
+      : String(row?.user_type || '').toLowerCase() === 'consumer'
+      ? 'D2C'
+      : 'B2B';
+    return `ORD-${channel}-${orderHash(row?.id)}`;
+  };
 
   if (loading) {
     return (
@@ -365,7 +380,7 @@ const OrdersPage = () => {
       header: "Order ID",
       accessor: "id",
       cell: (row) => (
-        <span className="order-id">{formatOrderId(row.id)}</span>
+        <span className="order-id">{formatOrderId(row)}</span>
       ),
     },
     {
@@ -632,7 +647,7 @@ const OrdersPage = () => {
         <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
           Are you sure you want to delete order{' '}
           <strong style={{ color: 'var(--brand)' }}>
-            {formatOrderId(deleteOrderItem?.id)}
+            {formatOrderId(deleteOrderItem)}
           </strong>
           ? This action cannot be undone.
         </p>

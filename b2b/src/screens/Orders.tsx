@@ -346,7 +346,7 @@ const Orders = () => {
                 <View style={styles.orderInfo}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={styles.orderId}>
-                      {order.isCustom ? `Custom #${order.id}` : `Order #${order.id}`}
+                      {order.order_number || (order.isCustom ? `Custom #${order.id}` : `Order #${order.id}`)}
                     </Text>
                     {order.isCustom ? (
                       <View style={styles.customTag}>

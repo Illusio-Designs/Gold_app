@@ -121,6 +121,7 @@ function createOrder(req, res) {
           try {
             const notificationData = {
               id: orderDetails.id,
+              orderNumber: orderDetails.order_number,
               userId: orderDetails.business_user_id,
               userName: orderDetails.user_name,
               productName: orderDetails.product_name,
@@ -440,6 +441,7 @@ function updateOrderStatus(req, res) {
             try {
               const r = await notifyOrderStatusChange({
                 id: updatedOrder.id,
+                orderNumber: updatedOrder.order_number,
                 status,
                 userId: roomUserId,
               });

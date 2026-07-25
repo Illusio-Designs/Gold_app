@@ -1,6 +1,7 @@
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const { formatOrderNumber, channelForUserType } = require("../utils/orderNumber");
 
 const BRAND = "#5d0829";
 const GOLD = "#c09e83";
@@ -9,7 +10,11 @@ const INK = "#2b2b2b";
 const MUTED = "#7a6a5d";
 const LINE = "#e6d8c8";
 
-const formatOrderId = (id) => `ORD-${String(id ?? "").padStart(6, "0")}`;
+// Prefer the order_number the query already derived; fall back to computing it
+// from the id + channel so an invoice never shows a blank/old-style number.
+const formatOrderId = (order) =>
+  (order && order.order_number) ||
+  formatOrderNumber(order && order.id, channelForUserType(order && order.user_type));
 
 const formatCurrency = (amount) => {
   const n = Number(amount);
@@ -60,7 +65,7 @@ function generateOrderPDF(order, stream) {
     .fillColor(GOLD)
     .font("Helvetica")
     .fontSize(10)
-    .text(formatOrderId(order.id), pageW - M - 220, 58, {
+    .text(formatOrderId(order), pageW - M - 220, 58, {
       width: 220,
       align: "right",
     })
@@ -264,7 +269,7 @@ function generateCustomOrderPDF(order, stream) {
   const pageW = doc.page.width;
   const M = 48;
   const contentW = pageW - M * 2;
-  const number = order.order_number || `CUS-${String(order.id ?? "").padStart(6, "0")}`;
+  const number = order.order_number || formatOrderNumber(order.id, "CUS");
 
   // ---- Header band ---------------------------------------------------------
   doc.rect(0, 0, pageW, 96).fill(BRAND);

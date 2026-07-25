@@ -150,7 +150,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const onOrder = (payload: any) => {
         const order = payload?.order || payload;
         const status = order?.status ? String(order.status) : 'updated';
-        const idText = order?.id ? ` #${order.id}` : '';
+        const idText = order?.order_number
+          ? ` ${order.order_number}`
+          : order?.id
+          ? ` #${order.id}`
+          : '';
         showBanner('Order update', `Your order${idText} is now ${status}.`);
         refresh();
       };
