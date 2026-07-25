@@ -35,14 +35,32 @@ platform :ios do
       build_number: latest_testflight_build_number(api_key: api_key, initial_build_number: 5).to_i + 1
     )
 
-    # Fetch (or create on first run) the distribution cert + App Store profile.
+    # A dedicated CI keychain with a KNOWN password. Without this, match imports
+    # the cert into the runner's login.keychain and can't set the key partition
+    # list, so codesign hangs forever on a keychain UI-permission popup on the
+    # headless runner (the build timed out at "Signing Amrut.app").
+    keychain_name = "ci.keychain"
+    keychain_password = "ci-keychain-pw"
+    create_keychain(
+      name: keychain_name,
+      password: keychain_password,
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
+
+    # Fetch the distribution cert + App Store profile (already created & stored
+    # in the fastlane-certs branch on the first run) into the CI keychain.
     match(
       type: "appstore",
       api_key: api_key,
       app_identifier: "com.Amrutt",
       git_url: ENV["MATCH_GIT_URL"],
       git_branch: "fastlane-certs",
-      readonly: false
+      keychain_name: keychain_name,
+      keychain_password: keychain_password,
+      readonly: true
     )
 
     # Point the Xcode project at the match profile with manual signing, for both
