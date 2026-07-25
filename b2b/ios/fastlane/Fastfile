@@ -49,8 +49,11 @@ platform :ios do
       scheme: "Amrut",
       clean: true,
       export_method: "app-store",
-      xcargs: auth,          # auth for the archive step
-      export_xcargs: auth,   # auth for the export step
+      # auth for the ARCHIVE step. Do NOT also set export_xcargs — gym injects
+      # the same -authenticationKey* flags into -exportArchive itself, and
+      # xcodebuild rejects the duplicate ("option '-authenticationKeyID' may
+      # only be provided once"), which failed the export after a good archive.
+      xcargs: auth,
       export_options: {
         signingStyle: "automatic"
       },
