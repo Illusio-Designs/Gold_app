@@ -61,13 +61,14 @@ const styles = StyleSheet.create({
   name: { fontFamily: FONT, fontSize: fontSize.bodySm, color: colors.ink },
   chip: { marginTop: 5 },
   viewBtn: {
-    marginTop: 9,
+    marginTop: 10,
     backgroundColor: colors.maroon,
-    borderRadius: radius.sm,
-    paddingVertical: 7,
+    borderRadius: radius.md,
+    paddingVertical: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  viewTxt: { fontFamily: FONT, fontSize: fontSize.label, color: colors.cream },
+  viewTxt: { fontFamily: FONT, fontSize: fontSize.bodySm, color: colors.cream },
 });
 
 export default ProductCard;
