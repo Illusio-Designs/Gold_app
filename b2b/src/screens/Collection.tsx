@@ -8,9 +8,11 @@ import SearchBar from '../components/common/SearchBar';
 
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { resolveCategoryIcon } from '../utils/categoryIcons';
+import { CategoryRail, ProductCard } from '../components/ui';
 import { isSmallScreen, isMediumScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { wp, hp } from '../utils/responsiveConfig';
-import { getApprovedCategoriesForUser } from '../services/Api';
+import { getApprovedCategoriesForUser, getApprovedProductsForUser } from '../services/Api';
+import { getProductImageUrl } from '../utils/imageUtils';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ScreenLoader from '../components/common/ScreenLoader';
 import { Skeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
@@ -98,6 +100,44 @@ const Collection = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Swiggy-style browsing: an active category whose products fill the page.
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+
+  // Pick the initial active category once categories arrive (route param wins).
+  useEffect(() => {
+    if (activeId != null || categories.length === 0) return;
+    const routeId = typeof selectedCategoryId === 'number' ? selectedCategoryId : null;
+    const initial = (routeId && categories.find(c => c.id === routeId)) ? routeId : categories[0].id;
+    setActiveId(initial);
+  }, [categories, selectedCategoryId, activeId]);
+
+  // Load products for the active category (client-side filter, like Product).
+  useEffect(() => {
+    if (activeId == null) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setProductsLoading(true);
+        const res = await getApprovedProductsForUser(userId, accessToken);
+        if (cancelled) return;
+        const all = res && res.success && Array.isArray(res.data) ? res.data : [];
+        setProducts(all.filter((p: any) => p && p.category_id === activeId && p.stock_status !== 'out_of_stock'));
+      } catch (e) {
+        if (!cancelled) setProducts([]);
+      } finally {
+        if (!cancelled) setProductsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [activeId, userId, accessToken]);
+
+  const activeCategory = categories.find(c => c.id === activeId) || null;
+  const visibleProducts = (products || []).filter(
+    (p: any) => search === '' || String(p.name || p.sku || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   // Keep latest fetch function for socket callbacks (avoid stale closures)
   const fetchCategoriesRef = useRef(fetchCategories);
@@ -188,33 +228,17 @@ const Collection = () => {
           ]}
         />
 
-        {/* Category Filter Header */}
-        {selectedCategoryId && categoryName && (
-          <View style={styles.categoryFilterHeader}>
-            <Text style={styles.categoryFilterText}>
-              Showing: <Text style={styles.categoryFilterName}>{categoryName}</Text>
-            </Text>
-            <TouchableOpacity
-              style={styles.clearFilterButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.clearFilterText}>Show All</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Loading/Error State */}
+        {/* Loading / error while categories load */}
         {loading ? (
-          <View style={productCardStyles.container}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton
-                key={i}
-                width="47%"
-                height={tileHeight}
-                radius={getResponsiveSpacing(16, 18, 22)}
-                style={{ marginBottom: 14 }}
-              />
-            ))}
+          <View style={{ paddingHorizontal: 16, paddingTop: 14 }}>
+            <Skeleton width="60%" height={20} radius={6} style={{ marginBottom: 16 }} />
+            <View style={styles.gridInner}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <View key={i} style={styles.gridCell}>
+                  <Skeleton width="100%" height={tileHeight} radius={16} />
+                </View>
+              ))}
+            </View>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
@@ -223,59 +247,70 @@ const Collection = () => {
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
+        ) : categories.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No categories found</Text>
+            <Text style={styles.emptySubtext}>No categories available</Text>
+          </View>
         ) : (
-          /* Categories Display */
-          <ScrollView
-            contentContainerStyle={productCardStyles.container}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          >
-            {filteredCategories.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No categories found</Text>
-                <Text style={styles.emptySubtext}>
-                  {search ? `No categories match "${search}"` : 'No categories available'}
-                </Text>
+          <>
+            {/* Swiggy-style category rail — tap to switch, auto-scrolls */}
+            <CategoryRail
+              items={categories.map(c => ({ id: c.id, name: c.name, icon: c.icon }))}
+              activeId={activeId}
+              onSelect={(id) => setActiveId(typeof id === 'number' ? id : parseInt(String(id), 10))}
+            />
+
+            {/* Active category banner */}
+            {activeCategory && (
+              <View style={styles.banner}>
+                <View>
+                  <Text style={styles.bannerKicker}>Explore</Text>
+                  <Text style={styles.bannerName}>{activeCategory.name}</Text>
+                </View>
+                <HugeiconsIcon icon={resolveCategoryIcon(activeCategory.icon)} size={40} color="#C09E83" strokeWidth={1.5} />
               </View>
-            ) : (
-              filteredCategories.map((category: Category, index: number) => (
-                <FadeInSlide
-                  key={category.id ? String(category.id) : String(index)}
-                  delay={Math.min(index, 8) * 55}
-                  style={productCardStyles.cardWrap}
-                >
-                  <PressableScale
-                    style={productCardStyles.card}
-                    onPress={() => handleCategoryPress(category)}
-                  >
-                    {/* Category icon centered on a cream tile */}
-                    <View style={[productCardStyles.image, productCardStyles.iconTile]}>
-                      <HugeiconsIcon
-                        icon={resolveCategoryIcon(category.icon)}
-                        size={54}
-                        color="#A17C57"
-                        strokeWidth={1.6}
+            )}
+
+            {/* Products for the active category */}
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={styles.grid}
+              showsVerticalScrollIndicator={false}
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            >
+              {productsLoading ? (
+                <View style={styles.gridInner}>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <View key={i} style={styles.gridCell}>
+                      <Skeleton width="100%" height={tileHeight} radius={16} />
+                    </View>
+                  ))}
+                </View>
+              ) : visibleProducts.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>No products yet</Text>
+                  <Text style={styles.emptySubtext}>
+                    {activeCategory ? `Nothing in ${activeCategory.name} yet` : 'Select a category'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.gridInner}>
+                  {visibleProducts.map((p: any, i: number) => (
+                    <View key={String(p.id || i)} style={styles.gridCell}>
+                      <ProductCard
+                        name={p.name || p.sku || 'Product'}
+                        weight={p.net_weight ? `${p.net_weight} g` : undefined}
+                        imageUri={getProductImageUrl(p.image) || undefined}
+                        fallbackIcon={resolveCategoryIcon(activeCategory?.icon)}
+                        onPress={() => (navigation as any).navigate('ProductDetail', { productId: p.id })}
                       />
                     </View>
-
-                    {/* Maroon fade so the name is always readable */}
-                    <LinearGradient
-                      colors={['transparent', 'rgba(58,5,25,0.9)']}
-                      style={productCardStyles.overlay}
-                    />
-
-                    {/* Category name (cream Glorify) + arrow, over the image */}
-                    <View style={productCardStyles.labelRow}>
-                      <Text style={productCardStyles.name} numberOfLines={1}>{category.name}</Text>
-                      <Text style={productCardStyles.arrow}>›</Text>
-                    </View>
-                  </PressableScale>
-                </FadeInSlide>
-              ))
-            )}
-          </ScrollView>
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          </>
         )}
 
       </View>
@@ -284,6 +319,46 @@ const Collection = () => {
 };
 
 const styles = StyleSheet.create({
+  banner: {
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 2,
+    backgroundColor: '#FBF3E6',
+    borderWidth: 1,
+    borderColor: '#ECE0D3',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bannerKicker: {
+    fontFamily: 'GlorifyDEMO',
+    fontSize: 11,
+    color: '#A17C57',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  bannerName: {
+    fontFamily: 'GlorifyDEMO',
+    fontSize: 20,
+    color: '#5D0829',
+    marginTop: 2,
+  },
+  grid: {
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  gridInner: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  gridCell: {
+    width: '50%',
+    padding: 6,
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
