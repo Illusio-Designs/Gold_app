@@ -484,7 +484,7 @@ const Product = () => {
           title="Filter"
           icon={FilterIcon}
           onPress={() => setFilterVisible(true)}
-          fullWidth
+          style={styles.filterBtn}
         />
       </View>
 
@@ -513,6 +513,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 16,
+  },
+  filterBtn: {
+    alignSelf: 'stretch',
+    paddingVertical: 14,
   },
   searchRow: {
     flexDirection: 'row',

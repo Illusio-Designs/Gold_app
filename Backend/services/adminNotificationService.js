@@ -403,6 +403,7 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           }
           
           // No push token, but still record the in-app bell notification.
+          console.warn(`[notif] user=${userId} type=${type} -> NO active push token (recipient must open the app logged in)`);
           persistUserNotification(userId, type, title, body, data);
           resolve({
             success: false,
@@ -467,6 +468,12 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             // Send push notification to user
             try {
               const pushResult = await sendNotification(userToken, title, body, notificationData);
+              console.log(
+                `[notif] user=${userId} type=${type} -> push:`,
+                pushResult && pushResult.success
+                  ? `OK (${pushResult.messageId})`
+                  : `FAIL (${pushResult && (pushResult.error || (pushResult.disabled ? 'firebase-disabled/no-service-account' : 'unknown'))})`
+              );
 
               // Mark notification as unread for user
               const markUnreadSql = `
