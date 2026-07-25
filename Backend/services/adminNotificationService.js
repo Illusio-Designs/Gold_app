@@ -321,9 +321,11 @@ async function notifyOrderStatusChange(orderData) {
  */
 async function sendUserNotification(userId, type, title, body, data = {}) {
   try {
-    // Save it to the user's in-app notifications list (bell) first, so it's
-    // there whether or not a push token is registered.
-    persistUserNotification(userId, type, title, body, data);
+    // NOTE: do NOT persist the bell row here. The canonical insert happens below
+    // (after the duplicate check). Persisting here caused the duplicate check to
+    // find the row it just wrote and abort before sending the push — which is
+    // why order-status / registration pushes never fired. The no-token branch
+    // below persists the bell row itself.
     // For login approval notifications, also check for unauthenticated tokens
     // This handles the case where user hasn't logged in yet but has the app installed
     let getTokensSql;
@@ -400,8 +402,10 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             return;
           }
           
-          resolve({ 
-            success: false, 
+          // No push token, but still record the in-app bell notification.
+          persistUserNotification(userId, type, title, body, data);
+          resolve({
+            success: false,
             error: 'No user token found',
             message: 'User has not registered FCM token yet. They need to open the mobile app.',
             requiresAppAction: true

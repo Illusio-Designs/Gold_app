@@ -261,17 +261,6 @@ const Collection = () => {
               onSelect={(id) => setActiveId(typeof id === 'number' ? id : parseInt(String(id), 10))}
             />
 
-            {/* Active category banner */}
-            {activeCategory && (
-              <View style={styles.banner}>
-                <View>
-                  <Text style={styles.bannerKicker}>Explore</Text>
-                  <Text style={styles.bannerName}>{activeCategory.name}</Text>
-                </View>
-                <HugeiconsIcon icon={resolveCategoryIcon(activeCategory.icon)} size={40} color="#C09E83" strokeWidth={1.5} />
-              </View>
-            )}
-
             {/* Products for the active category */}
             <ScrollView
               style={{ flex: 1 }}

@@ -158,9 +158,9 @@ const styles = StyleSheet.create({
     fontFamily: 'GlorifyDEMO',
   },
   actionBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     marginLeft: 8,
     backgroundColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
