@@ -57,6 +57,13 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # Ensure Android 16 (API 36) platform + build-tools are present — the app
+      # targets API 36 (Google Play policy). Explicit install so the build never
+      # depends on whatever the runner image happens to preinstall.
+      - name: Install Android SDK 36
+        run: |
+          yes | sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+
       - name: Install JS dependencies
         run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
