@@ -574,23 +574,9 @@ const styles = StyleSheet.create({
     tintColor: '#6B0D33',
     resizeMode: 'contain',
   },
-  filterBtn: {
-    marginLeft: 10,
-    backgroundColor: '#5D0829', // updated to match design
-    borderRadius: 18, // perfect circle for 40x40
-    width: 60,
-    height: 45,
-    justifyContent: 'center',
-    alignItems: 'center',
-    top:4,
-    
-  },
-  filterIcon: {
-    width: 18,
-    height: 18,
-    resizeMode: 'contain',
-    // removed tintColor to preserve original icon color
-  },
+  // NOTE: the old 60x45 `filterBtn` pill was removed — it was a DUPLICATE key
+  // that silently overrode the real full-width `filterBtn` above (last key wins),
+  // which is why the button rendered as a cramped "F..." pill.
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

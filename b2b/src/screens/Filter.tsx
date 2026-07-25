@@ -62,12 +62,15 @@ const CustomWeightSlider = ({ value, onValueChange, min = SLIDER_MIN, max = SLID
 
   return (
     <View style={sliderStyles.container}>
+      {/* base track (light) + maroon fill up to the thumb */}
       <View style={sliderStyles.track} />
+      <View style={[sliderStyles.fill, { width: Math.max(0, currentThumbX) }]} />
       <View
         style={[
           sliderStyles.thumb,
-          { left: currentThumbX - 10 },
+          { left: currentThumbX - 13 },
         ]}
+        hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
         {...panResponder.panHandlers}
       />
       <View style={sliderStyles.labelRow}>
@@ -225,12 +228,13 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
                 ))}
               </View>
             )}
-            <Text style={styles.label}>Weight</Text>
-            {/* Slider removed. Add your custom slider or another solution here. */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 2, marginTop: 18, marginBottom: 10 }}>
-              <Text style={{ color: '#6B0D33', fontFamily: 'GlorifyDEMO', fontSize: 14, fontWeight: '700' }}>0gm</Text>
-              <Text style={{ color: '#6B0D33', fontFamily: 'GlorifyDEMO', fontSize: 14, fontWeight: '700' }}>10gm</Text>
+            <View style={styles.weightHeader}>
+              <Text style={styles.label}>Weight</Text>
+              <View style={styles.weightPill}>
+                <Text style={styles.weightPillText}>{weight.toFixed(1)} gm</Text>
+              </View>
             </View>
+            <CustomWeightSlider value={weight} onValueChange={setWeight} />
             <Text style={styles.label}>Size</Text>
             <View style={styles.optionsRow}>
               {SIZES.map(size => (
@@ -341,6 +345,26 @@ const styles = StyleSheet.create({
     fontFamily: 'GlorifyDEMO',
     marginTop: 18,
     marginBottom: 8,
+  },
+  weightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  weightPill: {
+    backgroundColor: '#F9F2E7',
+    borderWidth: 1,
+    borderColor: '#EADBC8',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginTop: 18,
+  },
+  weightPillText: {
+    color: '#6B0D33',
+    fontFamily: 'GlorifyDEMO',
+    fontSize: 13,
+    fontWeight: '700',
   },
   weightRow: {
     flexDirection: 'row',

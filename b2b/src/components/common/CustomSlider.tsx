@@ -154,23 +154,34 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
               imageStyle={styles.slideBg}
               resizeMode="cover"
             >
-              <Text style={styles.title}>{slide.title}</Text>
-              <Image
-                source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image}
-                style={styles.jewelryImg}
-                resizeMode="contain"
-                onError={(error) => console.log('Slider image load error:', error?.nativeEvent?.error)}
-              />
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  if (slide.category_id && onShowMore) {
-                    onShowMore(slide.category_id, slide.category_name || 'Category');
-                  }
-                }}
-              >
-                <Text style={styles.buttonText}>{slide.button}</Text>
-              </TouchableOpacity>
+              {/* Balanced two-column layout: text block on the left, product
+                  image on the right — no more overlapping absolute elements. */}
+              <View style={styles.slideRow}>
+                <View style={styles.textCol}>
+                  <Text style={styles.eyebrow}>FEATURED</Text>
+                  <Text style={styles.title} numberOfLines={2}>{slide.title}</Text>
+                  {slide.description ? (
+                    <Text style={styles.desc} numberOfLines={2}>{slide.description}</Text>
+                  ) : null}
+                  <TouchableOpacity
+                    style={styles.button}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      if (slide.category_id && onShowMore) {
+                        onShowMore(slide.category_id, slide.category_name || 'Category');
+                      }
+                    }}
+                  >
+                    <Text style={styles.buttonText}>{slide.button}</Text>
+                  </TouchableOpacity>
+                </View>
+                <Image
+                  source={typeof slide.image === 'string' && slide.image.startsWith('http') ? { uri: slide.image } : slide.image}
+                  style={styles.jewelryImg}
+                  resizeMode="contain"
+                  onError={(error) => console.log('Slider image load error:', error?.nativeEvent?.error)}
+                />
+              </View>
             </ImageBackground>
           </TouchableOpacity>
         ))}
@@ -195,75 +206,89 @@ const styles = StyleSheet.create({
   slide: {
     width: SLIDE_WIDTH,
     height: SLIDE_HEIGHT,
-    borderRadius: 32,
+    borderRadius: 24,
     overflow: 'hidden',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 0,
-    justifyContent: 'space-between',
-    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(192,158,131,0.45)', // subtle gold hairline
   },
   slideBg: {
     width: '100%',
     height: '100%',
-    borderRadius: 28,
+    borderRadius: 24,
+  },
+  slideRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 22,
+    paddingRight: 14,
+  },
+  textCol: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingRight: 8,
+  },
+  eyebrow: {
+    color: '#E7C9A9',
+    fontSize: 11,
+    fontFamily: 'GlorifyDEMO',
+    letterSpacing: 2,
+    marginBottom: 4,
+    opacity: 0.9,
   },
   jewelryImg: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    right: 100,
-    bottom: 5,
-    zIndex: 1,
+    width: 128,
+    height: 128,
   },
   title: {
-    position: 'absolute',
-    left: 40,
-    bottom: 25,
-    color: '#F8D7C5',
-    fontSize: 30,
+    color: '#FCE2BF',
+    fontSize: 26,
     fontWeight: 'bold',
     fontFamily: 'GlorifyDEMO',
-    letterSpacing: 1,
-    zIndex: 2,
-    textShadowColor: 'rgba(0,0,0,0.35)',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },
+  desc: {
+    color: '#F0D9C4',
+    fontSize: 12,
+    fontFamily: 'GlorifyDEMO',
+    marginTop: 4,
+    opacity: 0.9,
+  },
   button: {
-    position: 'absolute',
-    right: 24,
-    bottom: 20,
-    backgroundColor: '#F8D7C5',
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    zIndex: 3,
-    
+    alignSelf: 'flex-start',
+    marginTop: 12,
+    backgroundColor: '#FCE2BF',
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
   },
   buttonText: {
     color: '#5D0829',
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'GlorifyDEMO',
     fontWeight: 'bold',
   },
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 10,
+    alignItems: 'center',
+    marginTop: 12,
   },
   dot: {
     width: 6,
     height: 6,
-    borderRadius: 4,
+    borderRadius: 3,
     backgroundColor: '#E2C6C6',
-    marginHorizontal: 4,
+    marginHorizontal: 3,
   },
   activeDot: {
-    backgroundColor: '#7B2B3A',
-    width: 8,
-    height: 8,
-    borderRadius: 6,
+    backgroundColor: '#C09E83', // gold active pill
+    width: 18,
+    height: 6,
+    borderRadius: 3,
   },
   loadingContainer: {
     flex: 1,
