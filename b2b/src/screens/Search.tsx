@@ -21,6 +21,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { searchAll, searchCategories, searchProducts } from '../services/Api';
+import { Search01Icon } from '@hugeicons/core-free-icons';
+import { EmptyState } from '../components/ui';
 import Toast from 'react-native-toast-message';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 
@@ -337,15 +339,11 @@ const Search = () => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               ListEmptyComponent={
-                <View style={styles.emptyContainer}>
-                  <View style={styles.emptyIconCircle}>
-                    <Text style={styles.emptyIconGlyph}>🔍</Text>
-                  </View>
-                  <Text style={styles.emptyText}>No results found</Text>
-                  <Text style={styles.emptySubtext}>
-                    Try adjusting your search terms or filters
-                  </Text>
-                </View>
+                <EmptyState
+                  icon={Search01Icon}
+                  title="No results found"
+                  subtitle="Try adjusting your search terms or filters"
+                />
               }
             />
           )}

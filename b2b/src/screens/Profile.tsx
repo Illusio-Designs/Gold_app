@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking, PermissionsAndroid } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { PencilEdit02Icon, SparklesIcon, Notification03Icon, Delete02Icon, ArrowRight01Icon, Logout01Icon } from '@hugeicons/core-free-icons';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
 import CustomLoader from '../components/common/CustomLoader';
@@ -404,37 +406,37 @@ const Profile = () => {
           style={styles.menuBtn}
           onPress={() => (navigation as any).navigate('EditProfile')}
         >
-          <Image source={require('../assets/img/profile/profile.png')} style={styles.menuIcon} />
+          <View style={styles.menuIconBox}><HugeiconsIcon icon={PencilEdit02Icon} size={19} color="#5D0829" strokeWidth={1.8} /></View>
           <Text style={styles.menuText}>Edit Profile</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="#b8a7ac" strokeWidth={1.8} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBtn}
           onPress={() => (navigation as any).navigate('Custom')}
         >
-          <Text style={styles.menuGlyph}>✦</Text>
+          <View style={styles.menuIconBox}><HugeiconsIcon icon={SparklesIcon} size={19} color="#5D0829" strokeWidth={1.8} /></View>
           <Text style={styles.menuText}>Custom Order</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="#b8a7ac" strokeWidth={1.8} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBtn}
           onPress={handleCheckPush}
         >
-          <Text style={styles.menuGlyph}>🔔</Text>
+          <View style={styles.menuIconBox}><HugeiconsIcon icon={Notification03Icon} size={19} color="#5D0829" strokeWidth={1.8} /></View>
           <Text style={styles.menuText}>Notification Status</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="#b8a7ac" strokeWidth={1.8} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBtn}
           onPress={handleDeleteAccount}
         >
-          <Image source={require('../assets/img/profile/logout.png')} style={[styles.menuIcon, {tintColor: '#dc2626'}]} />
+          <View style={[styles.menuIconBox, styles.menuIconBoxRed]}><HugeiconsIcon icon={Delete02Icon} size={19} color="#dc2626" strokeWidth={1.8} /></View>
           <Text style={[styles.menuText, {color: '#dc2626'}]}>Delete Account</Text>
-          <Image source={require('../assets/img/profile/nextarrow.png')} style={styles.menuArrow} />
+          <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="#b8a7ac" strokeWidth={1.8} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuBtn} onPress={handleLogout}>
-          <Image source={require('../assets/img/profile/logout.png')} style={styles.menuIcon} />
-          <Text style={styles.menuText}>Logout</Text>
+          <View style={[styles.menuIconBox, styles.menuIconBoxRed]}><HugeiconsIcon icon={Logout01Icon} size={19} color="#dc2626" strokeWidth={1.8} /></View>
+          <Text style={[styles.menuText, {color: '#dc2626'}]}>Logout</Text>
         </TouchableOpacity>
       </View>
       
@@ -525,6 +527,18 @@ const styles = StyleSheet.create({
     color: '#5D0829',
     textAlign: 'center',
     marginRight: getResponsiveSpacing(12, 16, 20),
+  },
+  menuIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: '#FBF3E6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  menuIconBoxRed: {
+    backgroundColor: '#FBECEA',
   },
   menuText: {
     color: '#5D0829',
