@@ -25,8 +25,11 @@ on:
   workflow_dispatch:
   push:
     branches: [claude/code-updates-review-4lp01q]
+    # Any app change rebuilds iOS — the JS/src is bundled into the iOS app too,
+    # so watching only b2b/ios/** missed JS-only fixes (they built Android but
+    # not iOS). Match android-build.yml: rebuild on any b2b change.
     paths:
-      - "b2b/ios/**"
+      - "b2b/**"
       - ".github/workflows/ios-build.yml"
 
 concurrency:
