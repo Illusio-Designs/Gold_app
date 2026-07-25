@@ -7,6 +7,7 @@ import CustomTextInput from '../components/common/CustomTextInput';
 import ScreenLoader from '../components/common/ScreenLoader';
 
 import CountryPickerModal from '../components/common/CountryPickerModal';
+import { FlagIN } from '../components/ui';
 import CityPickerModal from '../components/common/CityPickerModal';
 import { countryCities, cityToState } from '../data/cities';
 import { Country } from '../data/countries';
@@ -361,7 +362,11 @@ const EditProfile = () => {
           <CustomTextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" />
           <View style={styles.row}>
             <TouchableOpacity style={styles.countryCodeBox} onPress={() => setCountryModalVisible(true)}>
-              <Text style={styles.flag}>{countryFlag}</Text>
+              {countryCode === '+91' ? (
+                <FlagIN />
+              ) : (
+                <Text style={styles.flag}>{countryFlag}</Text>
+              )}
               <Text style={styles.countryCode}>{countryCode}</Text>
             </TouchableOpacity>
             <TextInput
