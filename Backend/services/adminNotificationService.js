@@ -1,5 +1,5 @@
 const { db } = require('../config/db');
-const { sendNotification } = require('./firebaseNotificationService');
+const { sendNotification, sendMulticastNotification } = require('./firebaseNotificationService');
 const socketService = require('./socketService');
 
 // Notification types and their corresponding sounds
@@ -420,8 +420,13 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           return;
         }
 
-         // Get user's token (authenticated only)
-         const userToken = tokenResults[0].token;
+        // ALL of the user's active tokens. The same account can be logged into
+        // more than one app/device (e.g. B2B + D2C) whose tokens belong to
+        // different Firebase projects; sending to only the first token often
+        // hit the wrong project ("SenderId mismatch"). Multicasting to every
+        // token means the token that matches THIS backend's Firebase project
+        // gets delivered and any other-project token just fails harmlessly.
+        const userTokens = tokenResults.map((r) => r.token).filter(Boolean);
 
         // Add notification type and sound to data (all values must be strings for Firebase)
         const typeKey = (type || '').toString().toUpperCase();
@@ -480,12 +485,14 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
             const notificationId = insertResult.insertId;
             // Send push notification to user
             try {
-              const pushResult = await sendNotification(userToken, title, body, notificationData);
+              const pushResult = await sendMulticastNotification(userTokens, title, body, notificationData);
               console.log(
                 `[notif] user=${userId} type=${type} -> push:`,
-                pushResult && pushResult.success
-                  ? `OK (${pushResult.messageId})`
-                  : `FAIL (${pushResult && (pushResult.error || (pushResult.disabled ? 'firebase-disabled/no-service-account' : 'unknown'))})`
+                pushResult && pushResult.disabled
+                  ? 'firebase-disabled/no-service-account'
+                  : pushResult && pushResult.success === false
+                  ? `FAIL (${pushResult.error || 'unknown'})`
+                  : `OK (${pushResult.successCount}/${userTokens.length} device(s), ${pushResult.failureCount} failed)`
               );
 
               // Mark notification as unread for user

@@ -12,6 +12,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ErrorBoundary from './src/components/common/ErrorBoundary';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/components/common/ToastConfig';
 // import NotificationManager from './src/components/NotificationManager';
 // import UserNotificationManager from './src/components/UserNotificationManager';
 
@@ -240,7 +242,10 @@ const App = () => {
         </View>
       )} */}
 
-
+      {/* App-wide toast host (Amrut-branded). Mounted last so it overlays every
+          screen. Without this, every Toast.show(...) call across the app was a
+          no-op — e.g. checkout errors were silently swallowed. */}
+      <Toast config={toastConfig} topOffset={60} />
     </SafeAreaProvider>
   );
 };

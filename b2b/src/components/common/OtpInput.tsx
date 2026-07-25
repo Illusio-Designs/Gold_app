@@ -1,5 +1,12 @@
-import React, { useRef } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  Platform,
+} from 'react-native';
 
 interface OtpInputProps {
   value: string;
@@ -8,65 +15,71 @@ interface OtpInputProps {
   boxStyle?: any;
 }
 
+// Single-field OTP entry disguised as 6 boxes.
+//
+// The old version used 6 separate TextInputs, each maxLength={1}. On iOS the
+// one-time-code autofill ("From Messages, 2413…") can only populate ONE field,
+// so it dropped a single digit into box 0 and the rest stayed blank — autofill
+// looked broken. A hidden, full-width TextInput with maxLength={6} +
+// textContentType="oneTimeCode" receives the FULL code from iOS autofill (and
+// SMS Retriever on Android), and we paint 6 read-only boxes on top of it. One
+// real field => autofill fills all six.
 const OtpInput: React.FC<OtpInputProps> = ({ value, onChange, style, boxStyle }) => {
-  const inputs = useRef<Array<TextInput | null>>([]);
+  const inputRef = useRef<TextInput | null>(null);
+  const [focused, setFocused] = useState(false);
 
-  const handleChange = (text: string, idx: number) => {
-    let newValue = value.split('');
-    if (text.length > 1) {
-      // If user pastes or types multiple digits, fill as much as possible
-      const chars = text.split('');
-      for (let i = 0; i < chars.length && idx + i < 6; i++) {
-        newValue[idx + i] = chars[i].replace(/\D/g, '');
-      }
-      onChange(newValue.join('').slice(0, 6));
-      if (idx + chars.length < 6) {
-        inputs.current[idx + chars.length]?.focus();
-      }
-      return;
-    }
-    if (/^\d$/.test(text)) {
-      newValue[idx] = text;
-      onChange(newValue.join('').slice(0, 6));
-      if (idx < 5) {
-        inputs.current[idx + 1]?.focus();
-      }
-    } else if (text === '') {
-      newValue[idx] = '';
-      onChange(newValue.join('').slice(0, 6));
-    }
+  const handleChange = (text: string) => {
+    // keep digits only, cap at 6
+    const digits = text.replace(/\D/g, '').slice(0, 6);
+    onChange(digits);
   };
 
-  const handleKeyPress = (e: any, idx: number) => {
-    if (e.nativeEvent.key === 'Backspace' && !value[idx] && idx > 0) {
-      inputs.current[idx - 1]?.focus();
-    }
-  };
+  const focus = () => inputRef.current?.focus();
+
+  const cells = [...Array(6)].map((_, idx) => {
+    const char = value[idx] || '';
+    // active cell = the next empty slot (or the last one when full)
+    const isActive = focused && (idx === value.length || (value.length === 6 && idx === 5));
+    return (
+      <View
+        key={idx}
+        style={[
+          styles.box,
+          boxStyle,
+          isActive && styles.boxActive,
+          char ? styles.boxFilled : null,
+        ]}
+      >
+        <Text style={styles.boxText}>{char || ''}</Text>
+      </View>
+    );
+  });
 
   return (
-    <View style={[styles.container, style]}>
-      {[...Array(6)].map((_, idx) => (
+    <TouchableWithoutFeedback onPress={focus}>
+      <View style={[styles.container, style]}>
+        {cells}
+
+        {/* The real input — transparent and stretched across all 6 boxes so a
+            tap anywhere focuses it and the caret/selection stay invisible. */}
         <TextInput
-          key={idx}
-          ref={ref => (inputs.current[idx] = ref)}
-          style={[styles.box, boxStyle]}
+          ref={inputRef}
+          style={styles.hiddenInput}
+          value={value}
+          onChangeText={handleChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           keyboardType="number-pad"
-          maxLength={1}
-          value={value[idx] || ''}
-          onChangeText={text => handleChange(text, idx)}
-          onKeyPress={e => handleKeyPress(e, idx)}
-          autoFocus={idx === 0}
-          placeholder="-"
-          placeholderTextColor="#A47C8C"
-          textAlign="center"
-          returnKeyType="next"
-          // OS one-time-code autofill (the "From Messages 2413…" suggestion)
-          autoComplete={idx === 0 ? 'sms-otp' : 'off'}
-          textContentType={idx === 0 ? 'oneTimeCode' : 'none'}
-          importantForAutofill={idx === 0 ? 'yes' : 'no'}
+          maxLength={6}
+          autoFocus
+          caretHidden
+          textContentType="oneTimeCode"
+          autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
+          importantForAutofill="yes"
+          returnKeyType="done"
         />
-      ))}
-    </View>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -75,6 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 12,
+    position: 'relative',
   },
   box: {
     width: 40,
@@ -83,12 +97,34 @@ const styles = StyleSheet.create({
     borderColor: '#5D0829',
     borderRadius: 8,
     backgroundColor: '#fff',
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  boxFilled: {
+    backgroundColor: '#FBF3E6',
+  },
+  boxActive: {
+    borderColor: '#C09E83',
+    borderWidth: 2,
+  },
+  boxText: {
     fontSize: 20,
     fontFamily: 'GlorifyDEMO',
     color: '#5D0829',
-    marginHorizontal: 4,
     fontWeight: 'bold',
+  },
+  // Covers the whole row; transparent text/background so only the boxes show.
+  hiddenInput: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.01,
+    color: 'transparent',
+    fontSize: 20,
   },
 });
 
-export default OtpInput; 
+export default OtpInput;
