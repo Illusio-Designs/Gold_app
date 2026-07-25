@@ -205,7 +205,13 @@ const ProductDetail = () => {
           <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="#FCE2BF" strokeWidth={2} />
         </TouchableOpacity>
         <Text style={styles.pdHeaderTitle}>Product Details</Text>
-        <View style={styles.pdHeaderBtn} />
+        <TouchableOpacity
+          style={styles.pdHeaderBtn}
+          onPress={() => (navigation as any).navigate('Cart')}
+          activeOpacity={0.8}
+        >
+          <HugeiconsIcon icon={ShoppingBag03Icon} size={20} color="#FCE2BF" strokeWidth={1.9} />
+        </TouchableOpacity>
       </View>
 
       {/* Light image area — full product image */}

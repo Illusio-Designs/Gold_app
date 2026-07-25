@@ -55,6 +55,38 @@
   /* Skeleton */
   --skeleton-base: #ece2d5;
   --skeleton-shine: #f7f1e9;
+
+  /* --- Revamp additions --- */
+  /* Typography: Poppins for UI, Fraunces (serif) for premium headings */
+  --font-body: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', 'Poppins', Georgia, serif;
+
+  /* True metallic gold accent (the muted --brand-gold #c09e83 is the tan tone) */
+  --gold: #bd9a4e;
+  --gold-deep: #a07d34;
+  --gold-soft: #efe0c2;
+  --gold-line: #e4d3b3;
+  --gold-gradient: linear-gradient(120deg, #d8b768 0%, #bd9a4e 55%, #a07d34 100%);
+
+  /* Maroon scale for buttons/headers */
+  --maroon-700: #7a1338;
+  --maroon-600: #8b1f45;
+
+  /* Page background — soft warm cream so white cards lift off it */
+  --page-bg: #f6efe6;
+  --main-bg: #f6efe6;
+
+  /* Premium soft elevation for cards/panels */
+  --shadow-card: 0 1px 2px rgba(93,8,41,0.04), 0 8px 24px -12px rgba(93,8,41,0.12);
+  --hairline: #ece2d5;
+}
+
+/* Load the real heading font on brand titles. Body stays Poppins (already
+   forced app-wide); headings/brand marks use the serif for a premium feel. */
+.brand-display,
+.page-header h1,
+.stat-card__value {
+  font-family: var(--font-display);
 }
 
 /* Shared form control — replaces the per-page inline `inputStyle` objects */
