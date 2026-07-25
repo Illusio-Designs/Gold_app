@@ -33,6 +33,11 @@ concurrency:
   group: ios-testflight-build
   cancel-in-progress: true
 
+# match stores the encrypted signing certs in the `fastlane-certs` branch of
+# this repo, so the job needs write access to push them.
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & upload to TestFlight
@@ -51,13 +56,15 @@ jobs:
           cache: npm
           cache-dependency-path: b2b/package-lock.json
 
-      # Xcode 16 = Swift 6 (needed by Firebase pods) + iOS 18 SDK. NOT
-      # latest-stable — that picks Xcode 26 / iOS 26 SDK, which RN 0.80 can't
-      # build against ("Could not build module UIKit").
-      - name: Select Xcode 16 (Swift 6)
+      # Apple now REQUIRES the iOS 26 SDK (Xcode 26) for App Store uploads
+      # (altool 409 "must be built with the iOS 26 SDK"). Xcode 26 earlier
+      # failed only due to the react_runtime modulemap clash — now fixed by
+      # scoping modular headers to Firebase — so latest-stable (26.x) should
+      # both build and satisfy Apple's SDK requirement.
+      - name: Select latest Xcode (26, iOS 26 SDK — required by App Store)
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16"
+          xcode-version: latest-stable
 
       - name: Setup Ruby (for fastlane + CocoaPods)
         uses: ruby/setup-ruby@v1
@@ -80,6 +87,10 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          # match: passphrase for the encrypted certs, and the storage git URL
+          # (this repo's fastlane-certs branch) authenticated with the job token.
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "180"
         run: bundle exec fastlane beta
 
