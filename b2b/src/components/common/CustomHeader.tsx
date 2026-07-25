@@ -46,14 +46,15 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       colors={["#5D0829", "#6B0D33"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      // iOS: the native stack insets the screen below the notch, so pull the
-      // bar up by that inset (and pad the content back down) — otherwise the
-      // maroon starts below the notch with a white gap above it. Android lays
-      // the screen out at y=0, so no pull-up needed.
+      // iOS: the bottom-tab navigator insets its ROOT scenes below the notch,
+      // so a tab-root header (no back button) would double-inset and show a
+      // white gap above the maroon. Pull it up by the inset there. Pushed
+      // stack screens (with a back button, e.g. Product/Cart/Search) are
+      // already full-bleed like ProductDetail, so they must NOT pull up.
       style={[
         styles.bar,
         { paddingTop: insets.top + 8 },
-        Platform.OS === 'ios' && { marginTop: -insets.top },
+        Platform.OS === 'ios' && !showBack && { marginTop: -insets.top },
       ]}
     >
       {/* Light battery/clock icons so they stay visible on the maroon bar */}
