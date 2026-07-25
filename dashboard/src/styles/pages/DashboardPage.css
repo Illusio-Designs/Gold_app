@@ -120,10 +120,10 @@
   width: 4px;
   background: var(--brand, #5d0829);
 }
-.kpi-card.stat-blue::before { background: #1f6feb; }
-.kpi-card.stat-green::before { background: #1a7f4b; }
-.kpi-card.stat-purple::before { background: #7a3ea8; }
-.kpi-card.stat-orange::before { background: #b07d0a; }
+.kpi-card.stat-blue::before { background: #5d0829; }
+.kpi-card.stat-green::before { background: #a07d34; }
+.kpi-card.stat-purple::before { background: #8b1f45; }
+.kpi-card.stat-orange::before { background: #bd9a4e; }
 
 .kpi-card:hover {
   box-shadow: var(--shadow, 0 6px 18px rgba(93, 8, 41, 0.10));
@@ -207,10 +207,10 @@
   box-shadow: 0 2px 8px rgba(93, 8, 41, 0.12);
 }
 
-.stat-icon.stat-blue { background: #1f6feb; }
-.stat-icon.stat-green { background: #1a7f4b; }
-.stat-icon.stat-purple { background: #7a3ea8; }
-.stat-icon.stat-orange { background: #b07d0a; }
+.stat-icon.stat-blue { background: #5d0829; }
+.stat-icon.stat-green { background: #a07d34; }
+.stat-icon.stat-purple { background: #8b1f45; }
+.stat-icon.stat-orange { background: #bd9a4e; }
 
 /* Order Status Section */
 .dashboard-page .order-status-section {

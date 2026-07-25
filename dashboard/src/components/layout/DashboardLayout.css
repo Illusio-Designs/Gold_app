@@ -223,15 +223,16 @@ body {
 
 .dashboard-header {
   height: 70px;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text-color);
+  /* Clean white professional topbar (was solid maroon) */
+  background: var(--surface);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 30px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--hairline);
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(93, 8, 41, 0.08);
+  box-shadow: 0 1px 0 rgba(93, 8, 41, 0.04);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -241,12 +242,12 @@ body {
   font-size: 22px;
   font-weight: 600;
   margin: 0;
-  color: var(--sidebar-text-color);
+  color: var(--brand);
   background: none;
   -webkit-background-clip: initial;
   background-clip: initial;
   -webkit-text-fill-color: initial;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-display);
 }
 
 .profile-menu {
@@ -260,15 +261,15 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--sidebar-text-color);
+  color: var(--text-primary);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   font-family: 'Poppins', sans-serif;
 }
 
 .profile-trigger:hover {
-  background: rgba(252, 226, 191, 0.1);
+  background: var(--surface-muted);
   transform: translateY(-1px);
 }
 
@@ -366,17 +367,17 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--sidebar-text-color);
+  color: var(--text-primary);
   font-family: 'Poppins', sans-serif;
 }
 
 .header-icon-btn {
   background: none;
   border: none;
-  color: var(--sidebar-text-color);
+  color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,8 +388,8 @@ body {
 }
 
 .header-icon-btn:hover {
-  background: rgba(252, 226, 191, 0.1);
-  color: var(--sidebar-text-color);
+  background: var(--surface-muted);
+  color: var(--brand);
   transform: translateY(-1px);
 }
 
