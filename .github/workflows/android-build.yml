@@ -85,6 +85,21 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      # Production App Bundle (.aab) — signed with the REAL release key
+      # (amrut-release-key.keystore via gradle.properties, NOT the debug key),
+      # this is the file you upload to the Play Console Production track.
+      - name: Gradle bundleRelease (production AAB, release-signed)
+        working-directory: b2b/android
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Upload production AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: amrut-release-aab
+          path: b2b/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
       # Publish the APK to a rolling GitHub Release so it always has a stable
       # download link on the repo's Releases page (tag: android-test-latest).
       - name: Publish APK to GitHub Release
