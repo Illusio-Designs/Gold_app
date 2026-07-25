@@ -21,8 +21,10 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { searchAll, searchCategories, searchProducts } from '../services/Api';
+import { HugeiconsIcon } from '@hugeicons/react-native';
 import { Search01Icon } from '@hugeicons/core-free-icons';
-import { EmptyState } from '../components/ui';
+import { EmptyState, AnimatedSearchBar } from '../components/ui';
+import { resolveCategoryIcon } from '../utils/categoryIcons';
 import Toast from 'react-native-toast-message';
 import { useRealtimeData } from '../hooks/useRealtimeData';
 
@@ -40,6 +42,7 @@ interface SearchResult {
   id: number;
   name: string;
   description?: string;
+  icon?: string;
   image?: string;
   images?: string[];
   category_name?: string;
@@ -195,7 +198,11 @@ const Search = () => {
     >
       {/* Result Image */}
       <View style={styles.resultImageContainer}>
-        {item.image ? (
+        {item.type === 'category' ? (
+          <View style={[styles.resultImage, styles.iconResult]}>
+            <HugeiconsIcon icon={resolveCategoryIcon(item.icon)} size={26} color="#A17C57" strokeWidth={1.6} />
+          </View>
+        ) : item.image ? (
           <Image
             source={{ uri: item.image }}
             style={styles.resultImage}
@@ -256,12 +263,14 @@ const Search = () => {
     <View style={styles.container}>
       <CustomHeader title="Search" timer={true} />
       
-      {/* Search Bar — editable (no onPress so the input is focusable) */}
+      {/* Search Bar — same premium bar as Home, in editable mode */}
       <View style={styles.searchContainer}>
-        <SearchBar
+        <AnimatedSearchBar
+          editable
+          autoFocus
           value={search}
           onChangeText={setSearch}
-          placeholder="Search for products or categories..."
+          placeholder="Search for products or categories…"
           onSubmitEditing={() => performSearch(search)}
         />
       </View>
@@ -461,6 +470,11 @@ const styles = StyleSheet.create({
   },
   placeholderImage: {
     backgroundColor: '#E5E5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconResult: {
+    backgroundColor: '#FBF3E6',
     justifyContent: 'center',
     alignItems: 'center',
   },
