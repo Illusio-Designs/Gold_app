@@ -29,36 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
-    // Screenshot / screen-recording prevention (parity with Android's
-    // FLAG_SECURE in MainActivity.kt). iOS has no public "secure window" flag,
-    // so we use the well-known secure-UITextField trick: a hidden secure text
-    // field's render layer refuses to be captured, and by re-parenting the
-    // window's layer under it, the entire app screen comes out BLANK in
-    // screenshots and screen recordings while staying fully visible live.
-    enableScreenshotPrevention()
-
     return true
-  }
-
-  private func enableScreenshotPrevention() {
-    guard let window = self.window else { return }
-    let secureField = UITextField()
-    secureField.isSecureTextEntry = true
-    secureField.isUserInteractionEnabled = false
-
-    window.addSubview(secureField)
-    secureField.centerXAnchor.constraint(equalTo: window.centerXAnchor).isActive = true
-    secureField.centerYAnchor.constraint(equalTo: window.centerYAnchor).isActive = true
-
-    // Move the window's real content layer to live INSIDE the secure field's
-    // protected canvas. The protected sublayer sits at a different index across
-    // iOS versions (last on 17+, first before), so branch to hit the right one.
-    window.layer.superlayer?.addSublayer(secureField.layer)
-    if #available(iOS 17.0, *) {
-      secureField.layer.sublayers?.last?.addSublayer(window.layer)
-    } else {
-      secureField.layer.sublayers?.first?.addSublayer(window.layer)
-    }
   }
 }
 
