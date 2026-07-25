@@ -9,7 +9,7 @@ import { DetailSkeleton, PressableScale } from '../components/common/Motion';
 import { getProductImageUrl } from '../utils/imageUtils';
 import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Search01Icon, ShoppingBag03Icon } from '@hugeicons/core-free-icons';
+import { Search01Icon, ShoppingBag03Icon, ArrowLeft01Icon } from '@hugeicons/core-free-icons';
 import { SpecTable, BottomActionBar, Button } from '../components/ui';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
@@ -195,37 +195,31 @@ const ProductDetail = () => {
   // D2 · Maroon hero + white sheet
   return (
     <View style={styles.d2Base}>
-      {/* Maroon hero with header + product image */}
-      <LinearGradient
-        colors={["#43051D", "#5D0829"]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.hero}
-      >
-        <View style={[styles.heroHeader, { paddingTop: insets.top + 10 }]}>
+      {/* Light image area — full product image, controls overlaid */}
+      <View style={[styles.imgArea, { paddingTop: insets.top + 6 }]}>
+        <View style={styles.imgTopRow}>
           <TouchableOpacity
-            style={styles.heroBackBtn}
+            style={styles.roundBtn}
             onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
-            <Image source={require('../assets/img/common/creamback.png')} style={styles.heroBackArrow} />
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="#5D0829" strokeWidth={2} />
           </TouchableOpacity>
-          <Text style={styles.heroTitle}>Product Details</Text>
-          <View style={styles.heroBackBtn} />
+          <Text style={styles.imgTitle}>Product Details</Text>
+          <View style={styles.roundBtn} />
         </View>
 
         <TouchableOpacity
           activeOpacity={0.9}
-          style={styles.heroImageWrap}
+          style={styles.imgWrap}
           onPress={() => setImagePreviewVisible(true)}
         >
-          <Image source={getProductImage()} style={styles.heroImage} resizeMode="cover" />
-          {/* Magnify badge — tap to zoom the photo */}
+          <Image source={getProductImage()} style={styles.heroImage} resizeMode="contain" />
           <View style={styles.magnifyBadge}>
             <HugeiconsIcon icon={Search01Icon} size={18} color="#5D0829" strokeWidth={2} />
           </View>
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
 
       {/* White sheet that overlaps the hero */}
       <View style={styles.sheet}>
@@ -305,52 +299,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  hero: {
-    height: height * 0.42,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    overflow: 'hidden',
+  imgArea: {
+    backgroundColor: '#FBF3E6',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    paddingBottom: 22,
     alignItems: 'center',
   },
-  heroHeader: {
+  imgTopRow: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
+    paddingBottom: 4,
   },
-  heroBackBtn: {
+  roundBtn: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#5D0829',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  heroBackArrow: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain',
-    tintColor: '#FCE2BF',
-  },
-  heroTitle: {
-    color: '#FCE2BF',
-    fontSize: 20,
+  imgTitle: {
+    color: '#5D0829',
+    fontSize: 18,
     fontWeight: '700',
     fontFamily: 'GlorifyDEMO',
   },
-  heroImageWrap: {
-    width: HERO_IMG,
-    height: HERO_IMG, // square image
+  imgWrap: {
+    width: '88%',
+    height: height * 0.34,
     alignSelf: 'center',
-    marginTop: 8,
-    marginBottom: 22,
-    borderRadius: 18,
-    overflow: 'hidden',
-    backgroundColor: '#FCE2BF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 14,
-    elevation: 8,
+    marginTop: 6,
+    position: 'relative',
   },
   heroImage: {
     width: '100%',
