@@ -11,6 +11,7 @@ import CustomHeader from '../components/common/CustomHeader';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { PackageIcon, SparklesIcon, UserIcon } from '@hugeicons/core-free-icons';
 import { useNotifications, AppNotification } from '../context/NotificationContext';
+import { EmptyState } from '../components/ui';
 
 const iconForType = (type: string) => {
   const t = (type || '').toLowerCase();
@@ -95,15 +96,11 @@ const Notifications = () => {
           ) : null
         }
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <View style={styles.emptyIcon}>
-              <HugeiconsIcon icon={PackageIcon} size={44} color="#C09E83" strokeWidth={1.8} />
-            </View>
-            <Text style={styles.emptyTitle}>No notifications yet</Text>
-            <Text style={styles.emptySub}>
-              Order updates and account alerts will show up here.
-            </Text>
-          </View>
+          <EmptyState
+            icon={PackageIcon}
+            title="No notifications yet"
+            subtitle="Order updates and account alerts will show up here."
+          />
         }
       />
     </View>
