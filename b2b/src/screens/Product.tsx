@@ -8,7 +8,8 @@ import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { getApprovedProductsForUser, getApprovedCategoriesForUser } from '../services/Api';
-import { CategoryRail, ProductCard } from '../components/ui';
+import { CategoryRail, ProductCard, Button } from '../components/ui';
+import { FilterIcon } from '@hugeicons/core-free-icons';
 import ScreenLoader from '../components/common/ScreenLoader';
 import { ProductGridSkeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
@@ -427,10 +428,6 @@ const Product = () => {
             icon: require('../assets/img/common/searchicon.png'),
             onPress: () => (navigation as any).navigate('Search'),
           },
-          {
-            icon: require('../assets/img/common/filtericon.png'),
-            onPress: () => setFilterVisible(true),
-          },
         ]}
       />
 
@@ -480,6 +477,17 @@ const Product = () => {
           )}
         />
       )}
+
+      {/* Sticky Filter button at the bottom (out of the header) */}
+      <View style={styles.filterBar}>
+        <Button
+          title="Filter"
+          icon={FilterIcon}
+          onPress={() => setFilterVisible(true)}
+          fullWidth
+        />
+      </View>
+
       <Filter
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}
@@ -497,6 +505,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 0,
+  },
+  filterBar: {
+    borderTopWidth: 1,
+    borderTopColor: '#ECE0D3',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 16,
   },
   searchRow: {
     flexDirection: 'row',

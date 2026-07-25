@@ -420,14 +420,6 @@ const Profile = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuBtn}
-          onPress={handleCheckPush}
-        >
-          <View style={styles.menuIconBox}><HugeiconsIcon icon={Notification03Icon} size={19} color="#5D0829" strokeWidth={1.8} /></View>
-          <Text style={styles.menuText}>Notification Status</Text>
-          <HugeiconsIcon icon={ArrowRight01Icon} size={18} color="#b8a7ac" strokeWidth={1.8} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuBtn}
           onPress={handleDeleteAccount}
         >
           <View style={[styles.menuIconBox, styles.menuIconBoxRed]}><HugeiconsIcon icon={Delete02Icon} size={19} color="#dc2626" strokeWidth={1.8} /></View>
