@@ -577,6 +577,15 @@ export const sendNotification = (notificationData, token) =>
     })
     .then((r) => r.data);
 
+// Send a REAL FCM test push and get the exact outcome (success/error/counts).
+// target: 'business' (B2B) | 'consumer' (D2C) | 'self' | 'all'
+export const sendTestNotification = (payload, token) =>
+  axiosInstance
+    .post("/notifications/test", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((r) => r.data);
+
 // Get users for notification targeting
 export const getUsers = (token) =>
   axiosInstance

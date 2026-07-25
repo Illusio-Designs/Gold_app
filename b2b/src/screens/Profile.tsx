@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking, PermissionsAndroid } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Platform, Linking, PermissionsAndroid, ScrollView } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { PencilEdit02Icon, SparklesIcon, Notification03Icon, Delete02Icon, ArrowRight01Icon, Logout01Icon } from '@hugeicons/core-free-icons';
@@ -393,7 +393,7 @@ const Profile = () => {
   return (
     <View style={styles.baseBg}>
       <CustomHeader title="My Profile" showBack={false} />
-      <View style={styles.body}>
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent} showsVerticalScrollIndicator={false}>
       <ProfilePhotoName
         photoSource={photoUri}
         cameraIconSource={require('../assets/img/profile/editprofile.png')}
@@ -444,7 +444,7 @@ const Profile = () => {
       <View style={styles.versionLineContainer}>
         <Text style={styles.versionLineText}>v{APP_VERSION}</Text>
       </View>
-      </View>
+      </ScrollView>
 
       {/* Login Prompt Modal */}
       <LoginPromptModal
@@ -464,8 +464,11 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+  },
+  bodyContent: {
     alignItems: 'center',
     paddingTop: getResponsiveSpacing(16, 20, 24),
+    paddingBottom: 32,
   },
   headerRow: {
     flexDirection: 'row',

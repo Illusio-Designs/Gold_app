@@ -195,20 +195,21 @@ const ProductDetail = () => {
   // D2 · Maroon hero + white sheet
   return (
     <View style={styles.d2Base}>
-      {/* Light image area — full product image, controls overlaid */}
-      <View style={[styles.imgArea, { paddingTop: insets.top + 6 }]}>
-        <View style={styles.imgTopRow}>
-          <TouchableOpacity
-            style={styles.roundBtn}
-            onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
-            activeOpacity={0.8}
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="#5D0829" strokeWidth={2} />
-          </TouchableOpacity>
-          <Text style={styles.imgTitle}>Product Details</Text>
-          <View style={styles.roundBtn} />
-        </View>
+      {/* Maroon header bar */}
+      <View style={[styles.pdHeader, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity
+          style={styles.pdHeaderBtn}
+          onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
+          activeOpacity={0.8}
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={20} color="#FCE2BF" strokeWidth={2} />
+        </TouchableOpacity>
+        <Text style={styles.pdHeaderTitle}>Product Details</Text>
+        <View style={styles.pdHeaderBtn} />
+      </View>
 
+      {/* Light image area — full product image */}
+      <View style={styles.imgArea}>
         <TouchableOpacity
           activeOpacity={0.9}
           style={styles.imgWrap}
@@ -299,43 +300,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  imgArea: {
-    backgroundColor: '#FBF3E6',
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    paddingBottom: 22,
-    alignItems: 'center',
-  },
-  imgTopRow: {
-    width: '100%',
+  pdHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
-    paddingBottom: 4,
+    paddingBottom: 14,
+    backgroundColor: '#5D0829',
   },
-  roundBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#fff',
+  pdHeaderBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.14)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#5D0829',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
   },
-  imgTitle: {
-    color: '#5D0829',
-    fontSize: 18,
+  pdHeaderTitle: {
+    color: '#FCE2BF',
+    fontSize: 19,
     fontWeight: '700',
     fontFamily: 'GlorifyDEMO',
   },
+  imgArea: {
+    backgroundColor: '#FBF3E6',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    paddingTop: 12,
+    paddingBottom: 22,
+    alignItems: 'center',
+  },
   imgWrap: {
     width: '88%',
-    height: height * 0.34,
+    height: height * 0.32,
     alignSelf: 'center',
     marginTop: 6,
     position: 'relative',

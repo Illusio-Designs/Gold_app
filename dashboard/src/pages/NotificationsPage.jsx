@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAdminNotifications } from "../services/adminApiService";
+import { getAdminNotifications, sendTestNotification } from "../services/adminApiService";
 import { showErrorToast } from "../utils/toast";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import Badge from "../components/common/Badge";
@@ -14,7 +14,27 @@ import "../styles/pages/NotificationsPage.css";
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [testing, setTesting] = useState("");
+  const [testResult, setTestResult] = useState(null);
   const navigate = useNavigate();
+
+  const runTest = async (target) => {
+    setTesting(target);
+    setTestResult(null);
+    try {
+      const token = getAdminToken();
+      const res = await sendTestNotification(
+        { target, title: "Test notification", body: `Test push to ${target} devices.` },
+        token
+      );
+      setTestResult({ ok: !!res.success, ...res });
+    } catch (error) {
+      const data = error.response?.data;
+      setTestResult({ ok: false, error: data?.error || error.message || "Request failed" });
+    } finally {
+      setTesting("");
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -137,6 +157,49 @@ const NotificationsPage = () => {
   return (
     <div className="notifications-page">
       <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Bell} />
+
+      {/* Push notification tester — sends a REAL FCM push and shows the outcome */}
+      <div style={{ background: "#fff", border: "1px solid #e6dccf", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <div style={{ fontWeight: 700, color: "#5d0829", marginBottom: 4 }}>Test push notifications</div>
+        <div style={{ fontSize: 13, color: "#8a7a6d", marginBottom: 12 }}>
+          Sends a real Firebase push and reports the exact result. B2B and D2C are separate Firebase projects — each needs its own service-account key on the server.
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {[
+            { key: "business", label: "Send to B2B app" },
+            { key: "consumer", label: "Send to D2C app" },
+            { key: "self", label: "Send to my devices" },
+          ].map((b) => (
+            <button
+              key={b.key}
+              onClick={() => runTest(b.key)}
+              disabled={!!testing}
+              style={{
+                background: "#5d0829", color: "#fce2bf", border: "none", borderRadius: 8,
+                padding: "9px 16px", fontWeight: 600, cursor: testing ? "not-allowed" : "pointer",
+                opacity: testing && testing !== b.key ? 0.6 : 1,
+              }}
+            >
+              {testing === b.key ? "Sending…" : b.label}
+            </button>
+          ))}
+        </div>
+        {testResult && (
+          <div
+            style={{
+              marginTop: 12, padding: "10px 12px", borderRadius: 8, fontSize: 13,
+              background: testResult.ok ? "#e7f3ec" : "#fbecea",
+              color: testResult.ok ? "#2f7d5b" : "#b0324a",
+              border: `1px solid ${testResult.ok ? "#bfe3cd" : "#f3c8c8"}`,
+            }}
+          >
+            {testResult.ok
+              ? `✓ ${testResult.message || "Sent."}`
+              : `✕ ${testResult.error || "Failed."}${typeof testResult.tokenCount === "number" ? ` (tokens: ${testResult.tokenCount})` : ""}`}
+          </div>
+        )}
+      </div>
+
       <StatCards stats={notificationStats} />
       <TableWithControls
         columns={columns}

@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const notificationController = require("../controllers/notificationController");
-const { verifyToken } = require("../middlewares/auth");
+const { verifyToken, requireAdmin } = require("../middlewares/auth");
 
 // Create notification (admin only)
 router.post("/", verifyToken, notificationController.createNotification);
+
+// Send a REAL FCM test push and report the exact outcome/errors (admin only).
+router.post("/test", verifyToken, requireAdmin, notificationController.sendTestNotification);
 
 // Get user notifications
 router.get("/user/:userId", verifyToken, notificationController.getUserNotifications);

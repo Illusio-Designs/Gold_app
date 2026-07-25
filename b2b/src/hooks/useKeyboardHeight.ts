@@ -8,6 +8,15 @@ export function useKeyboardHeight(): number {
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
+    // If the keyboard is already open when this screen mounts (e.g. arriving on
+    // OTP Verify straight from Login with focus retained), keyboardDidShow won't
+    // fire again — seed from current metrics so the sticky button lifts right
+    // away instead of sitting hidden under the keyboard.
+    try {
+      const m = (Keyboard as any).metrics?.();
+      if (m && m.height) setHeight(m.height);
+    } catch {}
+
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 

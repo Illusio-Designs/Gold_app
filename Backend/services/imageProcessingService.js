@@ -50,7 +50,10 @@ class ImageProcessingService {
     // Processing image with options
 
     try {
-      let image = sharp(inputPath);
+      // .rotate() with no args auto-orients from EXIF and strips the orientation
+      // tag, so phone photos (often tagged 90°) are saved upright — fixes the
+      // rotated profile picture.
+      let image = sharp(inputPath).rotate();
 
       // Resize if dimensions provided
       if (width || height) {

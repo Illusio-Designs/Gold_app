@@ -28,6 +28,11 @@ const settingsRoutes = require("./routes/settings");
 
 const app = express();
 
+// Behind Phusion Passenger / a reverse proxy, so the client IP comes via the
+// X-Forwarded-For header. Trust the first proxy hop so express-rate-limit can
+// read the real IP (fixes ERR_ERL_UNEXPECTED_X_FORWARDED_FOR).
+app.set("trust proxy", 1);
+
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {

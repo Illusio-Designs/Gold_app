@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import { resolveCategoryIcon } from '../utils/categoryIcons';
-import { AnimatedSearchBar, SectionHeader } from '../components/ui';
+import { AnimatedSearchBar, SectionHeader, ProductCard as UIProductCard } from '../components/ui';
 import FocusAwareStatusBar from '../components/common/FocusAwareStatusBar';
 import { useNotifications } from '../context/NotificationContext';
 import { useCart } from '../context/CartContext';
@@ -556,12 +556,14 @@ const Home = () => {
           <ProductGridSkeleton count={6} />
         ) : products.length > 0 ? (
           products.map((product, idx) => (
-          <ProductCard
-              product={product}
-              key={(product as any).id || idx}
-              index={idx}
-              onPress={() => handleProductPress(product)}
-            />
+            <View key={(product as any).id || idx} style={productCardStyles.cardWrap}>
+              <UIProductCard
+                name={(product as any).name || (product as any).sku || 'Product'}
+                weight={(product as any).net_weight ? `${(product as any).net_weight} g` : undefined}
+                imageUri={getProductImageUrl((product as any).image) || undefined}
+                onPress={() => handleProductPress(product)}
+              />
+            </View>
           ))
         ) : (
           <View style={styles.noProductsContainer}>

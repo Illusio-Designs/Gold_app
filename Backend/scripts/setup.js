@@ -487,6 +487,16 @@ async function updateExistingTables() {
     );
   });
 
+  // users.pin (address PIN/postal code) so Edit Profile can save/load it
+  await safeStep("users.pin", async () => {
+    if (!(await columnExists("users", "pin"))) {
+      await executeQuery(
+        "ALTER TABLE users ADD COLUMN pin VARCHAR(20) AFTER city",
+        "users.pin column added"
+      );
+    }
+  });
+
   // orders payment columns (D2C Razorpay flow)
   await safeStep("orders.payment_columns", async () => {
     if (!(await columnExists("orders", "payment_status"))) {

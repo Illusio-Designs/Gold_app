@@ -135,6 +135,9 @@ function getOrdersByUserId(userId, callback) {
     SELECT o.*,
            CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
            p.name as product_name, p.image as product_image, p.sku as product_sku,
+           p.net_weight, p.gross_weight, p.mark_amount, p.purity,
+           (p.gross_weight - p.net_weight) as less_weight,
+           o.quantity as total_qty,
            c.name as category_name
     FROM orders o
     LEFT JOIN products p ON o.product_id = p.id

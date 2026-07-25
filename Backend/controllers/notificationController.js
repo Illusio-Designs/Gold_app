@@ -409,8 +409,81 @@ function sseNotifications(req, res) {
   });
 }
 
+// Admin: send a REAL FCM test push and report the exact outcome so failures
+// are visible (missing service account, no tokens, FCM errors, etc.).
+async function sendTestNotification(req, res) {
+  try {
+    const target = (req.body && req.body.target) || "self";
+    const title = (req.body && req.body.title) || "Test notification";
+    const body =
+      (req.body && req.body.body) || "This is a test push from the dashboard.";
+
+    // Which devices to send to. business = B2B users, consumer = D2C users,
+    // self = the logged-in admin's own devices, all = everyone.
+    let sql;
+    let params = [];
+    if (target === "self") {
+      sql = "SELECT token FROM notification_tokens WHERE active = true AND user_id = ?";
+      params = [req.user && req.user.id];
+    } else if (target === "business" || target === "consumer") {
+      sql =
+        "SELECT t.token FROM notification_tokens t JOIN users u ON t.user_id = u.id " +
+        "WHERE t.active = true AND u.type = ?";
+      params = [target];
+    } else {
+      sql = "SELECT token FROM notification_tokens WHERE active = true";
+    }
+
+    const tokens = await new Promise((resolve, reject) => {
+      db.query(sql, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve((rows || []).map((r) => r.token).filter(Boolean));
+      });
+    });
+
+    if (tokens.length === 0) {
+      return res.status(200).json({
+        success: false,
+        error: `No active device tokens for "${target}". Open the app (logged in) so it registers a token, then retry.`,
+        tokenCount: 0,
+      });
+    }
+
+    const result = await sendMulticastNotification(tokens, title, body, { type: "test" });
+
+    if (result && result.disabled) {
+      return res.status(200).json({
+        success: false,
+        disabled: true,
+        error:
+          "Firebase is not configured on the server (no service account key). " +
+          "Upload Backend/firebase-service-account.json (amrut-jewels key) and restart the backend.",
+        tokenCount: tokens.length,
+      });
+    }
+    if (result && result.success === false) {
+      return res.status(200).json({
+        success: false,
+        error: result.error || "FCM send failed.",
+        tokenCount: tokens.length,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      tokenCount: tokens.length,
+      successCount: result.successCount,
+      failureCount: result.failureCount,
+      message: `Test push delivered to ${result.successCount}/${tokens.length} device(s) for "${target}".`,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
 module.exports = {
   createNotification,
+  sendTestNotification,
   getUserNotifications,
   getUnreadCount,
   markAsRead,
