@@ -7,4 +7,4 @@
 //
 // (We intentionally don't fetch the version from the backend anymore — store
 // builds are the single source of truth for the installed version.)
-export const APP_VERSION = '1.2';
+export const APP_VERSION = '1.4.2';
