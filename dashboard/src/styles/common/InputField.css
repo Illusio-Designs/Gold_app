@@ -14,11 +14,11 @@
 .text-input,
 .select-input,
 .textarea-input {
-  background: var(--input-bg, #f9f2e7);
+  background: #fff;
   color: var(--brand, #5d0829);
-  border: 1px solid var(--input-border, #c09e83);
-  border-radius: var(--radius-sm, 6px);
-  padding: 10px 14px;
+  border: 1px solid var(--gold-line, #e4d3b3);
+  border-radius: var(--radius, 10px);
+  padding: 11px 14px;
   font-size: 0.95rem;
   transition: border-color var(--transition, 160ms), box-shadow var(--transition, 160ms);
 }
@@ -31,7 +31,7 @@
 .textarea-input:focus {
   outline: none;
   border-color: var(--brand, #5d0829);
-  box-shadow: 0 0 0 3px rgba(192, 158, 131, 0.28);
+  box-shadow: 0 0 0 3px rgba(93, 8, 41, 0.12);
 }
 .file-input-container {
   display: flex;
