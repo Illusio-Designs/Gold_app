@@ -7,7 +7,8 @@ import CustomHeader from '../components/common/CustomHeader';
 import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
-import { getApprovedProductsForUser } from '../services/Api';
+import { getApprovedProductsForUser, getApprovedCategoriesForUser } from '../services/Api';
+import { CategoryRail } from '../components/ui';
 import ScreenLoader from '../components/common/ScreenLoader';
 import { ProductGridSkeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
@@ -130,6 +131,26 @@ const Product = () => {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsError, setProductsError] = useState<any>(null);
 
+  // Categories for the Swiggy-style rail (switch category without leaving screen)
+  const [categories, setCategories] = useState<any[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getApprovedCategoriesForUser(userId, accessToken);
+        if (res && res.success && Array.isArray(res.data)) setCategories(res.data);
+      } catch (e) {
+        console.warn('[Product] category rail fetch failed', e);
+      }
+    })();
+  }, [userId, accessToken]);
+
+  const handleRailSelect = (id: number | string) => {
+    const idNum = typeof id === 'string' ? parseInt(id, 10) : id;
+    setCategoryId(Number.isFinite(idNum) ? (idNum as number) : null);
+    const picked = categories.find((c: any) => String(c.id) === String(id));
+    if (picked) setCategoryFilter(picked.name);
+  };
+
   // Load products for all users (no authentication required)
   const loadProducts = async () => {
     try {
@@ -163,12 +184,12 @@ const Product = () => {
     }
   };
 
-  // Load products when component mounts or category changes
+  // Load products when component mounts or the selected category changes
   useEffect(() => {
     if (!resolvingCategory) {
       loadProducts();
     }
-  }, [isValidCategoryId, resolvingCategory]);
+  }, [categoryId, resolvingCategory]);
 
   // A product matches a chosen filter value only when it actually has that
   // field set and it differs — missing data never hides a product.
@@ -412,6 +433,15 @@ const Product = () => {
           },
         ]}
       />
+
+      {/* Swiggy-style category rail — switch category without leaving the screen */}
+      {categories.length > 0 ? (
+        <CategoryRail
+          items={categories.map((c: any) => ({ id: c.id, name: c.name, icon: c.icon }))}
+          activeId={categoryId}
+          onSelect={handleRailSelect}
+        />
+      ) : null}
 
       {/* Product grid */}
       {productsLoading ? (
