@@ -1,0 +1,50 @@
+# Amrut B2B — iOS release automation.
+#
+# `beta` builds a signed App Store archive and uploads it to TestFlight.
+# Signing uses an App Store Connect API key (no passwords / no fastlane match
+# needed) together with Xcode automatic signing (-allowProvisioningUpdates),
+# which creates/refreshes the distribution profile for com.Amrutt on the fly.
+#
+# Required env (set as GitHub secrets → passed by the workflow):
+#   ASC_KEY_ID        App Store Connect API key id
+#   ASC_ISSUER_ID     App Store Connect issuer id
+#   ASC_KEY_CONTENT   the .p8 key contents, base64-encoded
+#
+# The signing team (8LARDGKQSN) is already set in the Xcode project.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and upload a new build to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+
+    # Bump the build number to the next TestFlight value so every upload is
+    # unique even if versionCode wasn't hand-bumped.
+    increment_build_number(
+      xcodeproj: "Amrut.xcodeproj",
+      build_number: latest_testflight_build_number(api_key: api_key, initial_build_number: 4).to_i + 1
+    )
+
+    build_app(
+      workspace: "Amrut.xcworkspace",
+      scheme: "Amrut",
+      clean: true,
+      export_method: "app-store",
+      xcargs: "-allowProvisioningUpdates",
+      output_directory: "build",
+      output_name: "Amrut.ipa"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end
