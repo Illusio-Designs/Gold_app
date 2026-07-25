@@ -11,7 +11,6 @@ import {
   RefreshControl
 } from 'react-native';
 import CustomHeader from '../components/common/CustomHeader';
-import SearchBar from '../components/common/SearchBar';
 import CustomLoader from '../components/common/CustomLoader';
 import ScreenLoader from '../components/common/ScreenLoader';
 // Removed client-side watermark overlay; backend already embeds watermark
@@ -370,8 +369,8 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
   searchContainer: {
-    paddingHorizontal: getResponsiveSpacing(20, 25, 30),
-    marginTop: getResponsiveSpacing(10, 12, 14),
+    paddingHorizontal: 16,
+    marginTop: 12,
   },
   filterContainer: {
     flexDirection: 'row',
