@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -46,7 +46,15 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       colors={["#5D0829", "#6B0D33"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.bar, { paddingTop: insets.top + 8 }]}
+      // iOS: the native stack insets the screen below the notch, so pull the
+      // bar up by that inset (and pad the content back down) — otherwise the
+      // maroon starts below the notch with a white gap above it. Android lays
+      // the screen out at y=0, so no pull-up needed.
+      style={[
+        styles.bar,
+        { paddingTop: insets.top + 8 },
+        Platform.OS === 'ios' && { marginTop: -insets.top },
+      ]}
     >
       {/* Light battery/clock icons so they stay visible on the maroon bar */}
       <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="light-content" />
