@@ -32,18 +32,25 @@ platform :ios do
       build_number: latest_testflight_build_number(api_key: api_key, initial_build_number: 5).to_i + 1
     )
 
+    # Write the .p8 so xcodebuild itself can authenticate with App Store Connect.
+    # This is what makes -allowProvisioningUpdates use Apple "cloud signing" to
+    # create the distribution certificate + App Store profile for com.Amrutt on
+    # the fly (headless — no Mac, no fastlane match, no manual certs). gym does
+    # NOT accept an `api_key:` param, so we pass the auth to xcodebuild directly.
+    key_path = File.absolute_path("asc_api_key.p8")
+    File.write(key_path, ENV["ASC_KEY_CONTENT"])
+    auth = "-allowProvisioningUpdates " \
+           "-authenticationKeyID #{ENV['ASC_KEY_ID']} " \
+           "-authenticationKeyIssuerID #{ENV['ASC_ISSUER_ID']} " \
+           "-authenticationKeyPath #{key_path}"
+
     build_app(
       workspace: "Amrut.xcworkspace",
       scheme: "Amrut",
       clean: true,
       export_method: "app-store",
-      # Pass the ASC API key to gym so xcodebuild is AUTHENTICATED — this is what
-      # lets -allowProvisioningUpdates use Apple "cloud signing" to create the
-      # distribution certificate + App Store profile for com.Amrutt on the fly
-      # (headless, no Mac, no fastlane match, no manual certs). Without this the
-      # archive fails with "No Accounts" / "No profiles for 'com.Amrutt'".
-      api_key: api_key,
-      xcargs: "-allowProvisioningUpdates",
+      xcargs: auth,          # auth for the archive step
+      export_xcargs: auth,   # auth for the export step
       export_options: {
         signingStyle: "automatic"
       },
