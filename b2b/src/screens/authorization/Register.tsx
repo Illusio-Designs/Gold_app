@@ -18,6 +18,7 @@ import ScreenLoader from '../../components/common/ScreenLoader';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import CountryPickerModal from '../../components/common/CountryPickerModal';
+import { FlagIN } from '../../components/ui';
 import { Country } from '../../data/countries';
 import CityPickerModal from '../../components/common/CityPickerModal';
 import { countryCities, cityToState } from '../../data/cities';
@@ -348,7 +349,11 @@ const Register = () => {
           {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           <View style={styles.row}>
             <TouchableOpacity style={styles.countryCodeBox} onPress={() => setCountryModalVisible(true)}>
-              <Text style={styles.flag}>{countryFlag}</Text>
+              {countryCode === '+91' ? (
+                <FlagIN />
+              ) : (
+                <Text style={styles.flag}>{countryFlag}</Text>
+              )}
               <Text style={styles.countryCode}>{countryCode}</Text>
             </TouchableOpacity>
             <TextInput

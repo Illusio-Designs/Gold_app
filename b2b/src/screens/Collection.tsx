@@ -6,24 +6,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomHeader from '../components/common/CustomHeader';
 import SearchBar from '../components/common/SearchBar';
 
-import { getCategoryImageUrl } from '../utils/imageUtils';
+import { HugeiconsIcon } from '@hugeicons/react-native';
+import { resolveCategoryIcon } from '../utils/categoryIcons';
 import { isSmallScreen, isMediumScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 import { wp, hp } from '../utils/responsiveConfig';
 import { getApprovedCategoriesForUser } from '../services/Api';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ScreenLoader from '../components/common/ScreenLoader';
-import { Skeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
+import { Skeleton, PressableScale, FadeInSlide } from '../components/common/Motion';
 import Toast from 'react-native-toast-message';
 
 type Category = {
   id: number;
   name: string;
   description?: string;
-  image?: string;
-  processedImageUrl?: string;
-  originalImageUrl?: string;
-  imageUrl?: string;
-  hasProcessedImage?: boolean;
+  icon?: string;
   status: string;
 };
 
@@ -253,18 +250,17 @@ const Collection = () => {
                     style={productCardStyles.card}
                     onPress={() => handleCategoryPress(category)}
                   >
-                    {/* Category Image fills the whole tile */}
-                    {category.image ? (
-                      <ShimmerImage
-                        source={{ uri: getCategoryImageUrl(category.image) || undefined }}
-                        style={productCardStyles.image}
-                        resizeMode="cover"
+                    {/* Category icon centered on a cream tile */}
+                    <View style={[productCardStyles.image, productCardStyles.iconTile]}>
+                      <HugeiconsIcon
+                        icon={resolveCategoryIcon(category.icon)}
+                        size={54}
+                        color="#A17C57"
+                        strokeWidth={1.6}
                       />
-                    ) : (
-                      <View style={[productCardStyles.image, productCardStyles.placeholderImage]} />
-                    )}
+                    </View>
 
-                    {/* Maroon fade so the name is always readable over the photo */}
+                    {/* Maroon fade so the name is always readable */}
                     <LinearGradient
                       colors={['transparent', 'rgba(58,5,25,0.9)']}
                       style={productCardStyles.overlay}
@@ -463,6 +459,11 @@ const productCardStyles = StyleSheet.create({
   },
   placeholderImage: {
     backgroundColor: '#5D0829',
+  },
+  iconTile: {
+    backgroundColor: '#F7F1E8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overlay: {
     position: 'absolute',

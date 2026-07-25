@@ -234,13 +234,10 @@ async function bulkUploadMedia(req, res) {
 
 // Get available products and categories for manual selection
 function getAvailableItems(req, res) {
+  // Categories are icon-based (no images), so only products are listed here.
   const sql = `
     SELECT 'product' as type, id, name, image, created_at
-    FROM products 
-    WHERE status = 'active'
-    UNION ALL
-    SELECT 'category' as type, id, name, image, created_at
-    FROM categories 
+    FROM products
     WHERE status = 'active'
     ORDER BY created_at DESC
   `;
@@ -258,16 +255,6 @@ function getMediaItemsWithProcessedImages(req, res) {
   db.query(
     "SELECT id, name, image, status FROM products WHERE image IS NOT NULL LIMIT 10",
     (err, productsWithImages) => {
-      if (err) {
-        } else {
-        }
-    }
-  );
-
-  // Check categories with any image data
-  db.query(
-    "SELECT id, name, image, status FROM categories WHERE image IS NOT NULL LIMIT 10",
-    (err, categoriesWithImages) => {
       if (err) {
         } else {
         }
@@ -310,26 +297,10 @@ function getMediaItemsWithProcessedImages(req, res) {
     LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.image IS NOT NULL AND p.image != '' AND p.image != 'null'
         AND p.image LIKE '%.webp'
-    
+
     UNION ALL
-    
-    SELECT 
-      'category' as type,
-      c.id,
-      c.name,
-      c.image as processed_image,
-      c.created_at,
-        NULL as category_name,
-        'database' as source,
-        NULL as product_status,
-        c.status as category_status
-    FROM categories c
-      WHERE c.image IS NOT NULL AND c.image != '' AND c.image != 'null'
-        AND c.image LIKE '%.webp'
-    
-    UNION ALL
-    
-    SELECT 
+
+    SELECT
       'media_gallery' as type,
       mg.id,
       mg.title as name,
@@ -349,14 +320,9 @@ function getMediaItemsWithProcessedImages(req, res) {
         AND mg.file_url NOT LIKE '%temp/%'
         AND mg.category LIKE '%product%'
         AND NOT EXISTS (
-          SELECT 1 FROM products p 
-          WHERE p.image IS NOT NULL 
+          SELECT 1 FROM products p
+          WHERE p.image IS NOT NULL
             AND (p.image = mg.file_url OR p.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM categories c 
-          WHERE c.image IS NOT NULL 
-            AND (c.image = mg.file_url OR c.image = SUBSTRING_INDEX(mg.file_url, '/', -1))
         )
     ) as main_data
     

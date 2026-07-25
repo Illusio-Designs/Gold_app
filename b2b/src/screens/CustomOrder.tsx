@@ -20,6 +20,7 @@ import SuccessOverlay from '../components/common/SuccessOverlay';
 import LoginPromptModal from '../components/common/LoginPromptModal';
 import { useLoginPrompt } from '../hooks/useLoginPrompt';
 import { createCustomOrder } from '../services/Api';
+import { Button } from '../components/ui';
 
 const MAROON = '#5D0829';
 const CREAM = '#FCE2BF';
@@ -329,14 +330,13 @@ const CustomOrder = () => {
           multiline
         />
 
-        <TouchableOpacity
-          style={[s.submit, submitting && { opacity: 0.6 }]}
+        <Button
+          title={submitting ? 'Submitting…' : 'Submit Custom Order'}
           onPress={handleSubmit}
           disabled={submitting}
-          activeOpacity={0.9}
-        >
-          <Text style={s.submitTxt}>{submitting ? 'Submitting…' : 'Submit Custom Order'}</Text>
-        </TouchableOpacity>
+          loading={submitting}
+          style={{ marginTop: 8, alignSelf: 'stretch' }}
+        />
 
         <View style={s.note}>
           <Text style={s.noteBadge}>PENDING</Text>

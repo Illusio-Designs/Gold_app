@@ -19,42 +19,30 @@ class MediaGalleryService {
         orphaned: []
       };
 
-      // Get category images
-      db.query('SELECT id, name, image FROM categories WHERE image IS NOT NULL', (err, categories) => {
+      // Categories are icon-based now — they hold no images, so the gallery
+      // only tracks product images.
+      media.categories = [];
+
+      // Get product images
+      db.query('SELECT id, name, sku, image FROM products WHERE image IS NOT NULL', (err, products) => {
         if (err) {
           reject(err);
           return;
         }
 
-        media.categories = categories.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          image: cat.image,
-          type: 'category',
-          path: path.join(this.uploadDirs.category, cat.image)
+        media.products = products.map(prod => ({
+          id: prod.id,
+          name: prod.name,
+          sku: prod.sku,
+          image: prod.image,
+          type: 'product',
+          path: path.join(this.uploadDirs.product, prod.image)
         }));
 
-        // Get product images
-        db.query('SELECT id, name, sku, image FROM products WHERE image IS NOT NULL', (err, products) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-
-          media.products = products.map(prod => ({
-            id: prod.id,
-            name: prod.name,
-            sku: prod.sku,
-            image: prod.image,
-            type: 'product',
-            path: path.join(this.uploadDirs.product, prod.image)
-          }));
-
-          // Auto-delete orphaned files instead of returning them
-          this.findAndDeleteOrphanedFiles(media).then(() => {
-            resolve(media);
-          }).catch(reject);
-        });
+        // Auto-delete orphaned files instead of returning them
+        this.findAndDeleteOrphanedFiles(media).then(() => {
+          resolve(media);
+        }).catch(reject);
       });
     });
   }
@@ -63,22 +51,7 @@ class MediaGalleryService {
   async findAndDeleteOrphanedFiles(media) {
     const orphaned = [];
 
-    // Check category directory
-    if (fs.existsSync(this.uploadDirs.category)) {
-      const categoryFiles = fs.readdirSync(this.uploadDirs.category);
-      const usedCategoryImages = media.categories.map(cat => cat.image);
-      
-      categoryFiles.forEach(file => {
-        if (!usedCategoryImages.includes(file)) {
-          orphaned.push({
-            filename: file,
-            path: path.join(this.uploadDirs.category, file),
-            type: 'category',
-            size: fs.statSync(path.join(this.uploadDirs.category, file)).size
-          });
-        }
-      });
-    }
+    // Categories are icon-based now — no category image directory to scan.
 
     // Check products directory
     if (fs.existsSync(this.uploadDirs.product)) {
@@ -172,16 +145,8 @@ class MediaGalleryService {
           try {
             // Update database to remove image reference
             if (isCategory) {
-              // Remove image from categories table
-              const updateQuery = 'UPDATE categories SET image = NULL WHERE image = ?';
-              db.query(updateQuery, [filename], (dbErr, result) => {
-                if (dbErr) {
-                  // Still resolve since file was deleted
-                  resolve({ success: true, path: filePath, dbUpdated: false });
-                } else {
-                  resolve({ success: true, path: filePath, dbUpdated: true });
-                }
-              });
+              // Categories are icon-based — no DB image column to clear.
+              resolve({ success: true, path: filePath, dbUpdated: false });
             } else if (isProduct) {
               // When deleting a product image, change status to draft so it won't appear in mobile app
               const updateQuery = 'UPDATE products SET image = NULL, status = "draft" WHERE image = ?';
@@ -232,58 +197,35 @@ class MediaGalleryService {
         let cleanedCount = 0;
         let categoryCleaned = 0;
         let productCleaned = 0;
-        
-        // Clean up categories table
-        db.query('SELECT id, name, image FROM categories WHERE image IS NOT NULL', (err, categories) => {
+
+        // Categories are icon-based now — only product images need cleanup.
+        db.query('SELECT id, name, sku, image FROM products WHERE image IS NOT NULL', (err, products) => {
           if (err) {
             reject(err);
             return;
           }
-          
-          categories.forEach(category => {
-            const imagePath = path.join(this.uploadDirs.category, category.image);
+
+          products.forEach(product => {
+            const imagePath = path.join(this.uploadDirs.product, product.image);
             if (!fs.existsSync(imagePath)) {
               // Image file doesn't exist, remove from database
-              db.query('UPDATE categories SET image = NULL WHERE id = ?', [category.id], (updateErr) => {
+              db.query('UPDATE products SET image = NULL WHERE id = ?', [product.id], (updateErr) => {
                 if (updateErr) {
                   } else {
                   cleanedCount++;
-                  categoryCleaned++;
+                  productCleaned++;
                 }
               });
             } else {
               }
           });
-          
-          // Clean up products table
-          db.query('SELECT id, name, sku, image FROM products WHERE image IS NOT NULL', (err, products) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            
-            products.forEach(product => {
-              const imagePath = path.join(this.uploadDirs.product, product.image);
-              if (!fs.existsSync(imagePath)) {
-                // Image file doesn't exist, remove from database
-                db.query('UPDATE products SET image = NULL WHERE id = ?', [product.id], (updateErr) => {
-                  if (updateErr) {
-                    } else {
-                    cleanedCount++;
-                    productCleaned++;
-                  }
-                });
-              } else {
-                }
-            });
-            
-            resolve({ 
-              success: true, 
-              cleanedCount,
-              categoryCleaned,
-              productCleaned,
-              message: `Cleanup completed: ${cleanedCount} orphaned records cleaned (${categoryCleaned} categories, ${productCleaned} products)`
-            });
+
+          resolve({
+            success: true,
+            cleanedCount,
+            categoryCleaned,
+            productCleaned,
+            message: `Cleanup completed: ${cleanedCount} orphaned records cleaned (${categoryCleaned} categories, ${productCleaned} products)`
           });
         });
         

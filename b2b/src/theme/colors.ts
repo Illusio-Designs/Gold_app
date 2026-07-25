@@ -1,7 +1,14 @@
+// Backward-compatible colors module. Keeps the original primary/secondary/accent
+// (default export) and also exposes the full token palette as a named `colors`
+// export, so both `import colors from` and `import { colors } from` work.
+import { colors as palette } from './tokens';
+
 const colors = {
-  primary: '#5D0829',      // Deep Red
-  secondary: '#FCE2BF',    // Light Beige
-  accent: '#C09E83',       // Gold/Bronze
+  ...palette,
+  primary: palette.maroon,
+  secondary: palette.cream,
+  accent: palette.gold,
 };
 
-export default colors; 
+export { colors };
+export default colors;

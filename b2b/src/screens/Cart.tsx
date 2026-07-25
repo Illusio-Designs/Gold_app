@@ -233,8 +233,7 @@ const Cart = () => {
                   nWeight={item.nWeight}
                   quantity={item.quantity}
                   onRemove={() => handleRemove(item.id)}
-                  showRemarkAndAmount={true}
-                  amount={item.amount}
+                  showRemarkAndAmount={false}
                 />
               );
             })}
@@ -247,10 +246,6 @@ const Cart = () => {
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Total N.W</Text>
                 <Text style={styles.summaryValue}>{getTotalWeight()}g</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Total Amount</Text>
-                <Text style={styles.summaryValue}>₹{cartItems.reduce((total: any, item: any) => total + (parseFloat(item.amount || '0') || 0), 0)}</Text>
               </View>
             </View>
             

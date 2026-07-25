@@ -435,10 +435,9 @@ const Orders = () => {
                       subtitle={item.category_name || 'Category'}
                       gWeight={item.gross_weight || '0'}
                       nWeight={item.net_weight || '0'}
-                      showRemarkAndAmount={true}
+                      showRemarkAndAmount={false}
                       readonly={true}
                       maroonPaddingBottom={12}
-                      customAmount={formatCurrency(item.mark_amount)}
                       customQuantity={item.quantity}
                     />
                   ))}
@@ -448,10 +447,6 @@ const Orders = () => {
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Total Items:</Text>
                       <Text style={styles.summaryValue}>{order.total_items || 0}</Text>
-                    </View>
-                    <View style={styles.summaryRow}>
-                      <Text style={styles.summaryLabel}>Total Amount:</Text>
-                      <Text style={styles.summaryValue}>{formatCurrency(order.total_mark_amount)}</Text>
                     </View>
                   </View>
                 </>

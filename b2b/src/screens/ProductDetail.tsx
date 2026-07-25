@@ -9,7 +9,8 @@ import { DetailSkeleton, PressableScale } from '../components/common/Motion';
 import { getProductImageUrl } from '../utils/imageUtils';
 import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
-import { Search01Icon } from '@hugeicons/core-free-icons';
+import { Search01Icon, ShoppingBag03Icon } from '@hugeicons/core-free-icons';
+import { SpecTable, BottomActionBar, Button } from '../components/ui';
 import { wp, hp } from '../utils/responsiveConfig';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../utils/responsive';
 
@@ -231,32 +232,19 @@ const ProductDetail = () => {
         <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
           <Text style={styles.sheetName}>{product.name || product.sku || 'Product Name'}</Text>
 
-          <View style={styles.sheetDetails}>
-            {product.size ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Size</Text><Text style={styles.dValue}>{product.size}</Text></View>
-            ) : null}
-            {product.length ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Length</Text><Text style={styles.dValue}>{product.length}</Text></View>
-            ) : null}
-            {product.sku ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>SKU</Text><Text style={styles.dValue}>{product.sku}</Text></View>
-            ) : null}
-            {product.purity ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Purity</Text><Text style={styles.dValue}>{product.purity}</Text></View>
-            ) : null}
-            {product.mark ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Mark</Text><Text style={styles.dValue}>{product.mark}</Text></View>
-            ) : null}
-            {product.gross_weight ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Gross Weight</Text><Text style={styles.dValue}>{product.gross_weight} g</Text></View>
-            ) : null}
-            {lessWeight ? (
-              <View style={styles.dRow}><Text style={styles.dLabel}>Less Weight</Text><Text style={styles.dValue}>{lessWeight} g</Text></View>
-            ) : null}
-            {product.net_weight ? (
-              <View style={[styles.dRow, styles.dRowLast]}><Text style={styles.dLabel}>Net Weight</Text><Text style={styles.dValue}>{product.net_weight} g</Text></View>
-            ) : null}
-          </View>
+          <Text style={styles.ocHeading}>Specifications</Text>
+          <SpecTable
+            rows={[
+              ...(product.size ? [{ k: 'Size', v: String(product.size) }] : []),
+              ...(product.length ? [{ k: 'Length', v: String(product.length) }] : []),
+              ...(product.sku ? [{ k: 'SKU', v: String(product.sku) }] : []),
+              ...(product.purity ? [{ k: 'Purity', v: String(product.purity) }] : []),
+              ...(product.mark ? [{ k: 'Mark', v: String(product.mark) }] : []),
+              ...(product.gross_weight ? [{ k: 'Gross Weight', v: `${product.gross_weight} g` }] : []),
+              ...(lessWeight ? [{ k: 'Less Weight', v: `${lessWeight} g` }] : []),
+              ...(product.net_weight ? [{ k: 'Net Weight', v: `${product.net_weight} g` }] : []),
+            ]}
+          />
 
           <Text style={styles.ocHeading}>Other Charges</Text>
           <TextInput
@@ -271,11 +259,15 @@ const ProductDetail = () => {
       </View>
 
       {/* Sticky Add to Cart */}
-      <View style={[styles.addBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <PressableScale style={styles.addBtn} activeScale={0.97} onPress={handleAddToCart}>
-          <Text style={styles.addText}>Add to Cart</Text>
-        </PressableScale>
-      </View>
+      <BottomActionBar
+        info={{
+          label: 'Net weight',
+          value: `${product.net_weight ? product.net_weight + ' g' : '—'}${product.purity ? ' · ' + product.purity : ''}`,
+        }}
+        style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+      >
+        <Button title="Add to Cart" icon={ShoppingBag03Icon} onPress={handleAddToCart} />
+      </BottomActionBar>
 
       {/* Full-screen image preview */}
       <Modal

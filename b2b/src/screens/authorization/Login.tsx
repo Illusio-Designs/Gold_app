@@ -14,6 +14,7 @@ import {
 import CustomTextInput from '../../components/common/CustomTextInput';
 import Button from '../../components/common/Button';
 import CountryPickerModal from '../../components/common/CountryPickerModal';
+import { FlagIN } from '../../components/ui';
 import { Country } from '../../data/countries';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -120,7 +121,11 @@ const Login = () => {
             <Text style={styles.label}>Phone Number</Text>
             <View style={styles.row}>
               <TouchableOpacity style={styles.countryCodeBox} onPress={() => setCountryModalVisible(true)}>
-                <Text style={styles.flag}>{countryFlag}</Text>
+                {countryCode === '+91' ? (
+                  <FlagIN />
+                ) : (
+                  <Text style={styles.flag}>{countryFlag}</Text>
+                )}
                 <Text style={styles.countryCode}>{countryCode}</Text>
               </TouchableOpacity>
               <CustomTextInput

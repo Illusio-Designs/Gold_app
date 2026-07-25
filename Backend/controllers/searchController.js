@@ -25,11 +25,11 @@ function searchAll(req, res) {
       id,
       name,
       description,
-      image,
+      icon,
       status,
       created_at,
       updated_at
-    FROM categories 
+    FROM categories
     WHERE status = 'active' 
     AND (name LIKE ? OR description LIKE ?)
     ORDER BY name ASC
@@ -182,15 +182,15 @@ function searchCategories(req, res) {
   const searchTerm = `%${query.trim()}%`;
 
   const sql = `
-    SELECT 
+    SELECT
       id,
       name,
       description,
-      image,
+      icon,
       status,
       created_at,
       updated_at
-    FROM categories 
+    FROM categories
     WHERE status = 'active' 
     AND (name LIKE ? OR description LIKE ?)
     ORDER BY name ASC

@@ -2,8 +2,8 @@ const { db } = require('../config/db');
 
 // Create new category
 function createCategory(category, callback) {
-  const sql = 'INSERT INTO categories (name, description, image, status) VALUES (?, ?, ?, ?)';
-  const values = [category.name, category.description, category.image, 'draft']; // Always start as draft
+  const sql = 'INSERT INTO categories (name, description, icon, status) VALUES (?, ?, ?, ?)';
+  const values = [category.name, category.description, category.icon, 'draft']; // Always start as draft
   db.query(sql, values, callback);
 }
 
@@ -21,8 +21,8 @@ function getCategoryById(id, callback) {
 
 // Update category
 function updateCategory(id, category, callback) {
-  const sql = 'UPDATE categories SET name = ?, description = ?, image = ? WHERE id = ?';
-  const values = [category.name, category.description, category.image, id];
+  const sql = 'UPDATE categories SET name = ?, description = ?, icon = ? WHERE id = ?';
+  const values = [category.name, category.description, category.icon, id];
   db.query(sql, values, callback);
 }
 
