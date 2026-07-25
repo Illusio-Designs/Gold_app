@@ -2,9 +2,9 @@
   overflow-x: auto;
   width: 100%;
   background: var(--surface);
-  border: 1px solid #ece2d5;
+  border: 1px solid var(--hairline, #ece2d5);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card, 0 8px 24px -12px rgba(93,8,41,0.12));
   overflow: hidden;
   overflow-x: auto;
 }
@@ -24,12 +24,14 @@
 }
 
 .custom-table thead th {
-  padding: 14px 18px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--brand);
-  background: var(--surface);
-  border-bottom: 2px solid var(--surface-sunken);
+  padding: 13px 18px;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--hairline, #ece2d5);
 }
 
 .custom-table tbody td {
