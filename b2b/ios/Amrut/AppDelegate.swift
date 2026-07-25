@@ -51,9 +51,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     secureField.centerYAnchor.constraint(equalTo: window.centerYAnchor).isActive = true
 
     // Move the window's real content layer to live INSIDE the secure field's
-    // protected canvas, then keep the field itself out of the layout.
+    // protected canvas. The protected sublayer sits at a different index across
+    // iOS versions (last on 17+, first before), so branch to hit the right one.
     window.layer.superlayer?.addSublayer(secureField.layer)
-    secureField.layer.sublayers?.last?.addSublayer(window.layer)
+    if #available(iOS 17.0, *) {
+      secureField.layer.sublayers?.last?.addSublayer(window.layer)
+    } else {
+      secureField.layer.sublayers?.first?.addSublayer(window.layer)
+    }
   }
 }
 
