@@ -18,11 +18,16 @@ name: iOS Build (TestFlight)
 #   • (Push) Certificates, IDs & Profiles → Keys → create an APNs Auth Key
 #     (.p8) → upload it to the amrut-jewels Firebase project (Cloud Messaging).
 #
-# Trigger: manual only (workflow_dispatch). Run it from the Actions tab once the
-# Apple secrets below are set — so it never auto-fails before they exist.
+# Trigger: manual (workflow_dispatch) OR a push touching iOS on the feature
+# branch (now that the Apple secrets are set, so it won't auto-fail).
 
 on:
   workflow_dispatch:
+  push:
+    branches: [claude/code-updates-review-4lp01q]
+    paths:
+      - "b2b/ios/**"
+      - ".github/workflows/ios-build.yml"
 
 concurrency:
   group: ios-testflight-build
