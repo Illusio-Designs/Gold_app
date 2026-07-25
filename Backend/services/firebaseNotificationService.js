@@ -1,17 +1,23 @@
 const admin = require('firebase-admin');
 
-// Firebase configuration for web app (for reference)
+// Firebase project config (amrut-jewels — the single project every app + this
+// backend must share). Used only as reference + to serve the web-push VAPID key
+// to browser clients; server-side sends authenticate with the service account.
 const firebaseConfig = {
-  apiKey: "AIzaSyDW0FnbA7vJrV7EsNnZK7Adu2dfBcVe3eg",
-  authDomain: "amrut-9cc5e.firebaseapp.com",
-  projectId: "amrut-9cc5e",
-  storageBucket: "amrut-9cc5e.firebasestorage.app",
-  messagingSenderId: "76051395970",
-  appId: "1:76051395970:web:1d7817edf09d6b2bb4cb9b",
-  measurementId: "G-C0MD37JBH6"
+  apiKey: "AIzaSyDmFrIU-XgXIZgMnkgaN4z05u9c4T83IKQ",
+  authDomain: "amrut-jewels.firebaseapp.com",
+  projectId: "amrut-jewels",
+  storageBucket: "amrut-jewels.firebasestorage.app",
+  messagingSenderId: "1071847770226",
+  // Android app id from google-services.json. If web push is enabled later,
+  // register a Web app in the amrut-jewels console and swap in its web appId.
+  appId: "1:1071847770226:android:3d2700e00d45bb7df79aeb",
 };
 
-// VAPID key for web push notifications
+// VAPID key for WEB push only. NOTE: the value below belongs to the OLD project.
+// Mobile (Android/iOS) push does NOT use this. If/when web push is enabled on
+// amrut-jewels, regenerate it (Cloud Messaging → Web Push certificates) and
+// paste the amrut-jewels key here.
 const VAPID_KEY = "BOaREbot4mZreAvnnsmWMtEpDD5G85fbW_0EXnMZcP7rJFjoQGDEIZckigVi-YPNPp9uTC06hti_e4Zhb9HPRVw";
 
 // Load Firebase service account credentials. Tried in order:
@@ -20,14 +26,37 @@ const VAPID_KEY = "BOaREbot4mZreAvnnsmWMtEpDD5G85fbW_0EXnMZcP7rJFjoQGDEIZckigVi-
 //   3) the legacy amrut-9cc5e filename (backward compatibility)
 // Guarded so a missing/misplaced file disables PUSH only — never crashes the API.
 const path = require('path');
+const fs = require('fs');
+
+// The Firebase project every app + this backend MUST share. A token minted by an
+// app on a DIFFERENT project is rejected by FCM with "SenderId mismatch", so if
+// the loaded key isn't this project, push silently fails — we warn loudly below.
+const EXPECTED_PROJECT = 'amrut-jewels';
+
 let serviceAccount = null;
 const candidatePaths = [];
+// 1) explicit path via env (absolute, or relative to Backend/)
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   const envPath = process.env.FIREBASE_SERVICE_ACCOUNT;
   candidatePaths.push(path.isAbsolute(envPath) ? envPath : path.join(__dirname, '..', envPath));
 }
+// 2) canonical drop-in name — rename the console download to this on the server
 candidatePaths.push(path.join(__dirname, '..', 'firebase-service-account.json'));
-candidatePaths.push(path.join(__dirname, '..', 'amrut-9cc5e-firebase-adminsdk-fbsvc-c0150a05ed.json'));
+// 3) any *firebase-adminsdk*.json the console generated, dropped into Backend/.
+//    Prefer a filename matching EXPECTED_PROJECT so a stale key can't win.
+try {
+  const backendDir = path.join(__dirname, '..');
+  const adminKeys = fs
+    .readdirSync(backendDir)
+    .filter((f) => /firebase-adminsdk.*\.json$/i.test(f))
+    .sort(
+      (a, b) =>
+        (b.includes(EXPECTED_PROJECT) ? 1 : 0) - (a.includes(EXPECTED_PROJECT) ? 1 : 0)
+    );
+  for (const f of adminKeys) candidatePaths.push(path.join(backendDir, f));
+} catch (e) {
+  /* Backend dir unreadable — nothing to auto-discover */
+}
 for (const p of candidatePaths) {
   try {
     serviceAccount = require(p);
@@ -41,6 +70,13 @@ for (const p of candidatePaths) {
 }
 if (!serviceAccount) {
   console.error('[firebase] No service account file found — push notifications disabled.');
+} else if (serviceAccount.project_id !== EXPECTED_PROJECT) {
+  console.warn(
+    `[firebase] WARNING: loaded service account project "${serviceAccount.project_id}" ` +
+      `!= expected "${EXPECTED_PROJECT}". Push to ${EXPECTED_PROJECT} app tokens will ` +
+      `fail with "SenderId mismatch". Upload the ${EXPECTED_PROJECT} key ` +
+      `(Project settings → Service accounts → Generate new private key).`
+  );
 }
 
 // Initialize Firebase Admin SDK (for server-side operations)
