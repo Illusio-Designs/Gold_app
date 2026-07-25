@@ -469,11 +469,34 @@ async function sendTestNotification(req, res) {
       });
     }
 
+    // Surface per-token failures. sendEachForMulticast() returns success:true
+    // even when EVERY token is rejected (e.g. "SenderId mismatch"), so a naive
+    // report shows a misleading "delivered". Pull the first failure reason.
+    const firstFailure =
+      (result.responses || []).find((r) => r && r.success === false) || null;
+    const failureError =
+      firstFailure && firstFailure.error
+        ? firstFailure.error.message || firstFailure.error.code
+        : null;
+
+    // Nothing actually got through — report it as a failure with the real cause.
+    if (result.successCount === 0) {
+      return res.status(200).json({
+        success: false,
+        tokenCount: tokens.length,
+        successCount: 0,
+        failureCount: result.failureCount,
+        error: failureError || "No device accepted the push (all sends failed).",
+        message: `0/${tokens.length} device(s) received it for "${target}".`,
+      });
+    }
+
     return res.status(200).json({
       success: true,
       tokenCount: tokens.length,
       successCount: result.successCount,
       failureCount: result.failureCount,
+      failureError: failureError || undefined,
       message: `Test push delivered to ${result.successCount}/${tokens.length} device(s) for "${target}".`,
     });
   } catch (error) {
