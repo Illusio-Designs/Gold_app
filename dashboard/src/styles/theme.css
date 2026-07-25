@@ -92,11 +92,11 @@
 /* Shared form control — replaces the per-page inline `inputStyle` objects */
 .form-control {
   width: 100%;
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
+  background: #fff;
+  border: 1px solid var(--gold-line, #e4d3b3);
   color: var(--text-primary);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  border-radius: var(--radius);
+  padding: 11px 13px;
   font-size: 0.95rem;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
@@ -104,7 +104,7 @@
 .form-control:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(192, 158, 131, 0.28);
+  box-shadow: 0 0 0 3px rgba(93, 8, 41, 0.12);
 }
 
 /* When `form-control` is placed on a field WRAPPER (InputField / DropdownSelect
