@@ -436,14 +436,21 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
           VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        // Check for duplicate notifications to prevent spam (within last 1 minute)
+        // De-dupe only EXACT repeats (same user + type + identical message) within
+        // a short window. Every order-status change produces a UNIQUE body
+        // ("Your order #12 has been shipped"), so distinct changes always send —
+        // only an accidental double-submit of the very same message is collapsed.
+        // (Previously this keyed on user+type over a full minute, which wrongly
+        // blocked a second order notification of any kind — hence "Duplicate
+        // notification prevented" on legitimate status changes.)
         const checkDuplicateSql = `
           SELECT id FROM notifications
-          WHERE user_id = ? AND type = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+          WHERE user_id = ? AND type = ? AND body = ?
+            AND created_at > DATE_SUB(NOW(), INTERVAL 15 SECOND)
           LIMIT 1
         `;
 
-        db.query(checkDuplicateSql, [userId, type], (duplicateErr, duplicateResults) => {
+        db.query(checkDuplicateSql, [userId, type, body], (duplicateErr, duplicateResults) => {
           if (duplicateErr) {
             // Continue anyway
           } else if (duplicateResults.length > 0) {
