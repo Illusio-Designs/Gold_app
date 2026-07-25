@@ -555,6 +555,7 @@ async function updateUser(req, res) {
       state: req.body.state || null,
       city: req.body.city || null,
       country: req.body.country || null,
+      pin: req.body.pin || null,
       gst_number: req.body.gst_number || null,
       pan_number: req.body.pan_number || null,
       business_name: req.body.business_name || null,
