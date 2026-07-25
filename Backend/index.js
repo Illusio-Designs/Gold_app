@@ -167,9 +167,11 @@ async function startServer() {
   try {
     // Try database setup, but don't fail if it doesn't work
     try {
-    await createTablesAndAdmin();
+      await createTablesAndAdmin();
+      console.log("[startup] Database setup/migrations completed");
     } catch (dbError) {
-      }
+      console.error("[startup] Database setup failed:", dbError.message);
+    }
 
     // Start the server even if database failed
     app.listen(PORT, HOST, () => {
