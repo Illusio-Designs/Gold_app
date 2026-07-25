@@ -320,7 +320,7 @@ const Orders = () => {
               {/* Order Header */}
               <View style={styles.orderHeader}>
                 <View style={styles.orderInfo}>
-                  <Text style={styles.orderId}>Order #{order.id}</Text>
+                  <Text style={styles.orderId}>{order.order_number || `Order #${order.id}`}</Text>
                   <Text style={styles.orderDate}>{formatDate(order.created_at)}</Text>
                 </View>
                 <View style={[
@@ -393,7 +393,7 @@ const Orders = () => {
             
             <View style={styles.modalBody}>
               <Text style={styles.modalSubtitle}>
-                Order #{selectedOrder.id} - {selectedOrder.product_name}
+                {selectedOrder.order_number || `Order #${selectedOrder.id}`} - {selectedOrder.product_name}
               </Text>
               
               <Text style={styles.modalDescription}>

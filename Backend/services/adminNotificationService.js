@@ -209,12 +209,14 @@ async function notifyUserRegistration(userData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function notifyNewOrder(orderData) {
+  const label = orderData.orderNumber || `#${orderData.id}`;
   const title = 'New Order Received';
-  const body = `Order #${orderData.id} from ${orderData.userName} for ${orderData.productName} - ${orderData.totalAmount}`;
-  
+  const body = `Order ${label} from ${orderData.userName} for ${orderData.productName} - ${orderData.totalAmount}`;
+
   const data = {
     action: 'view_order',
     orderId: orderData.id,
+    orderNumber: label,
     userId: orderData.userId,
     userName: orderData.userName,
     productName: orderData.productName,
@@ -233,14 +235,16 @@ async function notifyNewOrder(orderData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function notifyNewCustomOrder(orderData) {
+  const label = orderData.orderNumber || `#${orderData.id}`;
   const title = 'New Custom Order';
-  const body = `Custom order #${orderData.id} from ${orderData.userName || 'a customer'}${
+  const body = `Custom order ${label} from ${orderData.userName || 'a customer'}${
     orderData.weight ? ` — ${orderData.weight}g` : ''
   }.`;
 
   const data = {
     action: 'view_custom_order',
     orderId: orderData.id,
+    orderNumber: label,
     userId: orderData.userId,
     userName: orderData.userName,
     weight: orderData.weight,
@@ -293,12 +297,14 @@ async function notifyRegistrationStatusChange(userData) {
  * @returns {Promise<Object>} - Result of notification sending
  */
 async function notifyOrderStatusChange(orderData) {
+  const label = orderData.orderNumber || `#${orderData.id}`;
   const title = 'Order Status Updated';
-  const body = `Your order #${orderData.id} has been ${orderData.status}. ${orderData.remarks ? `Remarks: ${orderData.remarks}` : ''}`;
-  
+  const body = `Your order ${label} has been ${orderData.status}. ${orderData.remarks ? `Remarks: ${orderData.remarks}` : ''}`;
+
   const data = {
     action: 'view_order',
     orderId: orderData.id,
+    orderNumber: label,
     userId: orderData.userId,
     status: orderData.status,
     remarks: orderData.remarks || '',

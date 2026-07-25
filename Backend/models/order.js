@@ -1,6 +1,15 @@
 const { db } = require("../config/db");
 const productModel = require("./product");
 
+// Derived order number: ORD-<CHANNEL>-<6-hex hash of id>. The hash is
+// (id * odd-constant) mod 2^24 — a bijection, so it's unique + non-sequential.
+// Must stay identical to Backend/utils/orderNumber.js (JS side) so a number
+// computed in code always matches the value returned by these queries.
+// Requires the `users u` join to be present (for u.type → channel).
+const ORDER_NUMBER_SQL =
+  "CONCAT('ORD-', CASE WHEN u.type = 'consumer' THEN 'D2C' ELSE 'B2B' END, '-', " +
+  "UPPER(LPAD(CONV((o.id * 2654435761) MOD 16777216, 10, 16), 6, '0')))";
+
 // Create new order with individual product status tracking.
 // Reserving the piece and creating the order is now race-safe: the atomic
 // conditional flip in reserveProductForOrder guarantees that two concurrent
@@ -118,7 +127,7 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 function getAllOrders(callback) {
   const sql = `
     SELECT o.*,
-           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           ${ORDER_NUMBER_SQL} as order_number,
            u.name as user_name, u.business_name, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            p.name as product_name, p.sku as product_sku, p.image as product_image
     FROM orders o
@@ -133,13 +142,14 @@ function getAllOrders(callback) {
 function getOrdersByUserId(userId, callback) {
   const sql = `
     SELECT o.*,
-           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           ${ORDER_NUMBER_SQL} as order_number,
            p.name as product_name, p.image as product_image, p.sku as product_sku,
            p.net_weight, p.gross_weight, p.mark_amount, p.purity,
            (p.gross_weight - p.net_weight) as less_weight,
            o.quantity as total_qty,
            c.name as category_name
     FROM orders o
+    LEFT JOIN users u ON o.user_id = u.id
     LEFT JOIN products p ON o.product_id = p.id
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE o.user_id = ?
@@ -152,7 +162,7 @@ function getOrdersByUserId(userId, callback) {
 function getOrderById(id, callback) {
   const sql = `
     SELECT o.*,
-           CONCAT('ORD-', LPAD(o.id, 6, '0')) as order_number,
+           ${ORDER_NUMBER_SQL} as order_number,
            u.name as user_name, u.business_name, u.email, u.phone_number as user_phone, u.status as user_status, u.type as user_type,
            u.address_line1, u.address_line2, u.landmark, u.city, u.state, u.country,
            p.name as product_name, p.sku as product_sku, p.image as product_image

@@ -5,6 +5,7 @@ const {
   notifyOrderStatusChange,
   notifyNewCustomOrder,
 } = require("../services/adminNotificationService");
+const { formatOrderNumber } = require("../utils/orderNumber");
 
 // Turn stored image filenames into full URLs the apps/dashboard can render.
 function toImageUrls(images) {
@@ -55,6 +56,7 @@ function createCustomOrder(req, res) {
       // Alert admins about the new custom order (push + dashboard).
       notifyNewCustomOrder({
         id: result.insertId,
+        orderNumber: formatOrderNumber(result.insertId, "CUS"),
         userId,
         weight,
         purity,
@@ -133,7 +135,8 @@ function updateCustomOrderStatus(req, res) {
       const order = !getErr && rows && rows[0];
       if (order && order.user_id) {
         notifyOrderStatusChange({
-          id: `C${order.id}`,
+          id: order.id,
+          orderNumber: formatOrderNumber(order.id, "CUS"),
           status,
           userId: order.user_id,
         }).catch((e) =>
