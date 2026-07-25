@@ -402,7 +402,7 @@ function updateOrderStatus(req, res) {
       }
 
       // Get updated order details for real-time update
-      orderModel.getOrderById(id, (detailsErr, detailsResults) => {
+      orderModel.getOrderById(id, async (detailsErr, detailsResults) => {
         if (detailsErr) {
           return res.status(500).json({ error: detailsErr.message });
         }
@@ -419,6 +419,10 @@ function updateOrderStatus(req, res) {
 
           // Emit specific update to the user's room
           const roomUserId = updatedOrder.user_id || updatedOrder.business_user_id;
+          let notificationResult = {
+            attempted: false,
+            reason: "No recipient user id on order",
+          };
           if (roomUserId) {
             socketService.emitToRoom(
               `user_${roomUserId}`,
@@ -430,13 +434,28 @@ function updateOrderStatus(req, res) {
             );
 
             // Notify the customer (push + in-app bell) about the status change.
-            notifyOrderStatusChange({
-              id: updatedOrder.id,
-              status,
-              userId: roomUserId,
-            }).catch((e) =>
-              console.error("[orderController] notifyOrderStatusChange:", e.message)
-            );
+            // Awaited so the outcome is returned in the response — the caller
+            // can see exactly why a push did / didn't go out (no server-log
+            // access needed to debug delivery).
+            try {
+              const r = await notifyOrderStatusChange({
+                id: updatedOrder.id,
+                status,
+                userId: roomUserId,
+              });
+              notificationResult = { attempted: true, userId: roomUserId, ...r };
+            } catch (e) {
+              console.error(
+                "[orderController] notifyOrderStatusChange:",
+                e && e.message
+              );
+              notificationResult = {
+                attempted: true,
+                userId: roomUserId,
+                success: false,
+                error: (e && (e.error || e.message)) || "notification failed",
+              };
+            }
           }
 
           // If the order is cancelled, put the product back on the storefront
@@ -461,6 +480,7 @@ function updateOrderStatus(req, res) {
           res.json({
             message: "Order status updated successfully",
             order: updatedOrder,
+            notification: notificationResult,
           });
         } else {
           res
