@@ -442,47 +442,54 @@ function getTableNameFromIndex(indexName) {
   return tableMap[indexName] || "users"; // fallback to users
 }
 
-// Update existing tables with new fields
-async function updateExistingTables() {
-  try {
-    // Add stock_status field to products table if it doesn't exist
-    const checkStockStatus = "SHOW COLUMNS FROM products LIKE 'stock_status'";
-    const hasStockStatus = await new Promise((resolve, reject) => {
-      db.query(checkStockStatus, (err, results) => {
-        if (err) reject(err);
-        else resolve(results.length > 0);
-      });
+// Does a column exist on a table? Resolves false on any error (table missing etc).
+function columnExists(table, column) {
+  return new Promise((resolve) => {
+    db.query(`SHOW COLUMNS FROM \`${table}\` LIKE ?`, [column], (err, results) => {
+      resolve(!err && results && results.length > 0);
     });
+  });
+}
 
-    if (!hasStockStatus) {
+// Run one migration step in isolation — a failure is logged and skipped, never
+// aborts the other steps. This guarantees e.g. the categories icon migration
+// still runs even if an earlier ALTER fails.
+async function safeStep(label, fn) {
+  try {
+    await fn();
+  } catch (error) {
+    console.error(`[setup] migration step "${label}" failed:`, error.message);
+  }
+}
+
+// Update existing tables with new fields / run migrations. Each step is
+// independent and idempotent, safe to run on every boot.
+async function updateExistingTables() {
+  // products.stock_status
+  await safeStep("products.stock_status", async () => {
+    if (!(await columnExists("products", "stock_status"))) {
       await executeQuery(
         "ALTER TABLE products ADD COLUMN stock_status ENUM('available', 'out_of_stock', 'reserved') DEFAULT 'available' AFTER status",
         "stock_status field added to products table"
       );
-
-      // Update existing products to have 'available' status
       await executeQuery(
         "UPDATE products SET stock_status = 'available' WHERE stock_status IS NULL",
         "Existing products updated with available stock status"
       );
-    } else {
-      }
+    }
+  });
 
-    // Widen users.type to allow D2C consumers. Running MODIFY is idempotent —
-    // safe to re-run; it just re-asserts the enum. Existing rows are untouched.
+  // users.type widened for D2C consumers (MODIFY is idempotent)
+  await safeStep("users.type", async () => {
     await executeQuery(
       "ALTER TABLE users MODIFY COLUMN type ENUM('admin', 'business', 'consumer') NOT NULL",
       "users.type widened to include 'consumer'"
     );
+  });
 
-    // Add payment columns to orders (for the D2C Razorpay flow) if missing.
-    const hasPaymentStatus = await new Promise((resolve, reject) => {
-      db.query("SHOW COLUMNS FROM orders LIKE 'payment_status'", (err, results) => {
-        if (err) reject(err);
-        else resolve(results.length > 0);
-      });
-    });
-    if (!hasPaymentStatus) {
+  // orders payment columns (D2C Razorpay flow)
+  await safeStep("orders.payment_columns", async () => {
+    if (!(await columnExists("orders", "payment_status"))) {
       await executeQuery(
         "ALTER TABLE orders " +
           "ADD COLUMN payment_status ENUM('pending','paid','failed','refunded') DEFAULT 'pending' AFTER courier_company, " +
@@ -492,47 +499,33 @@ async function updateExistingTables() {
         "payment columns added to orders table"
       );
     }
+  });
 
-    // Migrate categories from image-based to icon-based (idempotent). If the old
-    // `image` column exists and `icon` doesn't, rename it; otherwise ensure an
-    // `icon` column exists. This lets the deploy fix the schema automatically.
-    try {
-      const hasIcon = await new Promise((resolve, reject) => {
-        db.query("SHOW COLUMNS FROM categories LIKE 'icon'", (err, results) => {
-          if (err) reject(err); else resolve(results.length > 0);
-        });
-      });
-      const hasImage = await new Promise((resolve, reject) => {
-        db.query("SHOW COLUMNS FROM categories LIKE 'image'", (err, results) => {
-          if (err) reject(err); else resolve(results.length > 0);
-        });
-      });
-      if (!hasIcon && hasImage) {
-        await executeQuery(
-          "ALTER TABLE categories CHANGE image icon VARCHAR(255)",
-          "categories.image renamed to icon"
-        );
-      } else if (!hasIcon && !hasImage) {
-        await executeQuery(
-          "ALTER TABLE categories ADD COLUMN icon VARCHAR(255)",
-          "categories.icon column added"
-        );
-      }
-    } catch (error) {
-      console.error("[setup] categories icon migration failed:", error.message);
+  // categories image -> icon (idempotent)
+  await safeStep("categories.image->icon", async () => {
+    const hasIcon = await columnExists("categories", "icon");
+    const hasImage = await columnExists("categories", "image");
+    if (!hasIcon && hasImage) {
+      await executeQuery(
+        "ALTER TABLE categories CHANGE image icon VARCHAR(255)",
+        "categories.image renamed to icon"
+      );
+    } else if (!hasIcon && !hasImage) {
+      await executeQuery(
+        "ALTER TABLE categories ADD COLUMN icon VARCHAR(255)",
+        "categories.icon column added"
+      );
     }
+  });
 
-    // Seed default pricing settings (used by the D2C gold-rate pricing).
-    // INSERT IGNORE keeps any value an admin has already set.
+  // seed default pricing settings (INSERT IGNORE keeps admin-set values)
+  await safeStep("seed.app_settings", async () => {
     await executeQuery(
       "INSERT IGNORE INTO app_settings (setting_key, setting_value) VALUES " +
         "('gold_rate', '0'), ('making_charge_percent', '0')",
       "default pricing settings seeded"
     );
-
-  } catch (error) {
-    console.error("[setup] updateExistingTables error:", error.message);
-  }
+  });
 }
 
 // Export the main function

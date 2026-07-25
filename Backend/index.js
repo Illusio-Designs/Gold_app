@@ -164,23 +164,27 @@ async function startServer() {
     return;
   }
 
-  try {
-    // Try database setup, but don't fail if it doesn't work
-    try {
-      await createTablesAndAdmin();
-      console.log("[startup] Database setup/migrations completed");
-    } catch (dbError) {
-      console.error("[startup] Database setup failed:", dbError.message);
-    }
-
-    // Start the server even if database failed
-    app.listen(PORT, HOST, () => {
-      serverStarted = true;
-      });
-  } catch (error) {
-    process.exit(1);
-  }
+  // Start the server (only used when run directly; under Passenger the app is
+  // started via module.exports = app). DB setup runs separately on module load.
+  app.listen(PORT, HOST, () => {
+    serverStarted = true;
+  });
 }
+
+// Run DB setup/migrations on module load so it happens under BOTH entry paths:
+//   • `node index.js` directly, AND
+//   • Phusion Passenger, which require()s this file (so require.main !== module
+//     and startServer() below never runs). This is why migrations previously
+//     did not apply on deploy. Idempotent + self-healing, safe to run each boot.
+let dbSetupStarted = false;
+function runDbSetupOnce() {
+  if (dbSetupStarted) return;
+  dbSetupStarted = true;
+  createTablesAndAdmin()
+    .then(() => console.log("[startup] Database setup/migrations completed"))
+    .catch((dbError) => console.error("[startup] Database setup failed:", dbError.message));
+}
+runDbSetupOnce();
 
 // Process-level safety nets: log and keep the API alive instead of letting a
 // stray promise rejection or async error take the whole process down.
