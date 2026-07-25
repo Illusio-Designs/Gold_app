@@ -18,3 +18,4 @@ export { default as BottomActionBar } from './BottomActionBar';
 export { default as AnimatedSearchBar } from './AnimatedSearchBar';
 export { default as SpecTable } from './SpecTable';
 export type { SpecRow } from './SpecTable';
+export { default as BrandFooter } from './BrandFooter';

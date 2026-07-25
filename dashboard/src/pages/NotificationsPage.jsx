@@ -166,7 +166,6 @@ const NotificationsPage = () => {
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {[
-            { key: "business", label: "Send to B2B app" },
             { key: "consumer", label: "Send to D2C app" },
             { key: "self", label: "Send to my devices" },
           ].map((b) => (
