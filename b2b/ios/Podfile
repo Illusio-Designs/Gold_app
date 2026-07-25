@@ -8,6 +8,11 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
 
+# Firebase (FirebaseCoreInternal → GoogleUtilities) ships as static Swift pods
+# that don't define module maps, so they can't be imported from Swift unless we
+# generate modular headers. Required to `pod install` with the Firebase SDK.
+use_modular_headers!
+
 
 
 # Flipper configuration
