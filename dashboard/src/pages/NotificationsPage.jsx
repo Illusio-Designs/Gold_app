@@ -162,7 +162,7 @@ const NotificationsPage = () => {
       <div style={{ background: "#fff", border: "1px solid #e6dccf", borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ fontWeight: 700, color: "#5d0829", marginBottom: 4 }}>Test push notifications</div>
         <div style={{ fontSize: 13, color: "#8a7a6d", marginBottom: 12 }}>
-          Sends a real Firebase push and reports the exact result. B2B and D2C are separate Firebase projects — each needs its own service-account key on the server.
+          Sends a real Firebase push and reports the exact result (delivered count, or the exact FCM error). Requires the amrut-jewels service-account key on the server.
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {[
