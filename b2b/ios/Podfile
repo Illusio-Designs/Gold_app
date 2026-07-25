@@ -22,12 +22,19 @@ end
 target 'Amrut' do
   config = use_native_modules!
 
-  # GoogleUtilities (a Firebase dependency) ships without a module map, which
-  # breaks Swift imports (FirebaseCoreInternal) when built as a static lib.
-  # Enable modular headers for JUST this pod. Doing it globally
-  # (use_modular_headers!) makes React Native emit two modulemaps for the same
-  # `react_runtime` module and the archive fails with a redefinition error.
-  pod 'GoogleUtilities', :modular_headers => true
+  # Firebase pods @import each other and GoogleUtilities as Clang modules, so
+  # each needs a module map. Enable modular headers for the Firebase/Google
+  # pods specifically. (Doing it globally with use_modular_headers! instead
+  # makes React Native emit two modulemaps for module `react_runtime` and the
+  # archive fails with a redefinition error — so we scope it to just these.)
+  %w[
+    GoogleUtilities
+    FirebaseCore
+    FirebaseCoreInternal
+    FirebaseCoreExtension
+    FirebaseInstallations
+    FirebaseMessaging
+  ].each { |fb_pod| pod fb_pod, :modular_headers => true }
 
   use_react_native!(
     :path => config[:reactNativePath],
