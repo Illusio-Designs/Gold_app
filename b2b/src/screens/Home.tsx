@@ -428,16 +428,10 @@ const Home = () => {
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.screen}>
       {/* Dark battery/clock icons so they stay visible on the light top bar */}
       <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-      {/* Modern top bar — logo + greeting + search icon */}
+      {/* Sticky top bar — logo + greeting + icons */}
       <View style={[styles.topBar, { paddingTop: insets.top + 4 }]}>
         <Image
           source={require('../assets/img/common/maroonlogo.png')}
@@ -480,6 +474,13 @@ const Home = () => {
         onPress={() => (navigation as any).navigate('Search')}
       />
 
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        showsVerticalScrollIndicator={false}
+      >
       {/* Slider first */}
       {slidersLoading ? (
         <BannerSkeleton height={150} />
@@ -569,11 +570,16 @@ const Home = () => {
         )}
       </View>
 
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

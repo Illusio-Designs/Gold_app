@@ -8,7 +8,7 @@ import SearchBar from '../components/common/SearchBar';
 import Filter from './Filter';
 import { getProductImageUrl } from '../utils/imageUtils';
 import { getApprovedProductsForUser, getApprovedCategoriesForUser } from '../services/Api';
-import { CategoryRail } from '../components/ui';
+import { CategoryRail, ProductCard } from '../components/ui';
 import ScreenLoader from '../components/common/ScreenLoader';
 import { ProductGridSkeleton, PressableScale, FadeInSlide, ShimmerImage } from '../components/common/Motion';
 import { useRealtimeData } from '../hooks/useRealtimeData';
@@ -457,6 +457,7 @@ const Product = () => {
           data={filteredProducts}
           keyExtractor={(item, idx) => String(item.id || idx)}
           numColumns={2}
+          style={{ flex: 1 }}
           columnWrapperStyle={styles.gridRow}
           contentContainerStyle={styles.gridContent}
           showsVerticalScrollIndicator={false}
@@ -465,36 +466,16 @@ const Product = () => {
           removeClippedSubviews
           renderItem={({ item }) => (
             <View style={styles.cardWrap}>
-              <View style={styles.card}>
-                {/* Cart icon at top-right */}
-                <TouchableOpacity
-                  style={styles.cartIconContainer}
-                  onPress={() => addToCartDirectly(item)}
-                  activeOpacity={0.7}
-                >
-                  <Image source={require('../assets/img/common/cart.png')} style={styles.cartIcon} />
-                </TouchableOpacity>
-
-                {/* Product Image - tap to view */}
-                <TouchableOpacity
-                  style={styles.imageTouch}
-                  activeOpacity={0.85}
-                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-                >
-                  {renderProductImage(item)}
-                  <Text style={styles.name}>{item.name || item.sku || 'Product'}</Text>
-                </TouchableOpacity>
-
-                {/* View button */}
-                <PressableScale
-                  containerStyle={styles.viewBtnWrap}
-                  style={styles.viewBtn}
-                  activeScale={0.96}
-                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-                >
-                  <Text style={styles.viewText}>View</Text>
-                </PressableScale>
-              </View>
+              <ProductCard
+                name={item.name || item.sku || 'Product'}
+                weight={item.net_weight ? `${item.net_weight} g` : undefined}
+                imageUri={(() => {
+                  let u = item.image || (item as any).originalImageUrl || (item as any).imageUrl || (item as any).processedImageUrl;
+                  if (u && !String(u).startsWith('http')) u = getProductImageUrl(u) || undefined;
+                  return u || undefined;
+                })()}
+                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+              />
             </View>
           )}
         />

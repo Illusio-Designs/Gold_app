@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
+  Text,
   TextInput,
   TouchableOpacity,
   Animated,
@@ -26,13 +27,8 @@ interface AnimatedSearchBarProps {
   autoFocus?: boolean;
 }
 
-const DEFAULT_HINTS = [
-  "Search 'rings'",
-  "Search 'temple haar'",
-  "Search 'jhumka'",
-  "Search 'kada'",
-  "Search 'mangalsutra'",
-];
+// Only the term animates; the word "Search" stays static. No quotes.
+const DEFAULT_HINTS = ['ring', 'chain', 'earrings', 'kada', 'mangalsutra', 'bangle'];
 
 // Premium search bar. Tappable placeholder that cycles suggestions (Home), or a
 // live text input (Search) — same look either way.
@@ -87,9 +83,12 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={[styles.bar, shadows.card, style]}>
       <HugeiconsIcon icon={Search01Icon} size={18} color={colors.muted} strokeWidth={1.8} />
-      <Animated.Text style={[styles.hint, { opacity }]} numberOfLines={1}>
-        {hints[idx]}
-      </Animated.Text>
+      <View style={styles.hintRow}>
+        <Text style={styles.hintStatic}>Search </Text>
+        <Animated.Text style={[styles.hint, { opacity }]} numberOfLines={1}>
+          {hints[idx]}
+        </Animated.Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -106,7 +105,9 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     paddingHorizontal: spacing.md,
   },
-  hint: { flex: 1, fontFamily: FONT, fontSize: fontSize.body, color: colors.muted },
+  hintRow: { flex: 1, flexDirection: 'row', alignItems: 'center' },
+  hintStatic: { fontFamily: FONT, fontSize: fontSize.body, color: colors.muted },
+  hint: { fontFamily: FONT, fontSize: fontSize.body, color: colors.muted },
   input: { flex: 1, fontFamily: FONT, fontSize: fontSize.body, color: colors.ink, paddingVertical: 0 },
 });
 

@@ -257,22 +257,37 @@ async function createTablesAndAdmin() {
     },
   ];
 
-  try {
-    // Step 1: Create tables in dependency order
-    for (const tableDef of tableDefinitions) {
+  // Each step is independent and self-healing: a failure in one table/step is
+  // logged but never aborts the rest, so a single bad statement can't leave the
+  // schema half-created (e.g. app_settings missing). Safe to run on every boot.
+  // Step 1: Create tables in dependency order
+  for (const tableDef of tableDefinitions) {
+    try {
       await executeQuery(tableDef.sql, `${tableDef.name} table ensured`);
-    }
-
-    // Step 2: Create default admin user
-    await createDefaultAdmin();
-
-    // Step 3: Create indexes for better performance
-    await createIndexes();
-
-    // Step 4: Update existing tables with new fields
-    await updateExistingTables();
     } catch (error) {
-    throw error;
+      console.error(`[setup] Failed to ensure table "${tableDef.name}":`, error.message);
+    }
+  }
+
+  // Step 2: Create default admin user
+  try {
+    await createDefaultAdmin();
+  } catch (error) {
+    console.error("[setup] createDefaultAdmin failed:", error.message);
+  }
+
+  // Step 3: Create indexes for better performance
+  try {
+    await createIndexes();
+  } catch (error) {
+    console.error("[setup] createIndexes failed:", error.message);
+  }
+
+  // Step 4: Update existing tables with new fields / run migrations
+  try {
+    await updateExistingTables();
+  } catch (error) {
+    console.error("[setup] updateExistingTables failed:", error.message);
   }
 }
 
@@ -478,6 +493,35 @@ async function updateExistingTables() {
       );
     }
 
+    // Migrate categories from image-based to icon-based (idempotent). If the old
+    // `image` column exists and `icon` doesn't, rename it; otherwise ensure an
+    // `icon` column exists. This lets the deploy fix the schema automatically.
+    try {
+      const hasIcon = await new Promise((resolve, reject) => {
+        db.query("SHOW COLUMNS FROM categories LIKE 'icon'", (err, results) => {
+          if (err) reject(err); else resolve(results.length > 0);
+        });
+      });
+      const hasImage = await new Promise((resolve, reject) => {
+        db.query("SHOW COLUMNS FROM categories LIKE 'image'", (err, results) => {
+          if (err) reject(err); else resolve(results.length > 0);
+        });
+      });
+      if (!hasIcon && hasImage) {
+        await executeQuery(
+          "ALTER TABLE categories CHANGE image icon VARCHAR(255)",
+          "categories.image renamed to icon"
+        );
+      } else if (!hasIcon && !hasImage) {
+        await executeQuery(
+          "ALTER TABLE categories ADD COLUMN icon VARCHAR(255)",
+          "categories.icon column added"
+        );
+      }
+    } catch (error) {
+      console.error("[setup] categories icon migration failed:", error.message);
+    }
+
     // Seed default pricing settings (used by the D2C gold-rate pricing).
     // INSERT IGNORE keeps any value an admin has already set.
     await executeQuery(
@@ -486,7 +530,8 @@ async function updateExistingTables() {
       "default pricing settings seeded"
     );
 
-    } catch (error) {
+  } catch (error) {
+    console.error("[setup] updateExistingTables error:", error.message);
   }
 }
 
