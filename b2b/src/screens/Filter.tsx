@@ -62,12 +62,15 @@ const CustomWeightSlider = ({ value, onValueChange, min = SLIDER_MIN, max = SLID
 
   return (
     <View style={sliderStyles.container}>
+      {/* base track (light) + maroon fill up to the thumb */}
       <View style={sliderStyles.track} />
+      <View style={[sliderStyles.fill, { width: Math.max(0, currentThumbX) }]} />
       <View
         style={[
           sliderStyles.thumb,
-          { left: currentThumbX - 10 },
+          { left: currentThumbX - 13 },
         ]}
+        hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
         {...panResponder.panHandlers}
       />
       <View style={sliderStyles.labelRow}>
