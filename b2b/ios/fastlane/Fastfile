@@ -1,14 +1,18 @@
 # Amrut B2B — iOS release automation.
 #
 # `beta` builds a signed App Store archive and uploads it to TestFlight.
-# Signing uses an App Store Connect API key (no passwords / no fastlane match
-# needed) together with Xcode automatic signing (-allowProvisioningUpdates),
-# which creates/refreshes the distribution profile for com.Amrutt on the fly.
 #
-# Required env (set as GitHub secrets → passed by the workflow):
-#   ASC_KEY_ID        App Store Connect API key id
-#   ASC_ISSUER_ID     App Store Connect issuer id
-#   ASC_KEY_CONTENT   the .p8 key contents, base64-encoded
+# Signing uses fastlane MATCH: it creates (once) a real App Store distribution
+# certificate + provisioning profile for com.Amrutt via the App Store Connect
+# API key, and stores them AES-encrypted in the `fastlane-certs` branch of this
+# repo. Every run then just fetches + installs them. This replaces Xcode "cloud
+# signing", which this account can't use headlessly ("Cloud signing permission
+# error" at export).
+#
+# Required env (GitHub secrets → passed by the workflow):
+#   ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_CONTENT  — App Store Connect API key
+#   MATCH_PASSWORD   — passphrase that encrypts the stored certs (any value)
+#   MATCH_GIT_URL    — git URL (with token) of the cert storage repo/branch
 #
 # The signing team (8LARDGKQSN) is already set in the Xcode project.
 
@@ -21,41 +25,47 @@ platform :ios do
       key_id: ENV["ASC_KEY_ID"],
       issuer_id: ENV["ASC_ISSUER_ID"],
       key_content: ENV["ASC_KEY_CONTENT"],
-      is_key_content_base64: false,
-      in_house: false
+      is_key_content_base64: false
     )
 
-    # Bump the build number to the next TestFlight value so every upload is
-    # unique even if versionCode wasn't hand-bumped.
+    # Bump the build number above the latest TestFlight build so every upload
+    # is unique.
     increment_build_number(
       xcodeproj: "Amrut.xcodeproj",
       build_number: latest_testflight_build_number(api_key: api_key, initial_build_number: 5).to_i + 1
     )
 
-    # Write the .p8 so xcodebuild itself can authenticate with App Store Connect.
-    # This is what makes -allowProvisioningUpdates use Apple "cloud signing" to
-    # create the distribution certificate + App Store profile for com.Amrutt on
-    # the fly (headless — no Mac, no fastlane match, no manual certs). gym does
-    # NOT accept an `api_key:` param, so we pass the auth to xcodebuild directly.
-    key_path = File.absolute_path("asc_api_key.p8")
-    File.write(key_path, ENV["ASC_KEY_CONTENT"])
-    auth = "-allowProvisioningUpdates " \
-           "-authenticationKeyID #{ENV['ASC_KEY_ID']} " \
-           "-authenticationKeyIssuerID #{ENV['ASC_ISSUER_ID']} " \
-           "-authenticationKeyPath #{key_path}"
+    # Fetch (or create on first run) the distribution cert + App Store profile.
+    match(
+      type: "appstore",
+      api_key: api_key,
+      app_identifier: "com.Amrutt",
+      git_url: ENV["MATCH_GIT_URL"],
+      git_branch: "fastlane-certs",
+      readonly: false
+    )
+
+    # Point the Xcode project at the match profile with manual signing, for both
+    # the archive and the export.
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Amrut.xcodeproj",
+      team_id: "8LARDGKQSN",
+      bundle_identifier: "com.Amrutt",
+      code_sign_identity: "Apple Distribution",
+      profile_name: "match AppStore com.Amrutt"
+    )
 
     build_app(
       workspace: "Amrut.xcworkspace",
       scheme: "Amrut",
       clean: true,
       export_method: "app-store",
-      # auth for the ARCHIVE step. Do NOT also set export_xcargs — gym injects
-      # the same -authenticationKey* flags into -exportArchive itself, and
-      # xcodebuild rejects the duplicate ("option '-authenticationKeyID' may
-      # only be provided once"), which failed the export after a good archive.
-      xcargs: auth,
       export_options: {
-        signingStyle: "automatic"
+        signingStyle: "manual",
+        provisioningProfiles: {
+          "com.Amrutt" => "match AppStore com.Amrutt"
+        }
       },
       output_directory: "build",
       output_name: "Amrut.ipa"

@@ -33,6 +33,11 @@ concurrency:
   group: ios-testflight-build
   cancel-in-progress: true
 
+# match stores the encrypted signing certs in the `fastlane-certs` branch of
+# this repo, so the job needs write access to push them.
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & upload to TestFlight
@@ -80,6 +85,10 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          # match: passphrase for the encrypted certs, and the storage git URL
+          # (this repo's fastlane-certs branch) authenticated with the job token.
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "180"
         run: bundle exec fastlane beta
 
