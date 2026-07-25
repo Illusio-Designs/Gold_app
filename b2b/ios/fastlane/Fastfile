@@ -37,7 +37,16 @@ platform :ios do
       scheme: "Amrut",
       clean: true,
       export_method: "app-store",
+      # Pass the ASC API key to gym so xcodebuild is AUTHENTICATED — this is what
+      # lets -allowProvisioningUpdates use Apple "cloud signing" to create the
+      # distribution certificate + App Store profile for com.Amrutt on the fly
+      # (headless, no Mac, no fastlane match, no manual certs). Without this the
+      # archive fails with "No Accounts" / "No profiles for 'com.Amrutt'".
+      api_key: api_key,
       xcargs: "-allowProvisioningUpdates",
+      export_options: {
+        signingStyle: "automatic"
+      },
       output_directory: "build",
       output_name: "Amrut.ipa"
     )
