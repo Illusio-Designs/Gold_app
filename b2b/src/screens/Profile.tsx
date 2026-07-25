@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Alert, Pla
 import CustomHeader from '../components/common/CustomHeader';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { PencilEdit02Icon, SparklesIcon, Notification03Icon, Delete02Icon, ArrowRight01Icon, Logout01Icon } from '@hugeicons/core-free-icons';
+import { BrandFooter } from '../components/ui';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import ProfilePhotoName from '../components/common/ProfilePhotoName';
 import CustomLoader from '../components/common/CustomLoader';
@@ -436,6 +437,7 @@ const Profile = () => {
       <View style={styles.versionLineContainer}>
         <Text style={styles.versionLineText}>v{APP_VERSION}</Text>
       </View>
+      <BrandFooter />
       </ScrollView>
 
       {/* Login Prompt Modal */}
