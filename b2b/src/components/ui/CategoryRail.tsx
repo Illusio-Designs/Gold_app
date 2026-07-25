@@ -38,6 +38,7 @@ const CategoryRail: React.FC<CategoryRailProps> = ({ items, activeId, onSelect }
       ref={scrollRef}
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroll}
       contentContainerStyle={styles.rail}
     >
       {items.map((item) => {
@@ -72,6 +73,9 @@ const CategoryRail: React.FC<CategoryRailProps> = ({ items, activeId, onSelect }
 };
 
 const styles = StyleSheet.create({
+  // flexGrow:0 stops the horizontal rail from expanding vertically and pushing
+  // the product grid down (the "too much space" gap).
+  scroll: { flexGrow: 0, flexShrink: 0 },
   rail: { paddingHorizontal: 10, paddingTop: 12 },
   tab: {
     width: 64,
