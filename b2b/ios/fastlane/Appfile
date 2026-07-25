@@ -1,0 +1,3 @@
+app_identifier("com.Amrutt")
+# apple_id / team are resolved from the App Store Connect API key at runtime,
+# so nothing sensitive is stored here.

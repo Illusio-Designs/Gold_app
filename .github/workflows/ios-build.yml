@@ -1,0 +1,80 @@
+name: iOS Build (TestFlight)
+
+# Builds a signed App Store archive of the Amrut B2B app on a macOS runner and
+# uploads it to TestFlight via fastlane. Signing uses an App Store Connect API
+# key + Xcode automatic signing (no certificates/passwords stored in the repo).
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   ASC_KEY_ID       App Store Connect API key id (e.g. ABC123DEF4)
+#   ASC_ISSUER_ID    App Store Connect issuer id (a UUID)
+#   ASC_KEY_CONTENT  the AuthKey_XXXX.p8 file, base64-encoded
+#                    (macOS/Linux: `base64 -i AuthKey_XXXX.p8 | pbcopy`)
+#
+# Prerequisites you do ONCE on Apple's side:
+#   • App Store Connect → Users and Access → Integrations → App Store Connect
+#     API → generate a key with "App Manager" access → download the .p8.
+#   • App Store Connect → create the app record for bundle id `com.Amrutt`.
+#   • (Push) Certificates, IDs & Profiles → Keys → create an APNs Auth Key
+#     (.p8) → upload it to the amrut-jewels Firebase project (Cloud Messaging).
+#
+# Trigger: manual only (workflow_dispatch). Run it from the Actions tab once the
+# Apple secrets below are set — so it never auto-fails before they exist.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-testflight-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & upload to TestFlight
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: b2b/package-lock.json
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -s /Applications/Xcode_16.app || true
+
+      - name: Setup Ruby (for fastlane + CocoaPods)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: b2b/ios
+
+      - name: Install JS dependencies
+        working-directory: b2b
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
+      - name: CocoaPods install
+        working-directory: b2b/ios
+        run: bundle exec pod install --repo-update
+
+      - name: Fastlane beta (build + upload to TestFlight)
+        working-directory: b2b/ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "180"
+        run: bundle exec fastlane beta
+
+      - name: Upload IPA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: amrut-ios-ipa
+          path: b2b/ios/build/Amrut.ipa
+          if-no-files-found: ignore
+          retention-days: 14
