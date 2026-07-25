@@ -51,10 +51,13 @@ jobs:
           cache: npm
           cache-dependency-path: b2b/package-lock.json
 
-      - name: Select Xcode 16 (Swift 6, for Firebase pods)
+      # Xcode 16 = Swift 6 (needed by Firebase pods) + iOS 18 SDK. NOT
+      # latest-stable — that picks Xcode 26 / iOS 26 SDK, which RN 0.80 can't
+      # build against ("Could not build module UIKit").
+      - name: Select Xcode 16 (Swift 6)
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: "16"
 
       - name: Setup Ruby (for fastlane + CocoaPods)
         uses: ruby/setup-ruby@v1
