@@ -25,23 +25,26 @@ const BrandFooter: React.FC<{ style?: any }> = ({ style }) => (
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    paddingVertical: 26,
+    paddingVertical: 30,
     paddingHorizontal: 20,
   },
   wordmark: {
     fontFamily: FONT,
-    fontSize: 19,
-    color: '#D9C7CD',
+    fontSize: 27,
+    lineHeight: 32,
+    // muted, maroon-tinted grey — the screenshot's big faded wordmark, our palette
+    color: '#D6C4CA',
     textAlign: 'center',
     letterSpacing: 0.3,
   },
   credit: {
     fontFamily: FONT,
-    fontSize: 12.5,
+    fontSize: 13,
     color: colors.muted,
-    marginTop: 6,
+    marginTop: 8,
   },
-  heart: { color: '#E23B5A' },
+  // heart in our brand maroon (screenshot uses the brand accent for the heart)
+  heart: { color: colors.maroon },
   link: { color: colors.maroon, textDecorationLine: 'underline' },
 });
 
