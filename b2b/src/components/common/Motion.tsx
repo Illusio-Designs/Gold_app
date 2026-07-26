@@ -178,12 +178,19 @@ const sk = StyleSheet.create({
   },
 });
 
-/** Placeholder that matches a product card (image + name + sub-label). */
+/** Placeholder that matches a product card (square image + name + chip + View
+ *  button) — mirrors ProductCard's aspectRatio:1 tile and maroon action button
+ *  so the loading state is the same size/shape as the real card. */
 export const ProductCardSkeleton: React.FC = () => (
   <View style={sk.card}>
-    <Skeleton height={112} radius={12} />
-    <Skeleton height={13} radius={6} width="72%" style={{ marginTop: 12 }} />
-    <Skeleton height={10} radius={5} width="46%" style={{ marginTop: 8 }} />
+    {/* square image — matches the real tile's aspectRatio: 1 */}
+    <View style={{ width: '100%', aspectRatio: 1 }}>
+      <Skeleton width="100%" height="100%" radius={12} />
+    </View>
+    <Skeleton height={14} radius={6} width="72%" style={{ marginTop: 12 }} />
+    <Skeleton height={11} radius={5} width="46%" style={{ marginTop: 8 }} />
+    {/* the maroon "View" button */}
+    <Skeleton height={40} radius={13} style={{ marginTop: 12 }} />
   </View>
 );
 
@@ -196,12 +203,15 @@ export const ProductGridSkeleton: React.FC<{ count?: number }> = ({ count = 6 })
   </View>
 );
 
-/** A wide banner placeholder (slider / hero). */
-export const BannerSkeleton: React.FC<{ height?: number }> = ({ height = 150 }) => (
+/** A banner placeholder that matches the home slider — a centred card at 85%
+ *  of the screen width and the slider's 160 height (SLIDE_WIDTH / SLIDE_HEIGHT
+ *  in CustomSlider), not a full-bleed bar. */
+export const BannerSkeleton: React.FC<{ height?: number }> = ({ height = 160 }) => (
   <Skeleton
+    width="85%"
     height={height}
     radius={18}
-    style={{ marginHorizontal: 16, marginVertical: 8 }}
+    style={{ alignSelf: 'center', marginVertical: 8 }}
   />
 );
 
