@@ -11,7 +11,7 @@ import RNScreenshotPrevent from 'react-native-screenshot-prevent';
 import './src/utils/globalFont'; // apply Glorify as the default font app-wide
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import ErrorBoundary from './src/components/common/ErrorBoundary';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/components/common/ToastConfig';
@@ -212,7 +212,7 @@ const App = () => {
   console.log('🔔 [APP] App loaded, userId:', userId);
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
     {/* edges left/right only — each screen's header/topBar handles the top inset,
         and the bottom nav handles the bottom, so we don't double-pad here. */}
     <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
