@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets, initialWindowMetrics } from 'react-native-safe-area-context';
-import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
 import { useCart } from '../../context/CartContext';
@@ -51,18 +50,13 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
   const { unreadCount } = useNotifications();
 
   return (
-    <LinearGradient
-      colors={["#5D0829", "#6B0D33"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      // Fill the notch/status-bar area with maroon and place the title+icons
-      // just below it. Every screen — tab roots AND pushed stack screens — is
-      // full-bleed from y=0 (the bottom-tab navigator does NOT inset its
-      // scenes), so paddingTop:insets.top is all that's needed. (A previous
-      // marginTop:-insets.top on tab roots pulled the title row up behind the
-      // status bar and hid it on iOS — see Collection/Orders/Custom/Profile.)
-      style={[styles.bar, { paddingTop: topInset + 8 }]}
-    >
+    // Plain View with a SOLID maroon background — identical approach to the
+    // headers that render correctly (ProductDetail's pdHeader, Home's topBar).
+    // A previous LinearGradient container did NOT expand to fit its children on
+    // iOS, so it collapsed to a thin band and the title/icons were clipped —
+    // hence the "short empty maroon strip" on Orders/Collection/Custom/Profile.
+    // paddingTop fills the notch/status-bar area; the row sits just below it.
+    <View style={[styles.bar, { paddingTop: topInset + 8 }]}>
       {/* Light battery/clock icons so they stay visible on the maroon bar */}
       <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <View style={styles.row}>
@@ -107,12 +101,13 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
           ) : null}
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   bar: {
+    backgroundColor: '#5D0829',
     paddingBottom: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
