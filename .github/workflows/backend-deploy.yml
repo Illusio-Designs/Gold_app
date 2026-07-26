@@ -33,6 +33,7 @@ name: Backend CI/CD
 # run remotely — the notice tells you when (and only when) to run them by hand.
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [main]
     paths:
@@ -198,6 +199,56 @@ jobs:
           NODE
           node ftp-env.mjs
           rm -f .env.deploy
+
+      # Deploy the Firebase service-account key automatically. Like .env, it is
+      # gitignored + excluded from the FTP sync (it's a secret), so its contents
+      # live in the FIREBASE_ADMIN_JSON secret and are written to
+      # <FTP_REMOTE_DIR>/amrut-jewels-firebase-adminsdk.json on every deploy.
+      # The backend auto-discovers *firebase-adminsdk*.json and prefers the
+      # amrut-jewels filename. Without this, firebase-admin never initialises on
+      # the server and every push notification is a silent no-op. Empty secret
+      # => no-op (server keeps whatever key is already there).
+      - name: Upload Firebase service-account key from secret
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_BASE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+          FIREBASE_ADMIN_JSON: ${{ secrets.FIREBASE_ADMIN_JSON }}
+        run: |
+          set -e
+          if [ -z "${FIREBASE_ADMIN_JSON:-}" ]; then
+            echo "ℹ️  FIREBASE_ADMIN_JSON secret is empty — skipping key upload (server keeps its existing key)."
+            exit 0
+          fi
+          printf '%s' "$FIREBASE_ADMIN_JSON" > firebase-admin.deploy
+          # Fail fast if the secret isn't valid JSON for the expected project.
+          node -e "const k=require('./firebase-admin.deploy');if(k.project_id!=='amrut-jewels'){console.error('❌ service account project_id is '+k.project_id+', expected amrut-jewels');process.exit(1)}console.log('✅ valid amrut-jewels service account')"
+          npm install --no-save --no-audit --no-fund --silent basic-ftp
+          cat > ftp-fbkey.mjs <<'NODE'
+          import { Client } from 'basic-ftp';
+          const base = (process.env.FTP_BASE_DIR || '/').replace(/\/+$/, '');
+          const host = (process.env.FTP_HOST || '').replace(/^ftps?:\/\//, '').replace(/\/.*$/, '').trim();
+          const client = new Client(30000);
+          try {
+            await client.access({
+              host,
+              user: process.env.FTP_USER,
+              password: process.env.FTP_PASSWORD,
+              secure: true,
+              secureOptions: { rejectUnauthorized: false },
+            });
+            await client.uploadFrom('firebase-admin.deploy', `${base}/amrut-jewels-firebase-adminsdk.json`);
+            console.log(`✅ Uploaded Firebase key -> ${base}/amrut-jewels-firebase-adminsdk.json`);
+          } catch (err) {
+            console.error('Firebase key upload failed:', err.message);
+            process.exitCode = 1;
+          } finally {
+            client.close();
+          }
+          NODE
+          node ftp-fbkey.mjs
+          rm -f firebase-admin.deploy
 
       # Auto-restart the Node app via Phusion Passenger (touch tmp/restart.txt).
       - name: Trigger Passenger restart
