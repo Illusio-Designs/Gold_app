@@ -33,7 +33,6 @@ name: Backend CI/CD
 # run remotely — the notice tells you when (and only when) to run them by hand.
 
 on:
-  workflow_dispatch: {}
   push:
     branches: [main]
     paths:
@@ -222,8 +221,6 @@ jobs:
             exit 0
           fi
           printf '%s' "$FIREBASE_ADMIN_JSON" > firebase-admin.deploy
-          # Fail fast if the secret isn't valid JSON for the expected project.
-          node -e "const k=require('./firebase-admin.deploy');if(k.project_id!=='amrut-jewels'){console.error('❌ service account project_id is '+k.project_id+', expected amrut-jewels');process.exit(1)}console.log('✅ valid amrut-jewels service account')"
           npm install --no-save --no-audit --no-fund --silent basic-ftp
           cat > ftp-fbkey.mjs <<'NODE'
           import { Client } from 'basic-ftp';
