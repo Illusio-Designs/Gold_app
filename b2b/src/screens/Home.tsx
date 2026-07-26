@@ -483,7 +483,7 @@ const Home = () => {
       >
       {/* Slider first */}
       {slidersLoading ? (
-        <BannerSkeleton height={150} />
+        <BannerSkeleton />
       ) : sliders && sliders.length > 0 ? (
         <CustomSlider
           sliders={sliders}
