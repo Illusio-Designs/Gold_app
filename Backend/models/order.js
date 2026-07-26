@@ -76,13 +76,33 @@ function createOrder(order, callback) {
   );
 }
 
-// Create order from cart items (multiple products)
+// Create order from cart items (multiple products).
+// All-or-nothing: if ANY item can't be reserved (e.g. a unique piece that was
+// just sold), we roll back every order/reservation that already succeeded so
+// no stock is stranded out_of_stock and no partial order is left behind. The
+// caller then gets a clear error instead of a silent partial checkout.
 function createOrderFromCart(userId, cartItems, orderDetails, callback) {
-  const orderIds = [];
+  const created = []; // { orderId, productId } for successful inserts
   let completedCount = 0;
   let hasError = false;
 
-  // Create individual order for each cart item
+  const finish = () => {
+    if (completedCount !== cartItems.length) return;
+
+    if (!hasError) {
+      return callback(null, created.map((c) => c.orderId));
+    }
+
+    // Partial failure → undo the successful ones (delete order + release stock).
+    created.forEach(({ orderId, productId }) => {
+      db.query("DELETE FROM orders WHERE id = ?", [orderId], () => {});
+      productModel.updateProductStockStatus(productId, "available", () => {});
+    });
+    callback(
+      new Error("Some items are no longer available — no order was placed.")
+    );
+  };
+
   for (const cartItem of cartItems) {
     const orderData = {
       user_id: userId,
@@ -94,31 +114,14 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
       courier_company: orderDetails.courier_company || null,
     };
 
-    // Create order for this product
     createOrder(orderData, (err, result) => {
+      completedCount++;
       if (err) {
         hasError = true;
-        completedCount++;
-
-        if (completedCount === cartItems.length) {
-          if (hasError) {
-            callback(new Error("Some orders failed to create"));
-          } else {
-            callback(null, orderIds);
-          }
-        }
       } else {
-        orderIds.push(result.insertId);
-        completedCount++;
-
-        if (completedCount === cartItems.length) {
-          if (hasError) {
-            callback(new Error("Some orders failed to create"));
-          } else {
-            callback(null, orderIds);
-          }
-        }
+        created.push({ orderId: result.insertId, productId: cartItem.product_id });
       }
+      finish();
     });
   }
 }

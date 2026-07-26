@@ -288,6 +288,7 @@ function getCurrentUserOrders(req, res) {
     // Format the response to match the expected structure
     const formattedOrders = results.map((order) => ({
       id: order.id,
+      order_number: order.order_number,
       business_user_id: order.business_user_id,
       product_id: order.product_id,
       product_name: order.product_name,

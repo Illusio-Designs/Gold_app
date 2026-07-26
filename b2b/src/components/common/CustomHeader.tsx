@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, initialWindowMetrics } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { HugeiconsIcon } from '@hugeicons/react-native';
 import { ShoppingBag03Icon, Notification03Icon } from '@hugeicons/core-free-icons';
@@ -37,6 +37,15 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
 }) => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  // On iOS the bottom-tab scenes hand this header a top inset of ~0 (the tab
+  // navigator absorbs the notch), so paddingTop:insets.top left a white strip
+  // above the maroon bar on tab-root screens (Orders/Collection/Custom/Profile)
+  // — while pushed screens got the real inset and looked correct. Home only
+  // hid the bug because its bar is white. initialWindowMetrics holds the REAL
+  // device inset (a global native constant, never zeroed inside a tab scene),
+  // so take the larger of the two: fills the notch with maroon everywhere, and
+  // stays correct on pushed screens where insets.top is already full.
+  const topInset = Math.max(insets.top, initialWindowMetrics?.insets?.top ?? 0);
   const { getTotalQuantity } = useCart();
   const cartCount = typeof getTotalQuantity === 'function' ? getTotalQuantity() : 0;
   const { unreadCount } = useNotifications();
@@ -46,16 +55,13 @@ const CustomHeader: React.FC<CustomHeaderProps> = ({
       colors={["#5D0829", "#6B0D33"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      // iOS: the bottom-tab navigator insets its ROOT scenes below the notch,
-      // so a tab-root header (no back button) would double-inset and show a
-      // white gap above the maroon. Pull it up by the inset there. Pushed
-      // stack screens (with a back button, e.g. Product/Cart/Search) are
-      // already full-bleed like ProductDetail, so they must NOT pull up.
-      style={[
-        styles.bar,
-        { paddingTop: insets.top + 8 },
-        Platform.OS === 'ios' && !showBack && { marginTop: -insets.top },
-      ]}
+      // Fill the notch/status-bar area with maroon and place the title+icons
+      // just below it. Every screen — tab roots AND pushed stack screens — is
+      // full-bleed from y=0 (the bottom-tab navigator does NOT inset its
+      // scenes), so paddingTop:insets.top is all that's needed. (A previous
+      // marginTop:-insets.top on tab roots pulled the title row up behind the
+      // status bar and hid it on iOS — see Collection/Orders/Custom/Profile.)
+      style={[styles.bar, { paddingTop: topInset + 8 }]}
     >
       {/* Light battery/clock icons so they stay visible on the maroon bar */}
       <FocusAwareStatusBar translucent backgroundColor="transparent" barStyle="light-content" />

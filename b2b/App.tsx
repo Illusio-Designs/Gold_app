@@ -6,12 +6,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, AppState, Platform } from 'react-native';
+import RNScreenshotPrevent from 'react-native-screenshot-prevent';
 import './src/utils/globalFont'; // apply Glorify as the default font app-wide
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import StackNavigation from './src/navigation/StackNavigation';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ErrorBoundary from './src/components/common/ErrorBoundary';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/components/common/ToastConfig';
 // import NotificationManager from './src/components/NotificationManager';
 // import UserNotificationManager from './src/components/UserNotificationManager';
 
@@ -41,6 +44,24 @@ const App = () => {
     
     return () => clearTimeout(timer);
   }, [userId]);
+
+  // iOS screenshot / screen-recording protection (Android already has this
+  // natively via FLAG_SECURE in MainActivity.kt). This runs AFTER the app has
+  // mounted — never during launch — because doing the secure-layer work at
+  // launch crashed a previous build on open. The library re-parents the ROOT
+  // VIEW's layer (not the window), from JS, so it's safe here:
+  //   • enableSecureView() -> still screenshots come out blank
+  //   • enabled(true)      -> app-switcher / inactive snapshot is blurred
+  // Wrapped so a failure can never take the app down.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    try {
+      RNScreenshotPrevent.enableSecureView();
+      RNScreenshotPrevent.enabled(true);
+    } catch (e) {
+      console.log('⚠️ [APP] iOS screenshot prevention setup skipped:', e);
+    }
+  }, []);
 
   // Re-register token on app resume to ensure auth/unauth flows are in sync
   useEffect(() => {
@@ -240,7 +261,10 @@ const App = () => {
         </View>
       )} */}
 
-
+      {/* App-wide toast host (Amrut-branded). Mounted last so it overlays every
+          screen. Without this, every Toast.show(...) call across the app was a
+          no-op — e.g. checkout errors were silently swallowed. */}
+      <Toast config={toastConfig} topOffset={60} />
     </SafeAreaProvider>
   );
 };
