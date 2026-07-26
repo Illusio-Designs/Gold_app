@@ -495,6 +495,43 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
                   : `OK (${pushResult.successCount}/${userTokens.length} device(s), ${pushResult.failureCount} failed)`
               );
 
+              // Prune tokens FCM reports as permanently dead (app uninstalled /
+              // token rotated) so we stop re-sending to them — otherwise every
+              // push shows a growing failureCount. Deactivate ONLY the
+              // unambiguously-dead codes; a "mismatched-credential" token is a
+              // valid token for the other app (D2C) that shares this table, so
+              // we leave it (it just fails harmlessly here). Best-effort.
+              try {
+                const responses = (pushResult && pushResult.responses) || [];
+                const deadTokens = [];
+                responses.forEach((r, i) => {
+                  const code = r && r.error && r.error.code;
+                  if (
+                    code === 'messaging/registration-token-not-registered' ||
+                    code === 'messaging/invalid-registration-token' ||
+                    code === 'messaging/invalid-argument'
+                  ) {
+                    if (userTokens[i]) deadTokens.push(userTokens[i]);
+                  }
+                });
+                if (deadTokens.length) {
+                  const placeholders = deadTokens.map(() => '?').join(',');
+                  db.query(
+                    `UPDATE notification_tokens SET active = false WHERE token IN (${placeholders})`,
+                    deadTokens,
+                    (pruneErr) => {
+                      if (!pruneErr) {
+                        console.log(
+                          `[notif] deactivated ${deadTokens.length} dead token(s) for user=${userId}`
+                        );
+                      }
+                    }
+                  );
+                }
+              } catch (e) {
+                // pruning is best-effort; never fail the notification for it
+              }
+
               // Mark notification as unread for user
               const markUnreadSql = `
                 INSERT INTO user_notifications (user_id, notification_id, read_at)
