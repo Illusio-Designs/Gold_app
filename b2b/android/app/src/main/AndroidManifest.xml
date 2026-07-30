@@ -9,9 +9,12 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <!-- OTP Auto-read permissions -->
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
+    <!--
+      OTP auto-read uses the Google SMS Retriever API (react-native-otp-verify),
+      which requires NO SMS permissions. RECEIVE_SMS / READ_SMS were removed:
+      Google Play restricts those sensitive permissions and OTP reading is not an
+      accepted justification for them. Do NOT re-add them.
+    -->
     <uses-permission android:name="com.google.android.gms.permission.READ_PHONE_STATE" />
     <!-- Gallery access (Android 13+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
