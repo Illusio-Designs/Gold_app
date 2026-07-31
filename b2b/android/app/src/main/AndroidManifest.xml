@@ -16,9 +16,13 @@
       accepted justification for them. Do NOT re-add them.
     -->
     <uses-permission android:name="com.google.android.gms.permission.READ_PHONE_STATE" />
-    <!-- Gallery access (Android 13+) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <!-- Gallery access (Android 12 and below) -->
+    <!--
+      Gallery access: on Android 13+ (API 33+) react-native-image-picker uses the
+      system Android Photo Picker, which needs NO media permission. READ_MEDIA_IMAGES
+      was removed to comply with Google Play's photo/video permissions policy.
+      Do NOT re-add READ_MEDIA_IMAGES / READ_MEDIA_VIDEO.
+      READ_EXTERNAL_STORAGE (below) is capped at API 32 for legacy devices only.
+    -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
