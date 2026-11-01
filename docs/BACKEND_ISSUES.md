@@ -82,13 +82,11 @@ of it, and — importantly — **whether the mobile apps need any change**.
 - **The fix:** Lock it to admins only.
 - **App change?** **No.** The apps don't use this; it's a dashboard number.
 
-### 8. Wholesale (shop) prices are visible to everyone
-- **What's wrong:** The special shop-only price ("mark amount") is sent out without
-  properly checking who's asking.
-- **The fix:** Only send the wholesale price to logged-in **shop** users.
-- **App change?** **No.** The shop app is the only one that uses the wholesale price, and
-  shop users will still get it. The customer app never reads that field, so hiding it from
-  customers changes nothing they can see.
+### 8. "mark amount" on products — ✅ NOT AN ISSUE (by design)
+- **Clarified:** `mark_amount` is **not** a hidden wholesale price. It is a product cost
+  component — the charge for diamonds, stones and other materials set in the piece — so it
+  is meant to travel with the product and be visible to everyone.
+- **Decision:** Leave it exactly as-is. No gating. No code change.
 
 ### 9. "Mark one notification as read" saves it against nobody
 - **What's wrong:** One of the notification routes is missing the user, so the "read"
