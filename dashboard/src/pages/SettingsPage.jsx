@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { gooeyToast } from "goey-toast";
 import notificationSoundService from "../services/notificationSoundService";
 import {
@@ -14,7 +14,6 @@ import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
-import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
 
 const CONFIRM_PHRASE = "DELETE ALL DATA";
@@ -124,7 +123,6 @@ const SettingsPage = () => {
 
   return (
     <div className="settings-page">
-      <PageHeader title="Settings" subtitle="Manage administrative settings" icon={Settings01Icon} />
 
       <div className="settings-grid">
         <section className="au-panel">

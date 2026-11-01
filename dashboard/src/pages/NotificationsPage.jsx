@@ -5,10 +5,8 @@ import { showErrorToast } from "../utils/toast";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
-import PageHeader from "../components/common/PageHeader";
 import TableWithControls from "../components/common/TableWithControls";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
-import { Notification03Icon } from "@hugeicons/core-free-icons";
 import "../styles/pages/NotificationsPage.css";
 
 const NotificationsPage = () => {
@@ -147,7 +145,6 @@ const NotificationsPage = () => {
   if (loading) {
     return (
       <div className="notifications-page">
-        <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Notification03Icon} />
         <SkeletonStats count={2} />
         <SkeletonTable rows={6} />
       </div>
@@ -156,8 +153,6 @@ const NotificationsPage = () => {
 
   return (
     <div className="notifications-page">
-      <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Notification03Icon} />
-
       {/* Push notification tester — sends a REAL FCM push and shows the outcome */}
       <section className="au-panel notif-test">
         <div className="au-panel-head">
