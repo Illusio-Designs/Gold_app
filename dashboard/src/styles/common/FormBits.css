@@ -1,0 +1,52 @@
+/* Shared styles for Checkbox + RadioGroup */
+
+.fb-check,
+.fb-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-body, "Hanken Grotesk", sans-serif);
+  font-size: 0.9rem;
+  color: var(--ink, #2a1620);
+}
+
+.fb-check.fb-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.fb-check-input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--maroon, #5d0829);
+  cursor: inherit;
+}
+
+.fb-check-label,
+.fb-radio-label {
+  line-height: 1.3;
+}
+
+.fb-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fb-radio-group--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.fb-radio-input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--maroon, #5d0829);
+  cursor: pointer;
+}

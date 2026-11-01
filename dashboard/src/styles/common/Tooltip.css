@@ -1,0 +1,64 @@
+.tt-root {
+  position: relative;
+  display: inline-flex;
+}
+
+.tt-bubble {
+  position: absolute;
+  left: 50%;
+  z-index: 50;
+  transform: translateX(-50%);
+  max-width: 220px;
+  width: max-content;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--maroon, #5d0829);
+  color: var(--cream, #fce2bf);
+  font-family: var(--font-body, "Hanken Grotesk", sans-serif);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: 0 8px 24px -12px rgba(58, 6, 25, 0.5);
+  transition: opacity 140ms ease, visibility 140ms ease;
+}
+
+.tt-root--top .tt-bubble {
+  bottom: calc(100% + 8px);
+}
+
+.tt-root--bottom .tt-bubble {
+  top: calc(100% + 8px);
+}
+
+.tt-arrow {
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--maroon, #5d0829);
+}
+
+.tt-root--top .tt-arrow {
+  bottom: -4px;
+}
+
+.tt-root--bottom .tt-arrow {
+  top: -4px;
+}
+
+.tt-root:hover .tt-bubble,
+.tt-root:focus-within .tt-bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-bubble {
+    transition: none;
+  }
+}
