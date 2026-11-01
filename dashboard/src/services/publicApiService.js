@@ -16,10 +16,7 @@ const publicAxiosInstance = axios.create({
 
 // Add request interceptor for logging
 publicAxiosInstance.interceptors.request.use(
-  (config) => {
-    console.log("🌐 [PUBLIC API] Request:", config.method?.toUpperCase(), config.url);
-    return config;
-  },
+  (config) => config,
   (error) => {
     console.error("❌ [PUBLIC API] Request error:", error);
     return Promise.reject(error);
@@ -28,10 +25,7 @@ publicAxiosInstance.interceptors.request.use(
 
 // Add response interceptor for logging
 publicAxiosInstance.interceptors.response.use(
-  (response) => {
-    console.log("✅ [PUBLIC API] Response:", response.status, response.config.url);
-    return response;
-  },
+  (response) => response,
   (error) => {
     console.error("❌ [PUBLIC API] Response error:", error.response?.status, error.config?.url);
     return Promise.reject(error);
@@ -49,73 +43,30 @@ export const getPublicCategories = () =>
   publicAxiosInstance
     .get("/categories")
     .then((response) => {
-      console.log("📂 [PUBLIC API] Categories response:", response.data);
-      console.log("📂 [PUBLIC API] Response status:", response.status);
-      console.log("📂 [PUBLIC API] Response headers:", response.headers);
-      
       // Handle different response formats
-      let categories = [];
-      
       if (response.data && Array.isArray(response.data)) {
-        categories = response.data;
-      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        categories = response.data.data;
-      } else if (response.data && response.data.categories && Array.isArray(response.data.categories)) {
-        categories = response.data.categories;
-      } else {
-        console.warn("⚠️ [PUBLIC API] Unexpected response format:", response.data);
-        return [];
+        return response.data;
       }
-      
-      // Log category data for debugging
-      categories.forEach((category, index) => {
-        console.log(`📸 [PUBLIC API] Category ${index + 1}:`, {
-          name: category.name,
-          image: category.image, // Just the filename
-          description: category.description,
-          status: category.status
-        });
-      });
-      
-      return categories;
-    })
-    .catch((error) => {
-      console.error("❌ [PUBLIC API] Error fetching categories:", error);
-      console.error("❌ [PUBLIC API] Error details:", {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        url: error.config?.url,
-        baseURL: error.config?.baseURL
-      });
-      throw error;
+      if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      if (response.data && Array.isArray(response.data.categories)) {
+        return response.data.categories;
+      }
+      console.warn("⚠️ [PUBLIC API] Unexpected response format:", response.data);
+      return [];
     });
 
 // PUBLIC PRODUCTS API (no authentication required)
 export const getPublicProducts = () =>
   publicAxiosInstance
     .get("/products")
-    .then((response) => {
-      console.log("📦 [PUBLIC API] Products response:", response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("❌ [PUBLIC API] Error fetching products:", error);
-      throw error;
-    });
+    .then((response) => response.data);
 
 // PUBLIC SLIDERS API (no authentication required)
 export const getPublicSliders = () =>
   publicAxiosInstance
     .get("/sliders")
-    .then((response) => {
-      console.log("🎠 [PUBLIC API] Sliders response:", response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("❌ [PUBLIC API] Error fetching sliders:", error);
-      throw error;
-    });
+    .then((response) => response.data);
 
 export default publicAxiosInstance;

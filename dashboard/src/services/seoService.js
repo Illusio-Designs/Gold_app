@@ -17,10 +17,7 @@ const seoAxiosInstance = axios.create({
 
 // Add request interceptor for logging
 seoAxiosInstance.interceptors.request.use(
-  (config) => {
-    console.log("🔍 [SEO API] Request:", config.method?.toUpperCase(), config.url);
-    return config;
-  },
+  (config) => config,
   (error) => {
     console.error("❌ [SEO API] Request error:", error);
     return Promise.reject(error);
@@ -29,10 +26,7 @@ seoAxiosInstance.interceptors.request.use(
 
 // Add response interceptor for logging
 seoAxiosInstance.interceptors.response.use(
-  (response) => {
-    console.log("✅ [SEO API] Response:", response.status, response.config.url);
-    return response;
-  },
+  (response) => response,
   (error) => {
     console.error("❌ [SEO API] Response error:", error.response?.status, error.config?.url);
     return Promise.reject(error);
@@ -43,22 +37,7 @@ seoAxiosInstance.interceptors.response.use(
 export const getSEOByPageUrl = (pageUrl) =>
   seoAxiosInstance
     .get(`/seo?page_url=${encodeURIComponent(pageUrl)}`)
-    .then((response) => {
-      console.log("📄 [SEO API] SEO data response:", response.data);
-      return response.data;
-    })
-    .catch((error) => {
-      console.error("❌ [SEO API] Error fetching SEO data:", error);
-      console.error("❌ [SEO API] Error details:", {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        url: error.config?.url,
-        baseURL: error.config?.baseURL
-      });
-      throw error;
-    });
+    .then((response) => response.data);
 
 export default seoAxiosInstance;
 
