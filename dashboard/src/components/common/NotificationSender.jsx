@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Notification03Icon } from '@hugeicons/core-free-icons';
 import { sendNotification, getUsers } from '../../services/adminApiService';
 import SidePanel from './SidePanel';
 import '../../styles/common/NotificationSender.css';
@@ -140,7 +141,7 @@ const NotificationSender = ({ onNotificationSent }) => {
   return (
     <>
       <button type="button" className="ns-trigger" onClick={() => setShowForm(true)}>
-        <Bell size={16} /> New notification
+        <HugeiconsIcon icon={Notification03Icon} size={16} /> New notification
       </button>
 
       <SidePanel

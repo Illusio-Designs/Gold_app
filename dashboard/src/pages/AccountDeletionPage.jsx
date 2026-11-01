@@ -13,7 +13,13 @@ import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
 import PageHeader from "../components/common/PageHeader";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
-import { CheckCircle2, XCircle, RotateCcw, UserX } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  CheckmarkCircle02Icon,
+  CancelCircleIcon,
+  ArrowReloadHorizontalIcon,
+  UserRemove01Icon,
+} from "@hugeicons/core-free-icons";
 import "../styles/pages/AccountDeletionPage.css";
 
 const AccountDeletionPage = () => {
@@ -167,7 +173,7 @@ const AccountDeletionPage = () => {
                 onClick={() => handleStatusUpdate(row.id, "processed")}
                 title="Mark as processed"
               >
-                <CheckCircle2 size={15} /> Processed
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} size={15} /> Processed
               </Button>
             )}
             {status !== "rejected" && (
@@ -177,7 +183,7 @@ const AccountDeletionPage = () => {
                 onClick={() => handleStatusUpdate(row.id, "rejected")}
                 title="Reject request"
               >
-                <XCircle size={15} /> Reject
+                <HugeiconsIcon icon={CancelCircleIcon} size={15} /> Reject
               </Button>
             )}
             {status !== "pending" && (
@@ -187,7 +193,7 @@ const AccountDeletionPage = () => {
                 onClick={() => handleStatusUpdate(row.id, "pending")}
                 title="Reset to pending"
               >
-                <RotateCcw size={15} />
+                <HugeiconsIcon icon={ArrowReloadHorizontalIcon} size={15} />
               </Button>
             )}
           </div>
@@ -202,7 +208,7 @@ const AccountDeletionPage = () => {
         <PageHeader
           title="Account Deletion"
           subtitle="Review and action user deletion requests"
-          icon={UserX}
+          icon={UserRemove01Icon}
         />
         <SkeletonStats count={4} />
         <SkeletonTable rows={8} cols={6} />
@@ -215,7 +221,7 @@ const AccountDeletionPage = () => {
       <PageHeader
         title="Account Deletion"
         subtitle="Review and action user deletion requests"
-        icon={UserX}
+        icon={UserRemove01Icon}
       />
       <StatCards stats={deletionStats} />
       <TableWithControls

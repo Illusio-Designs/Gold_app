@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { HugeiconsIcon } from "@hugeicons/react";
 import "../../styles/common/PageHeader.css";
 
 /**
@@ -11,7 +12,7 @@ const PageHeader = ({ title, subtitle, icon: Icon, actions }) => (
     <div className="page-header__left">
       {Icon && (
         <span className="page-header__icon">
-          <Icon size={22} />
+          {Array.isArray(Icon) ? <HugeiconsIcon icon={Icon} size={22} /> : <Icon size={22} />}
         </span>
       )}
       <div>
@@ -26,7 +27,7 @@ const PageHeader = ({ title, subtitle, icon: Icon, actions }) => (
 PageHeader.propTypes = {
   title: PropTypes.node.isRequired,
   subtitle: PropTypes.node,
-  icon: PropTypes.elementType,
+  icon: PropTypes.oneOfType([PropTypes.elementType, PropTypes.array]),
   actions: PropTypes.node,
 };
 

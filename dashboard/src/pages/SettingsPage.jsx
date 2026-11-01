@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Settings as SettingsIcon } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Alert02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import {
   wipeAllData,
   resetForReview,
@@ -11,6 +12,7 @@ import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
+import Modal from "../components/common/Modal";
 import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
 
@@ -22,6 +24,8 @@ const SettingsPage = () => {
   const [wiping, setWiping] = useState(false);
   const [resetText, setResetText] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [wipeConfirmOpen, setWipeConfirmOpen] = useState(false);
   const [goldRate, setGoldRate] = useState("");
   const [makingPct, setMakingPct] = useState("");
   const [savingPricing, setSavingPricing] = useState(false);
@@ -65,19 +69,18 @@ const SettingsPage = () => {
 
   const canReset = resetText === RESET_PHRASE && !resetting;
 
-  const handleReset = async () => {
+  const handleReset = () => {
     if (!isAuthenticated()) {
       showErrorToast("Please login again");
       navigate("/auth");
       return;
     }
     if (resetText !== RESET_PHRASE) return;
+    setResetConfirmOpen(true);
+  };
 
-    const sure = window.confirm(
-      "This clears all orders, custom orders, carts and non-admin users so the app is clean for store review. Products, categories, sliders and media are KEPT. Admin accounts are kept. Continue?"
-    );
-    if (!sure) return;
-
+  const doReset = async () => {
+    setResetConfirmOpen(false);
     try {
       setResetting(true);
       const token = getAdminToken();
@@ -93,19 +96,18 @@ const SettingsPage = () => {
 
   const canWipe = confirmText === CONFIRM_PHRASE && !wiping;
 
-  const handleWipe = async () => {
+  const handleWipe = () => {
     if (!isAuthenticated()) {
       showErrorToast("Please login again");
       navigate("/auth");
       return;
     }
     if (confirmText !== CONFIRM_PHRASE) return;
+    setWipeConfirmOpen(true);
+  };
 
-    const sure = window.confirm(
-      "This permanently deletes ALL business data (users, products, orders, categories, media records, sliders, etc.). Admin accounts are kept. This cannot be undone. Continue?"
-    );
-    if (!sure) return;
-
+  const doWipe = async () => {
+    setWipeConfirmOpen(false);
     try {
       setWiping(true);
       const token = getAdminToken();
@@ -121,7 +123,7 @@ const SettingsPage = () => {
 
   return (
     <div className="settings-page">
-      <PageHeader title="Settings" subtitle="Manage administrative settings" icon={SettingsIcon} />
+      <PageHeader title="Settings" subtitle="Manage administrative settings" icon={Settings01Icon} />
 
       <div className="au-grid au-row-2b settings-grid">
         <section className="au-panel">
@@ -232,7 +234,7 @@ const SettingsPage = () => {
 
       <section className="danger-zone">
         <div className="danger-zone__head">
-          <AlertTriangle size={20} />
+          <HugeiconsIcon icon={Alert02Icon} size={20} />
           <h2>Danger Zone</h2>
         </div>
 
@@ -265,6 +267,50 @@ const SettingsPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Themed confirmation dialogs (replace native window.confirm) */}
+      <Modal
+        isOpen={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        title="Reset for review?"
+        size="small"
+      >
+        <p style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
+          This clears all <strong>orders, custom orders, carts</strong> and{" "}
+          <strong>non-admin users</strong>. Your <strong>products, categories,
+          sliders and media are kept</strong>, and admin accounts stay. This{" "}
+          <strong>cannot be undone</strong>.
+        </p>
+        <div className="modal-actions">
+          <Button variant="secondary" onClick={() => setResetConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={doReset}>
+            Yes, reset for review
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={wipeConfirmOpen}
+        onClose={() => setWipeConfirmOpen(false)}
+        title="Wipe ALL data?"
+        size="small"
+      >
+        <p style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
+          This permanently deletes <strong>all business data</strong> — products,
+          categories, orders, carts, sliders, media records and all non-admin
+          users. Admin accounts are kept. This <strong>cannot be undone</strong>.
+        </p>
+        <div className="modal-actions">
+          <Button variant="secondary" onClick={() => setWipeConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={doWipe}>
+            Yes, wipe everything
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

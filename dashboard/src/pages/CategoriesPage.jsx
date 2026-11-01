@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit02Icon, Delete02Icon, Add01Icon } from "@hugeicons/core-free-icons";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
@@ -163,7 +163,7 @@ const CategoriesPage = () => {
             setModalOpen(true);
           }}
         >
-          <Plus size={16} />
+          <HugeiconsIcon icon={Add01Icon} size={16} />
           Add Category
         </Button>
       </div>
@@ -206,7 +206,7 @@ const CategoriesPage = () => {
                       title="Edit"
                       aria-label="Edit category"
                     >
-                      <Edit size={15} />
+                      <HugeiconsIcon icon={Edit02Icon} size={15} />
                     </button>
                     <button
                       type="button"
@@ -215,7 +215,7 @@ const CategoriesPage = () => {
                       title="Delete"
                       aria-label="Delete category"
                     >
-                      <Trash2 size={15} />
+                      <HugeiconsIcon icon={Delete02Icon} size={15} />
                     </button>
                   </div>
                 </div>

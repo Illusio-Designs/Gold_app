@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X, User, Clock, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Notification03Icon, Cancel01Icon, UserIcon, Clock01Icon, CheckmarkCircle02Icon, AlertCircleIcon, Alert02Icon, InformationCircleIcon } from '@hugeicons/core-free-icons';
 import '../../styles/common/ToastNotification.css';
 
 const ToastNotification = ({ notification, onClose, onAction }) => {
@@ -17,15 +18,15 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'success':
-        return <CheckCircle size={20} />;
+        return <HugeiconsIcon icon={CheckmarkCircle02Icon} size={20} />;
       case 'error':
-        return <AlertCircle size={20} />;
+        return <HugeiconsIcon icon={AlertCircleIcon} size={20} />;
       case 'warning':
-        return <AlertTriangle size={20} />;
+        return <HugeiconsIcon icon={Alert02Icon} size={20} />;
       case 'info':
-        return <Info size={20} />;
+        return <HugeiconsIcon icon={InformationCircleIcon} size={20} />;
       default:
-        return <Bell size={20} />;
+        return <HugeiconsIcon icon={Notification03Icon} size={20} />;
     }
   };
 
@@ -84,7 +85,7 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
                   )}
                   <p className="toast-message">{notification.body || notification.message}</p>
                   <div className="toast-meta">
-                    <Clock size={12} />
+                    <HugeiconsIcon icon={Clock01Icon} size={12} />
                     <span>{new Date(notification.created_at).toLocaleTimeString()}</span>
                   </div>
                 </div>
@@ -96,7 +97,7 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
               onClick={handleAction}
               title="View Users"
             >
-              <User size={16} />
+              <HugeiconsIcon icon={UserIcon} size={16} />
             </button>
           )}
           
@@ -106,7 +107,7 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
               onClick={handleAction}
               title="View Orders"
             >
-              <User size={16} />
+              <HugeiconsIcon icon={UserIcon} size={16} />
             </button>
           )}
           
@@ -115,7 +116,7 @@ const ToastNotification = ({ notification, onClose, onAction }) => {
             onClick={handleClose}
             title="Close"
           >
-            <X size={16} />
+            <HugeiconsIcon icon={Cancel01Icon} size={16} />
           </button>
         </div>
       </div>

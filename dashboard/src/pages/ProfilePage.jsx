@@ -13,7 +13,13 @@ import Button from "../components/common/Button";
 import PageHeader from "../components/common/PageHeader";
 import SidePanel from "../components/common/SidePanel";
 import InputField from "../components/common/InputField";
-import { User, Mail, ShieldCheck, Pencil } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  UserIcon,
+  Mail01Icon,
+  ShieldUserIcon,
+  Edit02Icon,
+} from "@hugeicons/core-free-icons";
 import "../styles/pages/ProfilePage.css";
 
 const ProfilePage = () => {
@@ -84,10 +90,10 @@ const ProfilePage = () => {
       <PageHeader
         title="Profile"
         subtitle="Your account details"
-        icon={User}
+        icon={UserIcon}
         actions={
           <Button variant="secondary" onClick={openEdit}>
-            <Pencil size={16} /> Edit Profile
+            <HugeiconsIcon icon={Edit02Icon} size={16} /> Edit Profile
           </Button>
         }
       />
@@ -95,7 +101,7 @@ const ProfilePage = () => {
       <div className="profile-card">
         <div className="profile-card__header">
           <div className="profile-avatar">
-            <User size={40} />
+            <HugeiconsIcon icon={UserIcon} size={40} />
           </div>
           <div className="profile-identity">
             <h2 className="profile-name">{name}</h2>
@@ -106,14 +112,14 @@ const ProfilePage = () => {
         <ul className="profile-info">
           <li className="profile-info__row">
             <span className="profile-info__icon">
-              <User size={18} />
+              <HugeiconsIcon icon={UserIcon} size={18} />
             </span>
             <span className="profile-info__label">Name</span>
             <span className="profile-info__value">{name}</span>
           </li>
           <li className="profile-info__row">
             <span className="profile-info__icon">
-              <ShieldCheck size={18} />
+              <HugeiconsIcon icon={ShieldUserIcon} size={18} />
             </span>
             <span className="profile-info__label">Role</span>
             <span className="profile-info__value">{role}</span>
@@ -121,7 +127,7 @@ const ProfilePage = () => {
           {email && (
             <li className="profile-info__row">
               <span className="profile-info__icon">
-                <Mail size={18} />
+                <HugeiconsIcon icon={Mail01Icon} size={18} />
               </span>
               <span className="profile-info__label">Email</span>
               <span className="profile-info__value">{email}</span>
