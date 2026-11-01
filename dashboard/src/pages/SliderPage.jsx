@@ -6,6 +6,8 @@ import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
 import FileUpload from "../components/common/FileUpload";
 import SidePanel from "../components/common/SidePanel";
+import Tooltip from "../components/common/Tooltip";
+import EmptyState from "../components/common/EmptyState";
 import { SkeletonCards, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
@@ -224,10 +226,17 @@ const SliderPage = () => {
       {error && <div className="au-notice">{error}</div>}
 
       {sliders.length === 0 ? (
-        <div className="au-card au-empty">
-          <div className="au-empty-title">No slides yet</div>
-          <p>Create a home banner to feature on the storefront.</p>
-        </div>
+        <EmptyState
+          icon={Image01Icon}
+          title="No slides yet"
+          message="Create a home banner to feature on the storefront."
+          action={
+            <Button onClick={handleCreate}>
+              <HugeiconsIcon icon={Add01Icon} size={16} />
+              Create New Slider
+            </Button>
+          }
+        />
       ) : (
         <div className="au-pgrid slider-grid">
           {sliders.map((row) => (
@@ -261,24 +270,26 @@ const SliderPage = () => {
                     Added {new Date(row.created_at).toLocaleDateString()}
                   </span>
                   <div className="slider-actions">
-                    <button
-                      type="button"
-                      className="au-rowbtn"
-                      onClick={() => handleEdit(row)}
-                      title="Edit"
-                      aria-label="Edit slider"
-                    >
-                      <HugeiconsIcon icon={Edit02Icon} size={15} />
-                    </button>
-                    <button
-                      type="button"
-                      className="au-rowbtn slider-del"
-                      onClick={() => handleDelete(row)}
-                      title="Delete"
-                      aria-label="Delete slider"
-                    >
-                      <HugeiconsIcon icon={Delete02Icon} size={15} />
-                    </button>
+                    <Tooltip text="Edit">
+                      <button
+                        type="button"
+                        className="au-rowbtn"
+                        onClick={() => handleEdit(row)}
+                        aria-label="Edit slider"
+                      >
+                        <HugeiconsIcon icon={Edit02Icon} size={15} />
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Delete">
+                      <button
+                        type="button"
+                        className="au-rowbtn slider-del"
+                        onClick={() => handleDelete(row)}
+                        aria-label="Delete slider"
+                      >
+                        <HugeiconsIcon icon={Delete02Icon} size={15} />
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               </div>

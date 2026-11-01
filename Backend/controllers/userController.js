@@ -481,6 +481,79 @@ async function createUser(req, res) {
   }
 }
 
+// Create a new system/admin account (for the dashboard System Users page).
+// Never logs or returns the password or its bcrypt hash.
+async function createAdmin(req, res) {
+  try {
+    // Validate required fields
+    if (!req.body.name || req.body.name.trim() === "") {
+      return res.status(400).json({ error: "Name is required" });
+    }
+    if (!req.body.email || req.body.email.trim() === "") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    if (!req.body.password || req.body.password.trim() === "") {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    const name = req.body.name.trim();
+    const email = req.body.email.trim();
+    const phone_number = req.body.phone_number
+      ? String(req.body.phone_number).trim() || null
+      : null;
+
+    // Reject if the email already exists
+    db.query(
+      "SELECT id FROM users WHERE email = ?",
+      [email],
+      async (err, results) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        if (results.length > 0) {
+          return res
+            .status(409)
+            .json({ error: "A user with the same email already exists." });
+        }
+
+        // Hash the password the same way the signup/login path does (bcrypt, 10 rounds)
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+        // Admins use status 'approved' (the users.status ENUM has no 'active';
+        // this matches how existing admin accounts are stored).
+        const insertSql = `INSERT INTO users (type, name, email, password, phone_number, status) VALUES ('admin', ?, ?, ?, ?, 'approved')`;
+
+        db.query(
+          insertSql,
+          [name, email, hashedPassword, phone_number],
+          (insertErr, result) => {
+            if (insertErr) {
+              return res.status(500).json({ error: insertErr.message });
+            }
+
+            // Return the created account without the password/hash
+            db.query(
+              "SELECT id, name, email, phone_number, type, status, created_at FROM users WHERE id = ?",
+              [result.insertId],
+              (selErr, rows) => {
+                if (selErr) {
+                  return res.status(500).json({ error: selErr.message });
+                }
+                res.status(201).json({
+                  message: "System user created successfully",
+                  user: rows && rows[0] ? rows[0] : null,
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 // Update user
 async function updateUser(req, res) {
   try {
@@ -1273,6 +1346,7 @@ module.exports = {
   getAllConsumers,
   getAllAdmins,
   createUser,
+  createAdmin,
   updateUser,
   deleteUser,
   checkUserExists,

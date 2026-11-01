@@ -3,6 +3,7 @@ import TableWithControls from '../components/common/TableWithControls';
 import { SkeletonTable, SkeletonStats } from '../components/common/Skeleton';
 import StatCards from '../components/common/StatCards';
 import Badge from '../components/common/Badge';
+import Avatar from '../components/common/Avatar';
 import { showErrorToast } from '../utils/toast';
 import { getAdminToken } from '../utils/authUtils';
 import { getConsumers } from '../services/adminApiService';
@@ -44,15 +45,13 @@ const ConsumersPage = () => {
     try { return new Date(d).toLocaleDateString(); } catch { return '—'; }
   };
 
-  const initialOf = (name) => (name || '?').trim().charAt(0).toUpperCase() || '?';
-
   const columns = [
     {
       header: 'Consumer',
       accessor: 'name',
       cell: (row) => (
         <div className="au-cell">
-          <span className="au-thumb" aria-hidden="true">{initialOf(row.name)}</span>
+          <Avatar name={row.name} size={32} />
           <span className="au-stack">
             <span className="au-ono">{row.name || 'N/A'}</span>
             <Badge tone="info">B2C</Badge>

@@ -27,6 +27,8 @@ router.get("/", verifyToken, requireAdmin, userController.getAllUsers);
 router.get("/consumers", verifyToken, requireAdmin, userController.getAllConsumers);
 // System/admin accounts (admin only) — must precede the "/:id" route.
 router.get("/system", verifyToken, requireAdmin, userController.getAllAdmins);
+// Create a system/admin account (admin only) — must precede the "/:id" route.
+router.post("/system", verifyToken, requireAdmin, userController.createAdmin);
 // COMMENTED OUT - Session management removed (no sessions needed)
 // router.get(
 //   "/validate-session",

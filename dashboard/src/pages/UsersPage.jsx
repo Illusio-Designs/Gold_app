@@ -13,6 +13,7 @@ import SidePanel from "../components/common/SidePanel";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
+import Avatar from "../components/common/Avatar";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
 import { getProfileImageUrl } from "../utils/imageUtils";
@@ -85,7 +86,12 @@ const UsersPage = () => {
     {
       header: "Name",
       accessor: "name",
-      cell: (row) => <span className="au-ono">{row.name || "—"}</span>,
+      cell: (row) => (
+        <div className="au-cell">
+          <Avatar name={row.name} size={32} />
+          <span className="au-ono">{row.name || "—"}</span>
+        </div>
+      ),
     },
     {
       header: "Email",

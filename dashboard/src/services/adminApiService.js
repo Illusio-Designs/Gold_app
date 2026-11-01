@@ -75,6 +75,14 @@ export const getSystemUsers = (token) =>
     .get("/users/system", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+// Create a new system / admin account.
+export const createSystemUser = (payload, token) =>
+  axiosInstance
+    .post("/users/system", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((r) => r.data);
+
 // App settings (gold rate, making charge % — drives B2C pricing).
 export const getAppSettings = (token) =>
   axiosInstance
