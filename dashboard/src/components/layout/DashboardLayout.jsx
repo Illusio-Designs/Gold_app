@@ -12,7 +12,8 @@ import {
   Notification03Icon,
   Logout01Icon,
   ArrowLeftDoubleIcon,
-  Image01Icon,
+  GalleryHorizontalIcon,
+  GridViewIcon,
   UserRemove01Icon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
@@ -39,8 +40,8 @@ const NavGroups = [
     links: [
       { name: "Products", path: "/dashboard/products", icon: PackageIcon },
       { name: "Categories", path: "/dashboard/categories", icon: Layers01Icon },
-      { name: "Sliders", path: "/dashboard/sliders", icon: Image01Icon },
-      { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },
+      { name: "Sliders", path: "/dashboard/sliders", icon: GalleryHorizontalIcon },
+      { name: "Media Gallery", path: "/dashboard/media-gallery", icon: GridViewIcon },
     ],
   },
   {
