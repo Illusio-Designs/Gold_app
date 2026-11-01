@@ -93,12 +93,13 @@ async function createProduct(req, res) {
 
 // Get all products (only available ones for frontend)
 function getAllProducts(req, res) {
-  // Check if this is a frontend request (no admin token)
-  const isFrontendRequest =
-    !req.headers.authorization ||
-    !req.headers.authorization.startsWith("Bearer ");
+  // Only a genuine admin gets the full catalogue (incl. out-of-stock / drafts).
+  // Logged-in consumer and business users also send a Bearer token, so we must
+  // check the decoded user type (populated by optionalAuth), not merely whether
+  // an Authorization header is present.
+  const isAdmin = req.user && req.user.type === "admin";
 
-  if (isFrontendRequest) {
+  if (!isAdmin) {
     // Frontend request - only show available products
     productModel.getAvailableProducts((err, results) => {
       if (err) {

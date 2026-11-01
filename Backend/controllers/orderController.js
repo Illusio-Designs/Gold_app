@@ -584,9 +584,10 @@ function updateOrder(req, res) {
           timestamp: new Date().toISOString(),
         });
 
-        // Emit specific update to the user's room
+        // Emit specific update to the user's room (owner column is user_id;
+        // business_user_id does not exist, so it emitted to user_undefined).
         socketService.emitToRoom(
-          `user_${updatedOrder.business_user_id}`,
+          `user_${updatedOrder.user_id}`,
           "order-updated",
           {
             order: updatedOrder,

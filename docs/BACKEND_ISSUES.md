@@ -97,15 +97,20 @@ of it, and — importantly — **whether the mobile apps need any change**.
 
 ---
 
-## 🟢 Minor / tidy-up
+## 🟢 Minor / tidy-up — ✅ FIXED
 
-- A product removed from the cart and added again can stay hidden. — *server only*
-- A logged-in customer can accidentally be shown the admin version of a product. — *server only*
+- A product removed from the cart and added again can stay hidden. — *fixed: re-add now
+  resets the item's status (and quantity) instead of only bumping quantity on a removed row.*
+- A logged-in customer can accidentally be shown the admin version of a product. — *fixed:
+  `getAllProducts` now checks the real user type via `optionalAuth`, so only genuine admins
+  get the full catalogue; shops/customers get the available-only storefront view.*
 - A couple of real-time "order updated" pings go to an empty channel, so they're never
-  delivered. — *server only*
-- A "mark read" route doesn't check the notification is really yours. — *server only*
+  delivered. — *fixed: `updateOrder` emits to `user_${user_id}` instead of the non-existent
+  `business_user_id`.*
+- A "mark read" route doesn't check the notification is really yours. — *fixed: marking read
+  only applies if the notification is addressed to you or is a global broadcast.*
 
-None of these need an app change.
+None of these needed an app change.
 
 ---
 

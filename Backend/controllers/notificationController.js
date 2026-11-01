@@ -181,13 +181,17 @@ function markAsRead(req, res) {
   // req.params left it undefined and wrote the read-mark against no user.
   const userId = req.user.id;
 
+  // Ownership check: only mark read if the notification is addressed to this
+  // user or is a global broadcast (user_id IS NULL). A notification that isn't
+  // visible to the caller inserts nothing.
   const sql = `
     INSERT INTO user_notifications (user_id, notification_id, read_at)
-    VALUES (?, ?, NOW())
+    SELECT ?, n.id, NOW() FROM notifications n
+    WHERE n.id = ? AND (n.user_id = ? OR n.user_id IS NULL)
     ON DUPLICATE KEY UPDATE read_at = NOW()
   `;
 
-  db.query(sql, [userId, notificationId], (err, result) => {
+  db.query(sql, [userId, notificationId, userId], (err, result) => {
     if (err) {
       return res
         .status(500)

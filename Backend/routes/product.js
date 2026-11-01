@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
 const { upload, excelUpload } = require("../config/multerConfig");
-const { verifyToken, requireAdmin } = require("../middlewares/auth");
+const { verifyToken, requireAdmin, optionalAuth } = require("../middlewares/auth");
 
 // Public routes (no authentication required)
-router.get("/", productController.getAllProducts);
+router.get("/", optionalAuth, productController.getAllProducts);
 router.get("/category/:categoryId", productController.getProductsByCategory);
 router.get("/sku/:sku", productController.getProductBySku);
 router.get("/:id", productController.getProductById);
