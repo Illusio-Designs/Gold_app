@@ -12,8 +12,6 @@ import {
   Notification03Icon,
   Logout01Icon,
   ArrowLeftDoubleIcon,
-  Maximize01Icon,
-  Minimize01Icon,
   Image01Icon,
   UserRemove01Icon,
   Search01Icon,
@@ -91,19 +89,10 @@ export default function DashboardLayout() {
   );
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [tooltip, setTooltip] = useState({ show: false, text: "", x: 0, y: 0 });
   const location = useLocation();
   const navigate = useNavigate();
-
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  };
 
   useEffect(() => {
     // Initialize notifications and Firebase messaging
@@ -149,9 +138,6 @@ export default function DashboardLayout() {
 
     initNotifications();
 
-    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-
     const interval = setInterval(async () => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
@@ -179,7 +165,6 @@ export default function DashboardLayout() {
     return () => {
       clearInterval(interval);
       RealtimeNotificationService.disconnect();
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
       document.removeEventListener("click", handleClickOutside);
       window.removeEventListener("notification-updated", handleNotificationUpdate);
     };
@@ -333,18 +318,6 @@ export default function DashboardLayout() {
           </label>
 
           <div className="header-actions">
-            <button
-              className="header-icon-btn"
-              onClick={handleFullscreen}
-              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            >
-              {isFullscreen ? (
-                <HugeiconsIcon icon={Minimize01Icon} size={20} />
-              ) : (
-                <HugeiconsIcon icon={Maximize01Icon} size={20} />
-              )}
-            </button>
-
             <div className="notification-menu">
               <button
                 className="header-icon-btn"

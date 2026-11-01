@@ -4,6 +4,11 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  /* Single clean card: header + body are seamless inside this one border. */
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .table-controls {
@@ -306,13 +311,8 @@
   overflow-x: auto; /* scroll wide tables horizontally instead of cramming */
   flex: 1 1 auto;
   background: var(--surface);
-  border-bottom-left-radius: var(--radius-lg);
-  border-bottom-right-radius: var(--radius-lg);
-  border-top: none;
-  border-left: 1px solid #ece2d5;
-  border-right: 1px solid #ece2d5;
-  border-bottom: 1px solid #ece2d5;
-  box-shadow: var(--shadow-sm);
+  /* No own border/radius/shadow — the parent .table-with-controls is the card,
+     so the body sits flush under the header (no inner "card in a card"). */
 }
 
 .table-with-controls .table-entries-scroll:has(.table-loading-container) {
