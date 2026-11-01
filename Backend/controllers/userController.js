@@ -367,6 +367,20 @@ function getAllUsers(req, res) {
   });
 }
 
+// Get all system/admin accounts (for the dashboard System Users page).
+// Never returns password/otp/reset_token.
+function getAllAdmins(req, res) {
+  db.query(
+    "SELECT id, name, email, phone_number, status, created_at FROM users WHERE type = 'admin' ORDER BY created_at DESC",
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results || []);
+    }
+  );
+}
+
 // Get all D2C consumer accounts (for the dashboard Consumers page)
 function getAllConsumers(req, res) {
   db.query(
@@ -1257,6 +1271,7 @@ module.exports = {
   updateUserStatus,
   getAllUsers,
   getAllConsumers,
+  getAllAdmins,
   createUser,
   updateUser,
   deleteUser,

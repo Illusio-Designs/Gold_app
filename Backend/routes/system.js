@@ -6,4 +6,7 @@ const { verifyToken, requireAdmin } = require("../middlewares/auth");
 // Destructive: full data reset. Admin-only, requires an exact confirm phrase.
 router.post("/wipe-data", verifyToken, requireAdmin, controller.wipeAllData);
 
+// Review reset: clear orders/carts/non-admin users but KEEP the catalog.
+router.post("/reset-review", verifyToken, requireAdmin, controller.resetForReview);
+
 module.exports = router;

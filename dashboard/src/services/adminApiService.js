@@ -69,6 +69,12 @@ export const getConsumers = (token) =>
     .get("/users/consumers", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+// System / admin accounts.
+export const getSystemUsers = (token) =>
+  axiosInstance
+    .get("/users/system", { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.data);
+
 // App settings (gold rate, making charge % — drives B2C pricing).
 export const getAppSettings = (token) =>
   axiosInstance
@@ -436,6 +442,16 @@ export const wipeAllData = (confirm, token) =>
   axiosInstance
     .post(
       "/system/wipe-data",
+      { confirm },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then((r) => r.data);
+
+// SYSTEM — review reset: clears orders/carts/non-admin users, keeps the catalog.
+export const resetForReview = (confirm, token) =>
+  axiosInstance
+    .post(
+      "/system/reset-review",
       { confirm },
       { headers: { Authorization: `Bearer ${token}` } }
     )

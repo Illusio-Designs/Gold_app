@@ -65,4 +65,56 @@ function wipeAllData(req, res) {
   });
 }
 
-module.exports = { wipeAllData };
+// ---------------------------------------------------------------------------
+// Reset for store review: clear transactional + user data but KEEP the catalog
+// (products, categories, sliders, media) so reviewers see a clean, browsable
+// app. Admin accounts are preserved.
+const RESET_CONFIRM_PHRASE = "RESET FOR REVIEW";
+
+// Cleared on a review reset. Catalog tables are intentionally NOT here.
+const RESET_TABLES = [
+  "account_deletion_requests",
+  "product_stock_history",
+  "cart_items",
+  "custom_orders",
+  "orders",
+  "notifications",
+  "login_requests",
+  "notification_tokens",
+];
+
+// POST /api/system/reset-review  (admin only)
+// Body: { confirm: "RESET FOR REVIEW" }
+function resetForReview(req, res) {
+  const { confirm } = req.body || {};
+
+  if (confirm !== RESET_CONFIRM_PHRASE) {
+    return res.status(400).json({
+      error: `Confirmation phrase mismatch. Type exactly: ${RESET_CONFIRM_PHRASE}`,
+    });
+  }
+
+  const statements = [
+    { sql: "SET FOREIGN_KEY_CHECKS = 0" },
+    ...RESET_TABLES.map((t) => ({ sql: `DELETE FROM \`${t}\`` })),
+    // Remove non-admin accounts (wholesalers/consumers); keep admins.
+    { sql: "DELETE FROM `users` WHERE type <> 'admin'" },
+    // Make the whole catalog available again so reviewers see every product.
+    { sql: "UPDATE `products` SET stock_status = 'available'" },
+    { sql: "SET FOREIGN_KEY_CHECKS = 1" },
+  ];
+
+  runSequential(statements, (err) => {
+    if (err) {
+      db.query("SET FOREIGN_KEY_CHECKS = 1", () => {});
+      return res.status(500).json({ error: "Reset failed: " + err.message });
+    }
+    return res.json({
+      success: true,
+      message:
+        "Cleared orders, custom orders, carts and non-admin users. Products, categories, sliders and media were kept.",
+    });
+  });
+}
+
+module.exports = { wipeAllData, resetForReview };
