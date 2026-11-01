@@ -121,6 +121,8 @@ const DropdownSelect = ({
         classNamePrefix="react-select"
         noOptionsMessage={() => "No options found"}
         loadingMessage={() => "Loading..."}
+        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+        menuPosition="fixed"
       />
     </div>
   );
