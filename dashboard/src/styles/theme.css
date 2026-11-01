@@ -100,43 +100,7 @@
   color-scheme: light;
 }
 
-/* ---------------- Dark theme ---------------- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #160d10; --page-bg: #160d10; --main-bg: #160d10;
-    --surface: #211319; --surface-2: #281620; --surface-muted: #281620; --surface-sunken: #1c1016;
-    --sidebar: #2c0e1a; --sidebar-2: #1c0810; --sidebar-fg: #efd5c2; --sidebar-muted: #b9918a;
-    --sidebar-bg: #2c0e1a; --sidebar-text-color: #efd5c2;
-    --ink: #f4e9ed; --muted: #b19aa2;
-    --text-primary: #f4e9ed; --text-secondary: #c9adb6; --text-muted: #9c858e;
-    --line: #3a2731; --line-2: #301f28; --hairline: #3a2731; --border-color: #4a3a2a;
-    --cream: #fce2bf; --gold: #cda065; --gold-soft: #4a3a2a; --gold-line: #4a3a2a;
-    --input-bg: #281620; --input-border: #4a3a2a;
-    --ok-bg: #14271d; --success-bg: #14271d; --warn-bg: #2a2210; --warning-bg: #2a2210;
-    --info-bg: #142234; --danger-bg: #2e1820;
-    --skeleton-base: #2a1a22; --skeleton-shine: #38232e;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
-    --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #160d10; --page-bg: #160d10; --main-bg: #160d10;
-  --surface: #211319; --surface-2: #281620; --surface-muted: #281620; --surface-sunken: #1c1016;
-  --sidebar: #2c0e1a; --sidebar-2: #1c0810; --sidebar-fg: #efd5c2; --sidebar-muted: #b9918a;
-  --sidebar-bg: #2c0e1a; --sidebar-text-color: #efd5c2;
-  --ink: #f4e9ed; --muted: #b19aa2;
-  --text-primary: #f4e9ed; --text-secondary: #c9adb6; --text-muted: #9c858e;
-  --line: #3a2731; --line-2: #301f28; --hairline: #3a2731; --border-color: #4a3a2a;
-  --cream: #fce2bf; --gold: #cda065; --gold-soft: #4a3a2a; --gold-line: #4a3a2a;
-  --input-bg: #281620; --input-border: #4a3a2a;
-  --ok-bg: #14271d; --success-bg: #14271d; --warn-bg: #2a2210; --warning-bg: #2a2210;
-  --info-bg: #142234; --danger-bg: #2e1820;
-  --skeleton-base: #2a1a22; --skeleton-shine: #38232e;
-  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
-  --shadow-card: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
-  color-scheme: dark;
-}
+/* The admin UI is light-only by design (no dark theme / no auto-switch). */
 
 /* Display font for brand titles, page headings, KPI numbers. */
 .brand-display,
