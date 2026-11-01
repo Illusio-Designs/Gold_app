@@ -15,6 +15,8 @@ import {
   GalleryHorizontalIcon,
   GridViewIcon,
   UserRemove01Icon,
+  Building01Icon,
+  UserShield01Icon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import "./DashboardLayout.css";
@@ -47,13 +49,14 @@ const NavGroups = [
   {
     label: "People",
     links: [
-      { name: "Users", path: "/dashboard/users", icon: UserGroupIcon },
+      { name: "Firms", path: "/dashboard/users", icon: Building01Icon },
       { name: "Consumers", path: "/dashboard/consumers", icon: UserIcon },
     ],
   },
   {
     label: "System",
     links: [
+      { name: "System Users", path: "/dashboard/system-users", icon: UserShield01Icon },
       { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
     ],
   },
@@ -70,8 +73,9 @@ const PageMeta = {
   "/dashboard/categories": "Organise the catalog",
   "/dashboard/sliders": "App home banners",
   "/dashboard/media-gallery": "Product & banner images",
-  "/dashboard/users": "Wholesale (B2B) accounts & approvals",
+  "/dashboard/users": "Wholesale firms (B2B) & approvals",
   "/dashboard/consumers": "B2C storefront customers",
+  "/dashboard/system-users": "Admin & system accounts",
   "/dashboard/account-deletion": "Account deletion requests",
   "/dashboard/settings": "Store & app configuration",
   "/dashboard/profile": "Your admin profile",

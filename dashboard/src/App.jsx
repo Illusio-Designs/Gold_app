@@ -19,6 +19,7 @@ const CategoriesPage = React.lazy(() => import("./pages/CategoriesPage"));
 const MediaGalleryPage = React.lazy(() => import("./pages/MediaGalleryPage"));
 const SliderPage = React.lazy(() => import("./pages/SliderPage"));
 const AccountDeletionPage = React.lazy(() => import("./pages/AccountDeletionPage"));
+const SystemUsersPage = React.lazy(() => import("./pages/SystemUsersPage"));
 const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage"));
@@ -102,6 +103,7 @@ function App() {
             <Route path="orders" element={<OrdersPage />} />
             <Route path="media-gallery" element={<MediaGalleryPage />} />
             <Route path="sliders" element={<SliderPage />} />
+            <Route path="system-users" element={<SystemUsersPage />} />
             <Route path="account-deletion" element={<AccountDeletionPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="profile" element={<ProfilePage />} />

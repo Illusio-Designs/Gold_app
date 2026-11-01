@@ -371,7 +371,7 @@ const UsersPage = () => {
     (u) => u.status === "rejected" || u.status === "denied"
   ).length;
   const userStats = [
-    { label: "Total Users", value: users.length, tone: "brand" },
+    { label: "Total Firms", value: users.length, tone: "brand" },
     { label: "Approved", value: approvedCount, tone: "success" },
     { label: "Pending", value: pendingCount, tone: "warning" },
     { label: "Rejected", value: rejectedCount, tone: "danger" },
@@ -400,7 +400,7 @@ const UsersPage = () => {
         columns={columns}
         data={users}
         searchFields={["name", "email", "city", "business_name"]}
-        pageTitle="User Management"
+        pageTitle="Firms"
         loading={loading}
         actions={
           <div style={{ display: "flex", gap: "10px" }}>
@@ -460,7 +460,7 @@ const UsersPage = () => {
       <SidePanel
         isOpen={modalOpen}
         onClose={handleCancel}
-        title={editUser ? "Edit User" : "Add User"}
+        title={editUser ? "Edit Firm" : "Add Firm"}
       >
         <DropdownSelect
           label="Type"
@@ -643,7 +643,7 @@ const UsersPage = () => {
       <Modal
         isOpen={!!deleteUser}
         onClose={() => setDeleteUser(null)}
-        title="Delete User"
+        title="Delete Firm"
       >
         <p>
           Are you sure you want to delete user <b>{deleteUser?.name}</b>?

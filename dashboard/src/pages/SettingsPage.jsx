@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AlertTriangle, Settings as SettingsIcon } from "lucide-react";
 import {
   wipeAllData,
+  resetForReview,
   getAppSettings,
   updateAppSettings,
 } from "../services/adminApiService";
@@ -14,10 +15,13 @@ import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
 
 const CONFIRM_PHRASE = "DELETE ALL DATA";
+const RESET_PHRASE = "RESET FOR REVIEW";
 
 const SettingsPage = () => {
   const [confirmText, setConfirmText] = useState("");
   const [wiping, setWiping] = useState(false);
+  const [resetText, setResetText] = useState("");
+  const [resetting, setResetting] = useState(false);
   const [goldRate, setGoldRate] = useState("");
   const [makingPct, setMakingPct] = useState("");
   const [savingPricing, setSavingPricing] = useState(false);
@@ -56,6 +60,34 @@ const SettingsPage = () => {
       showErrorToast(err?.response?.data?.error || "Failed to save pricing");
     } finally {
       setSavingPricing(false);
+    }
+  };
+
+  const canReset = resetText === RESET_PHRASE && !resetting;
+
+  const handleReset = async () => {
+    if (!isAuthenticated()) {
+      showErrorToast("Please login again");
+      navigate("/auth");
+      return;
+    }
+    if (resetText !== RESET_PHRASE) return;
+
+    const sure = window.confirm(
+      "This clears all orders, custom orders, carts and non-admin users so the app is clean for store review. Products, categories, sliders and media are KEPT. Admin accounts are kept. Continue?"
+    );
+    if (!sure) return;
+
+    try {
+      setResetting(true);
+      const token = getAdminToken();
+      await resetForReview(RESET_PHRASE, token);
+      showSuccessToast("Reset done. Orders & non-admin users cleared; catalog kept.");
+      setResetText("");
+    } catch (err) {
+      showErrorToast(err?.response?.data?.error || "Reset failed");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -166,6 +198,37 @@ const SettingsPage = () => {
           </div>
         </section>
       </div>
+
+      <section className="au-panel review-reset">
+        <div className="au-panel-head">
+          <h3>Prepare for store review</h3>
+        </div>
+        <p className="au-sub" style={{ marginTop: 0, lineHeight: 1.6 }}>
+          Clears all <strong>orders, custom orders, carts</strong> and{" "}
+          <strong>non-admin users</strong> so the app is clean for Google Play /
+          App Store reviewers. Your <strong>products, categories, sliders and
+          media are kept</strong> (every product is set back to “available”),
+          and <strong>admin accounts stay</strong>. This cannot be undone.
+        </p>
+
+        <label className="danger-zone__label" htmlFor="reset-confirm">
+          Type <code>{RESET_PHRASE}</code> to enable:
+        </label>
+        <input
+          id="reset-confirm"
+          className="danger-zone__input"
+          value={resetText}
+          onChange={(e) => setResetText(e.target.value)}
+          placeholder={RESET_PHRASE}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <div className="danger-zone__actions">
+          <Button variant="primary" onClick={handleReset} disabled={!canReset}>
+            {resetting ? "Resetting…" : "Reset for review"}
+          </Button>
+        </div>
+      </section>
 
       <section className="danger-zone">
         <div className="danger-zone__head">

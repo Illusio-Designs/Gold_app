@@ -139,3 +139,7 @@
 }
 
 .settings-actions { margin-top: 8px; }
+
+/* Review reset card */
+.review-reset { margin-bottom: 20px; }
+.review-reset .danger-zone__input { max-width: 420px; }
