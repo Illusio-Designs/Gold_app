@@ -31,6 +31,7 @@ const ContactUs = React.lazy(() => import("./webpage/ContactUs"));
 import { isAuthenticated, autoLogout } from "./utils/authUtils";
 import { showToast } from "./utils/toast";
 import ToastManager from "./components/common/ToastManager";
+import RingLoader from "./components/common/RingLoader";
 
 // Removed Firebase messaging-related code
 
@@ -66,22 +67,7 @@ function App() {
       {/* Mounted at the root so login/logout/session toasts render on every
           route, not only inside the dashboard. */}
       <ToastManager />
-      <React.Suspense
-        fallback={
-          <div
-            style={{
-              minHeight: "60vh",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#5D0829",
-              fontFamily: "system-ui, sans-serif",
-            }}
-          >
-            Loading…
-          </div>
-        }
-      >
+      <React.Suspense fallback={<RingLoader fullscreen label="Loading" />}>
       <Routes>
         {/* Public webpage routes */}
         <Route path="/" element={<HomePage />} />
