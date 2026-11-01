@@ -115,8 +115,9 @@
 .hp-app__text { position: relative; z-index: 2; }
 .hp-app h2 { font-size: clamp(26px, 3.6vw, 38px); color: #fff; }
 .hp-app p { color: rgba(252,226,191,.85); margin: 16px 0 26px; line-height: 1.7; max-width: 42ch; font-size: 17px; }
-.hp-stores { display: flex; gap: 14px; flex-wrap: wrap; }
-.hp-stores img { height: 50px; width: auto; display: block; transition: transform .15s; }
+.hp-stores { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.hp-stores img { height: 66px; width: auto; display: block; transition: transform .15s; }
+@media (max-width: 560px) { .hp-stores img { height: 56px; } }
 .hp-stores a:hover img { transform: translateY(-2px); }
 .hp-app__phones { position: relative; z-index: 2; display: flex; justify-content: center; }
 .hp-app__phones img { width: 100%; max-width: 300px; height: auto; filter: drop-shadow(0 30px 50px rgba(0,0,0,.45)); }
