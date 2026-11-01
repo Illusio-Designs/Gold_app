@@ -80,6 +80,26 @@ function requireApprovedBusiness(req, res, next) {
   });
 }
 
+// Allow the resource owner (JWT id matches the given route param) OR an admin.
+// Used to protect per-user reads/writes (orders, cart, profile) so one
+// authenticated user can't read or mutate another user's data by changing the
+// id in the URL. The mobile apps always pass their own id, so this is
+// transparent to them; the dashboard passes an admin token and is allowed.
+function requireSelfOrAdmin(paramName = 'user_id') {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    if (req.user.type === 'admin') {
+      return next();
+    }
+    if (String(req.user.id) === String(req.params[paramName])) {
+      return next();
+    }
+    return res.status(403).json({ error: 'Not authorized to access this resource' });
+  };
+}
+
 // Optional authentication (doesn't fail if no token)
 function optionalAuth(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1] || req.headers['x-access-token'];
@@ -101,5 +121,6 @@ module.exports = {
   requireAdmin,
   requireBusiness,
   requireApprovedBusiness,
+  requireSelfOrAdmin,
   optionalAuth
 }; 

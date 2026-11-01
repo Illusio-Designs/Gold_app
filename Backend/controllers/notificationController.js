@@ -60,73 +60,60 @@ async function createNotification(req, res) {
 
         const notificationId = result.insertId;
 
-        // Send push notification based on target type
-        let pushResult = null;
+        // Respond ONCE, after the push has actually been attempted — so the
+        // response carries the real pushResult (and we never send headers twice
+        // from an error path). The token queries below are async, so the reply
+        // must live inside each branch, not after the if/else.
+        const finish = (pushResult) =>
+          res.json({
+            message: "Notification created successfully",
+            notificationId,
+            pushResult,
+          });
+
+        const sendToTokens = async (tokens) => {
+          const list = (tokens || []).filter(Boolean);
+          if (list.length === 0) {
+            return finish({ success: false, noTokens: true, successCount: 0 });
+          }
+          const pushResult = await sendMulticastNotification(
+            list,
+            title,
+            body,
+            data
+          );
+          return finish(pushResult);
+        };
 
         if (topic) {
-          // Send to topic
-          pushResult = await sendTopicNotification(topic, title, body, data);
-        } else if (
-          targetUsers &&
-          Array.isArray(targetUsers) &&
-          targetUsers.length > 0
-        ) {
-          // Send to specific users
+          // Send to a topic (awaited — result is ready now)
+          const pushResult = await sendTopicNotification(topic, title, body, data);
+          return finish(pushResult);
+        }
+
+        if (targetUsers && Array.isArray(targetUsers) && targetUsers.length > 0) {
           const getUserTokensSql = `
-          SELECT token FROM notification_tokens 
-          WHERE user_id IN (${targetUsers.map(() => "?").join(",")}) 
-          AND active = true
-        `;
-
-          db.query(
-            getUserTokensSql,
-            targetUsers,
-            async (tokenErr, tokenResults) => {
-              if (tokenErr) {
-                return res
-                  .status(500)
-                  .json({ error: "Failed to get user tokens" });
-              }
-
-              const tokens = tokenResults.map((row) => row.token);
-              if (tokens.length > 0) {
-                pushResult = await sendMulticastNotification(
-                  tokens,
-                  title,
-                  body,
-                  data
-                );
-              }
-            }
-          );
-        } else {
-          // Send to all users
-          const getAllTokensSql =
-            "SELECT token FROM notification_tokens WHERE active = true";
-          db.query(getAllTokensSql, async (tokenErr, tokenResults) => {
+            SELECT token FROM notification_tokens
+            WHERE user_id IN (${targetUsers.map(() => "?").join(",")})
+            AND active = true`;
+          return db.query(getUserTokensSql, targetUsers, (tokenErr, tokenResults) => {
             if (tokenErr) {
-              return res
-                .status(500)
-                .json({ error: "Failed to get user tokens" });
+              return res.status(500).json({ error: "Failed to get user tokens" });
             }
-
-            const tokens = tokenResults.map((row) => row.token);
-            if (tokens.length > 0) {
-              pushResult = await sendMulticastNotification(
-                tokens,
-                title,
-                body,
-                data
-              );
-            }
+            sendToTokens(tokenResults.map((row) => row.token));
           });
         }
 
-        res.json({
-          message: "Notification created successfully",
-          notificationId,
-          pushResult,
-        });
+        // Send to all users
+        return db.query(
+          "SELECT token FROM notification_tokens WHERE active = true",
+          (tokenErr, tokenResults) => {
+            if (tokenErr) {
+              return res.status(500).json({ error: "Failed to get user tokens" });
+            }
+            sendToTokens(tokenResults.map((row) => row.token));
+          }
+        );
       }
     );
   } catch (error) {

@@ -4,9 +4,11 @@ const socketService = require("../services/socketService");
 
 // Add item to cart with real-time updates
 function addToCart(req, res) {
-  const { user_id, product_id, quantity } = req.body;
+  const { product_id, quantity } = req.body;
+  // The cart always belongs to the authenticated user — never a body user_id.
+  const user_id = req.user.id;
 
-  if (!user_id || !product_id) {
+  if (!product_id) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -95,6 +97,14 @@ function updateCartItemQuantity(req, res) {
     return res.status(400).json({ error: "Valid quantity is required" });
   }
 
+  // Verify the cart item belongs to the caller before mutating it.
+  cartModel.getCartItemById(cart_item_id, (ownErr, ownRows) => {
+    if (ownErr) return res.status(500).json({ error: ownErr.message });
+    if (!ownRows || ownRows.length === 0)
+      return res.status(404).json({ error: "Cart item not found" });
+    if (req.user.type !== "admin" && String(ownRows[0].user_id) !== String(req.user.id))
+      return res.status(403).json({ error: "Not authorized to modify this cart item" });
+
   cartModel.updateCartItemQuantity(cart_item_id, quantity, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -128,11 +138,20 @@ function updateCartItemQuantity(req, res) {
       }
     });
   });
+  });
 }
 
 // Remove item from cart with real-time updates
 function removeFromCart(req, res) {
   const { cart_item_id } = req.params;
+
+  // Verify the cart item belongs to the caller before removing it.
+  cartModel.getCartItemById(cart_item_id, (ownErr, ownRows) => {
+    if (ownErr) return res.status(500).json({ error: ownErr.message });
+    if (!ownRows || ownRows.length === 0)
+      return res.status(404).json({ error: "Cart item not found" });
+    if (req.user.type !== "admin" && String(ownRows[0].user_id) !== String(req.user.id))
+      return res.status(403).json({ error: "Not authorized to modify this cart item" });
 
   cartModel.removeFromCart(cart_item_id, (err, result) => {
     if (err) {
@@ -146,6 +165,7 @@ function removeFromCart(req, res) {
     // Note: No real-time update needed for item removal as it's user-specific
 
     res.json({ message: "Item removed from cart successfully" });
+  });
   });
 }
 
@@ -181,6 +201,10 @@ function getCartItemById(req, res) {
 
     if (results.length === 0) {
       return res.status(404).json({ error: "Cart item not found" });
+    }
+
+    if (req.user.type !== "admin" && String(results[0].user_id) !== String(req.user.id)) {
+      return res.status(403).json({ error: "Not authorized to view this cart item" });
     }
 
     res.json(results[0]);

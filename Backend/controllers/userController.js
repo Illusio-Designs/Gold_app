@@ -700,7 +700,13 @@ function getUserById(req, res) {
     if (err) return res.status(500).json({ error: err.message });
     if (!results || results.length === 0)
       return res.status(404).json({ error: "User not found" });
-    res.json({ user: results[0] });
+    // Never expose secret fields. Route is self-or-admin, so the user's own
+    // GST/PAN/address stay available, but the bcrypt hash must never leave the DB.
+    const user = { ...results[0] };
+    delete user.password;
+    delete user.otp;
+    delete user.reset_token;
+    res.json({ user });
   });
 }
 

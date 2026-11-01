@@ -163,24 +163,44 @@ function verifyRazorpayPayment(req, res) {
       Buffer.from(razorpay_signature)
     );
 
-  const newStatus = ok ? "paid" : "failed";
-  ids.forEach((oid) => {
-    orderModel.updateOrderPayment(
-      oid,
-      {
-        payment_status: newStatus,
-        payment_method: "razorpay",
-        razorpay_order_id,
-        razorpay_payment_id,
-      },
-      () => {}
-    );
-  });
-
   if (!ok) {
     return res.status(400).json({ error: "Payment signature verification failed" });
   }
-  return res.json({ success: true, payment_status: "paid" });
+
+  // Signature is valid. Mark paid ONLY the orders that are actually bound to
+  // THIS razorpay_order_id (set in createRazorpayOrder) AND owned by the
+  // authenticated user. Never trust the raw orderIds from the body, or a single
+  // genuine ₹1 payment could be replayed to mark other people's orders paid.
+  if (ids.length === 0) {
+    return res.json({ success: true, payment_status: "paid", updated: [] });
+  }
+  let pending = ids.length;
+  const updated = [];
+  ids.forEach((oid) => {
+    orderModel.getOrderById(oid, (err, rows) => {
+      const order = !err && rows && rows[0];
+      if (
+        order &&
+        String(order.razorpay_order_id) === String(razorpay_order_id) &&
+        String(order.user_id) === String(req.user.id)
+      ) {
+        orderModel.updateOrderPayment(
+          oid,
+          {
+            payment_status: "paid",
+            payment_method: "razorpay",
+            razorpay_order_id,
+            razorpay_payment_id,
+          },
+          () => {}
+        );
+        updated.push(oid);
+      }
+      if (--pending === 0) {
+        return res.json({ success: true, payment_status: "paid", updated });
+      }
+    });
+  });
 }
 
 module.exports = {

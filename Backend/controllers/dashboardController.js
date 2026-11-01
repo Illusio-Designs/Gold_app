@@ -12,8 +12,9 @@ function getDashboardStats(req, res) {
         COUNT(*) as total_orders,
         SUM(total_amount) as total_revenue,
         COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders,
-        COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_orders,
-        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_orders,
+        COUNT(CASE WHEN status = 'processing' THEN 1 END) as processing_orders,
+        COUNT(CASE WHEN status = 'shipped' THEN 1 END) as shipped_orders,
+        COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_orders,
         COUNT(CASE WHEN status = 'cancelled' THEN 1 END) as cancelled_orders
       FROM orders 
       WHERE DATE(created_at) = ?
