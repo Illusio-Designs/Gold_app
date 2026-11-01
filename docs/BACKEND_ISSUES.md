@@ -76,7 +76,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
 - **The fix:** Send only the fields the screen needs.
 - **App change?** **No** (admin/dashboard only).
 
-### 7. Store statistics are open to any logged-in user
+### 7. Store statistics are open to any logged-in user — ✅ FIXED
 - **What's wrong:** The store-wide stats page isn't limited to admins — any logged-in
   shop could read it.
 - **The fix:** Lock it to admins only.

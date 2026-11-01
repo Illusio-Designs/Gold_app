@@ -21,8 +21,8 @@ router.get('/user/:user_id', requireSelfOrAdmin('user_id'), orderController.getO
 // Get current user's orders (from token)
 router.get('/my-orders', orderController.getCurrentUserOrders);
 
-// Get order statistics (must come before /:id route)
-router.get('/stats/statistics', orderController.getOrderStatistics);
+// Get order statistics (admin only — store-wide figures). Must come before /:id.
+router.get('/stats/statistics', requireAdmin, orderController.getOrderStatistics);
 
 // Get order by ID
 router.get('/:id', orderController.getOrderById);
