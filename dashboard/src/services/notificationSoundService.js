@@ -32,7 +32,13 @@ class NotificationSoundService {
     if (!this.enabled) return;
 
     try {
-      const soundType = notificationType || 'default';
+      // Normalise the type so ANY order-related notification plays the order
+      // sound, and any registration plays the registration sound.
+      const t = String(notificationType || 'default').toLowerCase();
+      let soundType = 'default';
+      if (t.includes('order')) soundType = 'new_order';
+      else if (t.includes('regist')) soundType = 'user_registration';
+      else if (this.audioElements[t]) soundType = t;
       const audio = this.audioElements[soundType] || this.audioElements.default;
       
       if (audio) {

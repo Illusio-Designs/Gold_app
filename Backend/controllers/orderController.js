@@ -231,6 +231,32 @@ function createOrderFromCart(req, res) {
             }
           );
 
+          // Notify admin of the new order(s) so the dashboard alert + sound
+          // fire for cart checkouts too (never block the order on this).
+          try {
+            const first = cartResults[0] || {};
+            const totalQty = cartResults.reduce(
+              (s, i) => s + (Number(i.quantity) || 1),
+              0
+            );
+            notifyNewOrder({
+              id: orderIds[0],
+              orderNumber: `${orderIds.length} item${orderIds.length > 1 ? "s" : ""}`,
+              userId: user_id,
+              userName: first.user_name || first.business_name || `User #${user_id}`,
+              productName:
+                cartResults.length > 1
+                  ? `${first.product_name || "Item"} +${cartResults.length - 1}`
+                  : first.product_name || "Item",
+              productSku: first.product_sku || "",
+              quantity: totalQty,
+              totalAmount: "",
+              status: "pending",
+            }).catch(() => {});
+          } catch (e) {
+            /* ignore notification errors */
+          }
+
           res.status(201).json({
             message: "Orders created successfully from cart",
             orderIds: orderIds,

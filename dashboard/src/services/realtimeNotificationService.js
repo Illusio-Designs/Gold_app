@@ -1,4 +1,5 @@
 import { getAdminNotifications } from './adminApiService';
+import notificationSoundService from './notificationSoundService';
 
 class RealtimeNotificationService {
   constructor() {
@@ -110,8 +111,9 @@ class RealtimeNotificationService {
       this.processedNotifications.delete(firstItem);
     }
     
-    // Play notification sound
-    this.playNotificationSound();
+    // Play notification sound — the order sound for any order notification,
+    // otherwise the type's sound (falls back to a beep if the file is missing).
+    notificationSoundService.playSound(notification.type);
     
     // Show toast notification immediately
     console.log('[RealtimeNotificationService] Dispatching show-toast event');
@@ -123,45 +125,27 @@ class RealtimeNotificationService {
     window.dispatchEvent(new CustomEvent('notification-updated'));
   }
 
-  // Filter out mobile-only notifications for dashboard
+  // Decide whether a notification is relevant to the admin dashboard.
+  // Orders (any order-* type) are always surfaced — the admin needs to hear
+  // every new order. Registrations and admin/system alerts are shown too;
+  // mobile-app-only chatter (login/cart) is skipped.
   shouldSkipNotification(notification) {
-    // Skip mobile app specific notifications
-    const mobileOnlyTypes = [
-      'login_approved',
-      'login_rejected', 
-      'new_order',
-      'order_status_updated',
-      'cart_updated',
-      'product_added_to_cart'
-    ];
-    
-    // Skip notifications meant for business users (mobile app)
-    if (mobileOnlyTypes.includes(notification.type)) {
-      return true;
-    }
-    
-    // Skip notifications with mobile-specific actions
-    if (notification.data?.action) {
-      const mobileActions = [
-        'redirect_to_home',
-        'force_logout',
-        'view_order',
-        'view_cart'
-      ];
-      
-      if (mobileActions.includes(notification.data.action)) {
-        return true;
-      }
-    }
-    
-    // Only show admin-relevant notifications
+    const type = String(notification?.type || '').toLowerCase();
+
+    // Always surface orders (new order, status change, etc.).
+    if (type.includes('order')) return false;
+
     const adminRelevantTypes = [
+      'user_registered',
+      'user_registration',
       'admin_notification',
       'system_alert',
-      'user_registered'
     ];
-    
-    return !adminRelevantTypes.includes(notification.type);
+    if (adminRelevantTypes.includes(type)) return false;
+
+    // Everything else (login_approved/rejected, cart_updated, etc.) is
+    // mobile-app chatter and is skipped on the dashboard.
+    return true;
   }
 
   playNotificationSound() {
