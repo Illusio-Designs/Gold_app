@@ -338,9 +338,9 @@ const OrdersPage = () => {
     }).format(amount);
   };
 
-  // Order number: prefer the value the API already derived (ORD-B2B-8F3A91,
-  // ORD-D2C-…, ORD-CUS-…). Fallback computes the same hash client-side so a
-  // row that somehow lacks it still shows the new format (never the old ORD-000012).
+  // Order number: prefer the value the API already derived (B2B-8F3A91,
+  // B2C-…, CUS-…). Fallback computes the same hash client-side so a row that
+  // somehow lacks it still shows the format.
   const orderHash = (id) => {
     const n = (BigInt(id || 0) * 2654435761n) % 16777216n;
     return n.toString(16).toUpperCase().padStart(6, '0');
@@ -350,9 +350,9 @@ const OrdersPage = () => {
     const channel = row?.isCustom
       ? 'CUS'
       : String(row?.user_type || '').toLowerCase() === 'consumer'
-      ? 'D2C'
+      ? 'B2C'
       : 'B2B';
-    return `ORD-${channel}-${orderHash(row?.id)}`;
+    return `${channel}-${orderHash(row?.id)}`;
   };
 
   if (loading) {
@@ -408,7 +408,7 @@ const OrdersPage = () => {
           </div>
           <div className="au-cellbody">
             <div className="au-ono">
-              {row.product_name || 'N/A'}
+              {row.product_name || '—'}
               {row.isCustom && (
                 <span className="au-chan au-c-cus" style={{ marginLeft: 6 }}>CUSTOM</span>
               )}
@@ -422,7 +422,7 @@ const OrdersPage = () => {
               </>
             ) : (
               <>
-                <div className="au-sub">SKU: {row.product_sku || 'N/A'}</div>
+                <div className="au-sub">SKU: {row.product_sku || '—'}</div>
                 {row.net_weight && (
                   <div className="au-sub">Weight: {row.net_weight}g</div>
                 )}
@@ -436,19 +436,22 @@ const OrdersPage = () => {
       header: "User",
       accessor: "user_info",
       cell: (row) => (
-        <span className="au-ustrong">{row.user_name || row.business_name || 'N/A'}</span>
+        <span className="au-ustrong">{row.user_name || row.business_name || '—'}</span>
       ),
     },
     {
       header: "Source",
       accessor: "user_type",
       cell: (row) => {
-        // Orders placed from the D2C consumer app vs the B2B wholesale app,
-        // distinguished by the account type on the order.
-        const isD2C = row.user_type === 'consumer';
+        // Channel of the order: custom (CUS), consumer app (B2C) or the
+        // wholesale app (B2B).
+        if (row.isCustom) {
+          return <span className="au-chan au-c-cus">CUS</span>;
+        }
+        const isB2C = row.user_type === 'consumer';
         return (
-          <span className={`au-chan ${isD2C ? 'au-c-d2c' : 'au-c-b2b'}`}>
-            {isD2C ? 'D2C' : 'B2B'}
+          <span className={`au-chan ${isB2C ? 'au-c-d2c' : 'au-c-b2b'}`}>
+            {isB2C ? 'B2C' : 'B2B'}
           </span>
         );
       },
@@ -473,9 +476,14 @@ const OrdersPage = () => {
     {
       header: "Amount",
       accessor: "total_mark_amount",
-      cell: (row) => (
-        <span className="au-amt tnum">{formatCurrency(row.total_mark_amount || 0)}</span>
-      ),
+      cell: (row) =>
+        // Custom orders are made-to-order and have no price until quoted, so
+        // show a dash instead of a misleading ₹0.
+        row.total_mark_amount == null ? (
+          <span className="au-sub" title="Quote pending">—</span>
+        ) : (
+          <span className="au-amt tnum">{formatCurrency(row.total_mark_amount)}</span>
+        ),
     },
     {
       header: "Status",

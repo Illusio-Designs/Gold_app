@@ -1,13 +1,13 @@
 const { db } = require("../config/db");
 const productModel = require("./product");
 
-// Derived order number: ORD-<CHANNEL>-<6-hex hash of id>. The hash is
+// Derived order number: <CHANNEL>-<6-hex hash of id>. The hash is
 // (id * odd-constant) mod 2^24 — a bijection, so it's unique + non-sequential.
 // Must stay identical to Backend/utils/orderNumber.js (JS side) so a number
 // computed in code always matches the value returned by these queries.
 // Requires the `users u` join to be present (for u.type → channel).
 const ORDER_NUMBER_SQL =
-  "CONCAT('ORD-', CASE WHEN u.type = 'consumer' THEN 'D2C' ELSE 'B2B' END, '-', " +
+  "CONCAT(CASE WHEN u.type = 'consumer' THEN 'B2C' ELSE 'B2B' END, '-', " +
   "UPPER(LPAD(CONV((o.id * 2654435761) MOD 16777216, 10, 16), 6, '0')))";
 
 // Create new order with individual product status tracking.

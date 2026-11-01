@@ -49,7 +49,7 @@ function createCustomOrder(data, callback) {
 function getByUser(userId, callback) {
   db.query(
     `SELECT co.*,
-            CONCAT('ORD-CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number
+            CONCAT('CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number
      FROM custom_orders co
      WHERE co.user_id = ? ORDER BY co.created_at DESC`,
     [userId],
@@ -65,7 +65,7 @@ function getById(id, callback) {
 function getByIdWithUser(id, callback) {
   db.query(
     `SELECT co.*,
-            CONCAT('ORD-CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number,
+            CONCAT('CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number,
             u.name AS user_name,
             u.business_name AS business_name,
             u.email AS user_email,
@@ -83,7 +83,7 @@ function getByIdWithUser(id, callback) {
 function getAll(callback) {
   db.query(
     `SELECT co.*,
-            CONCAT('ORD-CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number,
+            CONCAT('CUS-', UPPER(LPAD(CONV((co.id * 2654435761) MOD 16777216, 10, 16), 6, '0'))) AS order_number,
             u.name AS user_name,
             u.business_name AS business_name,
             u.email AS user_email,

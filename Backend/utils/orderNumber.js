@@ -1,7 +1,7 @@
 // Order number generation — single source of truth (JS side).
 //
-// Format: ORD-<CHANNEL>-<HASH>   e.g. ORD-B2B-8F3A91, ORD-D2C-1C90E2, ORD-CUS-04B7FD
-//   CHANNEL — B2B (business buyer) | D2C (consumer buyer) | CUS (custom order)
+// Format: <CHANNEL>-<HASH>   e.g. B2B-8F3A91, B2C-1C90E2, CUS-04B7FD
+//   CHANNEL — B2B (business buyer) | B2C (consumer buyer) | CUS (custom order)
 //   HASH    — a 6-char uppercase hex code derived from the row id.
 //
 // Why this hash: (id * odd-constant) mod 2^24 is a *bijection* on [0, 2^24),
@@ -18,14 +18,14 @@ function orderHash(id) {
   return n.toString(16).toUpperCase().padStart(6, '0');
 }
 
-// channel: 'B2B' | 'D2C' | 'CUS'
+// channel: 'B2B' | 'B2C' | 'CUS'
 function formatOrderNumber(id, channel = 'B2B') {
-  return `ORD-${channel}-${orderHash(id)}`;
+  return `${channel}-${orderHash(id)}`;
 }
 
 // Map a buyer's account type to the channel code.
 function channelForUserType(userType) {
-  return String(userType || '').toLowerCase() === 'consumer' ? 'D2C' : 'B2B';
+  return String(userType || '').toLowerCase() === 'consumer' ? 'B2C' : 'B2B';
 }
 
 module.exports = { orderHash, formatOrderNumber, channelForUserType };
