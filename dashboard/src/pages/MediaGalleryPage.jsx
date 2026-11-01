@@ -19,6 +19,7 @@ import {
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import { SkeletonCards } from "../components/common/Skeleton";
 import SidePanel from "../components/common/SidePanel";
+import FileUpload from "../components/common/FileUpload";
 import Badge from "../components/common/Badge";
 import "../styles/pages/MediaGalleryPage.css";
 
@@ -372,24 +373,12 @@ const MediaGalleryPage = () => {
       >
         <div className="form-group">
           <label>Select Images (Max 20 files)</label>
-          <input
-            type="file"
+          <FileUpload
             accept="image/*"
             multiple
-            onChange={handleBulkFileSelect}
+            hint="Up to 20 images — each matched to a product by file name."
+            onFiles={(files) => handleBulkFileSelect({ target: { files } })}
           />
-          {bulkUploadFiles.length > 0 && (
-            <div className="file-list">
-              <p>
-                <strong>Selected Files ({bulkUploadFiles.length}):</strong>
-              </p>
-              <ul>
-                {bulkUploadFiles.map((file, index) => (
-                  <li key={`${file.name}-${index}`}>{file.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
 
         <div className="upload-info">
