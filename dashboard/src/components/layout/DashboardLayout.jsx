@@ -27,6 +27,7 @@ import { logout } from "../../utils/authUtils";
 import { initializeFirebaseMessaging, isFirebaseSupported } from "../../services/firebaseService";
 import notificationSoundService from "../../services/notificationSoundService";
 import RealtimeNotificationService from "../../services/realtimeNotificationService";
+import RingLoader from "../common/RingLoader";
 
 // Nav is grouped like the Amrut Admin design: Overview / Catalog / People / System.
 const NavGroups = [
@@ -373,13 +374,7 @@ export default function DashboardLayout() {
         </header>
 
         <main className="dashboard-content">
-          <Suspense
-            fallback={
-              <div className="dash-content-loading">
-                <span className="dash-content-spinner" />
-              </div>
-            }
-          >
+          <Suspense fallback={<RingLoader label="Loading" />}>
             <Outlet />
           </Suspense>
         </main>
