@@ -25,9 +25,9 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: linear-gradient(90deg, #fdf6ea 0%, #fff 100%);
-  padding: 18px;
-  border-bottom: 1px solid var(--surface-sunken);
+  background: var(--ivory, #fffbf4);
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line, #eadfcf);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -41,8 +41,11 @@
 .table-controls .page-title,
 .table-controls .controls-title,
 .controls-left .page-title {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.15rem;
+  font-family: var(--font-display, "Fraunces", serif);
   color: var(--brand);
+  margin: 0;
 }
 
 .controls-left {
