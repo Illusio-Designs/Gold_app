@@ -42,7 +42,7 @@ const ProductsPage = () => {
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
-  const [deleteProduct, setDeleteProduct] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
   const [excelImportModalOpen, setExcelImportModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [stockModalOpen, setStockModalOpen] = useState(false);
@@ -200,7 +200,7 @@ const ProductsPage = () => {
           <Button
             variant="danger"
             size="sm"
-            onClick={() => setDeleteProduct(row)}
+            onClick={() => setProductToDelete(row)}
             tooltip="Delete"
           >
             <HugeiconsIcon icon={Delete02Icon} size={16} />
@@ -357,7 +357,7 @@ const ProductsPage = () => {
 
   const handleDelete = async () => {
     try {
-      console.log("🔍 [ProductsPage] handleDelete called for:", deleteProduct);
+      console.log("🔍 [ProductsPage] handleDelete called for:", productToDelete);
       setLoading(true);
       setError("");
       const token = localStorage.getItem("admin_token");
@@ -366,10 +366,10 @@ const ProductsPage = () => {
         token ? "Present" : "Missing"
       );
 
-      await deleteProduct(deleteProduct.id, token);
+      await deleteProduct(productToDelete.id, token);
       console.log("✅ [ProductsPage] Product deleted successfully");
 
-      setDeleteProduct(null);
+      setProductToDelete(null);
 
       // Refresh products
       const response = await getAllProducts(token);
@@ -633,18 +633,18 @@ const ProductsPage = () => {
         </div>
       </SidePanel>
       <Modal
-        isOpen={!!deleteProduct}
-        onClose={() => setDeleteProduct(null)}
+        isOpen={!!productToDelete}
+        onClose={() => setProductToDelete(null)}
         title="Delete Product"
       >
         <p>
-          Are you sure you want to delete product <b>{deleteProduct?.name}</b>?
+          Are you sure you want to delete product <b>{productToDelete?.name}</b>?
         </p>
         <div className="modal-actions">
           <Button onClick={handleDelete} variant="danger" disabled={loading}>
             {loading ? "Deleting..." : "Delete"}
           </Button>
-          <Button onClick={() => setDeleteProduct(null)} variant="secondary">
+          <Button onClick={() => setProductToDelete(null)} variant="secondary">
             Cancel
           </Button>
         </div>
