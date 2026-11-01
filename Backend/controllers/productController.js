@@ -772,14 +772,17 @@ function createOrUpdateProduct(productData, categoryId) {
         // Product exists, update it
         const existingProductId = results[0].id;
 
+        // NOTE: do NOT update `name` here. The Excel has no separate name
+        // column (it was being set to the SKU), so re-importing the sheet used
+        // to wipe out any product name an admin had set in the dashboard back
+        // to the raw SKU. Leave the existing name untouched on update.
         const updateSql = `
-          UPDATE products SET 
-            name = ?,
-            category_id = ?, 
-            purity = ?, 
-            pieces = ?, 
-            gross_weight = ?, 
-            net_weight = ?, 
+          UPDATE products SET
+            category_id = ?,
+            purity = ?,
+            pieces = ?,
+            gross_weight = ?,
+            net_weight = ?,
             size = ?,
             mark_amount = ?,
             stock_status = 'available',
@@ -788,7 +791,6 @@ function createOrUpdateProduct(productData, categoryId) {
         `;
 
         const updateValues = [
-          sku,
           categoryId,
           purity,
           pieces,

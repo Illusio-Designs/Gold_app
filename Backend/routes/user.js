@@ -7,6 +7,7 @@ const {
   verifyToken,
   requireAdmin,
   requireBusiness,
+  requireSelfOrAdmin,
 } = require("../middlewares/auth");
 
 // Public routes
@@ -43,7 +44,7 @@ router.patch(
   requireAdmin,
   userController.updateUserStatus
 );
-router.get("/:id", verifyToken, userController.getUserById);
+router.get("/:id", verifyToken, requireSelfOrAdmin("id"), userController.getUserById);
 router.post(
   "/",
   verifyToken,

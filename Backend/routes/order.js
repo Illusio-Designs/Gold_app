@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { verifyToken, requireAdmin } = require('../middlewares/auth');
+const { verifyToken, requireAdmin, requireSelfOrAdmin } = require('../middlewares/auth');
 
 // Order routes - all require authentication
 router.use(verifyToken);
@@ -15,8 +15,8 @@ router.post('/from-cart', orderController.requireApprovedBusiness, orderControll
 // Get all orders (admin only — returns every customer's orders)
 router.get('/', requireAdmin, orderController.getAllOrders);
 
-// Get orders by user ID
-router.get('/user/:user_id', orderController.getOrdersByUserId);
+// Get orders by user ID (the owner or an admin only)
+router.get('/user/:user_id', requireSelfOrAdmin('user_id'), orderController.getOrdersByUserId);
 
 // Get current user's orders (from token)
 router.get('/my-orders', orderController.getCurrentUserOrders);
@@ -27,8 +27,8 @@ router.get('/stats/statistics', orderController.getOrderStatistics);
 // Get order by ID
 router.get('/:id', orderController.getOrderById);
 
-// Update order status (individual product status)
-router.patch('/:id/status', orderController.updateOrderStatus);
+// Update order status (admin only — the apps never change order status)
+router.patch('/:id/status', requireAdmin, orderController.updateOrderStatus);
 
 
 // Update order with full details (admin only)

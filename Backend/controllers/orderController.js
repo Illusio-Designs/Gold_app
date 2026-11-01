@@ -53,7 +53,6 @@ function requireApprovedBusiness(req, res, next) {
 // Create new order
 function createOrder(req, res) {
   const {
-    business_user_id,
     product_id,
     total_qty,
     total_mark_amount,
@@ -66,7 +65,6 @@ function createOrder(req, res) {
   } = req.body;
 
   if (
-    !business_user_id ||
     !product_id ||
     !total_qty ||
     !total_mark_amount ||
@@ -77,8 +75,10 @@ function createOrder(req, res) {
   }
 
   const orderData = {
-    // Map request fields to the columns the order model actually reads
-    user_id: business_user_id,
+    // The order owner is ALWAYS the authenticated user (requireApprovedBusiness
+    // runs first) — never a client-supplied business_user_id, which would let a
+    // user place orders billed to someone else.
+    user_id: req.user.id,
     product_id,
     quantity: total_qty,
     total_amount: total_mark_amount,
@@ -167,11 +167,11 @@ function createOrder(req, res) {
 
 // Create order from cart (multiple products)
 function createOrderFromCart(req, res) {
-  const { user_id, remark, courier_company } = req.body;
-
-  if (!user_id) {
-    return res.status(400).json({ error: "User ID is required" });
-  }
+  const { remark, courier_company } = req.body;
+  // Always checkout the authenticated user's OWN cart — never a client-supplied
+  // user_id, which would let a user read/clear another user's cart and place
+  // orders for them.
+  const user_id = req.user.id;
 
   // Get user's cart items
   cartModel.getUserCart(user_id, (cartErr, cartResults) => {
@@ -340,7 +340,13 @@ function getOrderById(req, res) {
     if (results.length === 0) {
       return res.status(404).json({ error: "Order not found" });
     }
-    res.json(results[0]);
+    // Only the order's owner or an admin may read it (it exposes the buyer's
+    // email, phone and address).
+    const order = results[0];
+    if (req.user.type !== "admin" && String(order.user_id) !== String(req.user.id)) {
+      return res.status(403).json({ error: "Not authorized to view this order" });
+    }
+    res.json(order);
   });
 }
 
@@ -654,6 +660,10 @@ function downloadOrderPDF(req, res) {
     }
 
     const order = results[0];
+    // Only the order's owner or an admin may download the invoice.
+    if (req.user.type !== "admin" && String(order.user_id) !== String(req.user.id)) {
+      return res.status(403).json({ error: "Not authorized to download this order" });
+    }
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
