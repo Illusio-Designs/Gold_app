@@ -10,6 +10,10 @@ const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? "/api" : "https://api.amrutkumargovinddasllp.com/api");
 
+// Admin-facing notifications are stored against the primary admin account
+// (see Backend ADMIN_NOTIFICATION_USER_ID). Kept in sync with the backend.
+const ADMIN_NOTIFICATION_USER_ID = 1;
+
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
@@ -411,7 +415,7 @@ export const getAdminNotifications = (token) => {
     token ? token.substring(0, 20) + "..." : "null"
   );
   return axiosInstance
-    .get("/notifications/user/1", {
+    .get(`/notifications/user/${ADMIN_NOTIFICATION_USER_ID}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => {
@@ -433,7 +437,7 @@ export const getUnreadCount = (token) => {
     token ? token.substring(0, 20) + "..." : "null"
   );
   return axiosInstance
-    .get("/notifications/user/1/unread", {
+    .get(`/notifications/user/${ADMIN_NOTIFICATION_USER_ID}/unread`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => {
@@ -478,7 +482,7 @@ export const markNotificationAsRead = (notificationId, token) => {
 export const markAllNotificationsAsRead = (token) =>
   axiosInstance
     .patch(
-      "/notifications/user/1/read-all",
+      `/notifications/user/${ADMIN_NOTIFICATION_USER_ID}/read-all`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },

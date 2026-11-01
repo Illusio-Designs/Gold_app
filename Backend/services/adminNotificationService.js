@@ -2,6 +2,10 @@ const { db } = require('../config/db');
 const { sendNotification, sendMulticastNotification } = require('./firebaseNotificationService');
 const socketService = require('./socketService');
 
+// Admin-facing notifications (new orders, registrations, etc.) are keyed to the
+// primary admin account. The dashboard reads them from /notifications/user/<this id>.
+const ADMIN_NOTIFICATION_USER_ID = 1;
+
 // Notification types and their corresponding sounds
 const NOTIFICATION_TYPES = {
   USER_REGISTRATION: {
@@ -57,7 +61,7 @@ function persistUserNotification(userId, type, title, body, data = {}) {
 async function sendAdminNotification(type, title, body, data = {}) {
   try {
     // Get admin user ID (assuming admin has ID 1)
-    const adminUserId = 1;
+    const adminUserId = ADMIN_NOTIFICATION_USER_ID;
     // Get admin's FCM token
     const getAdminTokenSql = 'SELECT token FROM notification_tokens WHERE user_id = ? AND active = true LIMIT 1';
     return new Promise((resolve, reject) => {
@@ -564,7 +568,7 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
  */
 async function getAdminNotificationStats() {
   return new Promise((resolve, reject) => {
-    const adminUserId = 1;
+    const adminUserId = ADMIN_NOTIFICATION_USER_ID;
     
     const statsSql = `
       SELECT 
