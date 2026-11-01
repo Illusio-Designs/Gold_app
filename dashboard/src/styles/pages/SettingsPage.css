@@ -143,3 +143,11 @@
 /* Review reset card */
 .review-reset { margin-bottom: 20px; }
 .review-reset .danger-zone__input { max-width: 420px; }
+
+/* Notification preview buttons */
+.toast-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
