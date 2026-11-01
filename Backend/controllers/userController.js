@@ -10,10 +10,14 @@ const {
   notifyUserRegistration,
 } = require("../services/adminNotificationService");
 
-// Register a new user (admin or business)
+// Public self-registration — may ONLY create business or consumer accounts.
+// The account type is NEVER taken from untrusted input as "admin": doing so
+// would let anyone self-mint an admin and take over the dashboard. Admins are
+// created only via the authenticated admin-only path (createAdmin).
 async function registerUser(req, res) {
+  const safeType = req.body.type === "consumer" ? "consumer" : "business";
   const user = {
-    type: req.body.type, // 'admin' or 'business'
+    type: safeType,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
@@ -30,8 +34,6 @@ async function registerUser(req, res) {
     business_name: req.body.business_name,
     remarks: req.body.remarks,
   };
-  if (user.type === "business") {
-    }
   try {
     // Check for duplicate email or phone number
     db.query(

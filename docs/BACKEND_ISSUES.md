@@ -13,7 +13,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
 
 ## 🔴 Must fix before going live
 
-### 1. Anyone on the internet can make themselves an "admin"
+### 1. Anyone on the internet can make themselves an "admin" — ✅ FIXED
 - **What's wrong:** The public sign-up accepts whatever account *type* the caller asks
   for. So a stranger can sign up as an **admin** and get full control of your dashboard.
 - **Why it matters:** This is a complete security hole — someone could take over the
