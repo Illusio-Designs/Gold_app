@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { adminLogin } from "../services/adminApiService";
 import { isAuthenticated, setAdminToken, clearAuthData } from "../utils/authUtils";
 import { showSuccessToast, showInfoToast } from "../utils/toast";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ViewIcon, ViewOffSlashIcon } from "@hugeicons/core-free-icons";
 import "../styles/pages/AuthPage.css";
 import loginLogo from "../assests/loginlogo.png";
 
@@ -129,7 +131,10 @@ const AuthPage = () => {
                 onClick={() => setShowPw((v) => !v)}
                 aria-label={showPw ? "Hide password" : "Show password"}
               >
-                {showPw ? "Hide" : "Show"}
+                <HugeiconsIcon
+                  icon={showPw ? ViewOffSlashIcon : ViewIcon}
+                  size={20}
+                />
               </button>
             </div>
           </div>
