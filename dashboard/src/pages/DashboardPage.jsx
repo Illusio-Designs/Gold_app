@@ -204,12 +204,6 @@ const DashboardPage = () => {
           ) : (
             <div className="au-delta">{inr(today.revenue)} today</div>
           )}
-          {spark.line && (
-            <svg className="au-spark" width="86" height="34" viewBox="0 0 86 34" fill="none" aria-hidden="true">
-              <path d={spark.area} fill="var(--gold)" opacity=".12" />
-              <path d={spark.line} stroke="var(--gold)" strokeWidth="2" fill="none" strokeLinejoin="round" />
-            </svg>
-          )}
         </div>
 
         <div className="au-kpi">
@@ -223,70 +217,45 @@ const DashboardPage = () => {
 
         <div className="au-kpi">
           <div className="au-lab">
+            <span className="au-ic"><HugeiconsIcon icon={UserGroupIcon} size={16} /></span>
+            Firms
+          </div>
+          <div className="au-val tnum">{totals.approvedUsers || 0}</div>
+          <div className="au-delta">{metrics.conversionRate || 0}% conversion today</div>
+        </div>
+
+        <div className="au-kpi">
+          <div className="au-lab">
             <span className="au-ic"><HugeiconsIcon icon={PackageIcon} size={16} /></span>
             Products
           </div>
           <div className="au-val tnum">{totals.products || 0}</div>
           <div className="au-delta">{totals.categories || 0} categories</div>
         </div>
-
-        <div className="au-kpi">
-          <div className="au-lab">
-            <span className="au-ic"><HugeiconsIcon icon={UserGroupIcon} size={16} /></span>
-            Approved wholesalers
-          </div>
-          <div className="au-val tnum">{totals.approvedUsers || 0}</div>
-          <div className="au-delta">{metrics.conversionRate || 0}% conversion today</div>
-        </div>
       </div>
 
-      {/* Status strip */}
-      <div className="au-sechead">
-        <h2>Today's orders by status</h2>
-        <span className="au-muted">updated live</span>
-      </div>
-      <div className="au-statstrip">
-        {statuses.map((s) => (
-          <div className="au-stat" key={s.key} style={{ "--au-bar": s.bar }}>
-            <div className="au-n tnum">{today[s.key] || 0}</div>
-            <div className="au-l">{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Revenue + Top products */}
-      <div className="au-grid au-row-2" style={{ marginTop: 16 }}>
+      {/* Revenue bars + Order status */}
+      <div className="au-grid dash-main-grid" style={{ marginTop: 16 }}>
         <div className="au-panel">
           <div className="au-panel-head">
             <h3>Revenue — last {months.length || 0} months</h3>
             {monthRevenue != null && <span className="au-link">{inrCompact(monthRevenue)} this month</span>}
           </div>
           {revValues.length ? (
-            <div className="au-tablewrap">
-              <svg viewBox={`0 0 ${chart.W} ${chart.H}`} width="100%" height="220"
-                preserveAspectRatio="xMidYMid meet" role="img" aria-label="Monthly revenue trend">
-                <defs>
-                  <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="var(--gold)" stopOpacity=".28" />
-                    <stop offset="1" stopColor="var(--gold)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <g stroke="var(--line)" strokeWidth="1">
-                  {chart.grid.map((gy, i) => (
-                    <line key={i} x1={chart.padL} y1={gy} x2={chart.W - chart.padR} y2={gy} />
-                  ))}
-                </g>
-                <path d={chart.area} fill="url(#rg)" />
-                <path d={chart.line} fill="none" stroke="var(--gold)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-                <circle cx={chart.last[0]} cy={chart.last[1]} r="4.5" fill="var(--maroon)" stroke="var(--surface)" strokeWidth="2" />
-                <g fill="var(--muted)" fontSize="10.5" textAnchor="middle">
-                  {months.map((m, i) => {
-                    const n = months.length;
-                    const px = chart.padL + (n <= 1 ? (chart.W - chart.padL - chart.padR) / 2 : (i / (n - 1)) * (chart.W - chart.padL - chart.padR));
-                    return <text key={i} x={px} y={chart.H - 8}>{monthLabel(m.month)}</text>;
-                  })}
-                </g>
-              </svg>
+            <div className="dash-bars" role="img" aria-label="Monthly revenue">
+              {months.map((m, i) => {
+                const v = Number(m.revenue || 0);
+                const max = Math.max(1, ...revValues);
+                const h = Math.max(3, Math.round((v / max) * 100));
+                return (
+                  <div className="dash-bar-col" key={i} title={inr(v)}>
+                    <div className="dash-bar-wrap">
+                      <div className="dash-bar" style={{ height: `${h}%` }} />
+                    </div>
+                    <span className="dash-bar-lbl">{monthLabel(m.month)}</span>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="au-empty"><div className="au-empty-title">No revenue yet</div><div>Sales will chart here as orders come in.</div></div>
@@ -294,26 +263,23 @@ const DashboardPage = () => {
         </div>
 
         <div className="au-panel">
-          <div className="au-panel-head"><h3>Top products</h3></div>
-          {topProducts.length ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {topProducts.map((p) => (
-                <div className="au-cell" key={p.product_sku}>
-                  <div className="au-thumb">◈</div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontWeight: 700, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {p.product_name}
-                    </div>
-                    <div className="au-sub">{p.product_sku}</div>
-                    <div className="dash-mini-track"><span style={{ width: `${(Number(p.order_count || 0) / maxTopOrders) * 100}%` }} /></div>
-                  </div>
-                  <b className="tnum" style={{ whiteSpace: "nowrap" }}>{p.order_count || 0} sold</b>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="au-empty"><div className="au-empty-title">No sales data</div></div>
-          )}
+          <div className="au-panel-head"><h3>Order status</h3><span className="au-muted">today</span></div>
+          <div className="dash-status-list">
+            {statuses.map((s) => (
+              <div className="dash-status-row" key={s.key}>
+                <span className="dash-status-name">
+                  <span className="dash-status-dot" style={{ background: s.bar }} />
+                  {s.label}
+                </span>
+                <b
+                  className="tnum"
+                  style={s.key === "cancelled" ? { color: "var(--danger)" } : undefined}
+                >
+                  {today[s.key] || 0}
+                </b>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
