@@ -29,13 +29,21 @@ import notificationSoundService from "../../services/notificationSoundService";
 import RealtimeNotificationService from "../../services/realtimeNotificationService";
 import RingLoader from "../common/RingLoader";
 
-// Nav is grouped like the Amrut Admin design: Overview / Catalog / People / System.
+// Nav is grouped like the reference: Daily / Customers / Catalog / System.
 const NavGroups = [
   {
-    label: "Overview",
+    label: "Daily",
     links: [
       { name: "Dashboard", path: "/dashboard", icon: DashboardSquare01Icon },
       { name: "Orders", path: "/dashboard/orders", icon: ShoppingBag03Icon },
+      { name: "Notifications", path: "/dashboard/notifications", icon: Notification03Icon },
+    ],
+  },
+  {
+    label: "Customers",
+    links: [
+      { name: "Firms", path: "/dashboard/users", icon: Building01Icon },
+      { name: "Consumers", path: "/dashboard/consumers", icon: UserGroupIcon },
     ],
   },
   {
@@ -48,17 +56,11 @@ const NavGroups = [
     ],
   },
   {
-    label: "People",
-    links: [
-      { name: "Firms", path: "/dashboard/users", icon: Building01Icon },
-      { name: "Consumers", path: "/dashboard/consumers", icon: UserIcon },
-    ],
-  },
-  {
     label: "System",
     links: [
       { name: "System Users", path: "/dashboard/system-users", icon: UserShield01Icon },
       { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
+      { name: "Settings", path: "/dashboard/settings", icon: Settings01Icon },
     ],
   },
 ];
@@ -353,14 +355,6 @@ export default function DashboardLayout() {
                   <Link to="/dashboard/profile" className="dropdown-item">
                     <HugeiconsIcon icon={UserIcon} size={18} />
                     <span>Profile</span>
-                  </Link>
-                  <Link to="/dashboard/notifications" className="dropdown-item">
-                    <HugeiconsIcon icon={Notification03Icon} size={18} />
-                    <span>Notifications</span>
-                  </Link>
-                  <Link to="/dashboard/settings" className="dropdown-item">
-                    <HugeiconsIcon icon={Settings01Icon} size={18} />
-                    <span>Settings</span>
                   </Link>
                   <div className="dropdown-divider"></div>
                   <button className="dropdown-item logout" onClick={handleLogout}>
