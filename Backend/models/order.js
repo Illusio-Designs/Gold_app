@@ -49,7 +49,9 @@ function createOrder(order, callback) {
           productModel.updateProductStockStatus(
             order.product_id,
             "available",
-            () => {}
+            (e) => {
+              if (e) console.error("[order] rollback stock:", e.message);
+            }
           );
           return callback(err);
         }
@@ -95,8 +97,12 @@ function createOrderFromCart(userId, cartItems, orderDetails, callback) {
 
     // Partial failure → undo the successful ones (delete order + release stock).
     created.forEach(({ orderId, productId }) => {
-      db.query("DELETE FROM orders WHERE id = ?", [orderId], () => {});
-      productModel.updateProductStockStatus(productId, "available", () => {});
+      db.query("DELETE FROM orders WHERE id = ?", [orderId], (e) => {
+        if (e) console.error("[order] undo insert:", e.message);
+      });
+      productModel.updateProductStockStatus(productId, "available", (e) => {
+        if (e) console.error("[order] release stock:", e.message);
+      });
     });
     callback(
       new Error("Some items are no longer available — no order was placed.")

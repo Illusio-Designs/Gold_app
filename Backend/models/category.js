@@ -3,7 +3,7 @@ const { db } = require('../config/db');
 // Create new category
 function createCategory(category, callback) {
   const sql = 'INSERT INTO categories (name, description, icon, status) VALUES (?, ?, ?, ?)';
-  const values = [category.name, category.description, category.icon, 'draft']; // Always start as draft
+  const values = [category.name, category.description, category.icon, 'draft'];
   db.query(sql, values, callback);
 }
 

@@ -35,7 +35,9 @@ function computeAuthoritativeTotal(orderIds) {
             : Number(o.total_amount || 0);
           total += line;
           if (isConsumer) {
-            orderModel.updateOrderTotal(o.id, line, () => {});
+            orderModel.updateOrderTotal(o.id, line, (e) => {
+              if (e) console.error("[payment] updateOrderTotal:", e.message);
+            });
           }
         });
         resolve(Math.round(total));
@@ -109,7 +111,9 @@ async function createRazorpayOrder(req, res) {
           razorpay_order_id: resp.data.id,
           razorpay_payment_id: null,
         },
-        () => {}
+        (e) => {
+          if (e) console.error("[payment] set pending status:", e.message);
+        }
       );
     });
 
@@ -192,7 +196,9 @@ function verifyRazorpayPayment(req, res) {
             razorpay_order_id,
             razorpay_payment_id,
           },
-          () => {}
+          (e) => {
+            if (e) console.error("[payment] set paid status:", e.message);
+          }
         );
         updated.push(oid);
       }

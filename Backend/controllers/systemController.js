@@ -55,7 +55,7 @@ function wipeAllData(req, res) {
   runSequential(statements, (err) => {
     if (err) {
       // Best-effort: make sure FK checks are re-enabled even on failure.
-      db.query("SET FOREIGN_KEY_CHECKS = 1", () => {});
+      db.query("SET FOREIGN_KEY_CHECKS = 1", (e) => { if (e) console.error("[system] re-enable FK checks:", e.message); });
       return res.status(500).json({ error: "Data wipe failed: " + err.message });
     }
     return res.json({
@@ -106,7 +106,7 @@ function resetForReview(req, res) {
 
   runSequential(statements, (err) => {
     if (err) {
-      db.query("SET FOREIGN_KEY_CHECKS = 1", () => {});
+      db.query("SET FOREIGN_KEY_CHECKS = 1", (e) => { if (e) console.error("[system] re-enable FK checks:", e.message); });
       return res.status(500).json({ error: "Reset failed: " + err.message });
     }
     return res.json({

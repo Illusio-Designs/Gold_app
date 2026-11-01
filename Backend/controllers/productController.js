@@ -66,8 +66,8 @@ async function createProduct(req, res) {
       purity: req.body.purity || null,
       pieces: req.body.pieces || null,
       mark_amount: req.body.mark_amount || null,
-      status: "draft", // Always start as draft
-      stock_status: "available", // Always start as available stock
+      status: "draft",
+      stock_status: "available",
     };
 
     // Convert empty strings to null for database compatibility

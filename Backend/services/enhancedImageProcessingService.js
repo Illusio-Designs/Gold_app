@@ -15,8 +15,7 @@ class EnhancedImageProcessingService {
 
     // Check if watermark file exists
     if (fs.existsSync(this.watermarkPath)) {
-    } else {
-      }
+    }
   }
 
   /**
@@ -229,7 +228,8 @@ class EnhancedImageProcessingService {
           const cleanedPath = await this.processExistingProductImage(imagePath);
           cleanedPaths.push(cleanedPath);
         } catch (error) {
-          }
+          console.error("[enhancedImageProcessingService.js]:", error && error.message);
+        }
       }
 
       return cleanedPaths;

@@ -134,6 +134,10 @@ function createOrder(req, res) {
 
             await notifyNewOrder(notificationData);
             } catch (notificationError) {
+              console.error(
+                "[order] notify new order:",
+                notificationError && notificationError.message
+              );
             }
 
           // Emit real-time order update
@@ -213,9 +217,9 @@ function createOrderFromCart(req, res) {
         // Clear user's cart after successful order creation
         cartModel.clearUserCart(user_id, (clearErr) => {
           if (clearErr) {
-            // Don't fail the order creation if cart clearing fails
-          } else {
-            }
+            // Cart clearing failure must not fail the order — just log it.
+            console.error("[order] clear cart:", clearErr.message);
+          }
 
           // Emit real-time updates
           socketService.emitToAll("order-update", {
@@ -256,7 +260,9 @@ function createOrderFromCart(req, res) {
               quantity: totalQty,
               totalAmount: "",
               status: "pending",
-            }).catch(() => {});
+            }).catch((e) =>
+              console.error("[order] notify new order (from-cart):", e && e.message)
+            );
           } catch (e) {
             /* ignore notification errors */
           }
@@ -455,7 +461,6 @@ function updateOrderStatus(req, res) {
     return res.status(400).json({ error: "Status is required" });
   }
 
-  // Validate status
   if (!VALID_ORDER_STATUSES.includes(status)) {
     return res.status(400).json({
       error:
