@@ -11,7 +11,6 @@ import {
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
-import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
 import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
@@ -125,36 +124,7 @@ const SettingsPage = () => {
     <div className="settings-page">
       <PageHeader title="Settings" subtitle="Manage administrative settings" icon={Settings01Icon} />
 
-      <div className="au-grid au-row-2b settings-grid">
-        <section className="au-panel">
-          <div className="au-panel-head">
-            <h3>Applications</h3>
-          </div>
-          <ul className="settings-apps">
-            <li className="settings-apps__row">
-              <div>
-                <div className="settings-apps__name">B2B App</div>
-                <div className="settings-apps__meta">Wholesale ordering</div>
-              </div>
-              <Badge tone="success">Live</Badge>
-            </li>
-            <li className="settings-apps__row">
-              <div>
-                <div className="settings-apps__name">iOS App</div>
-                <div className="settings-apps__meta">App Store submission</div>
-              </div>
-              <Badge tone="info">In review</Badge>
-            </li>
-            <li className="settings-apps__row">
-              <div>
-                <div className="settings-apps__name">B2C App</div>
-                <div className="settings-apps__meta">Direct-to-consumer</div>
-              </div>
-              <Badge tone="neutral">In development</Badge>
-            </li>
-          </ul>
-        </section>
-
+      <div className="settings-grid">
         <section className="au-panel">
           <div className="au-panel-head">
             <h3>B2C Pricing</h3>
