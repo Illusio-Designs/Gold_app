@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
 import { sendNotification, getUsers } from '../../services/adminApiService';
+import SidePanel from './SidePanel';
 import '../../styles/common/NotificationSender.css';
 
 const NotificationSender = ({ onNotificationSent }) => {
@@ -136,18 +138,17 @@ const NotificationSender = ({ onNotificationSent }) => {
   };
 
   return (
-    <div className="notification-sender">
-      <div className="notification-sender-header">
-        <h3>Send Notification</h3>
-        <button 
-          className="toggle-form-btn"
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? 'Hide' : 'Show'} Form
-        </button>
-      </div>
+    <>
+      <button type="button" className="ns-trigger" onClick={() => setShowForm(true)}>
+        <Bell size={16} /> New notification
+      </button>
 
-      {showForm && (
+      <SidePanel
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="Send notification"
+        size="medium"
+      >
         <form onSubmit={handleSubmit} className="notification-form">
           <div className="form-group">
             <label htmlFor="title">Title *</label>
@@ -264,8 +265,8 @@ const NotificationSender = ({ onNotificationSent }) => {
             </button>
           </div>
         </form>
-      )}
-    </div>
+      </SidePanel>
+    </>
   );
 };
 

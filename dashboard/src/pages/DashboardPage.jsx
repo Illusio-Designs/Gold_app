@@ -364,8 +364,9 @@ const DashboardPage = () => {
       </div>
 
       {/* Quick notification */}
-      <div className="au-sechead"><h2>Send a quick notification</h2></div>
-      <div className="au-panel">
+      <div className="au-sechead"><h2>Notifications</h2></div>
+      <div className="au-panel" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <span className="au-sub">Send a push notification to the B2B app.</span>
         <NotificationSender onNotificationSent={fetchDashboardData} />
       </div>
     </div>
