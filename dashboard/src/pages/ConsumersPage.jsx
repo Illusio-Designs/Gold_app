@@ -8,8 +8,8 @@ import { getAdminToken } from '../utils/authUtils';
 import { getConsumers } from '../services/adminApiService';
 import '../styles/pages/ConsumersPage.css';
 
-// Dashboard page listing D2C consumer accounts (users.type = 'consumer').
-// These are the retail shoppers from the D2C app — distinct from the B2B
+// Dashboard page listing B2C consumer accounts (users.type = 'consumer').
+// These are the retail shoppers from the B2C app — distinct from the B2B
 // wholesale businesses shown on the Users page. Consumers can order without
 // the admin-approval step, so this page is a read-only directory.
 const ConsumersPage = () => {
@@ -55,7 +55,7 @@ const ConsumersPage = () => {
           <span className="au-thumb" aria-hidden="true">{initialOf(row.name)}</span>
           <span className="au-stack">
             <span className="au-ono">{row.name || 'N/A'}</span>
-            <Badge tone="info">D2C</Badge>
+            <Badge tone="info">B2C</Badge>
           </span>
         </div>
       ),
@@ -101,7 +101,7 @@ const ConsumersPage = () => {
       <div className="au-notice" role="note">
         <span className="au-notice-ic" aria-hidden="true">i</span>
         <span>
-          Consumers are D2C retail shoppers from the storefront app. They order without the
+          Consumers are B2C retail shoppers from the storefront app. They order without the
           admin-approval step, so this is a read-only directory.
         </span>
       </div>
@@ -109,7 +109,7 @@ const ConsumersPage = () => {
         columns={columns}
         data={consumers}
         searchFields={["name", "phone_number", "email", "city"]}
-        pageTitle="Consumers (D2C)"
+        pageTitle="Consumers (B2C)"
         loading={loading}
       />
     </div>

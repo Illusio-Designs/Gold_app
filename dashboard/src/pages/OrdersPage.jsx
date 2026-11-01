@@ -450,7 +450,7 @@ const OrdersPage = () => {
         }
         const isB2C = row.user_type === 'consumer';
         return (
-          <span className={`au-chan ${isB2C ? 'au-c-d2c' : 'au-c-b2b'}`}>
+          <span className={`au-chan ${isB2C ? 'au-c-b2c' : 'au-c-b2b'}`}>
             {isB2C ? 'B2C' : 'B2B'}
           </span>
         );

@@ -168,7 +168,7 @@ const NotificationsPage = () => {
         </p>
         <div className="notif-test__actions">
           {[
-            { key: "consumer", label: "Send to D2C app" },
+            { key: "consumer", label: "Send to B2C app" },
             { key: "self", label: "Send to my devices" },
           ].map((b) => (
             <button

@@ -63,13 +63,13 @@ export const getAllUsers = (token) =>
     .get("/users", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-// D2C consumer accounts (separate from B2B businesses).
+// B2C consumer accounts (separate from B2B businesses).
 export const getConsumers = (token) =>
   axiosInstance
     .get("/users/consumers", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-// App settings (gold rate, making charge % — drives D2C pricing).
+// App settings (gold rate, making charge % — drives B2C pricing).
 export const getAppSettings = (token) =>
   axiosInstance
     .get("/settings/all", { headers: { Authorization: `Bearer ${token}` } })
@@ -578,7 +578,7 @@ export const sendNotification = (notificationData, token) =>
     .then((r) => r.data);
 
 // Send a REAL FCM test push and get the exact outcome (success/error/counts).
-// target: 'business' (B2B) | 'consumer' (D2C) | 'self' | 'all'
+// target: 'business' (B2B) | 'consumer' (B2C) | 'self' | 'all'
 export const sendTestNotification = (payload, token) =>
   axiosInstance
     .post("/notifications/test", payload, {
