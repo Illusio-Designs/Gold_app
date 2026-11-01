@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Edit, Trash2, RefreshCw, Plus } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  Edit02Icon,
+  Delete02Icon,
+  RefreshIcon,
+  Add01Icon,
+} from "@hugeicons/core-free-icons";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
@@ -171,7 +177,7 @@ const UsersPage = () => {
             }}
             tooltip="Edit"
           >
-            <Edit size={16} />
+            <HugeiconsIcon icon={Edit02Icon} size={16} />
           </Button>
           <Button
             variant="danger"
@@ -179,7 +185,7 @@ const UsersPage = () => {
             onClick={() => setDeleteUser(row)}
             tooltip="Delete"
           >
-            <Trash2 size={16} />
+            <HugeiconsIcon icon={Delete02Icon} size={16} />
           </Button>
         </div>
       ),
@@ -410,7 +416,7 @@ const UsersPage = () => {
               disabled={loading}
               tooltip="Refresh user list"
             >
-              <RefreshCw size={16} />
+              <HugeiconsIcon icon={RefreshIcon} size={16} />
               Refresh
             </Button>
             <Button
@@ -439,7 +445,7 @@ const UsersPage = () => {
                 setModalOpen(true);
               }}
             >
-              <Plus size={16} />
+              <HugeiconsIcon icon={Add01Icon} size={16} />
               Add User
             </Button>
           </div>

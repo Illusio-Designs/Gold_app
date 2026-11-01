@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Image,
-  Trash2,
-  Download,
-  Package,
-  Layers,
-  Upload,
-  Droplet,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+  Image01Icon,
+  Delete02Icon,
+  Download01Icon,
+  PackageIcon,
+  Layers01Icon,
+  Upload01Icon,
+  DropletIcon,
+  CheckmarkCircle02Icon,
+  CancelCircleIcon,
+} from "@hugeicons/core-free-icons";
 import {
   bulkUploadMediaFiles,
   getMediaItemsWithProcessedImages,
@@ -208,7 +209,7 @@ const MediaGalleryPage = () => {
           {isCategory ? (
             // Categories are identified by their name, not an image.
             <div className="media-category-name">
-              <Layers size={30} />
+              <HugeiconsIcon icon={Layers01Icon} size={30} />
               <span>{item.name}</span>
             </div>
           ) : fileUrl && imagePath ? (
@@ -232,7 +233,7 @@ const MediaGalleryPage = () => {
             />
           ) : (
             <div className="no-preview">
-              <Image size={32} />
+              <HugeiconsIcon icon={Image01Icon} size={32} />
               <span>No Preview</span>
             </div>
           )}
@@ -242,7 +243,7 @@ const MediaGalleryPage = () => {
               tone={isCategory ? "info" : "brand"}
               className="badge--nodot"
             >
-              {isCategory ? <Layers size={12} /> : <Package size={12} />}
+              {isCategory ? <HugeiconsIcon icon={Layers01Icon} size={12} /> : <HugeiconsIcon icon={PackageIcon} size={12} />}
               <span className="media-type-label">
                 {item.type?.replace("_", " ")}
               </span>
@@ -258,7 +259,7 @@ const MediaGalleryPage = () => {
                 aria-label="Download"
                 title="Download"
               >
-                <Download size={15} />
+                <HugeiconsIcon icon={Download01Icon} size={15} />
               </a>
             )}
             <button
@@ -267,13 +268,13 @@ const MediaGalleryPage = () => {
               title="Delete"
               aria-label="Delete"
             >
-              <Trash2 size={15} />
+              <HugeiconsIcon icon={Delete02Icon} size={15} />
             </button>
           </div>
 
           {!isCategory && (
             <span className="wm-overlay">
-              <Droplet size={11} /> Watermarked
+              <HugeiconsIcon icon={DropletIcon} size={11} /> Watermarked
             </span>
           )}
         </div>
@@ -317,7 +318,7 @@ const MediaGalleryPage = () => {
           className="au-btn"
           onClick={() => setShowBulkUploadModal(true)}
         >
-          <Upload size={16} />
+          <HugeiconsIcon icon={Upload01Icon} size={16} />
           Upload Images
         </button>
       </div>
@@ -327,14 +328,14 @@ const MediaGalleryPage = () => {
         <div className="au-pgrid media-grid">{renderedMediaCards}</div>
       ) : (
         <div className="au-card au-empty">
-          <Image size={44} />
+          <HugeiconsIcon icon={Image01Icon} size={44} />
           <div className="au-empty-title">No Processed Images Found</div>
           <p>Upload some images to see them here with watermarks applied.</p>
           <button
             className="au-btn"
             onClick={() => setShowBulkUploadModal(true)}
           >
-            <Upload size={16} />
+            <HugeiconsIcon icon={Upload01Icon} size={16} />
             Upload Your First Image
           </button>
         </div>
@@ -420,7 +421,7 @@ const MediaGalleryPage = () => {
               >
                 <div className="result-header">
                   <span className="result-status">
-                    {result.success ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                    {result.success ? <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} /> : <HugeiconsIcon icon={CancelCircleIcon} size={16} />}
                   </span>
                   <span className="filename">{result.filename}</span>
                 </div>

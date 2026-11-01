@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import { X } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import "../../styles/common/SidePanel.css";
 
 /**
@@ -50,7 +51,7 @@ const SidePanel = ({
           </h2>
           {showCloseButton && (
             <button className="side-panel__close" onClick={onClose} aria-label="Close panel">
-              <X size={20} />
+              <HugeiconsIcon icon={Cancel01Icon} size={20} />
             </button>
           )}
         </header>

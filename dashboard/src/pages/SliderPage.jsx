@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2, Upload, Plus, Image as ImageIcon } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Edit02Icon, Delete02Icon, Upload01Icon, Add01Icon, Image01Icon } from "@hugeicons/core-free-icons";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
@@ -214,7 +215,7 @@ const SliderPage = () => {
         <span className="au-muted">{sliders.length} banners</span>
         <div className="au-spacer" />
         <Button onClick={handleCreate}>
-          <Plus size={16} />
+          <HugeiconsIcon icon={Add01Icon} size={16} />
           Create New Slider
         </Button>
       </div>
@@ -242,7 +243,7 @@ const SliderPage = () => {
                   />
                 ) : (
                   <div className="slider-noimg">
-                    <ImageIcon size={26} />
+                    <HugeiconsIcon icon={Image01Icon} size={26} />
                     <span>No Image</span>
                   </div>
                 )}
@@ -266,7 +267,7 @@ const SliderPage = () => {
                       title="Edit"
                       aria-label="Edit slider"
                     >
-                      <Edit size={15} />
+                      <HugeiconsIcon icon={Edit02Icon} size={15} />
                     </button>
                     <button
                       type="button"
@@ -275,7 +276,7 @@ const SliderPage = () => {
                       title="Delete"
                       aria-label="Delete slider"
                     >
-                      <Trash2 size={15} />
+                      <HugeiconsIcon icon={Delete02Icon} size={15} />
                     </button>
                   </div>
                 </div>
@@ -336,7 +337,7 @@ const SliderPage = () => {
                   document.getElementById("slider-image-upload").click();
                 }}
               >
-                <Upload className="icon" />
+                <HugeiconsIcon icon={Upload01Icon} className="icon" />
                 {selectedFile ? (
                   <>
                     <strong>File Selected: {selectedFile.name}</strong>

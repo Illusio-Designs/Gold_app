@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Edit,
-  Trash2,
-  FileSpreadsheet,
-  Plus,
-  Package,
-} from "lucide-react";
+  Edit02Icon,
+  Delete02Icon,
+  File01Icon,
+  Add01Icon,
+  PackageIcon,
+} from "@hugeicons/core-free-icons";
 import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
@@ -109,7 +110,7 @@ const ProductsPage = () => {
             className="au-thumb-ph"
             style={{ display: row.image ? "none" : "flex" }}
           >
-            <Package size={16} />
+            <HugeiconsIcon icon={PackageIcon} size={16} />
           </span>
         </div>
       ),
@@ -193,7 +194,7 @@ const ProductsPage = () => {
             }}
             tooltip="Edit"
           >
-            <Edit size={16} />
+            <HugeiconsIcon icon={Edit02Icon} size={16} />
           </Button>
           <Button
             variant="danger"
@@ -201,7 +202,7 @@ const ProductsPage = () => {
             onClick={() => setDeleteProduct(row)}
             tooltip="Delete"
           >
-            <Trash2 size={16} />
+            <HugeiconsIcon icon={Delete02Icon} size={16} />
           </Button>
           <Button
             variant="outline"
@@ -216,7 +217,7 @@ const ProductsPage = () => {
             }}
             tooltip="Manage Stock"
           >
-            <Package size={16} />
+            <HugeiconsIcon icon={PackageIcon} size={16} />
           </Button>
         </div>
       ),
@@ -471,7 +472,7 @@ const ProductsPage = () => {
                 setModalOpen(true);
               }}
             >
-              <Plus size={16} />
+              <HugeiconsIcon icon={Add01Icon} size={16} />
               Add Product
             </Button>
             <Button
@@ -479,7 +480,7 @@ const ProductsPage = () => {
               variant="outline"
               className="excel-import-btn"
             >
-              <FileSpreadsheet size={16} />
+              <HugeiconsIcon icon={File01Icon} size={16} />
               Import Excel
             </Button>
           </div>
