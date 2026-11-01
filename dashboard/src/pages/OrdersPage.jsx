@@ -17,6 +17,7 @@ import TableWithControls from '../components/common/TableWithControls';
 import Button from '../components/common/Button';
 import DropdownSelect from '../components/common/DropdownSelect';
 import Modal from '../components/common/Modal';
+import SidePanel from '../components/common/SidePanel';
 import { SkeletonTable, SkeletonStats } from '../components/common/Skeleton';
 import StatCards from '../components/common/StatCards';
 import Badge from '../components/common/Badge';
@@ -612,56 +613,64 @@ const OrdersPage = () => {
         loading={loading}
       />
 
-      {/* User Cart Modal */}
-      {showUserCart && userCart && (
-        <div className="modal-overlay" onClick={() => setShowUserCart(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>User Cart - User ID: {selectedUser}</h3>
-              <button 
-                className="close-button"
-                onClick={() => setShowUserCart(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="cart-summary">
-                <p><strong>Total Items:</strong> {userCart.total_items}</p>
-                <p><strong>Total Quantity:</strong> {userCart.total_quantity}</p>
+      {/* User Cart side panel */}
+      <SidePanel
+        isOpen={showUserCart && !!userCart}
+        onClose={() => setShowUserCart(false)}
+        title={`Cart · User #${selectedUser}`}
+        size="medium"
+      >
+        {userCart && (
+          <div className="cart-panel">
+            <div className="cart-panel__summary">
+              <div>
+                <div className="au-sub">Items</div>
+                <div className="cart-panel__stat tnum">{userCart.total_items || 0}</div>
               </div>
-              
-              <div className="cart-items">
-                <h4>Cart Items:</h4>
-                {(userCart.items || []).map(item => (
-                  <div key={item.id} className="cart-item">
-                    <div className="cart-item-info">
-                      <img 
-                        src={getProductImageUrl(item.product_image)} 
-                        alt={item.product_name} 
-                        className="cart-item-image"
-                        onError={(e) => {
-                          e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23f0f0f0' width='50' height='50'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-size='10'%3ENo Image%3C/text%3E%3C/svg%3E";
-                        }}
+              <div>
+                <div className="au-sub">Total quantity</div>
+                <div className="cart-panel__stat tnum">{userCart.total_quantity || 0}</div>
+              </div>
+            </div>
+
+            {(userCart.items || []).length === 0 ? (
+              <div className="au-empty">
+                <HugeiconsIcon icon={ShoppingCart01Icon} size={40} color="var(--gold)" />
+                <div className="au-empty-title">Cart is empty</div>
+                <div>This customer has nothing in their cart right now. Items leave the cart once an order is placed.</div>
+              </div>
+            ) : (
+              <div className="cart-panel__list">
+                {(userCart.items || []).map((item) => (
+                  <div key={item.id} className="cart-panel__item">
+                    <div className="au-thumb">
+                      <img
+                        src={getProductImageUrl(item.product_image)}
+                        alt={item.product_name}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
-                      <div>
-                        <div className="cart-item-name">{item.product_name}</div>
-                        <div className="cart-item-sku">SKU: {item.product_sku}</div>
-                        <div className="cart-item-category">Category: {item.category_name}</div>
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div className="cart-panel__name">{item.product_name}</div>
+                      <div className="au-sub">
+                        SKU: {item.product_sku || '—'}
+                        {item.category_name ? ` · ${item.category_name}` : ''}
+                        {item.net_weight ? ` · ${item.net_weight}g` : ''}
                       </div>
                     </div>
-                    <div className="cart-item-details">
-                      <div className="cart-item-quantity">Qty: {item.quantity}</div>
-                      <div className="cart-item-price">₹{item.mark_amount}</div>
-                      <div className="cart-item-weight">Weight: {item.net_weight}g</div>
+                    <div className="cart-panel__right">
+                      <div className="cart-panel__qty">× {item.quantity}</div>
+                      {item.mark_amount ? (
+                        <div className="au-amt tnum">₹{item.mark_amount}</div>
+                      ) : null}
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </SidePanel>
 
       {/* Delete order confirmation */}
       <Modal
