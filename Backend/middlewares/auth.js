@@ -2,9 +2,21 @@ const jwt = require('jsonwebtoken');
 const { db } = require('../config/db');
 const { JWT_SECRET } = require('../config/jwt');
 
+// Pull the bearer token from the Authorization header (or x-access-token).
+function extractToken(req) {
+  return req.headers.authorization?.split(' ')[1] || req.headers['x-access-token'];
+}
+
+// True if the caller is an admin or owns the resource (their JWT id matches the
+// given owner id). Centralises the owner-or-admin rule used across controllers.
+function isOwnerOrAdmin(req, ownerId) {
+  if (!req.user) return false;
+  return req.user.type === 'admin' || String(req.user.id) === String(ownerId);
+}
+
 // Verify JWT token
 function verifyToken(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1] || req.headers['x-access-token'];
+  const token = extractToken(req);
 
   if (!token) {
     return res.status(401).json({ error: 'Access token required' });
@@ -19,31 +31,24 @@ function verifyToken(req, res, next) {
   }
 }
 
-// Check if user is admin
-function requireAdmin(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  if (req.user.type !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-
-  next();
+// Factory: require an authenticated user of a specific type.
+function requireType(type, label) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    if (req.user.type !== type) {
+      return res.status(403).json({ error: `${label} access required` });
+    }
+    next();
+  };
 }
+
+// Check if user is admin
+const requireAdmin = requireType('admin', 'Admin');
 
 // Check if user is business user
-function requireBusiness(req, res, next) {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  if (req.user.type !== 'business') {
-    return res.status(403).json({ error: 'Business user access required' });
-  }
-
-  next();
-}
+const requireBusiness = requireType('business', 'Business user');
 
 // Check if business user is approved
 function requireApprovedBusiness(req, res, next) {
@@ -87,10 +92,7 @@ function requireSelfOrAdmin(paramName = 'user_id') {
     if (!req.user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    if (req.user.type === 'admin') {
-      return next();
-    }
-    if (String(req.user.id) === String(req.params[paramName])) {
+    if (isOwnerOrAdmin(req, req.params[paramName])) {
       return next();
     }
     return res.status(403).json({ error: 'Not authorized to access this resource' });
@@ -99,15 +101,15 @@ function requireSelfOrAdmin(paramName = 'user_id') {
 
 // Optional authentication (doesn't fail if no token)
 function optionalAuth(req, res, next) {
-  const token = req.headers.authorization?.split(' ')[1] || req.headers['x-access-token'];
+  const token = extractToken(req);
 
   if (token) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
       req.user = decoded;
     } catch (error) {
-      // Token is invalid, but we don't fail the request
-      }
+      // Token is invalid, but we don't fail the request.
+    }
   }
 
   next();
@@ -119,5 +121,7 @@ module.exports = {
   requireBusiness,
   requireApprovedBusiness,
   requireSelfOrAdmin,
-  optionalAuth
-}; 
+  optionalAuth,
+  isOwnerOrAdmin,
+  extractToken,
+};

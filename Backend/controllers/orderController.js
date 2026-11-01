@@ -8,6 +8,7 @@ const {
 } = require("../services/adminNotificationService");
 const socketService = require("../services/socketService");
 const pdfService = require("../services/pdfService");
+const { isOwnerOrAdmin } = require("../middlewares/auth");
 
 function isApprovedBusinessStatus(status) {
   return String(status || "").toLowerCase() === "approved";
@@ -372,7 +373,7 @@ function getOrderById(req, res) {
     // Only the order's owner or an admin may read it (it exposes the buyer's
     // email, phone and address).
     const order = results[0];
-    if (req.user.type !== "admin" && String(order.user_id) !== String(req.user.id)) {
+    if (!isOwnerOrAdmin(req, order.user_id)) {
       return res.status(403).json({ error: "Not authorized to view this order" });
     }
     res.json(order);
@@ -689,7 +690,7 @@ function downloadOrderPDF(req, res) {
 
     const order = results[0];
     // Only the order's owner or an admin may download the invoice.
-    if (req.user.type !== "admin" && String(order.user_id) !== String(req.user.id)) {
+    if (!isOwnerOrAdmin(req, order.user_id)) {
       return res.status(403).json({ error: "Not authorized to download this order" });
     }
     res.setHeader("Content-Type", "application/pdf");
