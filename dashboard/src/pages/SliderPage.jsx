@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Edit02Icon, Delete02Icon, Upload01Icon, Add01Icon, Image01Icon } from "@hugeicons/core-free-icons";
+import { Edit02Icon, Delete02Icon, Add01Icon, Image01Icon } from "@hugeicons/core-free-icons";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
+import FileUpload from "../components/common/FileUpload";
 import SidePanel from "../components/common/SidePanel";
 import { SkeletonCards, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
@@ -329,50 +330,12 @@ const SliderPage = () => {
           </div>
 
           <div className="form-row">
-            <div className="file-upload">
-              <label
-                className={`file-label ${selectedFile ? "has-file" : ""}`}
-                htmlFor="slider-image-upload"
-                onClick={() => {
-                  document.getElementById("slider-image-upload").click();
-                }}
-              >
-                <HugeiconsIcon icon={Upload01Icon} className="icon" />
-                {selectedFile ? (
-                  <>
-                    <strong>File Selected: {selectedFile.name}</strong>
-                    <br />
-                    <small style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                      Click to change file
-                    </small>
-                  </>
-                ) : (
-                  <>
-                    {editSlider ? "Change Image" : "Upload Image"}
-                    <br />
-                    <small style={{ fontSize: "0.8rem", opacity: 0.8 }}>
-                      Click here to browse files
-                    </small>
-                  </>
-                )}
-              </label>
-              <input
-                id="slider-image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="file-input"
-                required={!editSlider}
-                style={{ display: "none" }}
-              />
-            </div>
-            <div className="file-help-text">
-              <small>
-                Click the upload area to select an image. Supported formats:
-                JPG, PNG, GIF. Recommended: <strong>1200 × 600 px</strong> (2:1
-                wide banner) for a proper full-width look in the app.
-              </small>
-            </div>
+            <FileUpload
+              label={editSlider ? "Change image" : "Upload image"}
+              accept="image/*"
+              hint="JPG, PNG or GIF — 1200 × 600 px (2:1 wide banner) recommended."
+              onFiles={(files) => handleFileChange({ target: { files } })}
+            />
           </div>
 
           {filePreview && (

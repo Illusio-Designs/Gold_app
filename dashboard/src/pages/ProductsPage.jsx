@@ -11,6 +11,7 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
+import FileUpload from "../components/common/FileUpload";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import Badge from "../components/common/Badge";
@@ -529,17 +530,16 @@ const ProductsPage = () => {
           onChange={handleInputChange}
           className="form-control"
         />
-        <InputField
+        <FileUpload
           label="Image"
-          name="image"
-          type="file"
           accept="image/*"
-          onChange={handleInputChange}
-          className="form-control"
+          hint="PNG or JPG — square 1080 × 1080 px (1:1) recommended; the app crops to a square."
+          onFiles={(files) => {
+            const file = files[0] || null;
+            setForm((prev) => ({ ...prev, image: file }));
+            setImagePreview(file ? URL.createObjectURL(file) : "");
+          }}
         />
-        <small style={{ display: "block", marginTop: -6, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
-          Recommended: square <strong>1080 × 1080 px</strong> (1:1). The app crops product images to a square.
-        </small>
         {imagePreview && (
           <div style={{ margin: "10px 0" }}>
             <img
