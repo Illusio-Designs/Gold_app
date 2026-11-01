@@ -13,6 +13,7 @@ import Button from "../components/common/Button";
 import PageHeader from "../components/common/PageHeader";
 import SidePanel from "../components/common/SidePanel";
 import InputField from "../components/common/InputField";
+import Avatar from "../components/common/Avatar";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   UserIcon,
@@ -98,43 +99,48 @@ const ProfilePage = () => {
         }
       />
 
-      <div className="profile-card">
-        <div className="profile-card__header">
-          <div className="profile-avatar">
-            <HugeiconsIcon icon={UserIcon} size={40} />
-          </div>
-          <div className="profile-identity">
+      <section className="au-panel profile-card">
+        <div className="profile-hero">
+          <Avatar name={name} size={76} tone="gold" />
+          <div className="profile-hero__id">
             <h2 className="profile-name">{name}</h2>
             <Badge tone="brand">{role}</Badge>
+            {email && <div className="profile-hero__email">{email}</div>}
           </div>
         </div>
 
-        <ul className="profile-info">
-          <li className="profile-info__row">
-            <span className="profile-info__icon">
+        <div className="profile-grid">
+          <div className="profile-field">
+            <span className="profile-field__ic">
               <HugeiconsIcon icon={UserIcon} size={18} />
             </span>
-            <span className="profile-info__label">Name</span>
-            <span className="profile-info__value">{name}</span>
-          </li>
-          <li className="profile-info__row">
-            <span className="profile-info__icon">
+            <div>
+              <div className="profile-field__k">Name</div>
+              <div className="profile-field__v">{name}</div>
+            </div>
+          </div>
+          <div className="profile-field">
+            <span className="profile-field__ic">
               <HugeiconsIcon icon={ShieldUserIcon} size={18} />
             </span>
-            <span className="profile-info__label">Role</span>
-            <span className="profile-info__value">{role}</span>
-          </li>
+            <div>
+              <div className="profile-field__k">Role</div>
+              <div className="profile-field__v">{role}</div>
+            </div>
+          </div>
           {email && (
-            <li className="profile-info__row">
-              <span className="profile-info__icon">
+            <div className="profile-field">
+              <span className="profile-field__ic">
                 <HugeiconsIcon icon={Mail01Icon} size={18} />
               </span>
-              <span className="profile-info__label">Email</span>
-              <span className="profile-info__value">{email}</span>
-            </li>
+              <div>
+                <div className="profile-field__k">Email</div>
+                <div className="profile-field__v">{email}</div>
+              </div>
+            </div>
           )}
-        </ul>
-      </div>
+        </div>
+      </section>
 
       <SidePanel
         isOpen={editOpen}
