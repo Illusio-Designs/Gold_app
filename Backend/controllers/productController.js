@@ -471,18 +471,116 @@ function getProductsByCategory(req, res) {
 }
 
 // Import products and categories from Excel
+// Flexible column-name matching for the product Excel import.
+const EXCEL_COLUMN_MAPPINGS = [
+  { key: "tgno", names: ["Tgno", "TGNO", "TgNo", "tgno"] },
+  {
+    key: "stamp",
+    names: [
+      "Stamp", "STAMP", "stamp", "Stmp", "STMP", "stmp",
+      "Purity", "PURITY", "purity", "Karat", "KARAT", "karat", "K", "k",
+    ],
+  },
+  { key: "pc", names: ["PC", "Pc", "pc", "P.C", "P.C."] },
+  { key: "gwt", names: ["Gwt", "GWT", "gwt", "G.WT", "G.W.T"] },
+  { key: "nwt", names: ["N.wt", "N.WT", "N.W.T", "n.wt", "Nwt", "NWT"] },
+  { key: "size", names: ["Size", "SIZE", "size"] },
+  { key: "mrp", names: ["MRP", "mrp", "Mrp", "M.R.P", "M.R.P."] },
+  {
+    key: "itemName",
+    names: ["Item Name", "ItemName", "ITEM NAME", "item name", "Item", "item"],
+  },
+];
+
+// Map each required column to its index in the sheet's header row (case- and
+// space-insensitive). Returns the index map and any columns that weren't found.
+function resolveColumnIndices(headers) {
+  const findColumn = (possibleNames) => {
+    for (const name of possibleNames) {
+      const index = headers.findIndex(
+        (header) =>
+          header &&
+          header.toString().toLowerCase().trim() === name.toLowerCase().trim()
+      );
+      if (index !== -1) return index;
+    }
+    return -1;
+  };
+
+  const columnIndices = {};
+  const missingColumns = [];
+  for (const mapping of EXCEL_COLUMN_MAPPINGS) {
+    const index = findColumn(mapping.names);
+    if (index !== -1) {
+      columnIndices[mapping.key] = index;
+    } else {
+      missingColumns.push(mapping.names[0]); // first name for the error message
+    }
+  }
+  return { columnIndices, missingColumns };
+}
+
+// Group data rows by their Item Name (category). Rows missing an item name are
+// recorded as errors. Returns { [categoryName]: productData[] }.
+function groupRowsByCategory(dataRows, columnIndices, results) {
+  const categoryGroups = {};
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i];
+    const rowNumber = i + 2; // Excel row number (1-based + header)
+    try {
+      const itemName = row[columnIndices.itemName];
+      if (!itemName) {
+        results.errors.push(`Row ${rowNumber}: Item Name is required`);
+        continue;
+      }
+      if (!categoryGroups[itemName]) categoryGroups[itemName] = [];
+      categoryGroups[itemName].push({ row, rowNumber, indices: columnIndices });
+    } catch (error) {
+      results.errors.push(`Row ${rowNumber}: ${error.message}`);
+    }
+  }
+  return categoryGroups;
+}
+
+// Create/update each category and its products, accumulating counts and errors.
+async function importCategoryGroups(categoryGroups, results) {
+  for (const [categoryName, products] of Object.entries(categoryGroups)) {
+    try {
+      const existingCategory = await findOrCreateCategory(categoryName);
+      const categoryId = existingCategory.id;
+      if (existingCategory.isNew) {
+        results.categoriesCreated++;
+      } else {
+        results.categoriesUpdated++;
+      }
+
+      for (const productData of products) {
+        try {
+          await createOrUpdateProduct(productData, categoryId);
+          if (productData.isUpdated) {
+            results.productsUpdated++;
+          } else {
+            results.productsCreated++;
+          }
+        } catch (error) {
+          results.errors.push(`Row ${productData.rowNumber}: ${error.message}`);
+        }
+      }
+    } catch (error) {
+      results.errors.push(`Category "${categoryName}": ${error.message}`);
+    }
+  }
+}
+
 async function importFromExcel(req, res) {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Excel file is required" });
     }
 
-    // Read the Excel file
+    // Read the Excel file and convert the first sheet to row arrays.
     const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-
-    // Convert to JSON
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
     if (data.length < 2) {
@@ -491,86 +589,8 @@ async function importFromExcel(req, res) {
         .json({ error: "Excel file is empty or has no data rows" });
     }
 
-    // Get headers (first row)
     const headers = data[0];
-    // Debug: Show exact header names and their positions
-    headers.forEach((header, index) => {
-      if (header) {
-      }
-    });
-
-    // Helper function to find column with flexible matching
-    const findColumn = (possibleNames) => {
-      for (const name of possibleNames) {
-        const index = headers.findIndex(
-          (header) =>
-            header &&
-            header.toString().toLowerCase().trim() === name.toLowerCase().trim()
-        );
-        if (index !== -1) {
-          return index;
-        }
-      }
-      return -1;
-    };
-
-    // Validate required columns with flexible matching
-    const requiredColumnMappings = [
-      { key: "tgno", names: ["Tgno", "TGNO", "TgNo", "tgno"] },
-      {
-        key: "stamp",
-        names: [
-          "Stamp",
-          "STAMP",
-          "stamp",
-          "Stmp",
-          "STMP",
-          "stmp",
-          "Purity",
-          "PURITY",
-          "purity",
-          "Karat",
-          "KARAT",
-          "karat",
-          "K",
-          "k",
-        ],
-      },
-      { key: "pc", names: ["PC", "Pc", "pc", "P.C", "P.C."] },
-      { key: "gwt", names: ["Gwt", "GWT", "gwt", "G.WT", "G.W.T"] },
-      { key: "nwt", names: ["N.wt", "N.WT", "N.W.T", "n.wt", "Nwt", "NWT"] },
-      { key: "size", names: ["Size", "SIZE", "size"] },
-      { key: "mrp", names: ["MRP", "mrp", "Mrp", "M.R.P", "M.R.P."] },
-      {
-        key: "itemName",
-        names: [
-          "Item Name",
-          "ItemName",
-          "ITEM NAME",
-          "item name",
-          "Item",
-          "item",
-        ],
-      },
-    ];
-
-    const columnIndices = {};
-    const missingColumns = [];
-
-    for (const mapping of requiredColumnMappings) {
-      const index = findColumn(mapping.names);
-      if (index !== -1) {
-        columnIndices[mapping.key] = index;
-        // Special debugging for stamp column
-        if (mapping.key === "stamp") {
-          }
-      } else {
-        missingColumns.push(mapping.names[0]); // Use first name for error message
-        // Special debugging for missing stamp column
-        if (mapping.key === "stamp") {
-        }
-      }
-    }
+    const { columnIndices, missingColumns } = resolveColumnIndices(headers);
 
     if (missingColumns.length > 0) {
       return res.status(400).json({
@@ -580,8 +600,6 @@ async function importFromExcel(req, res) {
       });
     }
 
-    // Process data rows (skip header)
-    const dataRows = data.slice(1);
     const results = {
       categoriesCreated: 0,
       categoriesUpdated: 0,
@@ -590,76 +608,19 @@ async function importFromExcel(req, res) {
       errors: [],
     };
 
-    // Group by category name (Item Name)
-    const categoryGroups = {};
-
-    for (let i = 0; i < dataRows.length; i++) {
-      const row = dataRows[i];
-      const rowNumber = i + 2; // Excel row number (1-based + header)
-
-      try {
-        const itemName = row[columnIndices.itemName];
-        if (!itemName) {
-          const errorMsg = `Row ${rowNumber}: Item Name is required`;
-          results.errors.push(errorMsg);
-          continue;
-        }
-
-        if (!categoryGroups[itemName]) {
-          categoryGroups[itemName] = [];
-          }
-
-        const productData = {
-          row: row,
-          rowNumber: rowNumber,
-          indices: columnIndices,
-        };
-
-        categoryGroups[itemName].push(productData);
-      } catch (error) {
-        const errorMsg = `Row ${rowNumber}: ${error.message}`;
-        results.errors.push(errorMsg);
-      }
-    }
-
-    // Create/Update categories and products
-    for (const [categoryName, products] of Object.entries(categoryGroups)) {
-      try {
-        // Check if category already exists
-        const existingCategory = await findOrCreateCategory(categoryName);
-        const categoryId = existingCategory.id;
-
-        if (existingCategory.isNew) {
-          results.categoriesCreated++;
-          } else {
-          results.categoriesUpdated++;
-          }
-
-        // Create/Update products for this category
-        for (const productData of products) {
-          try {
-            await createOrUpdateProduct(productData, categoryId);
-
-            if (productData.isUpdated) {
-              results.productsUpdated++;
-              } else {
-              results.productsCreated++;
-              }
-          } catch (error) {
-            const errorMsg = `Row ${productData.rowNumber}: ${error.message}`;
-            results.errors.push(errorMsg);
-          }
-        }
-      } catch (error) {
-        const errorMsg = `Category "${categoryName}": ${error.message}`;
-        results.errors.push(errorMsg);
-      }
-    }
+    // Group rows by category (Item Name), then create/update each category and
+    // its products, accumulating counts and per-row errors.
+    const categoryGroups = groupRowsByCategory(
+      data.slice(1),
+      columnIndices,
+      results
+    );
+    await importCategoryGroups(categoryGroups, results);
 
     // Clean up uploaded file
     if (fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
-      }
+    }
 
     res.json({
       message: "Excel import completed successfully",
@@ -669,7 +630,7 @@ async function importFromExcel(req, res) {
     // Clean up uploaded file on error
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
-      }
+    }
 
     res.status(500).json({ error: "Failed to import Excel file" });
   }
