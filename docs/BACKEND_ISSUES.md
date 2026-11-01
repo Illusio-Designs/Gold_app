@@ -15,10 +15,10 @@ This file now tracks only what is still outstanding.
   accounts are fine. Run `node Backend/scripts/resetPassword.js <email> "<newPassword>"`
   against the DB for each affected account (or edit the user in the dashboard and
   set a new password). Data cleanup only — nothing left to code.
-- **Cleanup (cosmetic) — mostly done.** Dashboard debug `console.log`s removed,
-  including lines that printed admin token prefixes (L2, PR #105). Still open and
-  optional: a few narration comments and empty fire-and-forget handlers scattered
-  across backend files (L1 / L3) — diffuse and very low value.
+
+> Cosmetic cleanup (L1–L4) is **complete**: dashboard debug/token-prefix logs
+> removed (PR #105), and backend empty blocks now log or were removed with
+> narration comments stripped (PR #107).
 
 ---
 
