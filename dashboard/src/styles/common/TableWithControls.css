@@ -11,6 +11,16 @@
   box-shadow: var(--shadow);
 }
 
+/* The <Table> rendered inside wraps itself in .table-container (its own card
+   with a border/radius/shadow). Strip that when nested so there's no
+   "card in a card" — the .table-with-controls border above is the only card. */
+.table-with-controls .table-container {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
 .table-controls {
   position: sticky;
   top: 0;
