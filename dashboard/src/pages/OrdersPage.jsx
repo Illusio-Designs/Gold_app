@@ -108,12 +108,17 @@ const OrdersPage = () => {
       const customRows = (Array.isArray(custom) ? custom : []).map((c) => ({
         ...c,
         isCustom: true,
-        order_type: 'B2B Custom',
+        order_type: 'Custom',
         product_name: `Custom${c.weight ? ' · ' + c.weight + 'g' : ''}`,
         product_image: Array.isArray(c.images) && c.images.length ? c.images[0] : null,
         total_qty: c.quantity || 1,
         total_mark_amount: null,
-        user_name: c.business_name || c.user_name,
+        // Show the customer: name, else business, else a phone/email identifier.
+        user_name:
+          c.user_name || c.business_name || c.user_phone || c.user_email || null,
+        business_name: c.business_name,
+        user_status: c.user_status,
+        user_type: c.user_type,
       }));
 
       const merged = [...regularRows, ...customRows].sort(
