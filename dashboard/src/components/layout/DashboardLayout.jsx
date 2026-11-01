@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -395,7 +395,15 @@ export default function DashboardLayout() {
         </header>
 
         <main className="dashboard-content">
-          <Outlet />
+          <Suspense
+            fallback={
+              <div className="dash-content-loading">
+                <span className="dash-content-spinner" />
+              </div>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </main>
 
         <footer className="dashboard-footer">
