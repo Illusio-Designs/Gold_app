@@ -20,6 +20,13 @@ body {
   color: var(--ink);
 }
 
+/* Border-box everywhere in the dashboard so width:100% + padding never
+   overflows its container (previously clipped the right edge of pages). */
+.dashboard-layout,
+.dashboard-layout *,
+.dashboard-layout *::before,
+.dashboard-layout *::after { box-sizing: border-box; }
+
 /* Hanken Grotesk everywhere; Fraunces for display headings. */
 .dashboard-layout,
 .dashboard-layout * { font-family: var(--font-body) !important; }
