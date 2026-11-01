@@ -56,7 +56,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
   now have already does this correctly.)
 - **App change?** **No.** This is entirely inside the server.
 
-### 5. The search on the storefront crashes
+### 5. The search on the storefront crashes — ✅ FIXED
 - **What's wrong:** Search asks the database for columns that don't exist, so it errors
   out every time.
 - **Why it matters:** Customers/shops can't search the catalogue.
