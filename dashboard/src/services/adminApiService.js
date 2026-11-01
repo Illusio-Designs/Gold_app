@@ -3,7 +3,7 @@
 // BASE_URL is set from environment variable
 
 import axios from "axios";
-import { clearAuthData } from "../utils/authUtils";
+import { clearAuthData, getAdminToken } from "../utils/authUtils";
 import { showWarningToast } from "../utils/toast";
 
 const BASE_URL =
@@ -29,6 +29,20 @@ axiosInstance.interceptors.request.use(
       config.headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
       config.headers["Pragma"] = "no-cache";
       config.headers["Expires"] = "0";
+    }
+
+    // Attach the admin bearer token to every request, so individual calls no
+    // longer need to pass it. An explicitly-set Authorization header still wins.
+    try {
+      const token = getAdminToken();
+      if (token) {
+        config.headers = config.headers || {};
+        if (!config.headers.Authorization) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch (e) {
+      // No token available — request proceeds unauthenticated.
     }
     return config;
   },
@@ -94,55 +108,30 @@ export const updateAppSettings = (data, token) =>
     .put("/settings", data, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-export const createUser = (data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .post("/users", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
+// Build a FormData body from a plain object (skipping null/undefined values),
+// or pass an existing FormData through unchanged.
+function toFormData(data) {
+  if (data instanceof FormData) return data;
   const formData = new FormData();
   Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
+    if (v !== null && v !== undefined) formData.append(k, v);
   });
+  return formData;
+}
 
-  return axiosInstance
-    .post("/users", formData, {
+export const createUser = (data, token) =>
+  axiosInstance
+    .post("/users", toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
-export const updateUser = (userId, data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .put(`/users/${userId}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .put(`/users/${userId}`, formData, {
+export const updateUser = (userId, data, token) =>
+  axiosInstance
+    .put(`/users/${userId}`, toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
 export const updateUserStatus = (userId, data, token) =>
   axiosInstance
@@ -197,55 +186,19 @@ export const getAllSliders = (token) =>
     .get("/slider", { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-export const createSlider = (data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .post("/slider", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .post("/slider", formData, {
+export const createSlider = (data, token) =>
+  axiosInstance
+    .post("/slider", toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
-export const updateSlider = (id, data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .put(`/slider/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .put(`/slider/${id}`, formData, {
+export const updateSlider = (id, data, token) =>
+  axiosInstance
+    .put(`/slider/${id}`, toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
 export const deleteSlider = (id, token) =>
   axiosInstance
@@ -263,57 +216,19 @@ export const getProductById = (id, token) =>
     .get(`/products/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
-export const createProduct = (data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .post("/products", data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    // Include all values, even empty strings, but not null/undefined
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .post("/products", formData, {
+export const createProduct = (data, token) =>
+  axiosInstance
+    .post("/products", toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
-export const updateProduct = (id, data, token) => {
-  // If data is already FormData, use it directly
-  if (data instanceof FormData) {
-    return axiosInstance
-      .put(`/products/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((r) => r.data);
-  }
-
-  // Otherwise, create FormData from object
-  const formData = new FormData();
-  Object.entries(data).forEach(([k, v]) => {
-    // Include all values, even empty strings, but not null/undefined
-    if (v !== null && v !== undefined) {
-      formData.append(k, v);
-    }
-  });
-
-  return axiosInstance
-    .put(`/products/${id}`, formData, {
+export const updateProduct = (id, data, token) =>
+  axiosInstance
+    .put(`/products/${id}`, toFormData(data), {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((r) => r.data);
-};
 
 export const deleteProduct = (id, token) =>
   axiosInstance
