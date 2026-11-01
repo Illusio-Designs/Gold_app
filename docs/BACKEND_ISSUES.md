@@ -1,38 +1,128 @@
-# Backend issues — audit findings
+# Backend issues — plain-language list
 
-Read-only audit of `Backend/` for B2B (`business`), B2C (`consumer`) and admin
-(`admin`) flows. Grouped by severity. Status: **open** unless noted.
+A check of the backend for the three kinds of users: **shops (B2B)**, **customers (B2C)**
+and **you (admin)**. Each item says, in simple words, what's wrong, what happens because
+of it, and — importantly — **whether the mobile apps need any change**.
 
-> ⚠️ #1 and #2 are production-blocking — fix before the store review proceeds.
+> **Short answer on the apps:** No. The B2B and B2C apps do **not** need any
+> change for any of these fixes. All of them are repairs inside the server only.
+> The apps keep calling the same things the same way; they just start getting the
+> correct, safe response. (Details on each are in the "App change?" line below.)
 
-## 🔴 Critical
+---
 
-- [ ] **Public register can self-mint an admin.** `routes/user.js` `POST /api/users/register` is unauthenticated and sets `type` from the request body, so anyone can create a `type:"admin"` account and log in via `/admin/login`. — *Fix: force `type` to `business`/`consumer` on the public register path; never accept `admin` from unauthenticated input.* (`controllers/userController.js` ~line 16)
-- [ ] **Single-product order creation is broken.** `controllers/orderController.js` (~line 147) references an undefined `business_user_id` after the insert → throws / hangs; stock is reserved but the client gets no response. — *Fix: use `req.user.id` / `orderDetails.user_id`; remove the stray `business_user_id`.*
+## 🔴 Must fix before going live
 
-## 🟠 High
+### 1. Anyone on the internet can make themselves an "admin"
+- **What's wrong:** The public sign-up accepts whatever account *type* the caller asks
+  for. So a stranger can sign up as an **admin** and get full control of your dashboard.
+- **Why it matters:** This is a complete security hole — someone could take over the
+  whole system, see every order and customer, and delete data.
+- **The fix:** On public sign-up, the server forces the type to "shop" or "customer"
+  and never lets anyone become an admin that way. Admins are only created by you from
+  inside the dashboard.
+- **App change?** **No.** The shop app already signs people up as "shop" and the
+  customer app as "customer" — exactly what the fix keeps allowing. Nothing to change.
 
-- [ ] **`/verify-otp` issues a token with no OTP check and skips approval.** `verifyBusinessOTP` (`userController.js` ~802) looks a user up by phone only and returns a 365-day JWT. — *Fix: verify a real OTP and re-apply the `status==='approved'` gate (or document that Firebase enforces the OTP first).*
-- [ ] **Admin/consumer accounts created by an admin can never log in** (double bcrypt hash). `userController.js` ~441 hashes, then `models/user.js` ~33 hashes again. — *Fix: hash once (pass plaintext to the model, or INSERT directly like `createAdmin`).* (`/users/system` admin-create is already correct.)
-- [ ] **Storefront search 500s** — `searchController.js` queries columns that don't exist (`p.less_weight`, `p.length`, `p.mark`). — *Fix: drop `length`/`mark`; compute `less_weight` as `gross_weight - net_weight`.*
+### 2. Placing an order for a single product is broken
+- **What's wrong:** When someone orders one product (not from the cart), the server hits
+  an internal error and never finishes. The stock gets held, but the customer just sees
+  it hang with no confirmation.
+- **Why it matters:** A core action — buying one item — silently fails.
+- **The fix:** Correct the one wrong reference inside the order code so the order saves
+  and returns a proper confirmation.
+- **App change?** **No.** The apps already send the order correctly; the server was
+  mishandling it. After the fix the same request just works.
 
-## 🟡 Medium
+---
 
-- [ ] **Password hashes leaked in admin user lists** — `getAllUsers`/`getAllConsumers` use `SELECT *` (returns `password`, `otp`, `reset_token`). — *Fix: explicit column lists.*
-- [ ] **`GET /orders/stats/statistics` has no admin gate** — any logged-in user can read store-wide stats. — *Fix: add `requireAdmin`.*
-- [ ] **B2B wholesale price (`mark_amount`) is public** — product endpoints expose it with no auth/type gating (admin-vs-frontend split only checks for a Bearer header). — *Fix: gate the price fields by auth/user type if they're meant to be private.*
-- [ ] **Single "mark notification read" writes a NULL user** — route lacks the `:userId` param the controller reads. — *Fix: use `req.user.id`.*
+## 🟠 Important
 
-## 🟢 Low
+### 3. Login can hand out a pass without really checking the code, and lets blocked users in
+- **What's wrong:** The phone-login step trusts the phone number alone and hands out a
+  long-lived login pass, and it skips the "is this shop approved?" check.
+- **Why it matters:** A not-yet-approved (or rejected) shop could still get in.
+- **The fix:** Re-apply the "approved only" rule on login.
+- **App change?** **No.** The actual OTP code is already checked inside the apps by the
+  SMS widget before the server is called, so that part is covered. Adding the "approved
+  only" gate back is a server rule — the apps don't need to change; a blocked user simply
+  gets a clear "not approved yet" message, which is the intended behaviour.
 
-- [ ] Cart re-add stays hidden (`ON DUPLICATE KEY UPDATE` never resets `status` from `removed`).
-- [ ] Logged-in consumers get the admin product view (any Bearer treated as admin in `productController.js` ~97).
-- [ ] `updateOrder` realtime emit targets `user_${business_user_id}` (undefined) → dead room.
-- [ ] `PATCH /:notificationId/read` has no ownership check.
+### 4. Accounts you create from the dashboard can never log in
+- **What's wrong:** When an account is created through one older path, the password gets
+  scrambled twice, so the real password never matches and the person is locked out.
+- **Why it matters:** Staff/customer accounts you add by hand are unusable.
+- **The fix:** Scramble the password only once. (The newer "add system user" button you
+  now have already does this correctly.)
+- **App change?** **No.** This is entirely inside the server.
 
-## ✅ Verified correct (no action)
+### 5. The search on the storefront crashes
+- **What's wrong:** Search asks the database for columns that don't exist, so it errors
+  out every time.
+- **Why it matters:** Customers/shops can't search the catalogue.
+- **The fix:** Remove the made-up columns and calculate the one real value ("less weight")
+  from numbers we already have.
+- **App change?** **No.** The apps already call search the same way and just show whatever
+  comes back — after the fix they get results instead of an error.
 
-Order/cart ownership · approval gating on ordering · server-side pricing ·
-payment replay/ownership · atomic stock reservation · order-number derivation ·
-no SQL injection · notification failure-safety · account-deletion gating ·
-route ordering (no `/:id` shadowing).
+---
+
+## 🟡 Worth fixing
+
+### 6. Admin user lists quietly include passwords
+- **What's wrong:** When the dashboard loads the user list, the server also sends the
+  scrambled passwords, reset codes and OTPs along with it — more than should ever leave
+  the server.
+- **The fix:** Send only the fields the screen needs.
+- **App change?** **No** (admin/dashboard only).
+
+### 7. Store statistics are open to any logged-in user
+- **What's wrong:** The store-wide stats page isn't limited to admins — any logged-in
+  shop could read it.
+- **The fix:** Lock it to admins only.
+- **App change?** **No.** The apps don't use this; it's a dashboard number.
+
+### 8. Wholesale (shop) prices are visible to everyone
+- **What's wrong:** The special shop-only price ("mark amount") is sent out without
+  properly checking who's asking.
+- **The fix:** Only send the wholesale price to logged-in **shop** users.
+- **App change?** **No.** The shop app is the only one that uses the wholesale price, and
+  shop users will still get it. The customer app never reads that field, so hiding it from
+  customers changes nothing they can see.
+
+### 9. "Mark one notification as read" saves it against nobody
+- **What's wrong:** One of the notification routes is missing the user, so the "read"
+  mark is saved against an empty user.
+- **The fix:** Use the logged-in user automatically.
+- **App change?** **No.** The apps already have working "mark read" calls they use; this
+  fixes the stray one on the server side.
+
+---
+
+## 🟢 Minor / tidy-up
+
+- A product removed from the cart and added again can stay hidden. — *server only*
+- A logged-in customer can accidentally be shown the admin version of a product. — *server only*
+- A couple of real-time "order updated" pings go to an empty channel, so they're never
+  delivered. — *server only*
+- A "mark read" route doesn't check the notification is really yours. — *server only*
+
+None of these need an app change.
+
+---
+
+## ✅ Already correct (no action)
+
+Order and cart ownership · only approved shops can order · prices are worked out on the
+server (can't be faked by the app) · payment can't be replayed or stolen · stock is held
+safely during checkout · order numbers · no database-injection holes · notifications fail
+safely · account-deletion is properly gated · routes are ordered correctly.
+
+---
+
+## Bottom line
+
+- **Fix 1 and 2 first** — they're the live-blocking ones.
+- **None of the eleven fixes require any change to the B2B or B2C apps.** They all live
+  inside the server. The apps keep working exactly as they do now and simply start getting
+  the correct, safe responses.
