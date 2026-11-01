@@ -62,35 +62,48 @@ const UsersPage = () => {
 
   // Table shows summary fields only
   const columns = [
-    { header: "Type", accessor: "type" },
-    { header: "Name", accessor: "name" },
-    { header: "Email", accessor: "email" },
+    {
+      header: "Type",
+      accessor: "type",
+      cell: (row) => {
+        const t = row.type || "";
+        if (!t) return <span className="au-sub">—</span>;
+        const label = t.charAt(0).toUpperCase() + t.slice(1);
+        return (
+          <span className={`au-chan ${t === "business" ? "au-c-b2b" : "au-c-cus"}`}>
+            {label}
+          </span>
+        );
+      },
+    },
+    {
+      header: "Name",
+      accessor: "name",
+      cell: (row) => <span className="au-ono">{row.name || "—"}</span>,
+    },
+    {
+      header: "Email",
+      accessor: "email",
+      cell: (row) => <span className="au-sub">{row.email || "—"}</span>,
+    },
     {
       header: "Image",
       accessor: "image",
-      cell: (row) => {
-        if (!row.image) {
-          return (
-            <span style={{ color: "#999", fontSize: "12px" }}>No image</span>
-          );
-        }
-
-        return (
-          <img
-            src={getProfileImageUrl(row.image)}
-            alt={row.name}
-            style={{
-              width: 40,
-              height: 40,
-              objectFit: "cover",
-              borderRadius: "4px",
-            }}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
-        );
-      },
+      cell: (row) => (
+        <span className="au-thumb" aria-hidden={row.image ? undefined : "true"}>
+          {row.image ? (
+            <img
+              src={getProfileImageUrl(row.image)}
+              alt={row.name || "user"}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          ) : (
+            (row.name || "?").trim().charAt(0).toUpperCase() || "?"
+          )}
+        </span>
+      ),
     },
     {
       header: "Status",
@@ -109,8 +122,21 @@ const UsersPage = () => {
         );
       },
     },
-    { header: "City", accessor: "city" },
-    { header: "Business Name", accessor: "business_name" },
+    {
+      header: "City",
+      accessor: "city",
+      cell: (row) => <span className="au-sub">{row.city || "—"}</span>,
+    },
+    {
+      header: "Business Name",
+      accessor: "business_name",
+      cell: (row) =>
+        row.business_name ? (
+          <span className="au-ono">{row.business_name}</span>
+        ) : (
+          <span className="au-sub">—</span>
+        ),
+    },
     {
       header: "Actions",
       accessor: "actions",
@@ -361,6 +387,15 @@ const UsersPage = () => {
       ) : (
       <>
       <StatCards stats={userStats} />
+      <div className="au-notice" role="note">
+        <span className="au-notice-ic" aria-hidden="true">i</span>
+        <span>
+          Wholesale (B2B) accounts must be <b>Approved</b> before they can place orders.
+          <span className="au-pill au-p-pending">Pending</span> accounts can sign in but
+          cannot checkout; set a user's status to Approved from the edit panel to unlock
+          wholesale ordering.
+        </span>
+      </div>
       <TableWithControls
         columns={columns}
         data={users}

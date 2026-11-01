@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Edit, Trash2, Plus } from "lucide-react";
-import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
+import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import { SkeletonCards, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
 import IconPicker from "../components/common/IconPicker";
@@ -27,76 +27,15 @@ const CategoriesPage = () => {
   const [deleteCategory, setDeleteCategory] = useState(null);
   const [form, setForm] = useState({ name: "", description: "", icon: "" });
 
-  // Table shows summary fields only
-  const columns = [
-    { header: "Name", accessor: "name" },
-    { header: "Description", accessor: "description" },
-    {
-      header: "Icon",
-      accessor: "icon",
-      cell: (row) => {
-        if (!row.icon) {
-          return (
-            <span style={{ color: "#999", fontSize: "12px" }}>No icon</span>
-          );
-        }
-
-        return (
-          <span
-            style={{
-              display: "inline-grid",
-              placeItems: "center",
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: "#fbf3e6",
-              color: "#5d0829",
-            }}
-          >
-            <HugeiconsIcon icon={resolveCategoryIcon(row.icon)} size={22} />
-          </span>
-        );
-      },
-    },
-    {
-      header: "Actions",
-      accessor: "actions",
-      cell: (row) => {
-        return (
-          <div
-            className="action-buttons"
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEditCategory(row);
-                setForm({
-                  name: row.name || "",
-                  description: row.description || "",
-                  icon: row.icon || "",
-                });
-                setModalOpen(true);
-              }}
-              tooltip="Edit"
-            >
-              <Edit size={16} />
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => {
-                setDeleteCategory(row);
-              }}
-              tooltip="Delete"
-            >
-              <Trash2 size={16} />
-            </Button>
-          </div>
-        );
-      },
-    },
-  ];
+  const startEdit = (row) => {
+    setEditCategory(row);
+    setForm({
+      name: row.name || "",
+      description: row.description || "",
+      icon: row.icon || "",
+    });
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -207,32 +146,84 @@ const CategoriesPage = () => {
       {loading ? (
         <>
           <SkeletonStats count={3} />
-          <SkeletonTable rows={8} cols={5} />
+          <SkeletonCards count={8} />
         </>
       ) : (
       <>
       <StatCards stats={categoryStats} />
-      <TableWithControls
-        columns={columns}
-        data={categories}
-        searchFields={["name"]}
-        pageTitle="Category Management"
-        loading={loading}
-        actions={
-          <Button
-            onClick={() => {
-              setEditCategory(null);
-              setForm({ name: "", description: "", icon: "" });
-              setModalOpen(true);
-            }}
-          >
-            <Plus size={16} />
-            Add Category
-          </Button>
-        }
-        itemsPerPage={10}
-        errorMessage={error}
-      />
+
+      <div className="au-sechead">
+        <h2>Category Management</h2>
+        <span className="au-muted">{categories.length} total</span>
+        <div className="au-spacer" />
+        <Button
+          onClick={() => {
+            setEditCategory(null);
+            setForm({ name: "", description: "", icon: "" });
+            setModalOpen(true);
+          }}
+        >
+          <Plus size={16} />
+          Add Category
+        </Button>
+      </div>
+
+      {error && <div className="au-notice">{error}</div>}
+
+      {categories.length === 0 ? (
+        <div className="au-card au-empty">
+          <div className="au-empty-title">No categories yet</div>
+          <p>Create your first category to organise the catalogue.</p>
+        </div>
+      ) : (
+        <div className="au-pgrid cat-grid">
+          {categories.map((row) => (
+            <div className="au-pcard" key={row.id}>
+              <div className="au-ph cat-ph">
+                {row.icon ? (
+                  <HugeiconsIcon
+                    icon={resolveCategoryIcon(row.icon)}
+                    size={46}
+                  />
+                ) : (
+                  <span className="cat-noicon">No icon</span>
+                )}
+              </div>
+              <div className="au-pb">
+                <div className="au-pn">{row.name}</div>
+                <div className="au-pm">
+                  {row.description || "No description"}
+                </div>
+                <div className="au-pr">
+                  <Badge tone={row.icon ? "success" : "neutral"}>
+                    {row.icon ? "Icon set" : "No icon"}
+                  </Badge>
+                  <div className="cat-actions">
+                    <button
+                      type="button"
+                      className="au-rowbtn"
+                      onClick={() => startEdit(row)}
+                      title="Edit"
+                      aria-label="Edit category"
+                    >
+                      <Edit size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="au-rowbtn cat-del"
+                      onClick={() => setDeleteCategory(row)}
+                      title="Delete"
+                      aria-label="Delete category"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       </>
       )}
       <SidePanel
@@ -261,7 +252,7 @@ const CategoriesPage = () => {
           value={form.icon}
           onChange={(name) => setForm((prev) => ({ ...prev, icon: name }))}
         />
-        <small style={{ display: "block", marginTop: -2, marginBottom: 10, color: "#8a7a6d", fontSize: 12 }}>
+        <small className="cat-hint">
           Pick an icon — it's shown for this category across the apps.
         </small>
         <div className="modal-actions">

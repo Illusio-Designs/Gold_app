@@ -144,8 +144,9 @@ function getDashboardStats(req, res) {
                                   total_orders: 0,
                                   total_revenue: 0,
                                   pending_orders: 0,
-                                  approved_orders: 0,
-                                  completed_orders: 0,
+                                  processing_orders: 0,
+                                  shipped_orders: 0,
+                                  delivered_orders: 0,
                                   cancelled_orders: 0,
                                 };
 
@@ -182,8 +183,9 @@ function getDashboardStats(req, res) {
                                     orders: todayStats.total_orders,
                                     revenue: todayStats.total_revenue || 0,
                                     pending: todayStats.pending_orders,
-                                    approved: todayStats.approved_orders,
-                                    completed: todayStats.completed_orders,
+                                    processing: todayStats.processing_orders,
+                                    shipped: todayStats.shipped_orders,
+                                    delivered: todayStats.delivered_orders,
                                     cancelled: todayStats.cancelled_orders,
                                     averageOrderValue:
                                       parseFloat(averageOrderValue),

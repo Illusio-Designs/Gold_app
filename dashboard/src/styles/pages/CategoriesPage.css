@@ -1,41 +1,62 @@
-.categories-page .table-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+/* Categories — Amrut Admin tile layout.
+   Visual chrome only; markup uses the shared .au-* primitives. */
+
+.categories-page {
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
 }
 
-.categories-page .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+/* Icon tile: cream-gold well with a maroon glyph */
+.categories-page .cat-ph {
+  color: var(--maroon);
+  background: linear-gradient(135deg, var(--gold-soft), var(--surface-2));
 }
 
-.categories-page .page-title {
-  font-size: 24px;
+.categories-page .cat-noicon {
+  font-size: 12.5px;
   font-weight: 600;
-  color: #5d0829;
+  color: var(--muted);
 }
 
-.categories-page .action-buttons {
+/* Bottom row actions */
+.categories-page .cat-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
-.categories-page .modal-actions {
+.categories-page .au-rowbtn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  padding: 0;
+}
+
+.categories-page .cat-del:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Keep the description to a single tidy line */
+.categories-page .au-pm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Side-panel hint + action rows (shared panel/modal chrome) */
+.categories-page .cat-hint,
+.cat-hint {
+  display: block;
+  margin: -2px 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 20px;
-}
-
-.categories-page .image-preview {
-  margin: 10px 0;
-  text-align: center;
-}
-
-.categories-page .image-preview img {
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

@@ -1,3 +1,61 @@
+/* ==================================================================
+   Amrut revamp — orders list presentation (token-driven, au-* aligned)
+   ================================================================== */
+
+/* Status filter chips row (replaces the old status dropdown) */
+.orders-page .orders-status-chips {
+  margin: 4px 2px 14px;
+}
+
+/* Thumbnail fallback placeholder inside .au-thumb */
+.orders-page .au-thumb-ph {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+}
+
+/* Product cell body (name + sub lines) */
+.orders-page .au-cellbody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.orders-page .au-cellbody .au-ono {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+/* Strong user name */
+.orders-page .au-ustrong {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+/* Quantity (tabular, centred-ish) */
+.orders-page .au-qty {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Amount in brand gold-deep for emphasis */
+.orders-page .au-amt {
+  color: var(--text-primary);
+}
+
+/* Nudge the shared table toward the au-table rhythm */
+.orders-page .custom-table tbody tr:hover {
+  background-color: var(--surface-2);
+}
+.orders-page .status-cell {
+  min-width: 150px;
+}
+
 /* Product Info */
 .product-info {
   display: flex;

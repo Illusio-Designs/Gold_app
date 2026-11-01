@@ -1,0 +1,54 @@
+/* ConsumersPage — Amrut Admin restyle.
+   Presentation only: aligns the D2C consumer directory table + notice banner
+   with the shared `.au-*` artifact primitives. All colors/fonts come from the
+   global theme tokens — no hardcoded hex, no font-family overrides. */
+
+.consumers-page .au-notice {
+  margin-bottom: 20px;
+}
+
+/* Round "i" marker for the notice banner. */
+.consumers-page .au-notice .au-notice-ic {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--cream);
+  background: var(--maroon);
+}
+
+/* Consumer identity cell: avatar initial + stacked name/badge. */
+.consumers-page .au-cell .au-thumb {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.consumers-page .au-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.consumers-page .au-ono {
+  color: var(--ink);
+}
+
+/* Keep the muted secondary cells (email, address, joined) readable but quiet. */
+.consumers-page .au-sub {
+  color: var(--muted);
+}
+
+/* Left-align data cells so the identity avatar + text line up naturally,
+   overriding the shared table's centered last/first-column defaults where
+   they would misalign our restyled content. */
+.consumers-page .custom-table tbody td {
+  vertical-align: middle;
+}

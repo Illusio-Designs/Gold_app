@@ -1,7 +1,51 @@
 /* UsersPage styles */
 .users-page h1 {
   margin-bottom: 16px;
-  color: #5d0829;
+  color: var(--text-primary);
+}
+
+/* ---- Amrut Admin restyle (presentation only) ---- */
+
+/* Approval-gating notice banner above the table. */
+.users-page .au-notice {
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.users-page .au-notice .au-notice-ic {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--cream);
+  background: var(--maroon);
+}
+
+/* Inline Pending pill sitting inside the notice sentence. */
+.users-page .au-notice .au-pill {
+  margin: 0 3px;
+  vertical-align: baseline;
+}
+
+/* Identity avatar thumbnail in the Image column. */
+.users-page .custom-table .au-thumb {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.users-page .au-ono {
+  color: var(--ink);
+}
+
+.users-page .au-sub {
+  color: var(--muted);
 }
 
 .users-page .action-buttons {

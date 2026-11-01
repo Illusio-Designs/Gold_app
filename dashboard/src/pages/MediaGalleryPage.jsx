@@ -18,6 +18,7 @@ import {
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import { SkeletonCards } from "../components/common/Skeleton";
 import SidePanel from "../components/common/SidePanel";
+import Badge from "../components/common/Badge";
 import "../styles/pages/MediaGalleryPage.css";
 
 const MediaGalleryPage = () => {
@@ -198,76 +199,90 @@ const MediaGalleryPage = () => {
     const fileUrl = getFileUrl(item.type, imagePath);
     const isCategory = item.type === "category";
     return (
-      <div key={item.id} className="media-card">
-        <div className="media-card-header">
-          <div className="media-type-badge">
-            {isCategory && <Layers size={16} />}
-            {item.type === "product" && <Package size={16} />}
-            <span>{item.type?.replace("_", " ")}</span>
-          </div>
-          <div className="media-actions">
-            {!isCategory && (
-              <a href={fileUrl} download className="action-btn" aria-label="Download" title="Download">
-                <Download size={16} />
-              </a>
-            )}
-            <button
-              className="action-btn delete-btn"
-              onClick={() => setDeleteItem(item)}
-              title="Delete"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        </div>
-
-        {isCategory ? (
-          // Categories are identified by their name, not an image.
-          <div className="media-preview media-preview--category">
+      <div key={item.id} className="au-pcard media-card">
+        <div
+          className={`au-ph media-ph${
+            isCategory ? " media-ph--category" : ""
+          }`}
+        >
+          {isCategory ? (
+            // Categories are identified by their name, not an image.
             <div className="media-category-name">
               <Layers size={30} />
               <span>{item.name}</span>
             </div>
-          </div>
-        ) : (
-          <div className="media-preview">
-            {fileUrl && imagePath ? (
-              <img
-                src={fileUrl}
-                alt={item.name}
-                loading="lazy"
-                decoding="async"
-                key={`${item.id}-${imagePath}`}
-                onError={(e) => {
-                  // Try fallback URL with direct file access
-                  const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
-                  let fallbackUrl;
-                  if (imagePath.startsWith("/uploads/")) {
-                    fallbackUrl = `${imageBaseUrl}${imagePath.replace('/uploads', '')}`;
-                  } else {
-                    fallbackUrl = `${imageBaseUrl}/products/${imagePath}`;
-                  }
-                  e.target.src = fallbackUrl;
-                }}
-              />
-            ) : (
-              <div className="no-preview">
-                <Image size={32} />
-                <span>No Preview</span>
-              </div>
+          ) : fileUrl && imagePath ? (
+            <img
+              src={fileUrl}
+              alt={item.name}
+              loading="lazy"
+              decoding="async"
+              key={`${item.id}-${imagePath}`}
+              onError={(e) => {
+                // Try fallback URL with direct file access
+                const imageBaseUrl = import.meta.env.VITE_IMAGE_BASE_URL || 'https://api.amrutkumargovinddasllp.com/uploads';
+                let fallbackUrl;
+                if (imagePath.startsWith("/uploads/")) {
+                  fallbackUrl = `${imageBaseUrl}${imagePath.replace('/uploads', '')}`;
+                } else {
+                  fallbackUrl = `${imageBaseUrl}/products/${imagePath}`;
+                }
+                e.target.src = fallbackUrl;
+              }}
+            />
+          ) : (
+            <div className="no-preview">
+              <Image size={32} />
+              <span>No Preview</span>
+            </div>
+          )}
+
+          <span className="au-stk">
+            <Badge
+              tone={isCategory ? "info" : "brand"}
+              className="badge--nodot"
+            >
+              {isCategory ? <Layers size={12} /> : <Package size={12} />}
+              <span className="media-type-label">
+                {item.type?.replace("_", " ")}
+              </span>
+            </Badge>
+          </span>
+
+          <div className="media-actions">
+            {!isCategory && (
+              <a
+                href={fileUrl}
+                download
+                className="media-abtn"
+                aria-label="Download"
+                title="Download"
+              >
+                <Download size={15} />
+              </a>
             )}
+            <button
+              className="media-abtn media-abtn--del"
+              onClick={() => setDeleteItem(item)}
+              title="Delete"
+              aria-label="Delete"
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+
+          {!isCategory && (
             <span className="wm-overlay">
               <Droplet size={11} /> Watermarked
             </span>
-          </div>
-        )}
+          )}
+        </div>
 
-        <div className="media-info">
-          <h4>{item.name}</h4>
-          <p className="media-ref">
-            {isCategory ? "Category" : "SKU"}:{" "}
-            <strong>{item.name}</strong>
-          </p>
+        <div className="au-pb">
+          <div className="au-pn">{item.name}</div>
+          <div className="au-pm media-ref">
+            {isCategory ? "Category" : "SKU"}: <strong>{item.name}</strong>
+          </div>
         </div>
       </div>
     );
@@ -291,42 +306,39 @@ const MediaGalleryPage = () => {
   return (
     <div className="media-gallery-page">
       {/* Header Section */}
-      <div className="media-header-section">
-        <div className="table-controls">
-          <div className="controls-left">
-            <h2 className="page-title">Media Gallery</h2>
-          </div>
-          <div className="controls-right">
-            <button
-              className="upload-btn"
-              onClick={() => setShowBulkUploadModal(true)}
-            >
-              <Upload size={16} />
-              Upload Images
-            </button>
-          </div>
-        </div>
+      <div className="au-sechead">
+        <h2>Media Gallery</h2>
+        <span className="au-muted">
+          {processedMediaItems.length} item
+          {processedMediaItems.length === 1 ? "" : "s"}
+        </span>
+        <div className="au-spacer" />
+        <button
+          className="au-btn"
+          onClick={() => setShowBulkUploadModal(true)}
+        >
+          <Upload size={16} />
+          Upload Images
+        </button>
       </div>
 
       {/* Media Grid */}
-      <div className="media-grid">
-        {processedMediaItems.length > 0 ? (
-          renderedMediaCards
-        ) : (
-          <div className="empty-state">
-            <Image size={48} />
-            <h3>No Processed Images Found</h3>
-            <p>Upload some images to see them here with watermarks applied.</p>
-            <button
-              className="bulk-upload-btn"
-              onClick={() => setShowBulkUploadModal(true)}
-            >
-              <Upload size={16} />
-              Upload Your First Image
-            </button>
-          </div>
-        )}
-      </div>
+      {processedMediaItems.length > 0 ? (
+        <div className="au-pgrid media-grid">{renderedMediaCards}</div>
+      ) : (
+        <div className="au-card au-empty">
+          <Image size={44} />
+          <div className="au-empty-title">No Processed Images Found</div>
+          <p>Upload some images to see them here with watermarks applied.</p>
+          <button
+            className="au-btn"
+            onClick={() => setShowBulkUploadModal(true)}
+          >
+            <Upload size={16} />
+            Upload Your First Image
+          </button>
+        </div>
+      )}
 
       {/* Bulk Upload Side Panel */}
       <SidePanel
