@@ -10,12 +10,11 @@ This file now tracks only what is still outstanding.
 
 ## 🔧 Needs doing
 
-- **Dashboard: "Delete product" is broken.** In `dashboard/src/pages/ProductsPage.jsx`
-  a `deleteProduct` state variable shadows the imported `deleteProduct` API
-  function, so the delete call can't reach the API. *(code-review M2)*
-- **One-time password reset for old dashboard accounts.** Any account created
-  from the dashboard **before** the double-hash fix still has a double-hashed
-  password and cannot log in until it is re-saved / reset. New accounts are fine.
+- **One-time password reset for old dashboard accounts (your action).** Accounts
+  created from the dashboard **before** the double-hash fix can't log in. New
+  accounts are fine. Run `node Backend/scripts/resetPassword.js <email> "<newPassword>"`
+  against the DB for each affected account (or edit the user in the dashboard and
+  set a new password). Data cleanup only — nothing left to code.
 - **Minor backend code quality (low priority).** Hardcoded admin id `1` in the
   notification calls; ownership/auth guard expressions duplicated inline instead
   of a shared helper. *(code-review M4 / M6 / M7)*
