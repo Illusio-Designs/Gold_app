@@ -66,13 +66,14 @@ async function registerUser(req, res) {
                 [result.insertId, req.body.device_fcm_token],
                 (linkErr) => {
                   if (linkErr) {
-                    } else {
-                    }
+                    console.error("FCM token link failed:", linkErr.message);
+                  }
                 }
               );
             }
           } catch (e) {
-            }
+            console.error("FCM token link error:", e.message);
+          }
 
           // Send notification to admin for business user registration
           if (user.type === "business") {
@@ -102,19 +103,20 @@ async function registerUser(req, res) {
             `;
             db.query(selectSql, [], (selErr, selRows) => {
               if (selErr) {
-                } else if (selRows && selRows.length > 0) {
+                console.error("FCM token lookup failed:", selErr.message);
+              } else if (selRows && selRows.length > 0) {
                 const tokenRowId = selRows[0].id;
                 const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
                 db.query(updateSql, [newUserId, tokenRowId], (updErr) => {
                   if (updErr) {
-                    } else {
-                    }
+                    console.error("FCM token attach failed:", updErr.message);
+                  }
                 });
-              } else {
-                }
+              }
             });
           } catch (linkErr) {
-            }
+            console.error("FCM token linking error:", linkErr.message);
+          }
 
           res.status(201).json({
             message: "User registered successfully",

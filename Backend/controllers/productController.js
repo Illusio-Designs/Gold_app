@@ -467,9 +467,6 @@ function getProductsByCategory(req, res) {
             };
           });
 
-          processedResults.forEach((product, index) => {
-            });
-
           res.json(processedResults);
         });
       }

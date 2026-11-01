@@ -127,9 +127,6 @@ function getAllProducts(callback) {
     "SELECT * FROM products WHERE status = 'active' ORDER BY created_at DESC";
 
   db.query(sql, (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }
@@ -183,11 +180,6 @@ function getProductBySku(sku, callback) {
     "SELECT * FROM products WHERE sku = ? AND status = 'active' AND stock_status != 'out_of_stock'";
 
   db.query(sql, [sku], (err, results) => {
-    if (err) {
-      } else {
-      if (results.length > 0) {
-        }
-    }
     callback(err, results);
   });
 }
@@ -267,9 +259,6 @@ function getAvailableProducts(callback) {
     "SELECT * FROM products WHERE status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
   db.query(sql, (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }
@@ -281,9 +270,6 @@ function getAvailableProductsByCategory(categoryId, callback) {
     "SELECT * FROM products WHERE category_id = ? AND status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
   db.query(sql, [categoryId], (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }
