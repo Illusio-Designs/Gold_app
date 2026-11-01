@@ -10,13 +10,11 @@ const {
   notifyUserRegistration,
 } = require("../services/adminNotificationService");
 
-// Public self-registration — may ONLY create business or consumer accounts.
-// The account type is NEVER taken from untrusted input as "admin": doing so
-// would let anyone self-mint an admin and take over the dashboard. Admins are
-// created only via the authenticated admin-only path (createAdmin).
-async function registerUser(req, res) {
+// Build the user record for public registration. The account type is forced to
+// business/consumer and never taken as "admin" from untrusted input.
+function buildRegistrationUser(req) {
   const safeType = req.body.type === "consumer" ? "consumer" : "business";
-  const user = {
+  return {
     type: safeType,
     name: req.body.name,
     email: req.body.email,
@@ -34,8 +32,78 @@ async function registerUser(req, res) {
     business_name: req.body.business_name,
     remarks: req.body.remarks,
   };
+}
+
+// Attach an explicitly-supplied device FCM token to the new user (best-effort).
+function linkExplicitDeviceToken(userId, deviceToken) {
+  if (!deviceToken) return;
   try {
-    // Check for duplicate email or phone number
+    const linkSql = `
+      INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
+      VALUES (?, ?, 'mobile', true, NOW())
+      ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), active = true, updated_at = NOW()
+    `;
+    db.query(linkSql, [userId, deviceToken], (linkErr) => {
+      if (linkErr) console.error("FCM token link failed:", linkErr.message);
+    });
+  } catch (e) {
+    console.error("FCM token link error:", e.message);
+  }
+}
+
+// Attach the most recent unauthenticated mobile FCM token to the new user, so
+// they receive status pushes on the device they just registered from.
+function linkLatestUnauthToken(userId) {
+  try {
+    const selectSql = `
+      SELECT id FROM notification_tokens
+      WHERE user_id IS NULL AND device_type = 'mobile'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    db.query(selectSql, [], (selErr, selRows) => {
+      if (selErr) {
+        console.error("FCM token lookup failed:", selErr.message);
+        return;
+      }
+      if (!selRows || selRows.length === 0) return;
+      const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
+      db.query(updateSql, [userId, selRows[0].id], (updErr) => {
+        if (updErr) console.error("FCM token attach failed:", updErr.message);
+      });
+    });
+  } catch (linkErr) {
+    console.error("FCM token linking error:", linkErr.message);
+  }
+}
+
+// Notify the admin that a new business user registered (best-effort; never
+// blocks or fails the registration).
+async function notifyAdminOfBusinessRegistration(user, userId) {
+  try {
+    await notifyUserRegistration({
+      id: userId,
+      name: user.name,
+      email: user.email,
+      business_name: user.business_name,
+      phone_number: user.phone_number,
+    });
+  } catch (notificationError) {
+    console.error(
+      "notifyUserRegistration failed:",
+      notificationError && notificationError.message
+    );
+  }
+}
+
+// Public self-registration — may ONLY create business or consumer accounts.
+// The account type is NEVER taken from untrusted input as "admin": doing so
+// would let anyone self-mint an admin and take over the dashboard. Admins are
+// created only via the authenticated admin-only path (createAdmin).
+async function registerUser(req, res) {
+  const user = buildRegistrationUser(req);
+  try {
+    // Reject duplicate email or phone number before creating the account.
     db.query(
       "SELECT * FROM users WHERE email = ? OR phone_number = ?",
       [user.email, user.phone_number],
@@ -53,70 +121,12 @@ async function registerUser(req, res) {
             return res.status(400).json({ error: err.message });
           }
 
-          // Link unauth token by explicit device token if provided in payload
-          try {
-            if (req.body.device_fcm_token) {
-              const linkSql = `
-                INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
-                VALUES (?, ?, 'mobile', true, NOW())
-                ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), active = true, updated_at = NOW()
-              `;
-              db.query(
-                linkSql,
-                [result.insertId, req.body.device_fcm_token],
-                (linkErr) => {
-                  if (linkErr) {
-                    console.error("FCM token link failed:", linkErr.message);
-                  }
-                }
-              );
-            }
-          } catch (e) {
-            console.error("FCM token link error:", e.message);
-          }
-
-          // Send notification to admin for business user registration
+          // Best-effort device/notification wiring — never blocks registration.
+          linkExplicitDeviceToken(result.insertId, req.body.device_fcm_token);
           if (user.type === "business") {
-            try {
-              const userData = {
-                id: result.insertId,
-                name: user.name,
-                email: user.email,
-                business_name: user.business_name,
-                phone_number: user.phone_number,
-              };
-              await notifyUserRegistration(userData);
-              } catch (notificationError) {
-              // Don't fail the registration if notification fails
-            }
+            await notifyAdminOfBusinessRegistration(user, result.insertId);
           }
-
-          // Link latest unauth mobile FCM token to this newly created user so they can receive status pushes
-          try {
-            const newUserId = result.insertId;
-            // Get the most recent unauthenticated mobile token
-            const selectSql = `
-              SELECT id FROM notification_tokens 
-              WHERE user_id IS NULL AND device_type = 'mobile' 
-              ORDER BY created_at DESC 
-              LIMIT 1
-            `;
-            db.query(selectSql, [], (selErr, selRows) => {
-              if (selErr) {
-                console.error("FCM token lookup failed:", selErr.message);
-              } else if (selRows && selRows.length > 0) {
-                const tokenRowId = selRows[0].id;
-                const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
-                db.query(updateSql, [newUserId, tokenRowId], (updErr) => {
-                  if (updErr) {
-                    console.error("FCM token attach failed:", updErr.message);
-                  }
-                });
-              }
-            });
-          } catch (linkErr) {
-            console.error("FCM token linking error:", linkErr.message);
-          }
+          linkLatestUnauthToken(result.insertId);
 
           res.status(201).json({
             message: "User registered successfully",
