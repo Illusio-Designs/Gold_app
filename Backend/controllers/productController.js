@@ -373,6 +373,56 @@ function deleteProductImage(req, res) {
 }
 
 // Get all products by category
+// Resolve a product's image URLs: prefer a cleaned/watermarked .webp, then an
+// existing .webp, then a processed .webp, finally the original upload. Returns
+// the product augmented with processed/original/primary image URLs.
+function withResolvedImageUrls(product) {
+  let processedImageUrl = null;
+  let originalImageUrl = null;
+  let finalImageUrl = null;
+
+  if (product.image) {
+    originalImageUrl = `${getBaseUrl()}/uploads/products/${product.image}`;
+    const baseName = product.image.split(".")[0];
+    const cleanedImageName = `${baseName}-cleaned.webp`;
+    const cleanedImagePath = path.join(
+      __dirname,
+      "../uploads/products",
+      cleanedImageName
+    );
+
+    if (fs.existsSync(cleanedImagePath)) {
+      processedImageUrl = `${getBaseUrl()}/uploads/products/${cleanedImageName}`;
+      finalImageUrl = processedImageUrl;
+    } else if (product.image.endsWith(".webp")) {
+      processedImageUrl = originalImageUrl;
+      finalImageUrl = processedImageUrl;
+    } else {
+      const processedImageName = `${baseName}.webp`;
+      const processedImagePath = path.join(
+        __dirname,
+        "../uploads/products",
+        processedImageName
+      );
+      if (fs.existsSync(processedImagePath)) {
+        processedImageUrl = `${getBaseUrl()}/uploads/products/${processedImageName}`;
+        finalImageUrl = processedImageUrl;
+      } else {
+        processedImageUrl = null;
+        finalImageUrl = originalImageUrl;
+      }
+    }
+  }
+
+  return {
+    ...product,
+    processedImageUrl,
+    originalImageUrl,
+    imageUrl: finalImageUrl,
+    hasProcessedImage: !!processedImageUrl,
+  };
+}
+
 function getProductsByCategory(req, res) {
   const { categoryId } = req.params;
 
@@ -410,62 +460,8 @@ function getProductsByCategory(req, res) {
             return res.status(500).json({ error: err.message });
           }
 
-          // Process results to include processed image URLs with watermarks
-          const processedResults = results.map((product) => {
-            let processedImageUrl = null;
-            let originalImageUrl = null;
-            let finalImageUrl = null;
-
-            if (product.image) {
-              // Original image URL
-              originalImageUrl = `${getBaseUrl()}/uploads/products/${product.image}`;
-
-              // Always check for cleaned/watermarked image first (highest priority)
-              const baseName = product.image.split(".")[0]; // Remove original extension
-              const cleanedImageName = `${baseName}-cleaned.webp`;
-              const cleanedImagePath = path.join(
-                __dirname,
-                "../uploads/products",
-                cleanedImageName
-              );
-
-              if (fs.existsSync(cleanedImagePath)) {
-                // Use cleaned/watermarked image (highest priority)
-                processedImageUrl = `${getBaseUrl()}/uploads/products/${cleanedImageName}`;
-                finalImageUrl = processedImageUrl;
-                } else if (product.image.endsWith(".webp")) {
-                // Fall back to existing processed .webp file
-                processedImageUrl = originalImageUrl;
-                finalImageUrl = processedImageUrl;
-                } else {
-                // Convert to processed image path (.webp extension)
-                const processedImageName = `${baseName}.webp`;
-                const processedImagePath = path.join(
-                  __dirname,
-                  "../uploads/products",
-                  processedImageName
-                );
-
-                if (fs.existsSync(processedImagePath)) {
-                  // Use regular processed image
-                  processedImageUrl = `${getBaseUrl()}/uploads/products/${processedImageName}`;
-                  finalImageUrl = processedImageUrl;
-                  } else {
-                  // Processed image doesn't exist, fall back to original
-                  processedImageUrl = null;
-                  finalImageUrl = originalImageUrl;
-                  }
-              }
-            }
-
-            return {
-              ...product,
-              processedImageUrl: processedImageUrl,
-              originalImageUrl: originalImageUrl,
-              imageUrl: finalImageUrl, // Use final image as primary image
-              hasProcessedImage: !!processedImageUrl,
-            };
-          });
+          // Process results to include resolved image URLs
+          const processedResults = results.map(withResolvedImageUrls);
 
           res.json(processedResults);
         });
