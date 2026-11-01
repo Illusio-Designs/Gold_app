@@ -826,8 +826,25 @@ async function verifyBusinessOTP(req, res) {
 
         const user = results[0];
 
-        // All users treated equally - no approval check, unlimited access
-        // Generate JWT token with unlimited duration
+        // Approval gate: B2B 'business' accounts must be approved by an admin
+        // before they can log in. D2C 'consumer' accounts are not approval-gated
+        // (they register with status = null). The Play Store / App Store
+        // reviewer test account bypasses the gate so store review can sign in.
+        const BYPASS_PHONE_NUMBER = "7600046416";
+        const isBypassUser = phoneNumber === BYPASS_PHONE_NUMBER;
+        if (
+          !isBypassUser &&
+          user.type === "business" &&
+          user.status !== "approved"
+        ) {
+          return res.status(403).json({
+            error: "Account not approved",
+            status: user.status,
+            remarks: user.remarks,
+          });
+        }
+
+        // Generate JWT token
         const token = jwt.sign(
           {
             id: user.id,

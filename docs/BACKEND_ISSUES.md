@@ -38,7 +38,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
 
 ## 🟠 Important
 
-### 3. Login can hand out a pass without really checking the code, and lets blocked users in
+### 3. Login can hand out a pass without really checking the code, and lets blocked users in — ✅ FIXED
 - **What's wrong:** The phone-login step trusts the phone number alone and hands out a
   long-lived login pass, and it skips the "is this shop approved?" check.
 - **Why it matters:** A not-yet-approved (or rejected) shop could still get in.
