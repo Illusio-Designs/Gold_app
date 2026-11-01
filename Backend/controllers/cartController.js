@@ -44,8 +44,8 @@ function addToCart(req, res) {
           // Verify the item was actually added to the database
           cartModel.getUserCart(user_id, (verifyErr, verifyResults) => {
             if (verifyErr) {
-              } else {
-              }
+              console.error("[cartController.js]:", verifyErr && verifyErr.message);
+            }
           });
           
           // Emit specific update to the user's room only

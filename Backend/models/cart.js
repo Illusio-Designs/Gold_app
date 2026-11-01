@@ -19,8 +19,8 @@ function addToCart(cartItem, callback) {
 
   db.query(sql, values, (err, result) => {
     if (err) {
-      } else {
-      }
+      console.error("[cart.js]:", err && err.message);
+    }
     callback(err, result);
   });
 }
@@ -41,8 +41,8 @@ function getUserCart(userId, callback) {
 
   db.query(sql, [userId], (err, results) => {
     if (err) {
-      } else {
-      }
+      console.error("[cart.js]:", err && err.message);
+    }
     callback(err, results);
   });
 }
@@ -73,8 +73,8 @@ function clearUserCart(userId, callback) {
 
   db.query(sql, [userId], (err, result) => {
     if (err) {
-      } else {
-      }
+      console.error("[cart.js]:", err && err.message);
+    }
     callback(err, result);
   });
 }

@@ -15,7 +15,6 @@ class ImageProcessingService {
 
     // Check if watermark file exists
     if (fs.existsSync(this.watermarkPath)) {
-      } else {
       }
   }
 
@@ -169,7 +168,8 @@ class ImageProcessingService {
           fs.unlinkSync(inputPath);
           }
       } catch (cleanupError) {
-        }
+        console.error("[imageProcessingService.js]:", cleanupError && cleanupError.message);
+      }
 
       return result;
     } catch (error) {
@@ -191,7 +191,8 @@ class ImageProcessingService {
           fs.unlinkSync(inputPath);
           }
       } catch (cleanupError) {
-        }
+        console.error("[imageProcessingService.js]:", cleanupError && cleanupError.message);
+      }
       return fallbackResult;
     }
   }
@@ -260,24 +261,25 @@ class ImageProcessingService {
                       if (fs.existsSync(filePath)) {
                         fs.unlink(filePath, (finalErr) => {
                           if (finalErr) {
-                            } else {
-                            }
+                            console.error("[imageProcessingService.js]:", finalErr && finalErr.message);
+                          }
                         });
                       }
                     } catch (finalErr) {
-                      }
+                      console.error("[imageProcessingService.js]:", finalErr && finalErr.message);
+                    }
                   }, 3000);
                 }
               }, 5000);
-            } else {
-              }
+            }
           }
         };
 
         deleteFile();
       }
     } catch (error) {
-      }
+      console.error("[imageProcessingService.js]:", error && error.message);
+    }
   }
 }
 

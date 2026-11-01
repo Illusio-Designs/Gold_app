@@ -30,8 +30,8 @@ function createProduct(product, callback) {
     product.purity,
     product.pieces,
     product.mark_amount,
-    "draft", // Always start as draft
-    "available", // Always start as available stock
+    "draft",
+    "available",
   ];
   db.query(sql, values, callback);
 }

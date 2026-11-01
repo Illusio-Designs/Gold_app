@@ -75,7 +75,8 @@ async function sendAdminNotification(type, title, body, data = {}) {
           // Debug: Check all tokens in the database
           db.query('SELECT user_id, token, active, created_at FROM notification_tokens', (debugErr, debugResults) => {
             if (debugErr) {
-              }
+              console.error("[adminNotificationService.js]:", debugErr && debugErr.message);
+            }
           });
           
           resolve({ success: false, error: 'No admin token found' });
@@ -145,8 +146,8 @@ async function sendAdminNotification(type, title, body, data = {}) {
               
               db.query(markUnreadSql, [adminUserId, notificationId], (markErr) => {
                 if (markErr) {
-                  } else {
-                  }
+                  console.error("[adminNotificationService.js]:", markErr && markErr.message);
+                }
               });
 
               resolve({
@@ -545,8 +546,8 @@ async function sendUserNotification(userId, type, title, body, data = {}) {
 
               db.query(markUnreadSql, [userId, notificationId], (markErr) => {
                 if (markErr) {
-                  } else {
-                  }
+                  console.error("[adminNotificationService.js]:", markErr && markErr.message);
+                }
               });
 
               resolve({ success: true, notificationId, pushResult });

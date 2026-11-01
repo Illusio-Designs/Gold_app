@@ -102,7 +102,7 @@ async function uploadAndAssign(req, res) {
 
     // Still no product -> reject the upload and remove the temp file
     if (!productId) {
-      fs.unlink(file.path, () => {});
+      fs.unlink(file.path, (e) => { if (e) console.error("[media] temp cleanup:", e.message); });
       return res.status(422).json({
         matched: false,
         error:
@@ -117,7 +117,7 @@ async function uploadAndAssign(req, res) {
       );
     });
     if (!product) {
-      fs.unlink(file.path, () => {});
+      fs.unlink(file.path, (e) => { if (e) console.error("[media] temp cleanup:", e.message); });
       return res.status(404).json({ matched: false, error: "Product not found" });
     }
 
@@ -152,7 +152,7 @@ async function uploadAndAssign(req, res) {
       image: outputFilename,
     });
   } catch (err) {
-    fs.unlink(file.path, () => {});
+    fs.unlink(file.path, (e) => { if (e) console.error("[media] temp cleanup:", e.message); });
     return res.status(500).json({ error: err.message });
   }
 }
@@ -178,7 +178,7 @@ async function bulkUploadMedia(req, res) {
       );
 
       if (!detection || detection.type !== "product") {
-        fs.unlink(file.path, () => {});
+        fs.unlink(file.path, (e) => { if (e) console.error("[media] temp cleanup:", e.message); });
         results.push({
           file: file.originalname,
           success: false,
@@ -215,7 +215,7 @@ async function bulkUploadMedia(req, res) {
         matchedBy: `filename (${detection.confidence})`,
       });
     } catch (err) {
-      fs.unlink(file.path, () => {});
+      fs.unlink(file.path, (e) => { if (e) console.error("[media] temp cleanup:", e.message); });
       results.push({ file: file.originalname, success: false, reason: err.message });
     }
   }
@@ -256,8 +256,8 @@ function getMediaItemsWithProcessedImages(req, res) {
     "SELECT id, name, image, status FROM products WHERE image IS NOT NULL LIMIT 10",
     (err, productsWithImages) => {
       if (err) {
-        } else {
-        }
+        console.error("[mediaGalleryController.js]:", err && err.message);
+      }
     }
   );
 
@@ -266,8 +266,8 @@ function getMediaItemsWithProcessedImages(req, res) {
     "SELECT id, title, file_url, category FROM media_gallery LIMIT 10",
     (err, mediaGallery) => {
       if (err) {
-        } else {
-        }
+        console.error("[mediaGalleryController.js]:", err && err.message);
+      }
     }
   );
 
@@ -332,8 +332,8 @@ function getMediaItemsWithProcessedImages(req, res) {
   // First, let's test a simple query to make sure database connection works
   db.query("SELECT COUNT(*) as count FROM products", (testErr, testResults) => {
     if (testErr) {
-      } else {
-      }
+      console.error("[mediaGalleryController.js]:", testErr && testErr.message);
+    }
   });
 
   // Test the specific products query
@@ -341,8 +341,8 @@ function getMediaItemsWithProcessedImages(req, res) {
     "SELECT id, name, image, status FROM products WHERE image IS NOT NULL AND image != ''",
     (prodErr, prodResults) => {
       if (prodErr) {
-        } else {
-        }
+        console.error("[mediaGalleryController.js]:", prodErr && prodErr.message);
+      }
     }
   );
 
@@ -476,8 +476,8 @@ function getMediaItemsWithProcessedImages(req, res) {
         "SELECT id, name, image, status FROM products LIMIT 5",
         (err, products) => {
           if (err) {
-            } else {
-            }
+            console.error("[mediaGalleryController.js]:", err && err.message);
+          }
         }
       );
 
@@ -486,8 +486,8 @@ function getMediaItemsWithProcessedImages(req, res) {
         "SELECT id, name, image, status FROM categories LIMIT 5",
         (err, categories) => {
           if (err) {
-            } else {
-            }
+            console.error("[mediaGalleryController.js]:", err && err.message);
+          }
         }
       );
 
@@ -496,8 +496,8 @@ function getMediaItemsWithProcessedImages(req, res) {
         "SELECT id, title, file_url, category FROM media_gallery LIMIT 5",
         (err, media) => {
           if (err) {
-            } else {
-            }
+            console.error("[mediaGalleryController.js]:", err && err.message);
+          }
         }
       );
     }

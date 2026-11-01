@@ -232,7 +232,8 @@ async function businessLogin(req, res) {
           [user.id],
           (updateErr) => {
             if (updateErr) {
-              }
+              console.error("[userController.js]:", updateErr && updateErr.message);
+            }
           }
         );
 
@@ -267,16 +268,12 @@ async function businessLogin(req, res) {
             [user.id, categoryIdsJson],
             (insertErr, insertResult) => {
               if (insertErr) {
-                } else {
+                console.error("[userController.js]:", insertErr && insertErr.message);
               }
             }
           );
         }
       }
-
-      // Business login - return token
-      if (isBypassUser) {
-        }
 
       res.json({
         message: "Login successful",
@@ -342,17 +339,11 @@ async function updateUserStatus(req, res) {
                 } else if (userResults.length > 0) {
                 const userData = userResults[0];
                 try {
-                  const notificationResult =
-                    await notifyRegistrationStatusChange(userData);
-                  // Check if notification was actually sent
-                  if (notificationResult && notificationResult.success) {
-                    } else {
-                    }
+                  await notifyRegistrationStatusChange(userData);
                 } catch (notificationError) {
                   // Don't fail the request if notification fails
                 }
-              } else {
-                }
+              }
             }
           );
         } catch (notificationError) {
@@ -587,10 +578,6 @@ async function updateUser(req, res) {
     }
     const { id } = req.params;
 
-    // Log incoming request for debugging
-    if (!req.file) {
-    }
-
     // Validate required fields
     if (!req.body.name || req.body.name.trim() === "") {
       return res.status(400).json({ error: "Name is required" });
@@ -646,7 +633,8 @@ async function updateUser(req, res) {
               fs.unlinkSync(oldImagePath);
             }
           } catch (err) {
-            }
+            console.error("[userController.js]:", err && err.message);
+          }
         }
       } catch (imageError) {
         // Continue without image if processing fails

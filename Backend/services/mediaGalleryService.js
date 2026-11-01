@@ -76,6 +76,7 @@ class MediaGalleryService {
         try {
           fs.unlinkSync(file.path);
           } catch (error) {
+            console.error("[mediaGalleryService.js]:", error && error.message);
           }
       }
     }
@@ -93,7 +94,8 @@ class MediaGalleryService {
         fs.unlinkSync(orphaned.path);
         deletedFiles.push(orphaned);
       } catch (error) {
-        }
+        console.error("[mediaGalleryService.js]:", error && error.message);
+      }
     }
 
     return deletedFiles;
@@ -216,8 +218,7 @@ class MediaGalleryService {
                   productCleaned++;
                 }
               });
-            } else {
-              }
+            }
           });
 
           resolve({
