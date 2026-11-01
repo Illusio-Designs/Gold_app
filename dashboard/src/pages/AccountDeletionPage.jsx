@@ -11,14 +11,12 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
-import PageHeader from "../components/common/PageHeader";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CheckmarkCircle02Icon,
   CancelCircleIcon,
   ArrowReloadHorizontalIcon,
-  UserRemove01Icon,
 } from "@hugeicons/core-free-icons";
 import "../styles/pages/AccountDeletionPage.css";
 
@@ -205,11 +203,6 @@ const AccountDeletionPage = () => {
   if (loading) {
     return (
       <div className="account-deletion-page">
-        <PageHeader
-          title="Account Deletion"
-          subtitle="Review and action user deletion requests"
-          icon={UserRemove01Icon}
-        />
         <SkeletonStats count={4} />
         <SkeletonTable rows={8} cols={6} />
       </div>
@@ -218,11 +211,6 @@ const AccountDeletionPage = () => {
 
   return (
     <div className="account-deletion-page">
-      <PageHeader
-        title="Account Deletion"
-        subtitle="Review and action user deletion requests"
-        icon={UserRemove01Icon}
-      />
       <StatCards stats={deletionStats} />
       <TableWithControls
         columns={columns}
