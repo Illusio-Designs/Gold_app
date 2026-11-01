@@ -88,7 +88,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
   is meant to travel with the product and be visible to everyone.
 - **Decision:** Leave it exactly as-is. No gating. No code change.
 
-### 9. "Mark one notification as read" saves it against nobody
+### 9. "Mark one notification as read" saves it against nobody — ✅ FIXED
 - **What's wrong:** One of the notification routes is missing the user, so the "read"
   mark is saved against an empty user.
 - **The fix:** Use the logged-in user automatically.

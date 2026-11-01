@@ -175,7 +175,11 @@ function getUnreadCount(req, res) {
 
 // Mark a notification as read
 function markAsRead(req, res) {
-  const { userId, notificationId } = req.params;
+  const { notificationId } = req.params;
+  // The route carries only :notificationId, so the user is always the
+  // authenticated caller (verifyToken runs first). Reading userId from
+  // req.params left it undefined and wrote the read-mark against no user.
+  const userId = req.user.id;
 
   const sql = `
     INSERT INTO user_notifications (user_id, notification_id, read_at)
