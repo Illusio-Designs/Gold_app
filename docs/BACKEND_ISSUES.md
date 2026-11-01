@@ -24,7 +24,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
 - **App change?** **No.** The shop app already signs people up as "shop" and the
   customer app as "customer" — exactly what the fix keeps allowing. Nothing to change.
 
-### 2. Placing an order for a single product is broken
+### 2. Placing an order for a single product is broken — ✅ FIXED
 - **What's wrong:** When someone orders one product (not from the cart), the server hits
   an internal error and never finishes. The stock gets held, but the customer just sees
   it hang with no confirmation.

@@ -122,7 +122,7 @@ function createOrder(req, res) {
             const notificationData = {
               id: orderDetails.id,
               orderNumber: orderDetails.order_number,
-              userId: orderDetails.business_user_id,
+              userId: orderDetails.user_id,
               userName: orderDetails.user_name,
               productName: orderDetails.product_name,
               productSku: orderDetails.product_sku,
@@ -142,9 +142,12 @@ function createOrder(req, res) {
             timestamp: new Date().toISOString(),
           });
 
-          // Emit specific update to the user's room
+          // Emit specific update to the user's room. The owner is always
+          // orderDetails.user_id (the authenticated buyer); there is no
+          // business_user_id column — referencing it threw a ReferenceError
+          // after the order had already saved, hanging the client.
           socketService.emitToRoom(
-            `user_${business_user_id}`,
+            `user_${orderDetails.user_id}`,
             "order-created",
             {
               order: orderDetails,
