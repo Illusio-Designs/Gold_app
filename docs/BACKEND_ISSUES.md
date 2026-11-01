@@ -69,7 +69,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
 
 ## 🟡 Worth fixing
 
-### 6. Admin user lists quietly include passwords
+### 6. Admin user lists quietly include passwords — ✅ FIXED
 - **What's wrong:** When the dashboard loads the user list, the server also sends the
   scrambled passwords, reset codes and OTPs along with it — more than should ever leave
   the server.

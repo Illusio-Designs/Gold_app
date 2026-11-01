@@ -360,13 +360,21 @@ async function updateUserStatus(req, res) {
 }
 
 // Get all users (B2B businesses — the wholesale accounts)
+// Explicit, non-sensitive column list for user lists. Never includes
+// password, otp or reset_token, which must never leave the database.
+const USER_LIST_COLUMNS =
+  "id, type, name, email, phone_number, image, address_line1, address_line2, landmark, state, city, country, gst_number, pan_number, business_name, status, remarks, created_at, updated_at";
+
 function getAllUsers(req, res) {
-  db.query("SELECT * FROM users WHERE type = 'business'", (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+  db.query(
+    `SELECT ${USER_LIST_COLUMNS} FROM users WHERE type = 'business' ORDER BY created_at DESC`,
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
     }
-    res.json(results);
-  });
+  );
 }
 
 // Get all system/admin accounts (for the dashboard System Users page).
@@ -386,7 +394,7 @@ function getAllAdmins(req, res) {
 // Get all D2C consumer accounts (for the dashboard Consumers page)
 function getAllConsumers(req, res) {
   db.query(
-    "SELECT * FROM users WHERE type = 'consumer' ORDER BY created_at DESC",
+    `SELECT ${USER_LIST_COLUMNS} FROM users WHERE type = 'consumer' ORDER BY created_at DESC`,
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
