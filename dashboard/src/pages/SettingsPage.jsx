@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Alert02Icon, Settings01Icon } from "@hugeicons/core-free-icons";
+import { gooeyToast } from "goey-toast";
+import notificationSoundService from "../services/notificationSoundService";
 import {
   wipeAllData,
   resetForReview,
@@ -170,6 +172,45 @@ const SettingsPage = () => {
           </div>
         </section>
       </div>
+
+      <section className="au-panel">
+        <div className="au-panel-head">
+          <h3>Notification preview</h3>
+        </div>
+        <p className="au-sub" style={{ marginTop: 0, lineHeight: 1.6 }}>
+          The dashboard uses gooey (blob-morph) toasts. Tap a button to see how
+          each type looks — a new order also plays the order sound.
+        </p>
+        <div className="toast-preview-actions">
+          <Button
+            variant="primary"
+            onClick={() => {
+              gooeyToast("New order received", {
+                description: "B2B-1A2B3C · ₹24,500 · tap to view",
+                action: {
+                  label: "View order",
+                  onClick: () => navigate("/dashboard/orders"),
+                },
+              });
+              notificationSoundService.playSound("new_order");
+            }}
+          >
+            New order (with sound)
+          </Button>
+          <Button variant="secondary" onClick={() => gooeyToast.success("Saved successfully")}>
+            Success
+          </Button>
+          <Button variant="secondary" onClick={() => gooeyToast.error("Something went wrong")}>
+            Error
+          </Button>
+          <Button variant="secondary" onClick={() => gooeyToast.warning("Please double-check this")}>
+            Warning
+          </Button>
+          <Button variant="secondary" onClick={() => gooeyToast.info("Here's some information")}>
+            Info
+          </Button>
+        </div>
+      </section>
 
       <section className="au-panel review-reset">
         <div className="au-panel-head">
