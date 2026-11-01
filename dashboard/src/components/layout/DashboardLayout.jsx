@@ -16,6 +16,7 @@ import {
   Minimize01Icon,
   Image01Icon,
   UserRemove01Icon,
+  Search01Icon,
 } from "@hugeicons/core-free-icons";
 import "./DashboardLayout.css";
 import dashboardLogo from "../../assests/dashboardlogo.png";
@@ -26,17 +27,63 @@ import { initializeFirebaseMessaging, isFirebaseSupported } from "../../services
 import notificationSoundService from "../../services/notificationSoundService";
 import RealtimeNotificationService from "../../services/realtimeNotificationService";
 
-const SidebarLinks = [
-  { name: "Dashboard", path: "/dashboard", icon: DashboardSquare01Icon },
-  { name: "Sliders", path: "/dashboard/sliders", icon: Image01Icon },
-  { name: "Users", path: "/dashboard/users", icon: UserGroupIcon },
-  { name: "Consumers", path: "/dashboard/consumers", icon: UserIcon },
-  { name: "Categories", path: "/dashboard/categories", icon: Layers01Icon },
-  { name: "Products", path: "/dashboard/products", icon: PackageIcon },
-  { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart01Icon },
-  { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },
-  { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
+// Nav is grouped like the Amrut Admin design: Overview / Catalog / People / System.
+const NavGroups = [
+  {
+    label: "Overview",
+    links: [
+      { name: "Dashboard", path: "/dashboard", icon: DashboardSquare01Icon },
+      { name: "Orders", path: "/dashboard/orders", icon: ShoppingCart01Icon },
+    ],
+  },
+  {
+    label: "Catalog",
+    links: [
+      { name: "Products", path: "/dashboard/products", icon: PackageIcon },
+      { name: "Categories", path: "/dashboard/categories", icon: Layers01Icon },
+      { name: "Sliders", path: "/dashboard/sliders", icon: Image01Icon },
+      { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },
+    ],
+  },
+  {
+    label: "People",
+    links: [
+      { name: "Users", path: "/dashboard/users", icon: UserGroupIcon },
+      { name: "Consumers", path: "/dashboard/consumers", icon: UserIcon },
+    ],
+  },
+  {
+    label: "System",
+    links: [
+      { name: "Account Deletion", path: "/dashboard/account-deletion", icon: UserRemove01Icon },
+    ],
+  },
 ];
+
+// Flattened list for page-title matching (incl. pages not in the sidebar).
+const AllLinks = NavGroups.flatMap((g) => g.links);
+
+// Page subtitles shown under the title in the topbar.
+const PageMeta = {
+  "/dashboard": "Store overview",
+  "/dashboard/orders": "All channels · B2B, D2C and custom",
+  "/dashboard/products": "Your gold & diamond catalog",
+  "/dashboard/categories": "Organise the catalog",
+  "/dashboard/sliders": "App home banners",
+  "/dashboard/media-gallery": "Product & banner images",
+  "/dashboard/users": "Wholesale (B2B) accounts & approvals",
+  "/dashboard/consumers": "D2C storefront customers",
+  "/dashboard/account-deletion": "Account deletion requests",
+  "/dashboard/settings": "Store & app configuration",
+  "/dashboard/profile": "Your admin profile",
+  "/dashboard/notifications": "Push to the apps",
+};
+
+const ExtraTitles = {
+  "/dashboard/settings": "Settings",
+  "/dashboard/profile": "Profile",
+  "/dashboard/notifications": "Notifications",
+};
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(
@@ -46,18 +93,15 @@ export default function DashboardLayout() {
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [tooltip, setTooltip] = useState({ show: false, text: '', x: 0, y: 0 });
+  const [tooltip, setTooltip] = useState({ show: false, text: "", x: 0, y: 0 });
   const location = useLocation();
   const navigate = useNavigate();
-  const audioRef = React.useRef(null);
 
   const handleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
     }
   };
 
@@ -66,73 +110,48 @@ export default function DashboardLayout() {
     const initNotifications = async () => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
-        // Fetch initial unread count
         try {
           const response = await getUnreadCount(adminToken);
           setUnreadCount(response.unreadCount || 0);
         } catch (error) {
-          console.error('Failed to fetch unread count:', error);
+          console.error("Failed to fetch unread count:", error);
         }
-        
-        // Initialize Firebase messaging if supported
+
         if (isFirebaseSupported()) {
-          console.log('🔔 [DASHBOARD] Initializing Firebase messaging...');
           const success = await initializeFirebaseMessaging(adminToken, (payload) => {
-            console.log('🔔 [DASHBOARD] Received Firebase notification:', payload);
-            
-            // Create notification object for toast
             const notification = {
               id: Date.now(),
-              title: payload.notification?.title || 'New Notification',
-              body: payload.notification?.body || 'You have a new notification',
-              type: payload.data?.notificationType || 'default',
+              title: payload.notification?.title || "New Notification",
+              body: payload.notification?.body || "You have a new notification",
+              type: payload.data?.notificationType || "default",
               created_at: new Date().toISOString(),
               data: payload.data || {},
-              is_read: false
+              is_read: false,
             };
-            
-            console.log('🔔 [DASHBOARD] Created notification object for toast:', notification);
-            console.log('🔔 [DASHBOARD] Notification type:', notification.type);
-            console.log('🔔 [DASHBOARD] Notification data:', notification.data);
-            
-            // Show real-time toast notification
-            const toastEvent = new CustomEvent('show-toast', {
-              detail: { notification }
-            });
+
+            const toastEvent = new CustomEvent("show-toast", { detail: { notification } });
             window.dispatchEvent(toastEvent);
-            
-            // Play notification sound
-            const notificationType = payload.data?.notificationType || payload.notification?.type || 'default';
+
+            const notificationType =
+              payload.data?.notificationType || payload.notification?.type || "default";
             notificationSoundService.playSound(notificationType.toLowerCase());
-            
-            // Update unread count
+
             updateUnreadCount();
           });
-          
           if (success) {
-            console.log('✅ [DASHBOARD] Firebase messaging initialized successfully');
-          } else {
-            console.log('⚠️ [DASHBOARD] Firebase messaging initialization failed');
+            console.log("✅ [DASHBOARD] Firebase messaging initialized successfully");
           }
-        } else {
-          console.log('⚠️ [DASHBOARD] Firebase messaging not supported in this browser');
         }
-        
-        // Initialize real-time notification service
-        console.log('🔔 [DASHBOARD] Initializing real-time notification service...');
+
         RealtimeNotificationService.connect();
-        console.log('✅ [DASHBOARD] Real-time notification service initialized');
       }
     };
-    
+
     initNotifications();
-    
-    const onFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onFullscreenChange);
-    
-    // Set up polling for unread count
+
     const interval = setInterval(async () => {
       const adminToken = localStorage.getItem("admin_token");
       if (adminToken) {
@@ -140,100 +159,76 @@ export default function DashboardLayout() {
           const response = await getUnreadCount(adminToken);
           setUnreadCount(response.unreadCount || 0);
         } catch (error) {
-          console.error('Failed to fetch unread count:', error);
+          console.error("Failed to fetch unread count:", error);
         }
       }
-    }, 30000); // Poll every 30 seconds
-    
-    // Click outside handler to close dropdowns
+    }, 30000);
+
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.notification-menu') && !event.target.closest('.profile-menu')) {
+      if (!event.target.closest(".notification-menu") && !event.target.closest(".profile-menu")) {
         setShowNotificationMenu(false);
         setShowProfileMenu(false);
       }
     };
-    
-    // Listen for notification updates
-    const handleNotificationUpdate = () => {
-      updateUnreadCount();
-    };
-    
-    document.addEventListener('click', handleClickOutside);
-    window.addEventListener('notification-updated', handleNotificationUpdate);
-    
+
+    const handleNotificationUpdate = () => updateUnreadCount();
+
+    document.addEventListener("click", handleClickOutside);
+    window.addEventListener("notification-updated", handleNotificationUpdate);
+
     return () => {
       clearInterval(interval);
-      // Stop the realtime notification polling so it doesn't keep hitting the
-      // API with a cleared token after logout/unmount.
       RealtimeNotificationService.disconnect();
       document.removeEventListener("fullscreenchange", onFullscreenChange);
-      document.removeEventListener('click', handleClickOutside);
-      window.removeEventListener('notification-updated', handleNotificationUpdate);
+      document.removeEventListener("click", handleClickOutside);
+      window.removeEventListener("notification-updated", handleNotificationUpdate);
     };
   }, []);
 
-  const getPageTitle = () => {
+  const matchLink = () => {
     const path = location.pathname;
-    // Pages not in the sidebar.
-    const extra = {
-      "/dashboard/settings": "Settings",
-      "/dashboard/profile": "Profile",
-      "/dashboard/notifications": "Notifications",
-      "/dashboard/account-deletion": "Account Deletion",
-    };
-    if (extra[path]) return extra[path];
-
-    // Match the most specific sidebar link. The "/dashboard" root must match
-    // exactly, otherwise it would win for every sub-path via startsWith.
-    const match = SidebarLinks.filter((link) =>
+    return AllLinks.filter((link) =>
       link.path === "/dashboard" ? path === "/dashboard" : path.startsWith(link.path)
     ).sort((a, b) => b.path.length - a.path.length)[0];
+  };
 
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (ExtraTitles[path]) return ExtraTitles[path];
+    const match = matchLink();
     return match ? match.name : "Dashboard";
   };
 
+  const getPageSubtitle = () => PageMeta[location.pathname] || "";
+
+  const isLinkActive = (linkPath) =>
+    linkPath === "/dashboard"
+      ? location.pathname === "/dashboard"
+      : location.pathname.startsWith(linkPath) && location.pathname !== "/dashboard";
+
   const handleLogout = () => {
-    // Close any open dropdowns
     setShowProfileMenu(false);
     setShowNotificationMenu(false);
-    
-    // Use utility function for logout
     logout(navigate);
   };
 
   const handleNotificationClick = () => {
-    console.log('Notification bell clicked, current state:', showNotificationMenu);
     setShowNotificationMenu(!showNotificationMenu);
     setShowProfileMenu(false);
-    
-    // Play notification sound when bell is clicked
     try {
-      // Create audio context for beep sound
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      
-      // Create oscillator for beep sound
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
-      // Connect nodes
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
-      // Configure sound
-      oscillator.frequency.setValueAtTime(600, audioContext.currentTime); // 600Hz beep
-      oscillator.type = 'sine';
-      
-      // Configure volume
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+      oscillator.type = "sine";
       gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-      
-      // Play sound
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.2);
-      
-      console.log('Bell click sound played successfully');
     } catch (error) {
-      console.log('Could not play bell click sound:', error);
+      /* audio not available */
     }
   };
 
@@ -244,86 +239,120 @@ export default function DashboardLayout() {
         const response = await getUnreadCount(adminToken);
         setUnreadCount(response.unreadCount || 0);
       } catch (error) {
-        console.error('Failed to fetch unread count:', error);
+        console.error("Failed to fetch unread count:", error);
       }
     }
   };
+
+  const isMobile = () => typeof window !== "undefined" && window.innerWidth <= 768;
 
   return (
     <div className={`dashboard-layout${collapsed ? " collapsed" : ""}`}>
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
-          <img
-            src={dashboardLogo}
-            alt="Amrut Jewels"
-            className="sidebar-logo"
-          />
+          <img src={dashboardLogo} alt="Amrut Jewels" className="sidebar-logo" />
+          <div className="brand-text">
+            <div className="brand-name">Amrut Jewels</div>
+            <div className="brand-sub">Admin Console</div>
+          </div>
         </div>
+
         <nav className="sidebar-nav">
-          <ul>
-            {SidebarLinks.map((link) => {
-              const iconDef = link.icon;
-              const isActive =
-                link.path === "/dashboard"
-                  ? location.pathname === "/dashboard"
-                  : location.pathname.startsWith(link.path) &&
-                    location.pathname !== "/dashboard";
-              return (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className={isActive ? "active" : ""}
-                    onClick={() => {
-                      // On mobile, tapping a nav item closes the drawer.
-                      if (window.innerWidth <= 768) setCollapsed(true);
-                      setTooltip({ show: false, text: "", x: 0, y: 0 });
-                    }}
-                    onMouseEnter={(e) => {
-                      if (collapsed) {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setTooltip({
-                          show: true,
-                          text: link.name,
-                          x: rect.right + 15,
-                          y: rect.top + rect.height / 2
-                        });
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      setTooltip({ show: false, text: '', x: 0, y: 0 });
-                    }}
-                  >
-                    <HugeiconsIcon icon={iconDef} size={22} className="sidebar-icon" />
-                    <span className="link-text">{link.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+          {NavGroups.map((group) => (
+            <div key={group.label} className="nav-section">
+              <div className="nav-group">{group.label}</div>
+              <ul>
+                {group.links.map((link) => {
+                  const active = isLinkActive(link.path);
+                  return (
+                    <li key={link.path}>
+                      <Link
+                        to={link.path}
+                        className={active ? "active" : ""}
+                        onClick={() => {
+                          if (isMobile()) setCollapsed(true);
+                          setTooltip({ show: false, text: "", x: 0, y: 0 });
+                        }}
+                        onMouseEnter={(e) => {
+                          if (collapsed && !isMobile()) {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setTooltip({
+                              show: true,
+                              text: link.name,
+                              x: rect.right + 15,
+                              y: rect.top + rect.height / 2,
+                            });
+                          }
+                        }}
+                        onMouseLeave={() => setTooltip({ show: false, text: "", x: 0, y: 0 })}
+                      >
+                        <HugeiconsIcon icon={link.icon} size={20} className="sidebar-icon" />
+                        <span className="link-text">{link.name}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
+
+        <div className="sidefoot">
+          <div className="sf-avatar">A</div>
+          <div className="sf-meta">
+            <div className="sf-who">Admin</div>
+            <div className="sf-role">Super admin</div>
+          </div>
+        </div>
       </aside>
+
+      {/* Scrim behind the mobile drawer */}
+      <div
+        className={`sidebar-scrim${!collapsed && isMobile() ? " show" : ""}`}
+        onClick={() => setCollapsed(true)}
+      />
+
       <button
         className="sidebar-toggle-btn"
         onClick={() => setCollapsed((c) => !c)}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <HugeiconsIcon icon={ArrowLeftDoubleIcon} size={20} />
+        <HugeiconsIcon icon={ArrowLeftDoubleIcon} size={18} />
       </button>
+
       <div className="dashboard-main-wrapper">
         <header className="dashboard-header">
-          <h1 className="dashboard-title">{getPageTitle()}</h1>
+          <div className="header-titles">
+            <h1 className="dashboard-title">{getPageTitle()}</h1>
+            {getPageSubtitle() && <div className="dashboard-subtitle">{getPageSubtitle()}</div>}
+          </div>
+
+          <label className="topbar-search">
+            <HugeiconsIcon icon={Search01Icon} size={16} />
+            <input type="search" placeholder="Search orders, SKU, customer…" aria-label="Search" />
+          </label>
+
           <div className="header-actions">
-            <button className="header-icon-btn" onClick={handleFullscreen} title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}>
-              {isFullscreen ? <HugeiconsIcon icon={Minimize01Icon} size={24} /> : <HugeiconsIcon icon={Maximize01Icon} size={24} />}
+            <button
+              className="header-icon-btn"
+              onClick={handleFullscreen}
+              title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            >
+              {isFullscreen ? (
+                <HugeiconsIcon icon={Minimize01Icon} size={20} />
+              ) : (
+                <HugeiconsIcon icon={Maximize01Icon} size={20} />
+              )}
             </button>
 
-            {/* Notification Bell */}
             <div className="notification-menu">
               <button
                 className="header-icon-btn"
                 onClick={handleNotificationClick}
                 title="Notifications"
               >
-                <HugeiconsIcon icon={Notification03Icon} size={24} />
+                <HugeiconsIcon icon={Notification03Icon} size={20} />
+                {unreadCount > 0 && <span className="notif-dot" />}
               </button>
               {showNotificationMenu && (
                 <div className="notification-dropdown">
@@ -331,13 +360,13 @@ export default function DashboardLayout() {
                 </div>
               )}
             </div>
-            
+
             <div className="profile-menu">
               <button
                 className="profile-trigger"
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                <HugeiconsIcon icon={UserIcon} size={24} />
+                <HugeiconsIcon icon={UserIcon} size={20} />
                 <span className="admin-name">Admin</span>
               </button>
               {showProfileMenu && (
@@ -355,10 +384,7 @@ export default function DashboardLayout() {
                     <span>Settings</span>
                   </Link>
                   <div className="dropdown-divider"></div>
-                  <button
-                    className="dropdown-item logout"
-                    onClick={handleLogout}
-                  >
+                  <button className="dropdown-item logout" onClick={handleLogout}>
                     <HugeiconsIcon icon={Logout01Icon} size={18} />
                     <span>Logout</span>
                   </button>
@@ -367,33 +393,35 @@ export default function DashboardLayout() {
             </div>
           </div>
         </header>
+
         <main className="dashboard-content">
           <Outlet />
         </main>
+
         <footer className="dashboard-footer">
           &copy; {new Date().getFullYear()} Amrut Jewels Admin
         </footer>
       </div>
 
-      {/* Tooltip */}
+      {/* Collapsed-rail tooltip (desktop) */}
       {tooltip.show && collapsed && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             left: tooltip.x,
             top: tooltip.y,
-            transform: 'translateY(-50%)',
-            background: 'linear-gradient(135deg, #5d0829 0%, #7d0a37 100%)',
-            color: '#fce2bf',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            whiteSpace: 'nowrap',
+            transform: "translateY(-50%)",
+            background: "linear-gradient(135deg, #4c0a23 0%, #7c1f43 100%)",
+            color: "#fce2bf",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontWeight: "500",
+            whiteSpace: "nowrap",
             zIndex: 2147483647,
-            boxShadow: '0 4px 12px rgba(93, 8, 41, 0.3)',
-            border: '1px solid rgba(252, 226, 191, 0.2)',
-            pointerEvents: 'none'
+            boxShadow: "0 4px 12px rgba(58, 6, 25, 0.35)",
+            border: "1px solid rgba(252, 226, 191, 0.2)",
+            pointerEvents: "none",
           }}
         >
           {tooltip.text}

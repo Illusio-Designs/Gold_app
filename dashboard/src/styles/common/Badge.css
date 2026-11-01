@@ -1,14 +1,26 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  gap: 6px;
+  padding: 3px 9px;
   border-radius: var(--radius-pill, 999px);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.5;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
+/* Leading status dot (matches the Amrut Admin status pills) */
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+/* Opt out of the dot for non-status badges: <Badge className="badge--nodot"> */
+.badge.badge--nodot::before { display: none; }
 .badge--neutral { background: var(--surface-sunken, #f4ece0); color: var(--text-secondary, #8a6d5a); }
 .badge--success { background: var(--success-bg, #e6f4ec); color: var(--success, #1a7f4b); }
 .badge--warning { background: var(--warning-bg, #fbf1dd); color: var(--warning, #b07d0a); }
