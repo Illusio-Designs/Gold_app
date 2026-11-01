@@ -18,10 +18,6 @@ export const useAdminSocket = (
   // Initialize connection
   useEffect(() => {
     if (adminData) {
-      console.log(
-        "🔌 [USE ADMIN SOCKET] Initializing with admin data:",
-        adminData
-      );
       adminSocketService.connect(serverUrl, adminData);
     }
   }, [adminData, serverUrl]);
@@ -46,19 +42,16 @@ export const useAdminSocket = (
 
     // Listen for connection changes
     const handleConnect = () => {
-      console.log("✅ [USE ADMIN SOCKET] Connected");
       setIsConnected(true);
       setConnectionStatus("connected");
     };
 
     const handleDisconnect = () => {
-      console.log("❌ [USE ADMIN SOCKET] Disconnected");
       setIsConnected(false);
       setConnectionStatus("disconnected");
     };
 
-    const handleAdminRoomJoined = (data) => {
-      console.log("✅ [USE ADMIN SOCKET] Admin room joined:", data);
+    const handleAdminRoomJoined = () => {
       setConnectionStatus("admin-room-joined");
     };
 

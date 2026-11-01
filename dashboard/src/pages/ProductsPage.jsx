@@ -357,17 +357,11 @@ const ProductsPage = () => {
 
   const handleDelete = async () => {
     try {
-      console.log("🔍 [ProductsPage] handleDelete called for:", productToDelete);
       setLoading(true);
       setError("");
       const token = localStorage.getItem("admin_token");
-      console.log(
-        "🔍 [ProductsPage] Admin token:",
-        token ? "Present" : "Missing"
-      );
 
       await deleteProduct(productToDelete.id, token);
-      console.log("✅ [ProductsPage] Product deleted successfully");
 
       setProductToDelete(null);
 

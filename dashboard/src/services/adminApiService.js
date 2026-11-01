@@ -409,56 +409,22 @@ export const updateAccountDeletionStatus = (id, status, token) =>
     .then((r) => r.data);
 
 // NOTIFICATIONS
-export const getAdminNotifications = (token) => {
-  console.log(
-    "🔔 [API] getAdminNotifications called with token:",
-    token ? token.substring(0, 20) + "..." : "null"
-  );
-  return axiosInstance
+export const getAdminNotifications = (token) =>
+  axiosInstance
     .get(`/notifications/user/${ADMIN_NOTIFICATION_USER_ID}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then((r) => {
-      console.log("🔔 [API] getAdminNotifications response:", r.data);
-      return r.data;
-    })
-    .catch((error) => {
-      console.error(
-        "❌ [API] getAdminNotifications error:",
-        error.response?.data || error.message
-      );
-      throw error;
-    });
-};
+    .then((r) => r.data);
 
-export const getUnreadCount = (token) => {
-  console.log(
-    "🔔 [API] getUnreadCount called with token:",
-    token ? token.substring(0, 20) + "..." : "null"
-  );
-  return axiosInstance
+export const getUnreadCount = (token) =>
+  axiosInstance
     .get(`/notifications/user/${ADMIN_NOTIFICATION_USER_ID}/unread`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then((r) => {
-      console.log("🔔 [API] getUnreadCount response:", r.data);
-      return r.data;
-    })
-    .catch((error) => {
-      console.error(
-        "❌ [API] getUnreadCount error:",
-        error.response?.data || error.message
-      );
-      throw error;
-    });
-};
+    .then((r) => r.data);
 
-export const markNotificationAsRead = (notificationId, token) => {
-  console.log("🔔 [API] markNotificationAsRead called:", {
-    notificationId,
-    token: token ? token.substring(0, 20) + "..." : "null",
-  });
-  return axiosInstance
+export const markNotificationAsRead = (notificationId, token) =>
+  axiosInstance
     .patch(
       `/notifications/${notificationId}/read`,
       {},
@@ -466,18 +432,7 @@ export const markNotificationAsRead = (notificationId, token) => {
         headers: { Authorization: `Bearer ${token}` },
       }
     )
-    .then((r) => {
-      console.log("🔔 [API] markNotificationAsRead response:", r.data);
-      return r.data;
-    })
-    .catch((error) => {
-      console.error(
-        "❌ [API] markNotificationAsRead error:",
-        error.response?.data || error.message
-      );
-      throw error;
-    });
-};
+    .then((r) => r.data);
 
 export const markAllNotificationsAsRead = (token) =>
   axiosInstance
@@ -648,47 +603,12 @@ export const getAvailableItems = (token) =>
     .then((r) => r.data);
 
 // Get media items with actual processed images from products and categories tables
-export const getMediaItemsWithProcessedImages = (token) => {
-  console.log("🔍 [API SERVICE] getMediaItemsWithProcessedImages called");
-  console.log("🔍 [API SERVICE] Token exists:", !!token);
-  console.log(
-    "🔍 [API SERVICE] Token preview:",
-    token ? token.substring(0, 20) + "..." : "No token"
-  );
-  console.log(
-    "🔍 [API SERVICE] Making request to:",
-    `${BASE_URL}/media-gallery/processed-images`
-  );
-
-  return axiosInstance
+export const getMediaItemsWithProcessedImages = (token) =>
+  axiosInstance
     .get("/media-gallery/processed-images", {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then((response) => {
-      console.log("🔍 [API SERVICE] Raw axios response:", response);
-      console.log("🔍 [API SERVICE] Response status:", response.status);
-      console.log("🔍 [API SERVICE] Response headers:", response.headers);
-      console.log("🔍 [API SERVICE] Response data:", response.data);
-      console.log("🔍 [API SERVICE] Response data type:", typeof response.data);
-      console.log(
-        "🔍 [API SERVICE] Response data keys:",
-        response.data ? Object.keys(response.data) : "No data"
-      );
-
-      return response.data;
-    })
-    .catch((error) => {
-      console.error(
-        "❌ [API SERVICE] Error in getMediaItemsWithProcessedImages:",
-        error
-      );
-      console.error("❌ [API SERVICE] Error response:", error.response);
-      console.error("❌ [API SERVICE] Error message:", error.message);
-      console.error("❌ [API SERVICE] Error status:", error.response?.status);
-      console.error("❌ [API SERVICE] Error data:", error.response?.data);
-      throw error;
-    });
-};
+    .then((response) => response.data);
 
 // DASHBOARD API
 export const getDashboardStats = (token) =>

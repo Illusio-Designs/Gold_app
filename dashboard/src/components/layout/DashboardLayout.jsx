@@ -135,9 +135,6 @@ export default function DashboardLayout() {
 
             updateUnreadCount();
           });
-          if (success) {
-            console.log("✅ [DASHBOARD] Firebase messaging initialized successfully");
-          }
         }
 
         RealtimeNotificationService.connect();
