@@ -20,11 +20,12 @@ function getDashboardStats(req, res) {
       WHERE DATE(created_at) = ?
     `;
 
-    // Get total approved users
+    // Get total approved wholesalers (business accounts only — exclude the
+    // admin and any consumer rows so the count matches the Users page).
     const approvedUsersQuery = `
       SELECT COUNT(*) as total_approved_users
-      FROM users 
-      WHERE status = 'approved'
+      FROM users
+      WHERE status = 'approved' AND type = 'business'
     `;
 
     // Get total products
@@ -278,7 +279,7 @@ function getQuickStats(req, res) {
     const query = `
       SELECT 
         (SELECT COUNT(*) FROM orders WHERE DATE(created_at) = ?) as today_orders,
-        (SELECT COUNT(*) FROM users WHERE status = 'approved') as total_users,
+        (SELECT COUNT(*) FROM users WHERE status = 'approved' AND type = 'business') as total_users,
         (SELECT COUNT(*) FROM products) as total_products,
         (SELECT COUNT(*) FROM categories) as total_categories,
         (SELECT SUM(total_amount) FROM orders WHERE DATE(created_at) = ?) as today_revenue
