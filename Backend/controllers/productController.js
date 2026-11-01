@@ -8,6 +8,16 @@ const multer = require("multer");
 const xlsx = require("xlsx");
 const socketService = require("../services/socketService");
 const { createUser: createUserModel } = require("../models/user");
+
+// A storefront (non-admin) request carries no admin Bearer token, so drafts and
+// sold-out pieces are hidden from it. (getAllProducts instead checks the decoded
+// user type, since its route runs optionalAuth.)
+function isStorefrontRequest(req) {
+  return (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith("Bearer ")
+  );
+}
 const { db } = require("../config/db");
 const { executeQuery, checkConnection } = require("../utils/dbHelper");
 const { getBaseUrl } = require("../config/environment");
@@ -163,11 +173,8 @@ function getProductById(req, res) {
     // Storefront (token-less) callers must not see draft or sold-out pieces —
     // otherwise a stale detail link could open an item that's already gone in
     // the other app. Admin/dashboard requests (Bearer token) still see all.
-    const isFrontendRequest =
-      !req.headers.authorization ||
-      !req.headers.authorization.startsWith("Bearer ");
     if (
-      isFrontendRequest &&
+      isStorefrontRequest(req) &&
       (product.status !== "active" || product.stock_status === "out_of_stock")
     ) {
       return res.status(404).json({
@@ -393,13 +400,8 @@ function getProductsByCategory(req, res) {
           return res.status(500).json({ error: allProductsErr.message });
         }
 
-        // Check if this is a frontend request (no admin token)
-        const isFrontendRequest =
-          !req.headers.authorization ||
-          !req.headers.authorization.startsWith("Bearer ");
-
         // Now get products based on request type
-        const getProductsFunction = isFrontendRequest
+        const getProductsFunction = isStorefrontRequest(req)
           ? productModel.getAvailableProductsByCategory
           : productModel.getProductsByCategory;
 
