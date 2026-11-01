@@ -48,7 +48,7 @@ of it, and — importantly — **whether the mobile apps need any change**.
   only" gate back is a server rule — the apps don't need to change; a blocked user simply
   gets a clear "not approved yet" message, which is the intended behaviour.
 
-### 4. Accounts you create from the dashboard can never log in
+### 4. Accounts you create from the dashboard can never log in — ✅ FIXED
 - **What's wrong:** When an account is created through one older path, the password gets
   scrambled twice, so the real password never matches and the person is locked out.
 - **Why it matters:** Staff/customer accounts you add by hand are unusable.

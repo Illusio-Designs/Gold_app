@@ -439,14 +439,14 @@ async function createUser(req, res) {
       }
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
     const user = {
       type: req.body.type,
       name: req.body.name.trim(),
       email: req.body.email.trim(),
-      password: hashedPassword,
+      // Pass the PLAINTEXT password. The user model (insertUser) hashes it
+      // exactly once with bcrypt. Pre-hashing here caused a double hash, so
+      // the stored value never matched at login and the account was locked out.
+      password: req.body.password,
       image: imageFilename,
       phone_number: req.body.phone_number || null,
       address_line1: req.body.address_line1 || null,
