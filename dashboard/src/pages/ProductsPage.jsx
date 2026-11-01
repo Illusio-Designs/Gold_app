@@ -650,8 +650,8 @@ const ProductsPage = () => {
         </div>
       </Modal>
 
-      {/* Excel Import Modal */}
-      <Modal
+      {/* Excel Import side panel */}
+      <SidePanel
         isOpen={excelImportModalOpen}
         onClose={() => setExcelImportModalOpen(false)}
         title="Import Products & Categories from Excel"
@@ -677,10 +677,10 @@ const ProductsPage = () => {
             Close
           </Button>
         </div>
-      </Modal>
+      </SidePanel>
 
-      {/* Stock Management Modal */}
-      <Modal
+      {/* Stock Management side panel */}
+      <SidePanel
         isOpen={stockModalOpen}
         onClose={() => setStockModalOpen(false)}
         title="Manage Product Stock"
@@ -752,7 +752,7 @@ const ProductsPage = () => {
             </div>
           </div>
         )}
-      </Modal>
+      </SidePanel>
     </div>
   );
 };
