@@ -65,13 +65,13 @@ const AllLinks = NavGroups.flatMap((g) => g.links);
 // Page subtitles shown under the title in the topbar.
 const PageMeta = {
   "/dashboard": "Store overview",
-  "/dashboard/orders": "All channels · B2B, D2C and custom",
+  "/dashboard/orders": "All channels · B2B, B2C and custom",
   "/dashboard/products": "Your gold & diamond catalog",
   "/dashboard/categories": "Organise the catalog",
   "/dashboard/sliders": "App home banners",
   "/dashboard/media-gallery": "Product & banner images",
   "/dashboard/users": "Wholesale (B2B) accounts & approvals",
-  "/dashboard/consumers": "D2C storefront customers",
+  "/dashboard/consumers": "B2C storefront customers",
   "/dashboard/account-deletion": "Account deletion requests",
   "/dashboard/settings": "Store & app configuration",
   "/dashboard/profile": "Your admin profile",

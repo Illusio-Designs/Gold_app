@@ -80,7 +80,7 @@
 /* ---------- Channel tags ---------- */
 .au-chan { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .03em; padding: 2px 7px; border-radius: 6px; }
 .au-c-b2b { color: var(--maroon); background: color-mix(in srgb, var(--maroon) 12%, transparent); }
-.au-c-d2c { color: var(--gold-deep); background: var(--gold-soft); }
+.au-c-b2c { color: var(--gold-deep); background: var(--gold-soft); }
 .au-c-cus { color: var(--info); background: var(--info-bg); }
 
 /* ---------- Product / tile grid ---------- */

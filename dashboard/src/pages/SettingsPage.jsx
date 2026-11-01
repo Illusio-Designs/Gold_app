@@ -113,7 +113,7 @@ const SettingsPage = () => {
             </li>
             <li className="settings-apps__row">
               <div>
-                <div className="settings-apps__name">D2C App</div>
+                <div className="settings-apps__name">B2C App</div>
                 <div className="settings-apps__meta">Direct-to-consumer</div>
               </div>
               <Badge tone="neutral">In development</Badge>
@@ -123,12 +123,12 @@ const SettingsPage = () => {
 
         <section className="au-panel">
           <div className="au-panel-head">
-            <h3>D2C Pricing</h3>
+            <h3>B2C Pricing</h3>
           </div>
           <p className="settings-note">
             The consumer app prices are calculated as
             {" "}<strong>(net weight × gold rate) + making&nbsp;%</strong>.
-            Update today's gold rate here and it applies across the D2C app.
+            Update today's gold rate here and it applies across the B2C app.
           </p>
 
           <div className="field">

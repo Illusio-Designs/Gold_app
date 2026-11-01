@@ -134,7 +134,7 @@ const ProductsPage = () => {
       accessor: "purity",
       cell: (row) =>
         row.purity ? (
-          <span className="au-chan au-c-d2c">{row.purity}</span>
+          <span className="au-chan au-c-b2c">{row.purity}</span>
         ) : (
           <span className="au-sub">—</span>
         ),

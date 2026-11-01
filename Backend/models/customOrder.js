@@ -87,7 +87,9 @@ function getAll(callback) {
             u.name AS user_name,
             u.business_name AS business_name,
             u.email AS user_email,
-            u.phone_number AS user_phone
+            u.phone_number AS user_phone,
+            u.status AS user_status,
+            u.type AS user_type
      FROM custom_orders co
      LEFT JOIN users u ON co.user_id = u.id
      ORDER BY co.created_at DESC`,
