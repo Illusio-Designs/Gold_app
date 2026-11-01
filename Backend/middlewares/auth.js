@@ -73,9 +73,6 @@ function requireApprovedBusiness(req, res, next) {
       return res.status(403).json({ error: 'Account not approved' });
     }
 
-    if (isBypassUser) {
-      }
-
     next();
   });
 }

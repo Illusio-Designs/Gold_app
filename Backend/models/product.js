@@ -1,5 +1,18 @@
 const { db } = require("../config/db");
 
+// Parse a product's stored `image` column, which may be a JSON array of
+// filenames or a single filename string. Always returns an array (empty when
+// there is no image).
+function parseProductImages(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [raw];
+  } catch (e) {
+    return [raw];
+  }
+}
+
 // Create new product
 function createProduct(product, callback) {
   const sql = `INSERT INTO products (
@@ -36,20 +49,7 @@ function addProductImage(productId, image, callback) {
       return callback(new Error("Product not found"));
     }
 
-    let currentImages = [];
-    const currentImage = results[0].image;
-
-    // Parse existing images (could be single image or JSON array)
-    if (currentImage) {
-      try {
-        currentImages = JSON.parse(currentImage);
-        if (!Array.isArray(currentImages)) {
-          currentImages = [currentImage]; // Convert single image to array
-        }
-      } catch (e) {
-        currentImages = [currentImage]; // Single image, convert to array
-      }
-    }
+    const currentImages = parseProductImages(results[0].image);
 
     // Add new image
     currentImages.push(image);
@@ -72,19 +72,7 @@ function getProductImages(productId, callback) {
       return callback(new Error("Product not found"));
     }
 
-    const imageData = results[0].image;
-    let images = [];
-
-    if (imageData) {
-      try {
-        images = JSON.parse(imageData);
-        if (!Array.isArray(images)) {
-          images = [imageData]; // Single image, convert to array
-        }
-      } catch (e) {
-        images = [imageData]; // Single image, convert to array
-      }
-    }
+    const images = parseProductImages(results[0].image);
 
     // Convert to the expected format (with id and image fields)
     const formattedImages = images.map((image, index) => ({
@@ -110,20 +98,7 @@ function deleteProductImage(productId, imageIndex, callback) {
       return callback(new Error("Product not found"));
     }
 
-    let currentImages = [];
-    const currentImage = results[0].image;
-
-    // Parse existing images (could be single image or JSON array)
-    if (currentImage) {
-      try {
-        currentImages = JSON.parse(currentImage);
-        if (!Array.isArray(currentImages)) {
-          currentImages = [currentImage]; // Convert single image to array
-        }
-      } catch (e) {
-        currentImages = [currentImage]; // Single image, convert to array
-      }
-    }
+    const currentImages = parseProductImages(results[0].image);
 
     // Check if image index is valid
     if (imageIndex < 0 || imageIndex >= currentImages.length) {
@@ -152,9 +127,6 @@ function getAllProducts(callback) {
     "SELECT * FROM products WHERE status = 'active' ORDER BY created_at DESC";
 
   db.query(sql, (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }
@@ -208,11 +180,6 @@ function getProductBySku(sku, callback) {
     "SELECT * FROM products WHERE sku = ? AND status = 'active' AND stock_status != 'out_of_stock'";
 
   db.query(sql, [sku], (err, results) => {
-    if (err) {
-      } else {
-      if (results.length > 0) {
-        }
-    }
     callback(err, results);
   });
 }
@@ -292,9 +259,6 @@ function getAvailableProducts(callback) {
     "SELECT * FROM products WHERE status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
   db.query(sql, (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }
@@ -306,9 +270,6 @@ function getAvailableProductsByCategory(categoryId, callback) {
     "SELECT * FROM products WHERE category_id = ? AND status = 'active' AND stock_status != 'out_of_stock' ORDER BY created_at DESC";
 
   db.query(sql, [categoryId], (err, results) => {
-    if (err) {
-      } else {
-      }
     callback(err, results);
   });
 }

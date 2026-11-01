@@ -5,8 +5,9 @@ function addToCart(cartItem, callback) {
   const sql = `INSERT INTO cart_items (
     user_id, product_id, quantity, status, created_at
   ) VALUES (?, ?, ?, ?, NOW())
-  ON DUPLICATE KEY UPDATE 
-    quantity = quantity + VALUES(quantity),
+  ON DUPLICATE KEY UPDATE
+    quantity = IF(status = 'removed', VALUES(quantity), quantity + VALUES(quantity)),
+    status = VALUES(status),
     updated_at = NOW()`;
 
   const values = [

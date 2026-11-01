@@ -122,7 +122,7 @@ function createOrder(req, res) {
             const notificationData = {
               id: orderDetails.id,
               orderNumber: orderDetails.order_number,
-              userId: orderDetails.business_user_id,
+              userId: orderDetails.user_id,
               userName: orderDetails.user_name,
               productName: orderDetails.product_name,
               productSku: orderDetails.product_sku,
@@ -142,9 +142,12 @@ function createOrder(req, res) {
             timestamp: new Date().toISOString(),
           });
 
-          // Emit specific update to the user's room
+          // Emit specific update to the user's room. The owner is always
+          // orderDetails.user_id (the authenticated buyer); there is no
+          // business_user_id column — referencing it threw a ReferenceError
+          // after the order had already saved, hanging the client.
           socketService.emitToRoom(
-            `user_${business_user_id}`,
+            `user_${orderDetails.user_id}`,
             "order-created",
             {
               order: orderDetails,
@@ -376,6 +379,72 @@ function getOrderById(req, res) {
   });
 }
 
+const VALID_ORDER_STATUSES = [
+  "pending",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+];
+
+// Broadcast an order's status change over sockets and push the customer a
+// notification. Returns a result object describing whether/why a push went out.
+async function broadcastOrderStatusChange(updatedOrder, status) {
+  socketService.emitToAll("order-update", {
+    action: "status-updated",
+    order: updatedOrder,
+    timestamp: new Date().toISOString(),
+  });
+
+  const roomUserId = updatedOrder.user_id || updatedOrder.business_user_id;
+  if (!roomUserId) {
+    return { attempted: false, reason: "No recipient user id on order" };
+  }
+
+  socketService.emitToRoom(`user_${roomUserId}`, "order-status-updated", {
+    order: updatedOrder,
+    timestamp: new Date().toISOString(),
+  });
+
+  try {
+    const r = await notifyOrderStatusChange({
+      id: updatedOrder.id,
+      orderNumber: updatedOrder.order_number,
+      status,
+      userId: roomUserId,
+    });
+    return { attempted: true, userId: roomUserId, ...r };
+  } catch (e) {
+    console.error("[orderController] notifyOrderStatusChange:", e && e.message);
+    return {
+      attempted: true,
+      userId: roomUserId,
+      success: false,
+      error: (e && (e.error || e.message)) || "notification failed",
+    };
+  }
+}
+
+// When an order is cancelled, return its product to the storefront and
+// broadcast the availability change so both apps update in real time.
+function restoreProductStockForCancelledOrder(updatedOrder) {
+  if (!updatedOrder.product_id) return;
+  productModel.updateProductStockStatus(
+    updatedOrder.product_id,
+    "available",
+    (e) => {
+      if (e) {
+        console.error("[orderController] restore stock:", e.message);
+        return;
+      }
+      socketService.notifyProductUpdate(
+        { id: updatedOrder.product_id, stock_status: "available" },
+        "stock-updated"
+      );
+    }
+  );
+}
+
 // Update order status (individual product status)
 function updateOrderStatus(req, res) {
   const { id } = req.params;
@@ -386,19 +455,11 @@ function updateOrderStatus(req, res) {
   }
 
   // Validate status
-  const validStatuses = [
-    "pending",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ];
-  if (!validStatuses.includes(status)) {
-    return res
-      .status(400)
-      .json({
-        error: "Invalid status. Must be one of: " + validStatuses.join(", "),
-      });
+  if (!VALID_ORDER_STATUSES.includes(status)) {
+    return res.status(400).json({
+      error:
+        "Invalid status. Must be one of: " + VALID_ORDER_STATUSES.join(", "),
+    });
   }
 
   // Admin-side rule:
@@ -441,87 +502,27 @@ function updateOrderStatus(req, res) {
           return res.status(500).json({ error: detailsErr.message });
         }
 
-        if (detailsResults.length > 0) {
-          const updatedOrder = detailsResults[0];
-
-          // Emit real-time order status update
-          socketService.emitToAll("order-update", {
-            action: "status-updated",
-            order: updatedOrder,
-            timestamp: new Date().toISOString(),
-          });
-
-          // Emit specific update to the user's room
-          const roomUserId = updatedOrder.user_id || updatedOrder.business_user_id;
-          let notificationResult = {
-            attempted: false,
-            reason: "No recipient user id on order",
-          };
-          if (roomUserId) {
-            socketService.emitToRoom(
-              `user_${roomUserId}`,
-              "order-status-updated",
-              {
-                order: updatedOrder,
-                timestamp: new Date().toISOString(),
-              }
-            );
-
-            // Notify the customer (push + in-app bell) about the status change.
-            // Awaited so the outcome is returned in the response — the caller
-            // can see exactly why a push did / didn't go out (no server-log
-            // access needed to debug delivery).
-            try {
-              const r = await notifyOrderStatusChange({
-                id: updatedOrder.id,
-                orderNumber: updatedOrder.order_number,
-                status,
-                userId: roomUserId,
-              });
-              notificationResult = { attempted: true, userId: roomUserId, ...r };
-            } catch (e) {
-              console.error(
-                "[orderController] notifyOrderStatusChange:",
-                e && e.message
-              );
-              notificationResult = {
-                attempted: true,
-                userId: roomUserId,
-                success: false,
-                error: (e && (e.error || e.message)) || "notification failed",
-              };
-            }
-          }
-
-          // If the order is cancelled, put the product back on the storefront
-          // and broadcast so both apps show it as available again in real time.
-          if (status === "cancelled" && updatedOrder.product_id) {
-            productModel.updateProductStockStatus(
-              updatedOrder.product_id,
-              "available",
-              (e) => {
-                if (e) {
-                  console.error("[orderController] restore stock:", e.message);
-                  return;
-                }
-                socketService.notifyProductUpdate(
-                  { id: updatedOrder.product_id, stock_status: "available" },
-                  "stock-updated"
-                );
-              }
-            );
-          }
-
-          res.json({
-            message: "Order status updated successfully",
-            order: updatedOrder,
-            notification: notificationResult,
-          });
-        } else {
-          res
+        if (detailsResults.length === 0) {
+          return res
             .status(500)
             .json({ error: "Failed to retrieve updated order details" });
         }
+
+        const updatedOrder = detailsResults[0];
+        const notificationResult = await broadcastOrderStatusChange(
+          updatedOrder,
+          status
+        );
+
+        if (status === "cancelled") {
+          restoreProductStockForCancelledOrder(updatedOrder);
+        }
+
+        res.json({
+          message: "Order status updated successfully",
+          order: updatedOrder,
+          notification: notificationResult,
+        });
       });
     });
   });
@@ -581,9 +582,10 @@ function updateOrder(req, res) {
           timestamp: new Date().toISOString(),
         });
 
-        // Emit specific update to the user's room
+        // Emit specific update to the user's room (owner column is user_id;
+        // business_user_id does not exist, so it emitted to user_undefined).
         socketService.emitToRoom(
-          `user_${updatedOrder.business_user_id}`,
+          `user_${updatedOrder.user_id}`,
           "order-updated",
           {
             order: updatedOrder,

@@ -10,10 +10,12 @@ const {
   notifyUserRegistration,
 } = require("../services/adminNotificationService");
 
-// Register a new user (admin or business)
-async function registerUser(req, res) {
-  const user = {
-    type: req.body.type, // 'admin' or 'business'
+// Build the user record for public registration. The account type is forced to
+// business/consumer and never taken as "admin" from untrusted input.
+function buildRegistrationUser(req) {
+  const safeType = req.body.type === "consumer" ? "consumer" : "business";
+  return {
+    type: safeType,
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
@@ -30,10 +32,78 @@ async function registerUser(req, res) {
     business_name: req.body.business_name,
     remarks: req.body.remarks,
   };
-  if (user.type === "business") {
-    }
+}
+
+// Attach an explicitly-supplied device FCM token to the new user (best-effort).
+function linkExplicitDeviceToken(userId, deviceToken) {
+  if (!deviceToken) return;
   try {
-    // Check for duplicate email or phone number
+    const linkSql = `
+      INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
+      VALUES (?, ?, 'mobile', true, NOW())
+      ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), active = true, updated_at = NOW()
+    `;
+    db.query(linkSql, [userId, deviceToken], (linkErr) => {
+      if (linkErr) console.error("FCM token link failed:", linkErr.message);
+    });
+  } catch (e) {
+    console.error("FCM token link error:", e.message);
+  }
+}
+
+// Attach the most recent unauthenticated mobile FCM token to the new user, so
+// they receive status pushes on the device they just registered from.
+function linkLatestUnauthToken(userId) {
+  try {
+    const selectSql = `
+      SELECT id FROM notification_tokens
+      WHERE user_id IS NULL AND device_type = 'mobile'
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    db.query(selectSql, [], (selErr, selRows) => {
+      if (selErr) {
+        console.error("FCM token lookup failed:", selErr.message);
+        return;
+      }
+      if (!selRows || selRows.length === 0) return;
+      const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
+      db.query(updateSql, [userId, selRows[0].id], (updErr) => {
+        if (updErr) console.error("FCM token attach failed:", updErr.message);
+      });
+    });
+  } catch (linkErr) {
+    console.error("FCM token linking error:", linkErr.message);
+  }
+}
+
+// Notify the admin that a new business user registered (best-effort; never
+// blocks or fails the registration).
+async function notifyAdminOfBusinessRegistration(user, userId) {
+  try {
+    await notifyUserRegistration({
+      id: userId,
+      name: user.name,
+      email: user.email,
+      business_name: user.business_name,
+      phone_number: user.phone_number,
+    });
+  } catch (notificationError) {
+    console.error(
+      "notifyUserRegistration failed:",
+      notificationError && notificationError.message
+    );
+  }
+}
+
+// Public self-registration — may ONLY create business or consumer accounts.
+// The account type is NEVER taken from untrusted input as "admin": doing so
+// would let anyone self-mint an admin and take over the dashboard. Admins are
+// created only via the authenticated admin-only path (createAdmin).
+async function registerUser(req, res) {
+  const user = buildRegistrationUser(req);
+  try {
+    // Reject duplicate email or phone number before creating the account.
     db.query(
       "SELECT * FROM users WHERE email = ? OR phone_number = ?",
       [user.email, user.phone_number],
@@ -51,68 +121,12 @@ async function registerUser(req, res) {
             return res.status(400).json({ error: err.message });
           }
 
-          // Link unauth token by explicit device token if provided in payload
-          try {
-            if (req.body.device_fcm_token) {
-              const linkSql = `
-                INSERT INTO notification_tokens (user_id, token, device_type, active, created_at)
-                VALUES (?, ?, 'mobile', true, NOW())
-                ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), active = true, updated_at = NOW()
-              `;
-              db.query(
-                linkSql,
-                [result.insertId, req.body.device_fcm_token],
-                (linkErr) => {
-                  if (linkErr) {
-                    } else {
-                    }
-                }
-              );
-            }
-          } catch (e) {
-            }
-
-          // Send notification to admin for business user registration
+          // Best-effort device/notification wiring — never blocks registration.
+          linkExplicitDeviceToken(result.insertId, req.body.device_fcm_token);
           if (user.type === "business") {
-            try {
-              const userData = {
-                id: result.insertId,
-                name: user.name,
-                email: user.email,
-                business_name: user.business_name,
-                phone_number: user.phone_number,
-              };
-              await notifyUserRegistration(userData);
-              } catch (notificationError) {
-              // Don't fail the registration if notification fails
-            }
+            await notifyAdminOfBusinessRegistration(user, result.insertId);
           }
-
-          // Link latest unauth mobile FCM token to this newly created user so they can receive status pushes
-          try {
-            const newUserId = result.insertId;
-            // Get the most recent unauthenticated mobile token
-            const selectSql = `
-              SELECT id FROM notification_tokens 
-              WHERE user_id IS NULL AND device_type = 'mobile' 
-              ORDER BY created_at DESC 
-              LIMIT 1
-            `;
-            db.query(selectSql, [], (selErr, selRows) => {
-              if (selErr) {
-                } else if (selRows && selRows.length > 0) {
-                const tokenRowId = selRows[0].id;
-                const updateSql = `UPDATE notification_tokens SET user_id = ? WHERE id = ?`;
-                db.query(updateSql, [newUserId, tokenRowId], (updErr) => {
-                  if (updErr) {
-                    } else {
-                    }
-                });
-              } else {
-                }
-            });
-          } catch (linkErr) {
-            }
+          linkLatestUnauthToken(result.insertId);
 
           res.status(201).json({
             message: "User registered successfully",
@@ -358,13 +372,21 @@ async function updateUserStatus(req, res) {
 }
 
 // Get all users (B2B businesses — the wholesale accounts)
+// Explicit, non-sensitive column list for user lists. Never includes
+// password, otp or reset_token, which must never leave the database.
+const USER_LIST_COLUMNS =
+  "id, type, name, email, phone_number, image, address_line1, address_line2, landmark, state, city, country, gst_number, pan_number, business_name, status, remarks, created_at, updated_at";
+
 function getAllUsers(req, res) {
-  db.query("SELECT * FROM users WHERE type = 'business'", (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
+  db.query(
+    `SELECT ${USER_LIST_COLUMNS} FROM users WHERE type = 'business' ORDER BY created_at DESC`,
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(results);
     }
-    res.json(results);
-  });
+  );
 }
 
 // Get all system/admin accounts (for the dashboard System Users page).
@@ -384,7 +406,7 @@ function getAllAdmins(req, res) {
 // Get all D2C consumer accounts (for the dashboard Consumers page)
 function getAllConsumers(req, res) {
   db.query(
-    "SELECT * FROM users WHERE type = 'consumer' ORDER BY created_at DESC",
+    `SELECT ${USER_LIST_COLUMNS} FROM users WHERE type = 'consumer' ORDER BY created_at DESC`,
     (err, results) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -437,14 +459,14 @@ async function createUser(req, res) {
       }
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
     const user = {
       type: req.body.type,
       name: req.body.name.trim(),
       email: req.body.email.trim(),
-      password: hashedPassword,
+      // Pass the PLAINTEXT password. The user model (insertUser) hashes it
+      // exactly once with bcrypt. Pre-hashing here caused a double hash, so
+      // the stored value never matched at login and the account was locked out.
+      password: req.body.password,
       image: imageFilename,
       phone_number: req.body.phone_number || null,
       address_line1: req.body.address_line1 || null,
@@ -824,8 +846,25 @@ async function verifyBusinessOTP(req, res) {
 
         const user = results[0];
 
-        // All users treated equally - no approval check, unlimited access
-        // Generate JWT token with unlimited duration
+        // Approval gate: B2B 'business' accounts must be approved by an admin
+        // before they can log in. D2C 'consumer' accounts are not approval-gated
+        // (they register with status = null). The Play Store / App Store
+        // reviewer test account bypasses the gate so store review can sign in.
+        const BYPASS_PHONE_NUMBER = "7600046416";
+        const isBypassUser = phoneNumber === BYPASS_PHONE_NUMBER;
+        if (
+          !isBypassUser &&
+          user.type === "business" &&
+          user.status !== "approved"
+        ) {
+          return res.status(403).json({
+            error: "Account not approved",
+            status: user.status,
+            remarks: user.remarks,
+          });
+        }
+
+        // Generate JWT token
         const token = jwt.sign(
           {
             id: user.id,
@@ -855,488 +894,6 @@ async function verifyBusinessOTP(req, res) {
   }
 }
 
-// COMMENTED OUT - No longer needed, all users now treated equally
-/*
-// Handle bypass user OTP verification
-async function handleBypassUserOTP(user, res) {
-  try {
-    // Get all active categories
-    db.query(
-      'SELECT id FROM categories WHERE status = "active"',
-      (catErr, catResults) => {
-        const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
-        const categoryIdsJson = JSON.stringify(categoryIds);
-
-        // Create a logged_in session directly with unlimited time
-        db.query(
-          `INSERT INTO login_requests (
-            user_id,
-            category_ids,
-            status,
-            session_start_time,
-            session_time_minutes
-          ) VALUES (?, ?, 'logged_in', NOW(), 999999)`,
-          [user.id, categoryIdsJson],
-          (insertErr, insertResult) => {
-            if (insertErr) {
-              return res.status(500).json({ error: 'Failed to create bypass session' });
-            }
-
-            const sessionDurationMinutes = 999999;
-            const sessionStartTime = new Date();
-            const sessionEndTime = new Date(sessionStartTime.getTime() + sessionDurationMinutes * 60 * 1000);
-
-            // Generate JWT token
-            const token = jwt.sign(
-              {
-                id: user.id,
-                phone_number: user.phone_number,
-                type: user.type,
-                sessionDurationMinutes,
-                loginRequestId: insertResult.insertId,
-              },
-              JWT_SECRET,
-              { expiresIn: `${sessionDurationMinutes}m` }
-            );
-
-            return res.json({
-              message: "Login successful (bypass)",
-              token,
-              sessionExpiry: sessionEndTime.toISOString(),
-              sessionDurationMinutes,
-              user: {
-                id: user.id,
-                name: user.name,
-                phone_number: user.phone_number,
-                type: user.type,
-                status: user.status,
-              },
-            });
-          }
-        );
-      }
-    );
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Handle regular user OTP verification
-async function handleRegularUserOTP(user, res) {
-  try {
-
-        // First, check for existing active session
-        db.query(
-          `SELECT lr.* 
-           FROM login_requests lr 
-           WHERE lr.user_id = ? 
-           AND lr.status = 'logged_in' 
-           AND lr.session_time_minutes IS NOT NULL 
-           AND lr.session_start_time IS NOT NULL
-           AND NOW() < DATE_ADD(lr.session_start_time, INTERVAL lr.session_time_minutes MINUTE)
-           ORDER BY lr.created_at DESC 
-           LIMIT 1`,
-          [user.id],
-          (activeSessionErr, activeSessionResults) => {
-            if (activeSessionErr) {
-              return res.status(500).json({ error: "Database error" });
-            }
-
-            // If there's an active session, continue from where it left off
-            if (activeSessionResults.length > 0) {
-              const activeSession = activeSessionResults[0];
-              const sessionEndTime = new Date(activeSession.session_start_time);
-              sessionEndTime.setMinutes(
-                sessionEndTime.getMinutes() + activeSession.session_time_minutes
-              );
-
-              // Calculate remaining time in seconds
-              const now = new Date();
-              const remainingTimeSeconds = Math.max(
-                0,
-                Math.floor((sessionEndTime - now) / 1000)
-              );
-
-              // Session resumption logic
-              );
-              );
-              );
-
-              // Generate JWT token with existing session info
-              const token = jwt.sign(
-                {
-                  id: user.id,
-                  phone_number: user.phone_number,
-                  type: user.type,
-                  sessionDurationMinutes: activeSession.session_time_minutes,
-                  loginRequestId: activeSession.id,
-                },
-                JWT_SECRET,
-                { expiresIn: `${Math.ceil(remainingTimeSeconds / 60)}m` }
-              );
-
-              return res.json({
-                message: "Session resumed successfully",
-                token,
-                sessionExpiry: sessionEndTime.toISOString(),
-                sessionDurationMinutes: activeSession.session_time_minutes,
-                remainingTime: remainingTimeSeconds,
-                user: {
-                  id: user.id,
-                  name: user.name,
-                  phone_number: user.phone_number,
-                  type: user.type,
-                  status: user.status,
-                },
-              });
-            }
-
-            // Clean up any expired sessions before checking for approved requests
-            db.query(
-              `UPDATE login_requests 
-               SET status = 'expired', updated_at = CURRENT_TIMESTAMP
-               WHERE user_id = ? AND status = 'logged_in' AND session_time_minutes IS NOT NULL AND session_start_time IS NOT NULL
-               AND NOW() > DATE_ADD(session_start_time, INTERVAL session_time_minutes MINUTE)`,
-              [user.id],
-              (cleanupErr, cleanupResult) => {
-                if (cleanupErr) {
-                  } else if (cleanupResult.affectedRows > 0) {
-                  }
-
-                // Continue with checking for approved login requests
-                // If no active session, check for approved login request to create new session
-                db.query(
-                  `SELECT lr.* 
-                   FROM login_requests lr 
-                   WHERE lr.user_id = ? 
-                   AND lr.status = 'approved' 
-                   AND lr.session_time_minutes IS NOT NULL 
-                   ORDER BY lr.created_at DESC 
-                   LIMIT 1`,
-                  [user.id],
-                  (approvedErr, approvedResults) => {
-                    if (approvedErr) {
-                      return res.status(500).json({ error: "Database error" });
-                    }
-
-                    // If there's an approved login request, update it to logged_in instead of creating new entry
-                    if (approvedResults.length > 0) {
-                      const approvedRequest = approvedResults[0];
-                      const sessionDurationMinutes =
-                        approvedRequest.session_time_minutes;
-
-                      // Validate session duration
-                      if (
-                        !sessionDurationMinutes ||
-                        sessionDurationMinutes <= 0
-                      ) {
-                        return res.status(400).json({
-                          error:
-                            "Invalid session duration. Please contact administrator.",
-                        });
-                      }
-
-                      // Update the existing approved request to logged_in instead of creating new entry
-                      const sessionStartTime = new Date();
-                      const sessionEndTime = new Date(
-                        sessionStartTime.getTime() +
-                          sessionDurationMinutes * 60 * 1000
-                      );
-
-                      db.query(
-                        "UPDATE login_requests SET status = ?, session_start_time = ?, updated_at = ? WHERE id = ?",
-                        [
-                          "logged_in",
-                          sessionStartTime,
-                          new Date(),
-                          approvedRequest.id,
-                        ],
-                        (updateErr, updateResult) => {
-                          if (updateErr) {
-                            return res
-                              .status(500)
-                              .json({ error: "Failed to update session" });
-                          }
-
-                          // Generate JWT token with session info
-                          const token = jwt.sign(
-                            {
-                              id: user.id,
-                              phone_number: user.phone_number,
-                              type: user.type,
-                              sessionDurationMinutes,
-                              loginRequestId: approvedRequest.id,
-                            },
-                            JWT_SECRET,
-                            { expiresIn: `${sessionDurationMinutes}m` }
-                          );
-
-                          return res.json({
-                            message: "Login successful",
-                            token,
-                            sessionExpiry: sessionEndTime.toISOString(),
-                            sessionDurationMinutes,
-                            user: {
-                              id: user.id,
-                              name: user.name,
-                              phone_number: user.phone_number,
-                              type: user.type,
-                              status: user.status,
-                            },
-                          });
-                        }
-                      );
-                    } else {
-                      // No approved login request found
-                      return res.status(400).json({
-                        error:
-                          "No approved login request found. Please request login access first.",
-                      });
-                    }
-                  }
-                );
-              }
-            );
-          }
-        );
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-*/
-
-// COMMENTED OUT - Session validation removed (no sessions needed)
-/*
-// Validate user session
-async function validateUserSession(req, res) {
-  const userId = req.user.id;
-
-  try {
-    // First, verify the user exists and get their phone number for bypass check
-    db.query(
-      "SELECT id, name, status, phone_number FROM users WHERE id = ?",
-      [userId],
-      (userErr, userResults) => {
-        if (userErr) {
-          return res.status(500).json({ error: "Database error" });
-        }
-
-        if (userResults.length === 0) {
-          return res.status(401).json({
-            error: "User not found",
-            action: "force_logout",
-          });
-        }
-
-        const user = userResults[0];
-        // Special bypass for phone number 7600046416
-        const BYPASS_PHONE_NUMBER = "7600046416";
-        const isBypassUser = user.phone_number === BYPASS_PHONE_NUMBER;
-
-        // Check if user status is valid (skip for bypass user)
-        if (!isBypassUser && user.status !== "approved") {
-          return res.status(401).json({
-            error: "User account not approved",
-            action: "force_logout",
-          });
-        }
-
-        if (isBypassUser) {
-          }
-
-        // For bypass user, handle session differently
-        if (isBypassUser) {
-          // For bypass user, just check for any logged_in session (ignore expiry)
-          db.query(
-            `SELECT lr.*
-             FROM login_requests lr
-             WHERE lr.user_id = ?
-             AND lr.status = 'logged_in'
-             ORDER BY lr.created_at DESC
-             LIMIT 1`,
-            [userId],
-            (err, results) => {
-              if (err) {
-                return res.status(500).json({ error: "Database error" });
-              }
-
-              if (results.length === 0) {
-                // Create emergency unlimited session for bypass user
-                db.query(
-                  'SELECT id FROM categories WHERE status = "active"',
-                  (catErr, catResults) => {
-                    const categoryIds = catErr ? [] : catResults.map(cat => cat.id);
-                    const categoryIdsJson = JSON.stringify(categoryIds);
-
-                    db.query(
-                      `INSERT INTO login_requests (
-                        user_id,
-                        category_ids,
-                        status,
-                        session_start_time,
-                        session_time_minutes
-                      ) VALUES (?, ?, 'logged_in', NOW(), 999999)`,
-                      [userId, categoryIdsJson],
-                      (insertErr, insertResult) => {
-                        if (insertErr) {
-                          return res.status(500).json({ error: 'Failed to create bypass session' });
-                        }
-
-                        const sessionStartTime = new Date();
-                        const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
-
-                        return res.json({
-                          valid: true,
-                          sessionExpiry: sessionEndTime.toISOString(),
-                          sessionDurationMinutes: 999999,
-                          loginRequestId: insertResult.insertId,
-                        });
-                      }
-                    );
-                  }
-                );
-              } else {
-                // Found bypass session - ensure it has unlimited time
-                const session = results[0];
-
-                // If session doesn't have unlimited time, update it
-                if (session.session_time_minutes !== 999999) {
-                  db.query(
-                    "UPDATE login_requests SET session_time_minutes = 999999, session_start_time = NOW() WHERE id = ?",
-                    [session.id],
-                    (updateErr) => {
-                      if (updateErr) {
-                        } else {
-                        }
-                    }
-                  );
-                }
-
-                const sessionStartTime = new Date();
-                const sessionEndTime = new Date(sessionStartTime.getTime() + 999999 * 60 * 1000);
-
-                ,
-                });
-
-                res.json({
-                  valid: true,
-                  sessionExpiry: sessionEndTime.toISOString(),
-                  sessionDurationMinutes: 999999,
-                  loginRequestId: session.id,
-                });
-              }
-            }
-          );
-        } else {
-          // Regular user session validation with expiry check
-          db.query(
-            `SELECT lr.*
-           FROM login_requests lr
-           WHERE lr.user_id = ?
-           AND lr.status = 'logged_in'
-           AND lr.session_time_minutes IS NOT NULL
-           AND lr.session_start_time IS NOT NULL
-           AND NOW() < DATE_ADD(lr.session_start_time, INTERVAL lr.session_time_minutes MINUTE)
-           ORDER BY lr.created_at DESC
-           LIMIT 1`,
-            [userId],
-            (err, results) => {
-              if (err) {
-                return res.status(500).json({ error: "Database error" });
-              }
-
-              if (results.length === 0) {
-                // No active session found - check if there are expired sessions and clean them up
-                db.query(
-                  `UPDATE login_requests
-                 SET status = 'expired', updated_at = CURRENT_TIMESTAMP
-                 WHERE user_id = ? AND status = 'logged_in' AND session_time_minutes IS NOT NULL AND session_start_time IS NOT NULL
-                 AND NOW() > DATE_ADD(session_start_time, INTERVAL session_time_minutes MINUTE)`,
-                  [userId],
-                  (cleanupErr, cleanupResult) => {
-                    if (cleanupErr) {
-                      } else if (cleanupResult.affectedRows > 0) {
-                      }
-
-                    // Return session expired response
-                    return res.status(401).json({
-                      error: "Session expired. Please login again.",
-                      action: "force_logout",
-                    });
-                  }
-                );
-              } else {
-                // Found an active session - return session info
-                const session = results[0];
-
-                // Check if this is a bypass user (double-check)
-                const BYPASS_PHONE_NUMBER = "7600046416";
-                const isBypassUserInSession = user.phone_number === BYPASS_PHONE_NUMBER;
-
-                // If this is a bypass user but somehow ended up in regular validation,
-                // override the session duration to be unlimited
-                let sessionDuration = session.session_time_minutes;
-                if (isBypassUserInSession && session.session_time_minutes !== 999999) {
-                  sessionDuration = 999999;
-                }
-
-                const sessionEndTime = new Date(session.session_start_time);
-                sessionEndTime.setMinutes(
-                  sessionEndTime.getMinutes() + sessionDuration
-                );
-
-                ,
-                  isBypassUserFallback: isBypassUserInSession
-                });
-
-                res.json({
-                  valid: true,
-                  sessionExpiry: sessionEndTime.toISOString(),
-                  sessionDurationMinutes: sessionDuration,
-                  loginRequestId: session.id,
-                });
-              }
-            }
-          );
-        }
-      }
-    );
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// Logout user and update session status
-async function logoutUser(req, res) {
-  const userId = req.user.id;
-
-  try {
-    // Update the active session status to 'logged_out' instead of deleting it
-    db.query(
-      `UPDATE login_requests 
-       SET status = 'logged_out', 
-           session_end_time = NOW() 
-       WHERE user_id = ? 
-       AND status = 'logged_in' 
-       AND session_start_time IS NOT NULL`,
-      [userId],
-      (err, result) => {
-        if (err) {
-          return res.status(500).json({ error: "Database error" });
-        }
-
-        res.json({
-          message: "Logout successful",
-          updatedSessions: result.affectedRows,
-        });
-      }
-    );
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-*/
-
 module.exports = {
   registerUser,
   adminLogin,
@@ -1351,8 +908,5 @@ module.exports = {
   deleteUser,
   checkUserExists,
   getUserById,
-  verifyBusinessOTP, // Simplified - no approval or session checks
-  // COMMENTED OUT - Session management removed (no sessions needed)
-  // validateUserSession,
-  // logoutUser,
+  verifyBusinessOTP,
 };

@@ -45,12 +45,10 @@ function searchAll(req, res) {
       p.image,
       p.net_weight,
       p.gross_weight,
-      p.less_weight,
+      (p.gross_weight - p.net_weight) AS less_weight,
       p.size,
-      p.length,
       p.sku,
       p.purity,
-      p.mark,
       p.mark_amount,
       p.status,
       p.stock_status,
@@ -66,8 +64,7 @@ function searchAll(req, res) {
     AND (
       p.name LIKE ? 
       OR p.sku LIKE ? 
-      OR p.purity LIKE ? 
-      OR p.mark LIKE ?
+      OR p.purity LIKE ?
       OR c.name LIKE ?
     )
     ORDER BY p.name ASC
@@ -80,12 +77,10 @@ function searchAll(req, res) {
       p.image,
       p.net_weight,
       p.gross_weight,
-      p.less_weight,
+      (p.gross_weight - p.net_weight) AS less_weight,
       p.size,
-      p.length,
       p.sku,
       p.purity,
-      p.mark,
       p.mark_amount,
       p.status,
       p.stock_status,
@@ -100,8 +95,7 @@ function searchAll(req, res) {
     AND (
       p.name LIKE ? 
       OR p.sku LIKE ? 
-      OR p.purity LIKE ? 
-      OR p.mark LIKE ?
+      OR p.purity LIKE ?
       OR c.name LIKE ?
     )
     ORDER BY p.name ASC
@@ -122,7 +116,7 @@ function searchAll(req, res) {
 
       db.query(
         productSearchQuery,
-        [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm],
+        [searchTerm, searchTerm, searchTerm, searchTerm],
         (productErr, products) => {
           if (productErr) {
             return res.status(500).json({
@@ -245,12 +239,10 @@ function searchProducts(req, res) {
         p.image,
         p.net_weight,
         p.gross_weight,
-        p.less_weight,
+        (p.gross_weight - p.net_weight) AS less_weight,
         p.size,
-        p.length,
         p.sku,
         p.purity,
-        p.mark,
         p.mark_amount,
         p.status,
         p.stock_status,
@@ -266,13 +258,12 @@ function searchProducts(req, res) {
       AND (
         p.name LIKE ? 
         OR p.sku LIKE ? 
-        OR p.purity LIKE ? 
-        OR p.mark LIKE ?
+        OR p.purity LIKE ?
         OR c.name LIKE ?
       )
       ORDER BY p.name ASC
     `;
-    params = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+    params = [searchTerm, searchTerm, searchTerm, searchTerm];
   } else {
     // Admin request - show all products including stock status
     sql = `
@@ -282,12 +273,10 @@ function searchProducts(req, res) {
         p.image,
         p.net_weight,
         p.gross_weight,
-        p.less_weight,
+        (p.gross_weight - p.net_weight) AS less_weight,
         p.size,
-        p.length,
         p.sku,
         p.purity,
-        p.mark,
         p.mark_amount,
         p.status,
         p.stock_status,
@@ -302,13 +291,12 @@ function searchProducts(req, res) {
       AND (
         p.name LIKE ? 
         OR p.sku LIKE ? 
-        OR p.purity LIKE ? 
-        OR p.mark LIKE ?
+        OR p.purity LIKE ?
         OR c.name LIKE ?
       )
       ORDER BY p.name ASC
     `;
-    params = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+    params = [searchTerm, searchTerm, searchTerm, searchTerm];
   }
 
   db.query(sql, params, (err, results) => {

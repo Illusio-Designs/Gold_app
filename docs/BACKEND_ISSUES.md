@@ -1,38 +1,47 @@
-# Backend issues — audit findings
+# Remaining work
 
-Read-only audit of `Backend/` for B2B (`business`), B2C (`consumer`) and admin
-(`admin`) flows. Grouped by severity. Status: **open** unless noted.
+All backend audit issues (#1–#9) and the HIGH code-review items (H2, H3,
+H4/H5/H7, H6) have been **fixed and merged to `main`** — see git history for the
+individual commits. None of them required a change to the B2B/B2C apps.
 
-> ⚠️ #1 and #2 are production-blocking — fix before the store review proceeds.
+This file now tracks only what is still outstanding.
 
-## 🔴 Critical
+---
 
-- [ ] **Public register can self-mint an admin.** `routes/user.js` `POST /api/users/register` is unauthenticated and sets `type` from the request body, so anyone can create a `type:"admin"` account and log in via `/admin/login`. — *Fix: force `type` to `business`/`consumer` on the public register path; never accept `admin` from unauthenticated input.* (`controllers/userController.js` ~line 16)
-- [ ] **Single-product order creation is broken.** `controllers/orderController.js` (~line 147) references an undefined `business_user_id` after the insert → throws / hangs; stock is reserved but the client gets no response. — *Fix: use `req.user.id` / `orderDetails.user_id`; remove the stray `business_user_id`.*
+## 🔧 Needs doing
 
-## 🟠 High
+- **Dashboard: "Delete product" is broken.** In `dashboard/src/pages/ProductsPage.jsx`
+  a `deleteProduct` state variable shadows the imported `deleteProduct` API
+  function, so the delete call can't reach the API. *(code-review M2)*
+- **One-time password reset for old dashboard accounts.** Any account created
+  from the dashboard **before** the double-hash fix still has a double-hashed
+  password and cannot log in until it is re-saved / reset. New accounts are fine.
+- **Minor backend code quality (low priority).** Hardcoded admin id `1` in the
+  notification calls; ownership/auth guard expressions duplicated inline instead
+  of a shared helper. *(code-review M4 / M6 / M7)*
+- **Cleanup (cosmetic).** Narration comments, leftover debug `console.log`s, and
+  a few empty fire-and-forget handlers outside the files already cleaned. *(L1–L4)*
 
-- [ ] **`/verify-otp` issues a token with no OTP check and skips approval.** `verifyBusinessOTP` (`userController.js` ~802) looks a user up by phone only and returns a 365-day JWT. — *Fix: verify a real OTP and re-apply the `status==='approved'` gate (or document that Firebase enforces the OTP first).*
-- [ ] **Admin/consumer accounts created by an admin can never log in** (double bcrypt hash). `userController.js` ~441 hashes, then `models/user.js` ~33 hashes again. — *Fix: hash once (pass plaintext to the model, or INSERT directly like `createAdmin`).* (`/users/system` admin-create is already correct.)
-- [ ] **Storefront search 500s** — `searchController.js` queries columns that don't exist (`p.less_weight`, `p.length`, `p.mark`). — *Fix: drop `length`/`mark`; compute `less_weight` as `gross_weight - net_weight`.*
+---
 
-## 🟡 Medium
+## 📱 Mobile app track (separate, optional)
 
-- [ ] **Password hashes leaked in admin user lists** — `getAllUsers`/`getAllConsumers` use `SELECT *` (returns `password`, `otp`, `reset_token`). — *Fix: explicit column lists.*
-- [ ] **`GET /orders/stats/statistics` has no admin gate** — any logged-in user can read store-wide stats. — *Fix: add `requireAdmin`.*
-- [ ] **B2B wholesale price (`mark_amount`) is public** — product endpoints expose it with no auth/type gating (admin-vs-frontend split only checks for a Bearer header). — *Fix: gate the price fields by auth/user type if they're meant to be private.*
-- [ ] **Single "mark notification read" writes a NULL user** — route lacks the `:userId` param the controller reads. — *Fix: use `req.user.id`.*
+Lives entirely inside `b2b/` and `d2c/`; not required for the backend.
 
-## 🟢 Low
+- **A1 — Merge B2B & B2C into a shared library.** They are near-identical copies
+  and already drifting (`firebaseService.js` is byte-identical). Biggest payoff.
+- **A2 — Centralise the API & socket URLs from env; remove the shipped LAN IP**
+  (`172.20.10.10`) and the runtime `localhost → prod` string-patch in `d2c`.
+- **A3 — Split the 894-line `b2b Home.tsx`** god component.
+- **A4 — Remove leftover debug logging** in `d2c/src/services/Api.jsx`.
+- **A5 — Move the app-store reviewer test login to env/config** (keep the login;
+  just stop hardcoding the number in the bundles, and confirm it's non-admin).
 
-- [ ] Cart re-add stays hidden (`ON DUPLICATE KEY UPDATE` never resets `status` from `removed`).
-- [ ] Logged-in consumers get the admin product view (any Bearer treated as admin in `productController.js` ~97).
-- [ ] `updateOrder` realtime emit targets `user_${business_user_id}` (undefined) → dead room.
-- [ ] `PATCH /:notificationId/read` has no ownership check.
+---
 
-## ✅ Verified correct (no action)
+## ✅ Kept by design (no action)
 
-Order/cart ownership · approval gating on ordering · server-side pricing ·
-payment replay/ownership · atomic stock reservation · order-number derivation ·
-no SQL injection · notification failure-safety · account-deletion gating ·
-route ordering (no `/:id` shadowing).
+- **`mark_amount`** is a product cost component (diamonds, stones and other
+  materials set in the piece) — public by design, not a hidden wholesale price.
+- **App-store reviewer test login** (`7600046416`) — required by Google Play and
+  the Apple App Store so reviewers can sign in; intentional.
