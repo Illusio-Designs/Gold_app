@@ -380,48 +380,51 @@ const OrdersPage = () => {
       header: "Order ID",
       accessor: "id",
       cell: (row) => (
-        <span className="order-id">{formatOrderId(row)}</span>
+        <span className="au-ono">{formatOrderId(row)}</span>
       ),
     },
     {
       header: "Product",
       accessor: "product_info",
       cell: (row) => (
-        <div className="product-info">
-          {row.product_image ? (
-            <img 
-              src={getProductImageUrl(row.product_image)} 
-              alt={row.product_name} 
-              className="product-thumbnail"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
-              }}
-            />
-          ) : (
-            <div className="product-thumbnail no-image">
-              <HugeiconsIcon icon={Image01Icon} size={12} />
-            </div>
-          )}
-          <div className="product-details">
-            <div className="product-name">
+        <div className="au-cell">
+          <div className="au-thumb">
+            {row.product_image && (
+              <img
+                src={getProductImageUrl(row.product_image)}
+                alt={row.product_name}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            )}
+            <span
+              className="au-thumb-ph"
+              style={{ display: row.product_image ? 'none' : 'flex' }}
+            >
+              <HugeiconsIcon icon={Image01Icon} size={14} />
+            </span>
+          </div>
+          <div className="au-cellbody">
+            <div className="au-ono">
               {row.product_name || 'N/A'}
               {row.isCustom && (
-                <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 800, color: '#5D0829', background: '#F9F2E7', border: '1px solid #C09E83', borderRadius: 6, padding: '1px 6px', letterSpacing: 0.5 }}>CUSTOM</span>
+                <span className="au-chan au-c-cus" style={{ marginLeft: 6 }}>CUSTOM</span>
               )}
             </div>
             {row.isCustom ? (
               <>
-                {row.purity && <div className="product-sku">Purity: {row.purity}</div>}
+                {row.purity && <div className="au-sub">Purity: {row.purity}</div>}
                 {row.delivery_date && (
-                  <div className="product-weight">Delivery: {formatDate(row.delivery_date)}</div>
+                  <div className="au-sub">Delivery: {formatDate(row.delivery_date)}</div>
                 )}
               </>
             ) : (
               <>
-                <div className="product-sku">SKU: {row.product_sku || 'N/A'}</div>
+                <div className="au-sub">SKU: {row.product_sku || 'N/A'}</div>
                 {row.net_weight && (
-                  <div className="product-weight">Weight: {row.net_weight}g</div>
+                  <div className="au-sub">Weight: {row.net_weight}g</div>
                 )}
               </>
             )}
@@ -433,9 +436,7 @@ const OrdersPage = () => {
       header: "User",
       accessor: "user_info",
       cell: (row) => (
-        <div className="user-info">
-          <div className="user-name">{row.user_name || row.business_name || 'N/A'}</div>
-        </div>
+        <span className="au-ustrong">{row.user_name || row.business_name || 'N/A'}</span>
       ),
     },
     {
@@ -446,7 +447,9 @@ const OrdersPage = () => {
         // distinguished by the account type on the order.
         const isD2C = row.user_type === 'consumer';
         return (
-          <Badge tone={isD2C ? 'info' : 'brand'}>{isD2C ? 'D2C' : 'B2B'}</Badge>
+          <span className={`au-chan ${isD2C ? 'au-c-d2c' : 'au-c-b2b'}`}>
+            {isD2C ? 'D2C' : 'B2B'}
+          </span>
         );
       },
     },
@@ -464,14 +467,14 @@ const OrdersPage = () => {
       header: "Quantity",
       accessor: "total_qty",
       cell: (row) => (
-        <span className="quantity">{row.total_qty || 0}</span>
+        <span className="au-qty tnum">{row.total_qty || 0}</span>
       ),
     },
     {
       header: "Amount",
       accessor: "total_mark_amount",
       cell: (row) => (
-        <span className="amount">{formatCurrency(row.total_mark_amount || 0)}</span>
+        <span className="au-amt tnum">{formatCurrency(row.total_mark_amount || 0)}</span>
       ),
     },
     {
@@ -523,7 +526,7 @@ const OrdersPage = () => {
       header: "Created",
       accessor: "created_at",
       cell: (row) => (
-        <span className="created-date">{formatDate(row.created_at)}</span>
+        <span className="au-sub">{formatDate(row.created_at)}</span>
       ),
     },
     {
@@ -568,22 +571,32 @@ const OrdersPage = () => {
     <div className="orders-page">
       <StatCards stats={orderStats} />
 
+      <div className="au-chips orders-status-chips">
+        {statusOptions.map((opt) => {
+          const count =
+            opt.value === 'all'
+              ? orders.length
+              : orders.filter((o) => o.status === opt.value).length;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              className={`au-chip${filterStatus === opt.value ? ' on' : ''}`}
+              onClick={() => setFilterStatus(opt.value)}
+            >
+              {opt.label}
+              <span className="n">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <TableWithControls
         columns={columns}
         data={filteredOrders}
         searchFields={["product_name", "user_name", "id", "product_sku"]}
         pageTitle="Order Management"
         loading={loading}
-        actions={
-          <div style={{ width: "max-content" }}>
-            <DropdownSelect
-              value={filterStatus}
-              onChange={setFilterStatus}
-              options={statusOptions}
-              placeholder="All Statuses"
-            />
-          </div>
-        }
       />
 
       {/* User Cart Modal */}

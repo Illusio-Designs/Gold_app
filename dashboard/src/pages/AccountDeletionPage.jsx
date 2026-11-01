@@ -11,8 +11,10 @@ import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import StatCards from "../components/common/StatCards";
+import PageHeader from "../components/common/PageHeader";
 import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
-import { CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { CheckCircle2, XCircle, RotateCcw, UserX } from "lucide-react";
+import "../styles/pages/AccountDeletionPage.css";
 
 const AccountDeletionPage = () => {
   const [requests, setRequests] = useState([]);
@@ -113,9 +115,7 @@ const AccountDeletionPage = () => {
       header: "Request ID",
       accessor: "id",
       cell: (row) => (
-        <span style={{ fontWeight: 600, color: "var(--brand)" }}>
-          {formatRequestId(row.id)}
-        </span>
+        <span className="ad-reqid au-ono">{formatRequestId(row.id)}</span>
       ),
     },
     {
@@ -123,13 +123,9 @@ const AccountDeletionPage = () => {
       accessor: "user_name",
       cell: (row) => (
         <div>
-          <div style={{ fontWeight: 600, color: "var(--brand)" }}>
-            {row.user_name || "N/A"}
-          </div>
+          <div className="ad-user">{row.user_name || "N/A"}</div>
           {row.business_name && (
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-              {row.business_name}
-            </div>
+            <div className="ad-sub au-sub">{row.business_name}</div>
           )}
         </div>
       ),
@@ -138,7 +134,7 @@ const AccountDeletionPage = () => {
       header: "Mobile",
       accessor: "mobile_number",
       cell: (row) => (
-        <a href={`tel:${row.mobile_number}`} style={{ color: "var(--brand)" }}>
+        <a href={`tel:${row.mobile_number}`} className="ad-mobile">
           {row.mobile_number || "N/A"}
         </a>
       ),
@@ -154,9 +150,7 @@ const AccountDeletionPage = () => {
       header: "Requested",
       accessor: "created_at",
       cell: (row) => (
-        <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-          {formatDate(row.created_at)}
-        </span>
+        <span className="ad-date au-sub">{formatDate(row.created_at)}</span>
       ),
     },
     {
@@ -165,7 +159,7 @@ const AccountDeletionPage = () => {
       cell: (row) => {
         const status = String(row.status || "").toLowerCase();
         return (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="ad-actions">
             {status !== "processed" && (
               <Button
                 variant="secondary"
@@ -205,6 +199,11 @@ const AccountDeletionPage = () => {
   if (loading) {
     return (
       <div className="account-deletion-page">
+        <PageHeader
+          title="Account Deletion"
+          subtitle="Review and action user deletion requests"
+          icon={UserX}
+        />
         <SkeletonStats count={4} />
         <SkeletonTable rows={8} cols={6} />
       </div>
@@ -213,6 +212,11 @@ const AccountDeletionPage = () => {
 
   return (
     <div className="account-deletion-page">
+      <PageHeader
+        title="Account Deletion"
+        subtitle="Review and action user deletion requests"
+        icon={UserX}
+      />
       <StatCards stats={deletionStats} />
       <TableWithControls
         columns={columns}

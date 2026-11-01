@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Edit, Trash2, Upload, Plus, Image as ImageIcon } from "lucide-react";
-import TableWithControls from "../components/common/TableWithControls";
 import Button from "../components/common/Button";
+import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
 import SidePanel from "../components/common/SidePanel";
-import { SkeletonTable, SkeletonStats } from "../components/common/Skeleton";
+import { SkeletonCards, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
 import DropdownSelect from "../components/common/DropdownSelect";
@@ -32,85 +32,6 @@ const SliderPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState("");
   const [categories, setCategories] = useState([]);
-
-  const columns = [
-    {
-      header: "Title",
-      accessor: "title",
-      cell: (row) => (
-        <div className="slider-info">
-          <div className="slider-title">{row.title}</div>
-        </div>
-      ),
-    },
-    {
-      header: "Image",
-      accessor: "image_url",
-      cell: (row) => (
-        <div className="slider-image">
-          {row.image_url ? (
-            <img
-              src={getSliderImageUrl(row.image_url)}
-              alt={row.title}
-              className="preview-image"
-              onError={(e) => {
-                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
-              }}
-            />
-          ) : (
-            <div className="no-image">
-              <ImageIcon className="icon" />
-              No Image
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      header: "Category",
-      accessor: "category_name",
-      cell: (row) => (
-        <div className="slider-category">
-          {row.category_name ? (
-            <span className="category-tag">{row.category_name}</span>
-          ) : (
-            <span className="no-category">No Category</span>
-          )}
-        </div>
-      ),
-    },
-    {
-      header: "Created",
-      accessor: "created_at",
-      cell: (row) => (
-        <div className="slider-date">
-          {new Date(row.created_at).toLocaleDateString()}
-        </div>
-      ),
-    },
-    {
-      header: "Actions",
-      accessor: "actions",
-      cell: (row) => (
-        <div className="action-buttons">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleEdit(row)}
-          >
-            <Edit size={16} />
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => handleDelete(row)}
-          >
-            <Trash2 size={16} />
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   useEffect(() => {
     loadSliders();
@@ -282,38 +203,87 @@ const SliderPage = () => {
       {loading ? (
         <>
           <SkeletonStats count={2} />
-          <SkeletonTable rows={8} cols={5} />
+          <SkeletonCards count={6} />
         </>
       ) : (
       <>
       <StatCards stats={sliderStats} />
-      <TableWithControls
-        data={sliders}
-        columns={columns}
-        loading={loading}
-        pageTitle="Slider Management"
-        searchFields={["title", "category_name"]}
-        actions={
-          <Button onClick={handleCreate}>
-            <Plus className="icon" />
-            Create New Slider
-          </Button>
-        }
-        filters={[
-          {
-            key: "title",
-            options: [
-              { value: "", label: "All Titles" },
-              ...sliders.map((slider) => ({
-                value: slider.title,
-                label: slider.title,
-              })),
-            ],
-            placeholder: "Filter by title",
-          },
-        ]}
-        errorMessage={error}
-      />
+
+      <div className="au-sechead">
+        <h2>Slider Management</h2>
+        <span className="au-muted">{sliders.length} banners</span>
+        <div className="au-spacer" />
+        <Button onClick={handleCreate}>
+          <Plus size={16} />
+          Create New Slider
+        </Button>
+      </div>
+
+      {error && <div className="au-notice">{error}</div>}
+
+      {sliders.length === 0 ? (
+        <div className="au-card au-empty">
+          <div className="au-empty-title">No slides yet</div>
+          <p>Create a home banner to feature on the storefront.</p>
+        </div>
+      ) : (
+        <div className="au-pgrid slider-grid">
+          {sliders.map((row) => (
+            <div className="au-pcard" key={row.id}>
+              <div className="au-ph slider-ph" style={{ aspectRatio: "16/7" }}>
+                {row.image_url ? (
+                  <img
+                    src={getSliderImageUrl(row.image_url)}
+                    alt={row.title}
+                    onError={(e) => {
+                      e.target.src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23f0f0f0' width='100' height='100'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E";
+                    }}
+                  />
+                ) : (
+                  <div className="slider-noimg">
+                    <ImageIcon size={26} />
+                    <span>No Image</span>
+                  </div>
+                )}
+                <span className="au-stk">
+                  <Badge tone={row.category_name ? "brand" : "neutral"}>
+                    {row.category_name || "No category"}
+                  </Badge>
+                </span>
+              </div>
+              <div className="au-pb">
+                <div className="au-pn">{row.title}</div>
+                <div className="au-pr">
+                  <span className="au-sub">
+                    Added {new Date(row.created_at).toLocaleDateString()}
+                  </span>
+                  <div className="slider-actions">
+                    <button
+                      type="button"
+                      className="au-rowbtn"
+                      onClick={() => handleEdit(row)}
+                      title="Edit"
+                      aria-label="Edit slider"
+                    >
+                      <Edit size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      className="au-rowbtn slider-del"
+                      onClick={() => handleDelete(row)}
+                      title="Delete"
+                      aria-label="Delete slider"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       </>
       )}
 

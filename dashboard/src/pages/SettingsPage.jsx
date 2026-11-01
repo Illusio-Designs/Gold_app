@@ -9,6 +9,7 @@ import {
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
 import Button from "../components/common/Button";
+import Badge from "../components/common/Badge";
 import PageHeader from "../components/common/PageHeader";
 import "../styles/pages/SettingsPage.css";
 
@@ -90,46 +91,81 @@ const SettingsPage = () => {
     <div className="settings-page">
       <PageHeader title="Settings" subtitle="Manage administrative settings" icon={SettingsIcon} />
 
-      <section className="settings-card">
-        <h2>D2C Pricing</h2>
-        <p>
-          The consumer app prices are calculated as
-          {" "}<strong>(net weight × gold rate) + making&nbsp;%</strong>.
-          Update today's gold rate here and it applies across the D2C app.
-        </p>
+      <div className="au-grid au-row-2b settings-grid">
+        <section className="au-panel">
+          <div className="au-panel-head">
+            <h3>Applications</h3>
+          </div>
+          <ul className="settings-apps">
+            <li className="settings-apps__row">
+              <div>
+                <div className="settings-apps__name">B2B App</div>
+                <div className="settings-apps__meta">Wholesale ordering</div>
+              </div>
+              <Badge tone="success">Live</Badge>
+            </li>
+            <li className="settings-apps__row">
+              <div>
+                <div className="settings-apps__name">iOS App</div>
+                <div className="settings-apps__meta">App Store submission</div>
+              </div>
+              <Badge tone="info">In review</Badge>
+            </li>
+            <li className="settings-apps__row">
+              <div>
+                <div className="settings-apps__name">D2C App</div>
+                <div className="settings-apps__meta">Direct-to-consumer</div>
+              </div>
+              <Badge tone="neutral">In development</Badge>
+            </li>
+          </ul>
+        </section>
 
-        <div className="settings-field">
-          <label htmlFor="gold-rate">Gold rate (₹ per gram)</label>
-          <input
-            id="gold-rate"
-            type="number"
-            min="0"
-            step="0.01"
-            value={goldRate}
-            onChange={(e) => setGoldRate(e.target.value)}
-            placeholder="e.g. 6250"
-          />
-        </div>
+        <section className="au-panel">
+          <div className="au-panel-head">
+            <h3>D2C Pricing</h3>
+          </div>
+          <p className="settings-note">
+            The consumer app prices are calculated as
+            {" "}<strong>(net weight × gold rate) + making&nbsp;%</strong>.
+            Update today's gold rate here and it applies across the D2C app.
+          </p>
 
-        <div className="settings-field">
-          <label htmlFor="making-pct">Making charge (%)</label>
-          <input
-            id="making-pct"
-            type="number"
-            min="0"
-            step="0.01"
-            value={makingPct}
-            onChange={(e) => setMakingPct(e.target.value)}
-            placeholder="e.g. 12"
-          />
-        </div>
+          <div className="field">
+            <label htmlFor="gold-rate">Gold rate (₹ per gram)</label>
+            <input
+              id="gold-rate"
+              className="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              value={goldRate}
+              onChange={(e) => setGoldRate(e.target.value)}
+              placeholder="e.g. 6250"
+            />
+          </div>
 
-        <div className="settings-actions">
-          <Button onClick={handleSavePricing} disabled={savingPricing}>
-            {savingPricing ? "Saving…" : "Save Pricing"}
-          </Button>
-        </div>
-      </section>
+          <div className="field">
+            <label htmlFor="making-pct">Making charge (%)</label>
+            <input
+              id="making-pct"
+              className="form-control"
+              type="number"
+              min="0"
+              step="0.01"
+              value={makingPct}
+              onChange={(e) => setMakingPct(e.target.value)}
+              placeholder="e.g. 12"
+            />
+          </div>
+
+          <div className="settings-actions">
+            <Button onClick={handleSavePricing} disabled={savingPricing}>
+              {savingPricing ? "Saving…" : "Save Pricing"}
+            </Button>
+          </div>
+        </section>
+      </div>
 
       <section className="danger-zone">
         <div className="danger-zone__head">

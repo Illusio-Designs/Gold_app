@@ -85,31 +85,65 @@ const ProductsPage = () => {
       accessor: "category_id",
       cell: (row) => categoryMap[row.category_id] || row.category_id,
     },
-    { header: "Name", accessor: "name" },
+    {
+      header: "Name",
+      accessor: "name",
+      cell: (row) => <span className="au-ono">{row.name}</span>,
+    },
     {
       header: "Image",
       accessor: "image",
+      cell: (row) => (
+        <div className="au-thumb">
+          {row.image && (
+            <img
+              src={getProductImageUrl(row.image)}
+              alt={row.name}
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
+            />
+          )}
+          <span
+            className="au-thumb-ph"
+            style={{ display: row.image ? "none" : "flex" }}
+          >
+            <Package size={16} />
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Net Wt.",
+      accessor: "net_weight",
+      cell: (row) => <span className="tnum">{row.net_weight}</span>,
+    },
+    {
+      header: "SKU",
+      accessor: "sku",
+      cell: (row) => <span className="au-ono">{row.sku}</span>,
+    },
+    {
+      header: "Pieces",
+      accessor: "pieces",
+      cell: (row) => <span className="tnum">{row.pieces}</span>,
+    },
+    {
+      header: "Purity",
+      accessor: "purity",
       cell: (row) =>
-        row.image ? (
-          <img
-            src={getProductImageUrl(row.image)}
-            alt={row.name}
-            style={{
-              width: 40,
-              height: 40,
-              objectFit: "cover",
-              borderRadius: "4px",
-            }}
-          />
+        row.purity ? (
+          <span className="au-chan au-c-d2c">{row.purity}</span>
         ) : (
-          "-"
+          <span className="au-sub">—</span>
         ),
     },
-    { header: "Net Wt.", accessor: "net_weight" },
-    { header: "SKU", accessor: "sku" },
-    { header: "Pieces", accessor: "pieces" },
-    { header: "Purity", accessor: "purity" },
-    { header: "MRP", accessor: "mark_amount" },
+    {
+      header: "MRP",
+      accessor: "mark_amount",
+      cell: (row) => <span className="au-amt tnum">{row.mark_amount}</span>,
+    },
     {
       header: "Stock Status",
       accessor: "stock_status",

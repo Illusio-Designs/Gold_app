@@ -159,12 +159,14 @@ const NotificationsPage = () => {
       <PageHeader title="Notifications" subtitle="Recent activity across the platform" icon={Bell} />
 
       {/* Push notification tester — sends a REAL FCM push and shows the outcome */}
-      <div style={{ background: "#fff", border: "1px solid #e6dccf", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <div style={{ fontWeight: 700, color: "#5d0829", marginBottom: 4 }}>Test push notifications</div>
-        <div style={{ fontSize: 13, color: "#8a7a6d", marginBottom: 12 }}>
-          Sends a real Firebase push and reports the exact result (delivered count, or the exact FCM error). Requires the amrut-jewels service-account key on the server.
+      <section className="au-panel notif-test">
+        <div className="au-panel-head">
+          <h3>Test push notifications</h3>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <p className="notif-test__desc">
+          Sends a real Firebase push and reports the exact result (delivered count, or the exact FCM error). Requires the amrut-jewels service-account key on the server.
+        </p>
+        <div className="notif-test__actions">
           {[
             { key: "consumer", label: "Send to D2C app" },
             { key: "self", label: "Send to my devices" },
@@ -173,31 +175,21 @@ const NotificationsPage = () => {
               key={b.key}
               onClick={() => runTest(b.key)}
               disabled={!!testing}
-              style={{
-                background: "#5d0829", color: "#fce2bf", border: "none", borderRadius: 8,
-                padding: "9px 16px", fontWeight: 600, cursor: testing ? "not-allowed" : "pointer",
-                opacity: testing && testing !== b.key ? 0.6 : 1,
-              }}
+              className="au-btn notif-test__btn"
+              style={{ opacity: testing && testing !== b.key ? 0.6 : 1 }}
             >
               {testing === b.key ? "Sending…" : b.label}
             </button>
           ))}
         </div>
         {testResult && (
-          <div
-            style={{
-              marginTop: 12, padding: "10px 12px", borderRadius: 8, fontSize: 13,
-              background: testResult.ok ? "#e7f3ec" : "#fbecea",
-              color: testResult.ok ? "#2f7d5b" : "#b0324a",
-              border: `1px solid ${testResult.ok ? "#bfe3cd" : "#f3c8c8"}`,
-            }}
-          >
+          <div className={`notif-test__result ${testResult.ok ? "is-ok" : "is-err"}`}>
             {testResult.ok
               ? `✓ ${testResult.message || "Sent."}`
               : `✕ ${testResult.error || "Failed."}${typeof testResult.tokenCount === "number" ? ` (tokens: ${testResult.tokenCount})` : ""}`}
           </div>
         )}
-      </div>
+      </section>
 
       <StatCards stats={notificationStats} />
       <TableWithControls
