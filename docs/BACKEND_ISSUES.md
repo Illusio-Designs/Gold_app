@@ -15,9 +15,6 @@ This file now tracks only what is still outstanding.
   accounts are fine. Run `node Backend/scripts/resetPassword.js <email> "<newPassword>"`
   against the DB for each affected account (or edit the user in the dashboard and
   set a new password). Data cleanup only — nothing left to code.
-- **Minor backend code quality (low priority).** Hardcoded admin id `1` in the
-  notification calls; ownership/auth guard expressions duplicated inline instead
-  of a shared helper. *(code-review M4 / M6 / M7)*
 - **Cleanup (cosmetic).** Narration comments, leftover debug `console.log`s, and
   a few empty fire-and-forget handlers outside the files already cleaned. *(L1–L4)*
 
