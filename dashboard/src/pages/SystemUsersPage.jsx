@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { getSystemUsers } from "../services/adminApiService";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon } from "@hugeicons/core-free-icons";
+import { getSystemUsers, createSystemUser } from "../services/adminApiService";
 import { getAdminToken } from "../utils/authUtils";
+import { showSuccessToast, showErrorToast } from "../utils/toast";
 import Badge from "../components/common/Badge";
+import Button from "../components/common/Button";
 import StatCards from "../components/common/StatCards";
 import Skeleton from "../components/common/Skeleton";
+import SidePanel from "../components/common/SidePanel";
+import InputField from "../components/common/InputField";
 import "../styles/pages/UsersPage.css";
 
 const fmtDate = (d) =>
   d
     ? new Date(d).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })
     : "—";
+
+const emptyForm = { name: "", email: "", phone_number: "", password: "" };
 
 // Dashboard page listing system / admin accounts (users.type = 'admin').
 // These are the people who can sign in to this admin dashboard. They are
@@ -18,6 +26,10 @@ const SystemUsersPage = () => {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     load();
@@ -38,10 +50,65 @@ const SystemUsersPage = () => {
     }
   };
 
+  const openPanel = () => {
+    setForm(emptyForm);
+    setPanelOpen(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreate = async () => {
+    const name = form.name.trim();
+    const email = form.email.trim();
+    const password = form.password;
+
+    if (!name || !email || !password.trim()) {
+      showErrorToast("Name, email and password are required.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const token = getAdminToken();
+      await createSystemUser(
+        {
+          name,
+          email,
+          phone_number: form.phone_number.trim() || undefined,
+          password,
+        },
+        token
+      );
+      setPanelOpen(false);
+      await load();
+      showSuccessToast("System user added successfully.");
+    } catch (e) {
+      showErrorToast(e?.response?.data?.error || "Failed to add system user");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const stats = [{ label: "System users", value: admins.length, tone: "brand" }];
 
   return (
     <div className="users-page">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
+      >
+        <Button variant="primary" onClick={openPanel}>
+          <HugeiconsIcon icon={Add01Icon} size={16} />
+          Add system user
+        </Button>
+      </div>
+
       <StatCards stats={stats} />
 
       <div className="au-notice" style={{ marginBottom: 16 }}>
@@ -102,6 +169,58 @@ const SystemUsersPage = () => {
           </table>
         </div>
       )}
+
+      <SidePanel
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        title="Add system user"
+      >
+        <InputField
+          label="Name"
+          name="name"
+          placeholder="Enter full name"
+          value={form.name}
+          onChange={handleInputChange}
+          required
+          className="form-control"
+        />
+        <InputField
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="Enter email"
+          value={form.email}
+          onChange={handleInputChange}
+          required
+          className="form-control"
+        />
+        <InputField
+          label="Phone"
+          name="phone_number"
+          placeholder="Enter phone number (optional)"
+          value={form.phone_number}
+          onChange={handleInputChange}
+          className="form-control"
+        />
+        <InputField
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="Enter password"
+          value={form.password}
+          onChange={handleInputChange}
+          required
+          className="form-control"
+        />
+        <div className="modal-actions">
+          <Button onClick={handleCreate} variant="primary" disabled={saving}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
+          <Button onClick={() => setPanelOpen(false)} variant="secondary">
+            Cancel
+          </Button>
+        </div>
+      </SidePanel>
     </div>
   );
 };

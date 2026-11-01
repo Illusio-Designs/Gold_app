@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Edit02Icon, Delete02Icon, Add01Icon } from "@hugeicons/core-free-icons";
+import {
+  Edit02Icon,
+  Delete02Icon,
+  Add01Icon,
+  FolderLibraryIcon,
+} from "@hugeicons/core-free-icons";
 import Button from "../components/common/Button";
 import Badge from "../components/common/Badge";
 import Modal from "../components/common/Modal";
@@ -8,6 +13,8 @@ import { SkeletonCards, SkeletonStats } from "../components/common/Skeleton";
 import StatCards from "../components/common/StatCards";
 import InputField from "../components/common/InputField";
 import IconPicker from "../components/common/IconPicker";
+import Tooltip from "../components/common/Tooltip";
+import EmptyState from "../components/common/EmptyState";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { resolveCategoryIcon } from "../utils/categoryIcons";
 import "../styles/pages/CategoriesPage.css";
@@ -171,10 +178,11 @@ const CategoriesPage = () => {
       {error && <div className="au-notice">{error}</div>}
 
       {categories.length === 0 ? (
-        <div className="au-card au-empty">
-          <div className="au-empty-title">No categories yet</div>
-          <p>Create your first category to organise the catalogue.</p>
-        </div>
+        <EmptyState
+          icon={FolderLibraryIcon}
+          title="No categories yet"
+          message="Create your first category to organise the catalogue."
+        />
       ) : (
         <div className="au-pgrid cat-grid">
           {categories.map((row) => (
@@ -199,24 +207,26 @@ const CategoriesPage = () => {
                     {row.icon ? "Icon set" : "No icon"}
                   </Badge>
                   <div className="cat-actions">
-                    <button
-                      type="button"
-                      className="au-rowbtn"
-                      onClick={() => startEdit(row)}
-                      title="Edit"
-                      aria-label="Edit category"
-                    >
-                      <HugeiconsIcon icon={Edit02Icon} size={15} />
-                    </button>
-                    <button
-                      type="button"
-                      className="au-rowbtn cat-del"
-                      onClick={() => setDeleteCategory(row)}
-                      title="Delete"
-                      aria-label="Delete category"
-                    >
-                      <HugeiconsIcon icon={Delete02Icon} size={15} />
-                    </button>
+                    <Tooltip text="Edit">
+                      <button
+                        type="button"
+                        className="au-rowbtn"
+                        onClick={() => startEdit(row)}
+                        aria-label="Edit category"
+                      >
+                        <HugeiconsIcon icon={Edit02Icon} size={15} />
+                      </button>
+                    </Tooltip>
+                    <Tooltip text="Delete">
+                      <button
+                        type="button"
+                        className="au-rowbtn cat-del"
+                        onClick={() => setDeleteCategory(row)}
+                        aria-label="Delete category"
+                      >
+                        <HugeiconsIcon icon={Delete02Icon} size={15} />
+                      </button>
+                    </Tooltip>
                   </div>
                 </div>
               </div>
