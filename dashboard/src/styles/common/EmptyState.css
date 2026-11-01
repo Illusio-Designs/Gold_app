@@ -1,0 +1,39 @@
+.es-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 48px 24px;
+}
+
+.es-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold, #b4824e);
+  opacity: 0.45;
+  margin-bottom: 2px;
+}
+
+.es-title {
+  margin: 0;
+  font-family: var(--font-display, "Fraunces", serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--maroon, #5d0829);
+}
+
+.es-message {
+  margin: 0;
+  max-width: 380px;
+  font-family: var(--font-body, "Hanken Grotesk", sans-serif);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #8a6d5a);
+}
+
+.es-action {
+  margin-top: 6px;
+}
