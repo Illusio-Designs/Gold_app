@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getDashboardStats, getTodayOrders } from "../services/adminApiService";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ShoppingCart,
-  Users,
-  Package,
-  DollarSign,
-  RefreshCw,
-  AlertTriangle,
-} from "lucide-react";
+  ShoppingCart01Icon,
+  UserGroupIcon,
+  PackageIcon,
+  Coins01Icon,
+  RefreshIcon,
+  Alert02Icon,
+} from "@hugeicons/core-free-icons";
 import Badge from "../components/common/Badge";
 import NotificationSender from "../components/common/NotificationSender";
 import Skeleton, { SkeletonTable } from "../components/common/Skeleton";
@@ -137,7 +138,7 @@ const DashboardPage = () => {
   if (error) {
     return (
       <div className="dash-error">
-        <AlertTriangle size={40} />
+        <HugeiconsIcon icon={Alert02Icon} size={40} />
         <h2>Error Loading Dashboard</h2>
         <p>{error}</p>
         <button className="au-btn" onClick={fetchDashboardData}>
@@ -182,7 +183,7 @@ const DashboardPage = () => {
       <div className="dash-toolbar">
         <span className="au-sub">Auto-refreshes every 30s</span>
         <button className="dash-refresh" onClick={fetchDashboardData} disabled={loading}>
-          <RefreshCw size={15} className={loading ? "spin" : ""} />
+          <HugeiconsIcon icon={RefreshIcon} size={15} className={loading ? "spin" : ""} />
           {loading ? "Refreshing…" : "Refresh"}
         </button>
       </div>
@@ -191,7 +192,7 @@ const DashboardPage = () => {
       <div className="au-kpis">
         <div className="au-kpi">
           <div className="au-lab">
-            <span className="au-ic"><DollarSign size={16} /></span>
+            <span className="au-ic"><HugeiconsIcon icon={Coins01Icon} size={16} /></span>
             Revenue · this month
           </div>
           <div className="au-val tnum">{monthRevenue != null ? inrCompact(monthRevenue) : inr(today.revenue)}</div>
@@ -213,7 +214,7 @@ const DashboardPage = () => {
 
         <div className="au-kpi">
           <div className="au-lab">
-            <span className="au-ic"><ShoppingCart size={16} /></span>
+            <span className="au-ic"><HugeiconsIcon icon={ShoppingCart01Icon} size={16} /></span>
             Orders today
           </div>
           <div className="au-val tnum">{today.orders || 0}</div>
@@ -222,7 +223,7 @@ const DashboardPage = () => {
 
         <div className="au-kpi">
           <div className="au-lab">
-            <span className="au-ic"><Package size={16} /></span>
+            <span className="au-ic"><HugeiconsIcon icon={PackageIcon} size={16} /></span>
             Products
           </div>
           <div className="au-val tnum">{totals.products || 0}</div>
@@ -231,7 +232,7 @@ const DashboardPage = () => {
 
         <div className="au-kpi">
           <div className="au-lab">
-            <span className="au-ic"><Users size={16} /></span>
+            <span className="au-ic"><HugeiconsIcon icon={UserGroupIcon} size={16} /></span>
             Approved wholesalers
           </div>
           <div className="au-val tnum">{totals.approvedUsers || 0}</div>
@@ -352,7 +353,7 @@ const DashboardPage = () => {
               <tr>
                 <td colSpan="7">
                   <div className="au-empty">
-                    <ShoppingCart size={40} color="var(--gold)" />
+                    <HugeiconsIcon icon={ShoppingCart01Icon} size={40} color="var(--gold)" />
                     <div className="au-empty-title">No orders today</div>
                     <div>Orders placed today will appear here.</div>
                   </div>
