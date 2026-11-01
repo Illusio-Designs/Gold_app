@@ -38,7 +38,7 @@
   height: 40px;
   background: var(--button-bg);
   border-radius: 50%;
-  color: var(--text-primary);
+  color: var(--cream);
   flex-shrink: 0;
 }
 
