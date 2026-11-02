@@ -1,21 +1,22 @@
-const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
 
+// Image processing has been removed.
+//
+// Uploaded images are now stored and served EXACTLY as received — original
+// format and dimensions, no resize, no WebP conversion, and no watermark.
+// These methods are kept as thin pass-throughs so the existing controllers
+// keep working unchanged: they just make sure the original file ends up in the
+// correct served directory and return its path (callers use
+// path.basename(result) to get the stored filename).
 class ImageProcessingService {
   constructor() {
-    this.watermarkPath = path.join(__dirname, "../assets/watermark.png");
     this.uploadDirs = {
       category: path.join(__dirname, "../uploads/categories"),
       product: path.join(__dirname, "../uploads/products"),
     };
 
-    // Ensure upload directories exist
     this.ensureDirectoriesExist();
-
-    // Check if watermark file exists
-    if (fs.existsSync(this.watermarkPath)) {
-      }
   }
 
   /**
@@ -25,200 +26,66 @@ class ImageProcessingService {
     Object.values(this.uploadDirs).forEach((dir) => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
+      }
+    });
+  }
+
+  /**
+   * Keep the original uploaded file. Move it into destDir only when it isn't
+   * already there (media-gallery uploads land in a temp dir first). No image
+   * processing is performed.
+   * @param {string} inputPath - Path to the uploaded file
+   * @param {string} destDir - Directory the file should be served from
+   * @returns {string} - Final path of the kept file
+   */
+  keepOriginal(inputPath, destDir) {
+    try {
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      const dest = path.join(destDir, path.basename(inputPath));
+      if (
+        fs.existsSync(inputPath) &&
+        path.resolve(inputPath) !== path.resolve(dest)
+      ) {
+        try {
+          fs.renameSync(inputPath, dest);
+        } catch (e) {
+          // Cross-device move or locked file: copy then remove the original.
+          fs.copyFileSync(inputPath, dest);
+          try {
+            fs.unlinkSync(inputPath);
+          } catch (_) {}
         }
-    });
-  }
-
-  /**
-   * Process image: compress, convert to WebP, and apply watermark
-   * @param {string} inputPath - Path to input image
-   * @param {string} outputPath - Path to save processed image
-   * @param {Object} options - Processing options
-   * @returns {Promise<string>} - Path to processed image
-   */
-  async processImage(inputPath, outputPath, options = {}) {
-    const {
-      quality = 80,
-      width = null,
-      height = null,
-      applyWatermark = true,
-      watermarkOpacity = 0.3,
-      watermarkSpacing = 100,
-    } = options;
-
-    // Processing image with options
-
-    try {
-      // .rotate() with no args auto-orients from EXIF and strips the orientation
-      // tag, so phone photos (often tagged 90°) are saved upright — fixes the
-      // rotated profile picture.
-      let image = sharp(inputPath).rotate();
-
-      // Resize if dimensions provided
-      if (width || height) {
-        image = image.resize(width, height, {
-          fit: "inside",
-          withoutEnlargement: true,
-        });
       }
-
-      // Apply watermark if requested and watermark file exists
-      if (applyWatermark && fs.existsSync(this.watermarkPath)) {
-        image = await this.applyWatermark(image, watermarkOpacity);
-      }
-
-      // Convert to WebP with compression
-      await image
-        .webp({
-          quality: quality,
-          effort: 6, // Higher effort for better compression
-          nearLossless: false,
-        })
-        .toFile(outputPath);
-
-      return outputPath;
+      return dest;
     } catch (error) {
-      throw error;
+      // On any failure, fall back to the original path so the upload is still
+      // usable rather than lost.
+      return inputPath;
     }
   }
 
   /**
-   * Apply watermark to image with single, clean placement
-   * @param {Sharp} image - Sharp image instance
-   * @param {number} opacity - Watermark opacity (0-1)
-   * @returns {Promise<Sharp>} - Sharp image with watermark
+   * No-op (image processing removed). The original upload already lives in its
+   * served directory; return it unchanged.
    */
-  async applyWatermark(image, opacity = 0.4) {
-    try {
-      // Check if watermark file exists
-      if (!fs.existsSync(this.watermarkPath)) {
-        return image;
-      }
-
-      // Get image metadata
-      const metadata = await image.metadata();
-      // Load watermark
-      const watermark = sharp(this.watermarkPath);
-      const watermarkMetadata = await watermark.metadata();
-      // Calculate appropriate watermark size - not too large, not too small
-      const minWatermarkSize = 100; // Increased minimum size for better visibility
-      const maxWatermarkSize = 200; // Increased maximum size for better visibility
-      const percentageSize = Math.min(metadata.width, metadata.height) * 0.12; // Increased to 12% of image
-      const watermarkSize = Math.max(
-        minWatermarkSize,
-        Math.min(maxWatermarkSize, percentageSize)
-      );
-      const watermarkWidth = Math.round(watermarkSize);
-      const watermarkHeight = Math.round(
-        (watermarkSize * watermarkMetadata.height) / watermarkMetadata.width
-      );
-
-      // Resize watermark to the calculated size
-      const resizedWatermark = await watermark
-        .resize(watermarkWidth, watermarkHeight)
-        .png()
-        .toBuffer();
-
-      // Place single watermark centered for any image dimension
-      const watermarkPosition = {
-        x: Math.round((metadata.width - watermarkWidth) / 2),
-        y: Math.round((metadata.height - watermarkHeight) / 2),
-      };
-
-      // Create composite array with single watermark
-      const composites = [
-        {
-          input: resizedWatermark,
-          top: Math.round(watermarkPosition.y),
-          left: Math.round(watermarkPosition.x),
-          blend: "over",
-          opacity: opacity,
-        },
-      ];
-
-      // Apply watermark to the image
-      const watermarkedImage = image.composite(composites);
-
-      return watermarkedImage;
-    } catch (error) {
-      // Return original image if watermarking fails
-      return image;
-    }
+  async processImage(inputPath /*, outputPath, options */) {
+    return inputPath;
   }
 
   /**
-   * Process uploaded image for products (with watermark only, no background cleaning)
-   * @param {string} inputPath - Path to uploaded image
-   * @param {string} filename - Original filename
-   * @returns {Promise<string>} - Path to processed image
+   * Store the uploaded product image as-is (no watermark, no WebP).
    */
-  async processProductImage(inputPath, filename) {
-    try {
-      // Use enhanced processing for new uploads
-      const EnhancedImageProcessingService = require("./enhancedImageProcessingService");
-      const enhancedService = new EnhancedImageProcessingService();
-
-      const result = await enhancedService.processNewProductImage(
-        inputPath,
-        filename
-      );
-      // Clean up original uploaded file
-      try {
-        if (fs.existsSync(inputPath)) {
-          fs.unlinkSync(inputPath);
-          }
-      } catch (cleanupError) {
-        console.error("[imageProcessingService.js]:", cleanupError && cleanupError.message);
-      }
-
-      return result;
-    } catch (error) {
-      // Fallback to original method
-      const ext = path.extname(filename);
-      const baseName = path.basename(filename, ext);
-      const outputPath = path.join(this.uploadDirs.product, `${baseName}.webp`);
-
-      const fallbackResult = await this.processImage(inputPath, outputPath, {
-        quality: 85,
-        applyWatermark: true,
-        watermarkOpacity: 0.6,
-        watermarkSpacing: 80,
-      });
-
-      // Clean up original uploaded file after fallback
-      try {
-        if (fs.existsSync(inputPath)) {
-          fs.unlinkSync(inputPath);
-          }
-      } catch (cleanupError) {
-        console.error("[imageProcessingService.js]:", cleanupError && cleanupError.message);
-      }
-      return fallbackResult;
-    }
+  async processProductImage(inputPath /*, filename */) {
+    return this.keepOriginal(inputPath, this.uploadDirs.product);
   }
 
   /**
-   * Process uploaded image for categories (without watermark)
-   * @param {string} inputPath - Path to uploaded image
-   * @param {string} filename - Original filename
-   * @returns {Promise<string>} - Path to processed image
+   * Store the uploaded category image as-is (no WebP).
    */
-  async processCategoryImage(inputPath, filename) {
-    // Handle filename - it might be just the filename or contain a path
-    let cleanFilename = filename;
-    if (filename.includes("/")) {
-      // If it contains a path, extract just the filename
-      cleanFilename = path.basename(filename);
-    }
-
-    const ext = path.extname(cleanFilename);
-    const baseName = path.basename(cleanFilename, ext);
-    const outputPath = path.join(this.uploadDirs.category, `${baseName}.webp`);
-
-    return this.processImage(inputPath, outputPath, {
-      quality: 90,
-      applyWatermark: false,
-    });
+  async processCategoryImage(inputPath /*, filename */) {
+    return this.keepOriginal(inputPath, this.uploadDirs.category);
   }
 
   /**
@@ -236,46 +103,13 @@ class ImageProcessingService {
   }
 
   /**
-   * Delete original file after processing
+   * Delete a file
    * @param {string} filePath - Path to file to delete
    */
   deleteOriginalFile(filePath) {
     try {
       if (fs.existsSync(filePath)) {
-        // Try multiple approaches to delete the file
-        const deleteFile = () => {
-          try {
-            fs.unlinkSync(filePath);
-            } catch (err) {
-            if (err.code === "EPERM") {
-              // File might be locked, try again after a longer delay
-              setTimeout(() => {
-                try {
-                  if (fs.existsSync(filePath)) {
-                    fs.unlinkSync(filePath);
-                    }
-                } catch (retryErr) {
-                  // Try one more time with a different approach
-                  setTimeout(() => {
-                    try {
-                      if (fs.existsSync(filePath)) {
-                        fs.unlink(filePath, (finalErr) => {
-                          if (finalErr) {
-                            console.error("[imageProcessingService.js]:", finalErr && finalErr.message);
-                          }
-                        });
-                      }
-                    } catch (finalErr) {
-                      console.error("[imageProcessingService.js]:", finalErr && finalErr.message);
-                    }
-                  }, 3000);
-                }
-              }, 5000);
-            }
-          }
-        };
-
-        deleteFile();
+        fs.unlinkSync(filePath);
       }
     } catch (error) {
       console.error("[imageProcessingService.js]:", error && error.message);

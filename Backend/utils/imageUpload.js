@@ -1,6 +1,8 @@
-const sharp = require("sharp");
 const path = require("path");
 const fs = require("fs");
+
+// Image processing has been removed — uploads are stored and served exactly as
+// received (original format, no resize, no WebP conversion, no watermark).
 
 // Ensure directory exists
 function ensureDirectoryExists(dirPath) {
@@ -9,52 +11,14 @@ function ensureDirectoryExists(dirPath) {
   }
 }
 
-// Convert image to webp and save
-async function convertToWebp(inputPath, outputDir, filename) {
-  try {
-    ensureDirectoryExists(outputDir);
-
-    const outputFilename =
-      path.basename(filename, path.extname(filename)) + ".webp";
-    const outputPath = path.join(outputDir, outputFilename);
-
-    await sharp(inputPath).webp({ quality: 80 }).toFile(outputPath);
-
-    // Remove original file
-    if (fs.existsSync(inputPath)) {
-      fs.unlinkSync(inputPath);
-    }
-
-    return outputFilename;
-  } catch (error) {
-    throw new Error(`Image conversion failed: ${error.message}`);
-  }
-}
-
-// Process uploaded image
-async function processImageUpload(file, uploadType = "profile") {
+// Process uploaded image — now a pass-through. multer has already saved the
+// original file in the correct uploads/<type> directory, so we simply return
+// its filename unchanged (no conversion).
+async function processImageUpload(file /*, uploadType = "profile" */) {
   if (!file) {
     return null;
   }
-
-  const uploadDirs = {
-    profile: "uploads/profile",
-    category: "uploads/category",
-    product: "uploads/products",
-  };
-
-  const outputDir = uploadDirs[uploadType] || "uploads/profile";
-
-  try {
-    const webpFilename = await convertToWebp(
-      file.path,
-      outputDir,
-      file.filename
-    );
-    return webpFilename;
-  } catch (error) {
-    throw error;
-  }
+  return file.filename;
 }
 
 // Delete image file
@@ -77,68 +41,6 @@ function deleteImage(filename, uploadType = "profile") {
   return false;
 }
 
-/**
- * Apply a single, clean watermark to an image
- * @param {Buffer} imageBuffer - Image buffer
- * @param {string} watermarkPath - Path to watermark image
- * @returns {Promise<Buffer>} - Watermarked image buffer
- */
-async function applyTiledWatermark(imageBuffer, watermarkPath) {
-  try {
-    // Check if watermark file exists
-    if (!fs.existsSync(watermarkPath)) {
-      return imageBuffer;
-    }
-    
-    // Load the image
-    let image = sharp(imageBuffer);
-    
-    // Get image metadata
-    const metadata = await image.metadata();
-    // Load watermark
-    const watermark = sharp(watermarkPath);
-    const watermarkMetadata = await watermark.metadata();
-    // Calculate appropriate watermark size - not too large, not too small
-    const minWatermarkSize = 400; // Increased minimum size for better visibility
-    const maxWatermarkSize = 600; // Increased maximum size for better visibility
-    const percentageSize = Math.min(metadata.width, metadata.height) * 0.12; // Increased to 12% of image
-    const watermarkSize = Math.max(minWatermarkSize, Math.min(maxWatermarkSize, percentageSize));
-    const watermarkWidth = Math.round(watermarkSize);
-    const watermarkHeight = Math.round((watermarkSize * watermarkMetadata.height) / watermarkMetadata.width);
-    
-    // Resize watermark to the calculated size
-    const resizedWatermark = await watermark
-      .resize(watermarkWidth, watermarkHeight)
-      .png()
-      .toBuffer();
-    
-    // Place single watermark centered for any image dimension
-    const watermarkPosition = {
-      x: Math.round((metadata.width - watermarkWidth) / 2),
-      y: Math.round((metadata.height - watermarkHeight) / 2)
-    };
-    
-    // Create composite array with single watermark
-    const composites = [{
-      input: resizedWatermark,
-      top: Math.round(watermarkPosition.y),
-      left: Math.round(watermarkPosition.x),
-      blend: 'over',
-      opacity: 0.4
-    }];
-    
-    // Apply watermark to the image
-    const watermarkedImage = image.composite(composites);
-    
-    // Return the watermarked image as buffer
-    return await watermarkedImage.toBuffer();
-    
-  } catch (error) {
-    // Return original image if watermarking fails
-    return imageBuffer;
-  }
-}
-
 // Utility to delete old image if changed
 function deleteOldImageIfChanged(oldFilename, newFilename, uploadType = "profile") {
   if (oldFilename && oldFilename !== newFilename) {
@@ -154,9 +56,7 @@ function deleteOldImageIfChanged(oldFilename, newFilename, uploadType = "profile
 
 module.exports = {
   processImageUpload,
-  deleteImage,
-  convertToWebp,
   ensureDirectoryExists,
-  applyTiledWatermark,
+  deleteImage,
   deleteOldImageIfChanged,
 };
