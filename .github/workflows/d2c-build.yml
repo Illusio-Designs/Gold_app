@@ -50,6 +50,13 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Skip the obsolete default 'tools' package (Google removed it), which
+          # otherwise makes setup-android fail with "Failed to find package 'tools'".
+          packages: 'platform-tools'
+
+      - name: Install Android SDK 35
+        run: yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
 
       - name: Install JS dependencies
         # npm ci falls back to install so a lockfile that is momentarily out of
