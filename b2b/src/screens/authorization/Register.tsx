@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  Alert
+  Alert,
+  KeyboardAvoidingView
 } from 'react-native';
 import Button from '../../components/common/Button';
 import CustomTextInput from '../../components/common/CustomTextInput';
@@ -295,7 +296,11 @@ const Register = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <ScrollView 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -509,6 +514,7 @@ const Register = () => {
         {error ? <Text style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{error}</Text> : null}
         {success ? <Text style={{ color: 'green', textAlign: 'center', marginTop: 8 }}>{success}</Text> : null}
       </ScrollView>
+      </KeyboardAvoidingView>
       <CountryPickerModal
         visible={countryModalVisible}
         onClose={() => setCountryModalVisible(false)}
