@@ -109,6 +109,10 @@ android {
         resolutionStrategy {
             force 'androidx.core:core:1.13.1'
             force 'androidx.core:core-ktx:1.13.1'
+            // react-native-otp-verify uses the legacy Auth.GOOGLE_SIGN_IN_API,
+            // removed in play-services-auth 21.x. Pin the last version that has
+            // it so the Android build compiles.
+            force 'com.google.android.gms:play-services-auth:20.7.0'
             exclude group: 'com.android.support', module: 'support-compat'
             exclude group: 'com.android.support', module: 'support-v4'
         }
