@@ -1,0 +1,88 @@
+name: Android Deploy to Play (b2b)
+
+# Builds the b2b production App Bundle (release-signed) and uploads it to
+# Google Play via the Play Developer API (service-account JSON in the
+# PLAY_SERVICE_ACCOUNT_JSON secret).
+#
+# Track is chosen at dispatch time (default: internal testing — safe, only
+# visible to testers, never touches the public Production listing). Promote to
+# production only once an internal run has proven the pipeline works.
+#
+# Triggers:
+#   • workflow_dispatch  — run on demand, pick the track.
+#   • push               — ONLY when this workflow file itself changes, so the
+#                          first push gives one validation run (track: internal)
+#                          without deploying on every app change.
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: "Play track to release to"
+        type: choice
+        options: [internal, alpha, beta, production]
+        default: internal
+  push:
+    branches: [claude/code-updates-review-4lp01q]
+    paths:
+      - ".github/workflows/android-deploy.yml"
+
+concurrency:
+  group: android-play-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build AAB & upload to Play
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: b2b
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: b2b/package-lock.json
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+
+      - name: Install Android SDK 36
+        run: yes | sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+
+      - name: Install JS dependencies
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
+      # Production App Bundle signed with the REAL release key (via
+      # gradle.properties), same output android-build.yml publishes.
+      - name: Gradle bundleRelease (production AAB, release-signed)
+        working-directory: b2b/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Upload AAB to Google Play
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.goldapp.amrutkumargovinddasllp
+          releaseFiles: b2b/android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ github.event.inputs.track || 'internal' }}
+          status: completed
