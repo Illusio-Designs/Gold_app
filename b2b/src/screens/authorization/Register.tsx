@@ -9,7 +9,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  Alert
+  Alert,
+  KeyboardAvoidingView
 } from 'react-native';
 import Button from '../../components/common/Button';
 import CustomTextInput from '../../components/common/CustomTextInput';
@@ -198,7 +199,13 @@ const Register = () => {
     // Validate only required fields (Address, Landmark, and PAN/GST are now optional)
     isValid = validateRequiredField(name, 'Name', setNameError) && isValid;
     isValid = validateEmail(email) && isValid;
-    isValid = validatePassword(password) && isValid;
+    // Password is optional (business accounts sign in by phone OTP). Only
+    // validate it when the user actually typed one.
+    if (password && password.trim() !== '') {
+      isValid = validatePassword(password) && isValid;
+    } else {
+      setPasswordError('');
+    }
     isValid = validateRequiredField(phone, 'Phone number', setPhoneError) && isValid;
     // Address fields are now optional - removed validation
     isValid = validateRequiredField(city, 'City', setCityError) && isValid;
@@ -255,7 +262,7 @@ const Register = () => {
         type: 'business', // or 'admin', adjust as needed
         name: name.trim(),
         email: email.trim(),
-        password,
+        password: password && password.trim() !== '' ? password : null,
         phone_number: phone.trim(),
         address_line1: address1.trim() || null, // Optional field - send null if empty
         address_line2: address2.trim() || null, // Optional field - send null if empty
@@ -295,7 +302,11 @@ const Register = () => {
       style={styles.container}
       resizeMode="cover"
     >
-      <ScrollView 
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -329,7 +340,7 @@ const Register = () => {
           {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
           
           <CustomTextInput
-            placeholder="Password *"
+            placeholder="Password (Optional)"
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -509,6 +520,7 @@ const Register = () => {
         {error ? <Text style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{error}</Text> : null}
         {success ? <Text style={{ color: 'green', textAlign: 'center', marginTop: 8 }}>{success}</Text> : null}
       </ScrollView>
+      </KeyboardAvoidingView>
       <CountryPickerModal
         visible={countryModalVisible}
         onClose={() => setCountryModalVisible(false)}

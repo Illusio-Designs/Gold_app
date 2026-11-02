@@ -30,7 +30,13 @@ async function createUser(user, callback) {
 }
 
 async function insertUser(user, callback) {
-  const hashedPassword = await bcrypt.hash(user.password, 10);
+  // Password is optional for business/consumer accounts — they sign in by phone
+  // OTP, not by password. Only hash when one was actually provided; otherwise
+  // store NULL so registration without a password still succeeds.
+  const hashedPassword =
+    user.password && String(user.password).trim() !== ""
+      ? await bcrypt.hash(user.password, 10)
+      : null;
   const sql = `INSERT INTO users (
     type, name, email, password, image, phone_number, address_line1, address_line2, landmark, state, city, country, gst_number, pan_number, business_name, status, remarks
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;

@@ -81,6 +81,22 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      # Production App Bundle (.aab) — signed with the REAL release key
+      # (amrut-release-key.keystore via gradle.properties, NOT the debug key).
+      # This is the file uploaded to the Play Console for the D2C app's first
+      # (manual) release, and for CI auto-deploy afterwards.
+      - name: Gradle bundleRelease (production AAB, release-signed)
+        working-directory: d2c/android
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Upload production AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: amrut-d2c-release-aab
+          path: d2c/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Publish APK to GitHub Release
         if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2

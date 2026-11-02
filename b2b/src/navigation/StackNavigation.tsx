@@ -39,11 +39,15 @@ const StackNavigation = () => {
     return () => unsub();
   }, []);
 
-  // On session expiry (401), reset back to Login.
+  // On session expiry (401) the Api layer already clears the stored token.
+  // This app is browse-first (the catalog is public), so instead of dumping
+  // the user at a login wall we return them to the guest Home screen — they can
+  // keep browsing, and login/register is only required at the cart / checkout
+  // (which shows its own prompt).
   useEffect(() => {
     setUnauthorizedHandler(() => {
       try {
-        navigationRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
+        navigationRef.current?.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
       } catch {}
     });
     return () => setUnauthorizedHandler(null);
