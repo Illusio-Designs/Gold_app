@@ -16,9 +16,7 @@ const JourneyPane = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    console.log('🔔 [JOURNEY] JourneyPane mounted');
     const timer = setTimeout(() => {
-      console.log('🔔 [JOURNEY] Navigating to ShreenathjiScreen');
       navigation.replace('ShreenathjiScreen');
     }, 3000); // 3 seconds
     return () => clearTimeout(timer);

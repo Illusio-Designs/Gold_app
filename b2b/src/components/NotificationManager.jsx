@@ -7,7 +7,6 @@ const NotificationManager = ({ navigation, userId }) => {
   const notificationRef = useRef(null);
 
   useEffect(() => {
-    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - notification manager disabled...');
     // console.log('🔔 [NOTIFICATION MANAGER] Initializing notification manager...');
     // console.log('🔔 [NOTIFICATION MANAGER] User ID:', userId);
     
@@ -47,39 +46,31 @@ const NotificationManager = ({ navigation, userId }) => {
     // } catch (error) {
     //   console.error('❌ [NOTIFICATION MANAGER] Error initializing notifications:', error);
     // }
-    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - notifications not available...');
   };
 
   /**
    * Setup notification callbacks
    */
   const setupNotificationCallbacks = () => {
-    console.log('🔔 [NOTIFICATION MANAGER] Setting up notification callbacks...');
     
     // Handle notification received (foreground)
     const handleNotificationReceived = (remoteMessage) => {
-      console.log('🔔 [NOTIFICATION MANAGER] Notification received:', remoteMessage);
       
       const { notification, data } = remoteMessage;
       const notificationType = data?.notificationType;
       
-      console.log('🔔 [NOTIFICATION MANAGER] Notification type:', notificationType);
-      console.log('🔔 [NOTIFICATION MANAGER] Notification data:', data);
       
       // Native notification banner will be shown automatically by firebaseService
       // No need to show Alert - the native banner will appear
-      console.log('🔔 [NOTIFICATION MANAGER] Native notification banner will be shown');
     };
 
     // Handle notification opened (background/quit)
     const handleNotificationOpened = (remoteMessage) => {
-      console.log('🔔 [NOTIFICATION MANAGER] Notification opened:', remoteMessage);
       handleNotificationTap(remoteMessage);
     };
 
     // Set callbacks
     // firebaseService.setNotificationCallbacks(handleNotificationReceived, handleNotificationOpened);
-    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - callbacks not set...');
   };
 
   /**
@@ -87,18 +78,14 @@ const NotificationManager = ({ navigation, userId }) => {
    */
   const handleNotificationTap = (remoteMessage) => {
     try {
-      console.log('🔔 [NOTIFICATION MANAGER] Handling notification tap...');
       
       const { notification, data } = remoteMessage;
       const notificationType = data?.notificationType;
       
-      console.log('🔔 [NOTIFICATION MANAGER] Navigation type:', notificationType);
-      console.log('🔔 [NOTIFICATION MANAGER] Navigation data:', data);
       
       // Navigate based on notification type
       switch (notificationType) {
         case 'registration_status':
-          console.log('🔔 [NOTIFICATION MANAGER] Navigating to Profile screen...');
           navigation.navigate('Profile', { 
             refresh: true,
             statusUpdate: data?.status,
@@ -107,7 +94,6 @@ const NotificationManager = ({ navigation, userId }) => {
           break;
           
         case 'order_status':
-          console.log('🔔 [NOTIFICATION MANAGER] Navigating to Orders screen...');
           navigation.navigate('Orders', { 
             refresh: true,
             orderId: data?.orderId,
@@ -116,7 +102,6 @@ const NotificationManager = ({ navigation, userId }) => {
           break;
           
         default:
-          console.log('🔔 [NOTIFICATION MANAGER] Unknown notification type:', notificationType);
           // Show general notification
           Alert.alert(
             notification?.title || 'Notification',
@@ -139,7 +124,6 @@ const NotificationManager = ({ navigation, userId }) => {
     // } catch (error) {
     //   console.error('❌ [NOTIFICATION MANAGER] Error updating user ID:', error);
     // }
-    console.log('🔔 [NOTIFICATION MANAGER] Firebase disabled - user ID not updated...');
   };
 
   // Expose updateUserId method for parent components

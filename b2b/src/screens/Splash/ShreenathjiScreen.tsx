@@ -15,9 +15,7 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    console.log('🔔 [SHRENATHJI] ShreenathjiScreen mounted');
     const timer = setTimeout(() => {
-      console.log('🔔 [SHRENATHJI] Navigating to FamilyTree');
       navigation.replace('FamilyTree');
     }, 3000); // 3 seconds
     return () => clearTimeout(timer);
