@@ -59,10 +59,8 @@ const Profile = () => {
               ? user.image
               : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
             setPhotoUri({ uri: imgUrl });
-            console.log('[Profile] Image URL:', imgUrl);
           } else {
             setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-            console.log('[Profile] No image, using default');
           }
         } else {
           // fallback to AsyncStorage
@@ -75,10 +73,8 @@ const Profile = () => {
                 ? user.image
                 : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
               setPhotoUri({ uri: imgUrl });
-              console.log('[Profile] Image URL:', imgUrl);
             } else {
               setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-              console.log('[Profile] No image, using default');
             }
           }
         }
@@ -93,10 +89,8 @@ const Profile = () => {
               ? user.image
               : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
             setPhotoUri({ uri: imgUrl });
-            console.log('[Profile] Image URL:', imgUrl);
           } else {
             setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-            console.log('[Profile] No image, using default');
           }
         }
       } finally {
@@ -108,7 +102,6 @@ const Profile = () => {
 
 
   const handleCameraPress = async () => {
-    console.log('[Profile] Camera button pressed');
 
     // Ask permission on Android
     if (Platform.OS === 'android') {
@@ -145,7 +138,6 @@ const Profile = () => {
       });
 
     const response: any = await openCamera();
-    console.log('[Profile] Camera response:', response);
 
     if (response?.didCancel) return;
     if (response?.errorCode) {
@@ -216,7 +208,6 @@ const Profile = () => {
         setPhotoUri({ uri: imgUrl });
       }
     } catch (err) {
-      console.log('[Profile] Profile photo update error:', err);
       Alert.alert('Error', 'Failed to update profile photo');
     } finally {
       setUploading(false);

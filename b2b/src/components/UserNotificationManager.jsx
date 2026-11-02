@@ -34,7 +34,6 @@ const UserNotificationManager = ({ userData, navigation }) => {
               type: userType
             };
             
-            console.log('[UserNotificationManager] Retrieved user data from storage:', userInfo);
             setStoredUserData(userInfo);
             // Don't call joinUserRoom here, wait for socket connection
           }
@@ -45,7 +44,6 @@ const UserNotificationManager = ({ userData, navigation }) => {
           setIsInitialized(true);
         }
       } else if (userData) {
-        console.log('[UserNotificationManager] User data provided directly:', userData);
         // Ensure userData has the correct structure
         if (userData.id && userData.type) {
           // Don't call joinUserRoom here, wait for socket connection
@@ -78,13 +76,11 @@ const UserNotificationManager = ({ userData, navigation }) => {
         
         // Ensure we have all required fields
         if (userInfo.id && userInfo.type) {
-          console.log('[UserNotificationManager] ✅ User data is complete, joining room...');
           joinUserRoom(userInfo);
         } else {
           console.warn('[UserNotificationManager] ⚠️ User data incomplete:', userInfo);
         }
       } else {
-        console.log('[UserNotificationManager] ⏳ No user data available yet');
       }
     } else {
       console.log('[UserNotificationManager] ⏳ Cannot join room yet:', {
@@ -98,21 +94,14 @@ const UserNotificationManager = ({ userData, navigation }) => {
 
   // Log connection status for debugging
   useEffect(() => {
-    console.log('[UserNotificationManager] 🔌 Socket connection status:', connectionStatus, 'Connected:', isConnected);
     
     // Add more detailed logging
     if (isConnected) {
-      console.log('[UserNotificationManager] ✅ Socket is connected and ready');
-      console.log('[UserNotificationManager] User data available:', !!userData);
       if (userData) {
-        console.log('[UserNotificationManager] User ID:', userData.id, 'Name:', userData.name);
       }
       if (storedUserData) {
-        console.log('[UserNotificationManager] Stored User ID:', storedUserData.id, 'Name:', storedUserData.name);
       }
     } else {
-      console.log('[UserNotificationManager] ❌ Socket is not connected');
-      console.log('[UserNotificationManager] Connection status:', connectionStatus);
     }
   }, [connectionStatus, isConnected, userData, storedUserData]);
 

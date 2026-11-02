@@ -14,13 +14,10 @@ export const useUserSocket = (userData = null) => {
   const userDataRef = useRef(userData);
   const hasJoinedRoomRef = useRef(false);
 
-  console.log('[useUserSocket] 🔌 Hook initialized with userData:', userData);
-  console.log('[useUserSocket] 🔌 Hook instance ID:', Math.random().toString(36).substr(2, 9));
 
   // Update user data ref when it changes
   useEffect(() => {
     userDataRef.current = userData;
-    console.log('[useUserSocket] 🔄 User data ref updated:', userData);
   }, [userData]);
 
   // Initialize socket connection
@@ -30,7 +27,6 @@ export const useUserSocket = (userData = null) => {
         // Get access token for authentication
         const accessToken = await AsyncStorage.getItem('accessToken');
         
-        console.log('[useUserSocket] Initializing socket connection...');
         setConnectionStatus('connecting');
         
         // Connect to socket with authentication
@@ -38,7 +34,6 @@ export const useUserSocket = (userData = null) => {
         
         // Setup connection status listeners
         const connectListener = SocketService.addEventListener('connect', () => {
-          console.log('[useUserSocket] Socket connected');
           setIsConnected(true);
           setConnectionStatus('connected');
           
@@ -50,7 +45,6 @@ export const useUserSocket = (userData = null) => {
         });
 
         const disconnectListener = SocketService.addEventListener('disconnect', () => {
-          console.log('[useUserSocket] Socket disconnected');
           setIsConnected(false);
           setConnectionStatus('disconnected');
           hasJoinedRoomRef.current = false;
@@ -63,7 +57,6 @@ export const useUserSocket = (userData = null) => {
 
         // Listen for user room joined confirmation
         const userRoomJoinedListener = SocketService.addEventListener('user-room-joined', (data) => {
-          console.log('[useUserSocket] ✅ User room joined successfully:', data);
           console.log('[useUserSocket] Room details:', {
             room: data.room,
             success: data.success,
@@ -90,14 +83,10 @@ export const useUserSocket = (userData = null) => {
   // Join user room when user data becomes available
   useEffect(() => {
     if (userData && isConnected && !hasJoinedRoomRef.current) {
-      console.log('[useUserSocket] 🔌 Joining user room for:', userData.name || userData.id);
-      console.log('[useUserSocket] User data:', userData);
-      console.log('[useUserSocket] Socket connected:', isConnected);
       
       try {
         SocketService.joinUserRoom(userData);
         hasJoinedRoomRef.current = true;
-        console.log('[useUserSocket] ✅ Room join request sent');
       } catch (error) {
         console.error('[useUserSocket] ❌ Error joining room:', error);
       }
@@ -112,10 +101,8 @@ export const useUserSocket = (userData = null) => {
 
   // Setup notification listeners
   useEffect(() => {
-    console.log('[useUserSocket] 🔔 Setting up notification listeners. Connected:', isConnected);
     
     if (!isConnected) {
-      console.log('[useUserSocket] ⏳ Cannot setup listeners - not connected');
       return;
     }
     
@@ -129,7 +116,6 @@ export const useUserSocket = (userData = null) => {
     if (userData) {
       SocketService.joinUserRoom(userData);
       hasJoinedRoomRef.current = true;
-      console.log('[useUserSocket] Manually joined user room for:', userData.name || userData.id);
     }
   };
 

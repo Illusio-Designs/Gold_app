@@ -42,7 +42,6 @@ export const useAppIcon = (options = {}) => {
       setCurrentIcon(icon);
       setActiveIcons(icons);
       
-      console.log('🎨 App Icon Hook initialized for type:', type);
     } catch (err) {
       console.error('❌ Failed to initialize app icon hook:', err);
       setError(err.message || 'Failed to initialize app icon service');
@@ -62,7 +61,6 @@ export const useAppIcon = (options = {}) => {
   // Handle real-time updates from socket
   const handleSocketUpdate = useCallback(async (data) => {
     if (data.event === 'app-icon-update') {
-      console.log('🎨 Received real-time icon update:', data);
       await appIconService.handleIconUpdate(data.data);
     }
   }, []);
@@ -94,7 +92,6 @@ export const useAppIcon = (options = {}) => {
   const clearCache = useCallback(async () => {
     try {
       await appIconService.clearCache();
-      console.log('🗑️ App icon cache cleared');
     } catch (err) {
       console.error('❌ Failed to clear icon cache:', err);
     }

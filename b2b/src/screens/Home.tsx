@@ -215,7 +215,6 @@ const Home = () => {
 
   // Handle real-time category updates from socket events
   const handleRealTimeCategoryUpdate = (updateData: any) => {
-    console.log('[Home] Real-time category update received:', updateData);
     
     const { action, category, timestamp } = updateData;
     
@@ -236,13 +235,11 @@ const Home = () => {
         break;
         
       default:
-        console.log('[Home] Unknown category action:', action);
     }
   };
 
   // Handle real-time slider updates from socket events
   const handleRealTimeSliderUpdate = (updateData: any) => {
-    console.log('[Home] Real-time slider update received:', updateData);
     
     const { action, slider, timestamp } = updateData;
     
@@ -263,20 +260,17 @@ const Home = () => {
         break;
         
       default:
-        console.log('[Home] Unknown slider action:', action);
     }
   };
 
   // Handle real-time product updates from socket events
   const handleRealTimeProductUpdate = (updateData: any) => {
-    console.log('[Home] Real-time product update received:', updateData);
     // Refresh products silently (will re-apply current filters via existing effects)
     loadProductsRef.current();
   };
 
   // Handle slider Show More button press
   const handleSliderShowMore = (categoryId: number, categoryName: string) => {
-    console.log('[Home] Slider Show More pressed for category:', categoryId, categoryName);
     // Navigate to Collection screen with category filter
     (navigation as any).navigate('Collection', { 
       selectedCategory: categoryId,
@@ -346,8 +340,6 @@ const Home = () => {
     // Filter products based on category selection
     let filteredProducts = [];
     
-    console.log('[Home] Filtering products for category:', category);
-    console.log('[Home] Total products available:', allProducts.length);
     
     if (category === 'all') {
       filteredProducts = allProducts;
@@ -359,7 +351,6 @@ const Home = () => {
       filteredProducts = allProducts.filter((product: any) => {
         const productUpdateDate = new Date(product.updated_at);
         const isNew = productUpdateDate >= thirtyDaysAgo;
-        console.log('[Home] Product:', product.name, 'Updated:', product.updated_at, 'Is New:', isNew);
         return isNew;
       });
       
@@ -373,7 +364,6 @@ const Home = () => {
           return productCreateDate >= sixtyDaysAgo;
         });
         
-        console.log('[Home] No recent updates found, using 60-day created filter:', filteredProducts.length);
       }
       
       // If still no products, show the most recently updated ones (top 50%)
@@ -382,7 +372,6 @@ const Home = () => {
           .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
           .slice(0, Math.ceil(allProducts.length * 0.5));
         
-        console.log('[Home] Using most recently updated products:', filteredProducts.length);
       }
     } else if (category === 'best') {
       // For 'best' products - sort by gross_weight and recent updates
@@ -395,7 +384,6 @@ const Home = () => {
         })
         .slice(0, Math.ceil(allProducts.length * 0.8)); // Show top 80% as 'best'
       
-      console.log('[Home] Best products filtered:', filteredProducts.length);
     } else {
       // Handle actual category names — match by category_id (reliable) with a
       // category_name fallback, since some products only carry the id.

@@ -122,34 +122,24 @@ const Home = () => {
       setCategoriesError(null);
       
       if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Fetching approved categories for user:', userId);
-        console.log('[Home] User authentication state:', { isUserLoggedIn, userId, accessToken: accessToken ? 'present' : 'missing' });
         
         try {
           const response = await getApprovedCategoriesForUser(userId, accessToken);
-          console.log('[Home] Approved categories response:', response);
           
           if (response && response.success && response.data && response.data.length > 0) {
             setCategories(response.data);
-            console.log('[Home] Set approved categories:', response.data.length, 'categories');
-            console.log('[Home] Approved categories names:', response.data.map((cat: any) => cat.name));
           } else {
-            console.log('[Home] No approved categories found - user may not have approved login request yet');
-            console.log('[Home] Setting empty categories array - user needs to request login first');
             setCategories([]);
           }
         } catch (apiError: any) {
           console.error('[Home] Error calling getApprovedCategoriesForUser:', apiError);
           if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty state');
             setCategories([]);
           } else {
-            console.log('[Home] Setting empty categories array due to API error');
             setCategories([]);
           }
         }
       } else {
-        console.log('[Home] User not logged in - showing empty categories');
         setCategories([]);
       }
     } catch (err) {
@@ -191,33 +181,26 @@ const Home = () => {
       let response;
       
       if (isUserLoggedIn && userId && accessToken) {
-        console.log('[Home] Loading approved products for user:', userId);
         try {
           // Use filtered products for logged-in users
           response = await getApprovedProductsForUser(userId, accessToken);
-          console.log('[Home] Approved products response:', response);
           if (response.success && response.data && response.data.length > 0) {
             setAllProducts(response.data); // Store all products
             setProducts(response.data); // Initially show all products
-            console.log('[Home] Loaded approved products:', response.data.length);
           } else {
-            console.log('[Home] No approved products found - user may not have approved login request yet');
             setAllProducts([]);
             setProducts([]);
           }
         } catch (apiError: any) {
           console.error('[Home] Error calling getApprovedProductsForUser:', apiError);
           if (apiError.error === 'No approved login request found' || apiError.message === 'User login request is not approved yet') {
-            console.log('[Home] User does not have approved login request yet - showing empty products');
             setProducts([]);
           } else {
-            console.log('[Home] Setting empty products array due to API error');
             setAllProducts([]);
             setProducts([]);
           }
         }
       } else {
-        console.log('[Home] User not logged in - showing empty products');
         setAllProducts([]);
         setProducts([]);
       }
@@ -243,7 +226,6 @@ const Home = () => {
     getSliders,
     []
   );
-  console.log("slidersData:", slidersData);
   
   // Process sliders response and fix localhost URLs
   const slidersResponse = (slidersData?.data || []).map((slider: any) => ({
@@ -261,9 +243,6 @@ const Home = () => {
   });
 
   // Categories are now managed by local state
-  console.log('[Home] Current categories state:', categories);
-  console.log('[Home] User logged in:', isUserLoggedIn);
-  console.log('[Home] User ID:', userId);
 
   // Extract sliders from response
   const sliders = slidersResponse || [];
@@ -272,7 +251,6 @@ const Home = () => {
 
   // Handle real-time category updates from socket events
   const handleRealTimeCategoryUpdate = (updateData: any) => {
-    console.log('[Home] Real-time category update received:', updateData);
     
     const { action, category, timestamp } = updateData;
     
@@ -293,13 +271,11 @@ const Home = () => {
         break;
         
       default:
-        console.log('[Home] Unknown category action:', action);
     }
   };
 
   // Handle real-time slider updates from socket events
   const handleRealTimeSliderUpdate = (updateData: any) => {
-    console.log('[Home] Real-time slider update received:', updateData);
     
     const { action, slider, timestamp } = updateData;
     
@@ -320,20 +296,17 @@ const Home = () => {
         break;
         
       default:
-        console.log('[Home] Unknown slider action:', action);
     }
   };
 
   // Handle real-time product updates from socket events
   const handleRealTimeProductUpdate = (updateData: any) => {
-    console.log('[Home] Real-time product update received:', updateData);
     // Refresh products silently (will re-apply current filters via existing effects)
     loadProductsRef.current();
   };
 
   // Handle slider Show More button press
   const handleSliderShowMore = (categoryId: number, categoryName: string) => {
-    console.log('[Home] Slider Show More pressed for category:', categoryId, categoryName);
     // Navigate to Collection screen with category filter
     (navigation as any).navigate('Collection', { 
       selectedCategory: categoryId,
@@ -410,8 +383,6 @@ const Home = () => {
     // Filter products based on category selection
     let filteredProducts = [];
     
-    console.log('[Home] Filtering products for category:', category);
-    console.log('[Home] Total products available:', allProducts.length);
     
     if (category === 'all') {
       filteredProducts = allProducts;
@@ -423,7 +394,6 @@ const Home = () => {
       filteredProducts = allProducts.filter((product: any) => {
         const productUpdateDate = new Date(product.updated_at);
         const isNew = productUpdateDate >= thirtyDaysAgo;
-        console.log('[Home] Product:', product.name, 'Updated:', product.updated_at, 'Is New:', isNew);
         return isNew;
       });
       
@@ -437,7 +407,6 @@ const Home = () => {
           return productCreateDate >= sixtyDaysAgo;
         });
         
-        console.log('[Home] No recent updates found, using 60-day created filter:', filteredProducts.length);
       }
       
       // If still no products, show the most recently updated ones (top 50%)
@@ -446,7 +415,6 @@ const Home = () => {
           .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
           .slice(0, Math.ceil(allProducts.length * 0.5));
         
-        console.log('[Home] Using most recently updated products:', filteredProducts.length);
       }
     } else if (category === 'best') {
       // For 'best' products - sort by gross_weight and recent updates
@@ -459,24 +427,19 @@ const Home = () => {
         })
         .slice(0, Math.ceil(allProducts.length * 0.8)); // Show top 80% as 'best'
       
-      console.log('[Home] Best products filtered:', filteredProducts.length);
     } else {
       // Handle actual category names (like "antique buti", "cz ladies viti")
-      console.log('[Home] Filtering by actual category name:', category);
       
       filteredProducts = allProducts.filter((product: any) => {
         const productCategoryName = product.category_name?.toLowerCase();
         const selectedCategoryName = category.toLowerCase();
         const matches = productCategoryName === selectedCategoryName;
         
-        console.log('[Home] Product:', product.name, 'Category:', productCategoryName, 'Matches:', matches);
         return matches;
       });
       
-      console.log('[Home] Category-specific products filtered:', filteredProducts.length);
     }
     
-    console.log('[Home] Final filtered products count:', filteredProducts.length);
     setProducts(filteredProducts);
     
     Toast.show({

@@ -75,16 +75,11 @@ const Collection = () => {
       setLoading(true);
       setError(null);
       
-      console.log('[Collection] Fetching all categories (guest/logged-in)');
       const response = await getApprovedCategoriesForUser(userId, accessToken);
-      console.log('[Collection] Categories response:', response);
       
       if (response && response.success && response.data && response.data.length > 0) {
         setCategories(response.data);
-        console.log('[Collection] Set categories:', response.data.length, 'categories');
-        console.log('[Collection] Category names:', response.data.map((cat: any) => cat.name));
       } else {
-        console.log('[Collection] No categories found');
         setCategories([]);
       }
     } catch (err) {
@@ -179,10 +174,6 @@ const Collection = () => {
     .filter((cat: Category) => search === '' || cat.name.toLowerCase().includes(search.toLowerCase()));
 
   // Debug logging
-  console.log('[Collection] Current categories state:', categories);
-  console.log('[Collection] Filtered categories:', filteredCategories);
-  console.log('[Collection] User logged in:', isUserLoggedIn);
-  console.log('[Collection] User ID:', userId);
 
   // Handle pull-to-refresh
   const onRefresh = async () => {
@@ -203,7 +194,6 @@ const Collection = () => {
   };
 
   const handleCategoryPress = (category: Category) => {
-    console.log('Selected category:', category.name, 'ID:', category.id);
     // @ts-ignore
     navigation.navigate('Product', {
       categoryId: category.id,

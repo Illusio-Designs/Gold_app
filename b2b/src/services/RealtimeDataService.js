@@ -55,21 +55,18 @@ class RealtimeDataService {
   setupSocketListeners() {
     // Category updates
     const categoryListenerId = SocketService.addEventListener('category-update', (data) => {
-      console.log('[RealtimeDataService] Socket category update:', data);
       this.handleSocketUpdate('categories', data);
     });
     this.socketListeners.set('category-update', categoryListenerId);
 
     // Product updates
     const productListenerId = SocketService.addEventListener('product-update', (data) => {
-      console.log('[RealtimeDataService] Socket product update:', data);
       this.handleSocketUpdate('products', data);
     });
     this.socketListeners.set('product-update', productListenerId);
 
     // Order updates
     const orderListenerId = SocketService.addEventListener('order-update', (data) => {
-      console.log('[RealtimeDataService] Socket order update:', data);
       this.handleSocketUpdate('orders', data);
     });
     this.socketListeners.set('order-update', orderListenerId);
@@ -78,71 +75,60 @@ class RealtimeDataService {
 
     // Specific order events
     const orderCreatedListenerId = SocketService.addEventListener('order-created', (data) => {
-      console.log('[RealtimeDataService] Socket order created:', data);
       this.handleSocketUpdate('orders', data);
     });
     this.socketListeners.set('order-created', orderCreatedListenerId);
 
     const orderStatusUpdatedListenerId = SocketService.addEventListener('order-status-updated', (data) => {
-      console.log('[RealtimeDataService] Socket order status updated:', data);
       this.handleSocketUpdate('orders', data);
     });
     this.socketListeners.set('order-status-updated', orderStatusUpdatedListenerId);
 
     const ordersFromCartListenerId = SocketService.addEventListener('orders-created-from-cart', (data) => {
-      console.log('[RealtimeDataService] Socket orders created from cart:', data);
       this.handleSocketUpdate('orders', data);
     });
     this.socketListeners.set('orders-created-from-cart', ordersFromCartListenerId);
 
     // Specific cart events
     const cartItemAddedListenerId = SocketService.addEventListener('cart-item-added', (data) => {
-      console.log('[RealtimeDataService] Socket cart item added:', data);
       this.handleSocketUpdate('cart', data);
     });
     this.socketListeners.set('cart-item-added', cartItemAddedListenerId);
 
     const cartItemUpdatedListenerId = SocketService.addEventListener('cart-item-updated', (data) => {
-      console.log('[RealtimeDataService] Socket cart item updated:', data);
       this.handleSocketUpdate('cart', data);
     });
     this.socketListeners.set('cart-item-updated', cartItemUpdatedListenerId);
 
     const cartItemRemovedListenerId = SocketService.addEventListener('cart-item-removed', (data) => {
-      console.log('[RealtimeDataService] Socket cart item removed:', data);
       this.handleSocketUpdate('cart', data);
     });
     this.socketListeners.set('cart-item-removed', cartItemRemovedListenerId);
 
     const cartClearedListenerId = SocketService.addEventListener('cart-cleared', (data) => {
-      console.log('[RealtimeDataService] Socket cart cleared:', data);
       this.handleSocketUpdate('cart', data);
     });
     this.socketListeners.set('cart-cleared', cartClearedListenerId);
 
     // User updates
     const userUpdateListenerId = SocketService.addEventListener('user-update', (data) => {
-      console.log('[RealtimeDataService] Socket user update:', data);
       this.handleSocketUpdate('users', data);
     });
     this.socketListeners.set('user-update', userUpdateListenerId);
 
     // App updates
     const appVersionUpdateListenerId = SocketService.addEventListener('app-version-update', (data) => {
-      console.log('[RealtimeDataService] Socket app version update:', data);
       this.handleSocketUpdate('app-versions', data);
     });
     this.socketListeners.set('app-version-update', appVersionUpdateListenerId);
 
     const appIconUpdateListenerId = SocketService.addEventListener('app-icon-update', (data) => {
-      console.log('[RealtimeDataService] Socket app icon update:', data);
       this.handleSocketUpdate('app-icons', data);
     });
     this.socketListeners.set('app-icon-update', appIconUpdateListenerId);
 
     // Slider updates
     const sliderUpdateListenerId = SocketService.addEventListener('slider-update', (data) => {
-      console.log('[RealtimeDataService] Socket slider update:', data);
       this.handleSocketUpdate('sliders', data);
     });
     this.socketListeners.set('slider-update', sliderUpdateListenerId);
@@ -156,7 +142,6 @@ class RealtimeDataService {
   handleSocketUpdate(dataType, data) {
     const { action, category, product, order, cartItem, user, version, icon, timestamp } = data;
     
-    console.log(`[RealtimeDataService] Handling ${dataType} update:`, { action, dataType, timestamp });
     
     // Trigger a refresh of the specific data type
     this.refreshData(dataType);
@@ -189,7 +174,6 @@ class RealtimeDataService {
     // Start polling if not already started
     this.startPolling(dataType);
     
-    console.log(`[RealtimeDataService] Subscribed to ${dataType} with ID: ${subscriptionId}`);
     
     return subscriptionId;
   }
@@ -209,7 +193,6 @@ class RealtimeDataService {
       }
     }
     
-    console.log(`[RealtimeDataService] Unsubscribed from ${dataType} with ID: ${subscriptionId}`);
   }
 
   /**
@@ -221,7 +204,6 @@ class RealtimeDataService {
       return; // Already polling
     }
 
-    console.log(`[RealtimeDataService] Starting polling for ${dataType}`);
     
     // Start polling immediately
     this.pollData(dataType);
@@ -242,7 +224,6 @@ class RealtimeDataService {
     if (this.pollingIntervals.has(dataType)) {
       clearInterval(this.pollingIntervals.get(dataType));
       this.pollingIntervals.delete(dataType);
-      console.log(`[RealtimeDataService] Stopped polling for ${dataType}`);
     }
   }
 
@@ -316,7 +297,6 @@ class RealtimeDataService {
     
     // Check if data has changed
     if (dataHash !== lastHash) {
-      console.log(`[RealtimeDataService] Data changed for ${dataType}`, { options });
       
       // Update the last hash
       this.lastDataHashes.set(`${dataType}_${JSON.stringify(options)}`, dataHash);
@@ -342,7 +322,6 @@ class RealtimeDataService {
       if (this.shouldNotifySubscriber(subscriberOptions, options)) {
         try {
           callback(data, options);
-          console.log(`[RealtimeDataService] Notified subscriber ${subscriptionId} for ${dataType}`);
         } catch (error) {
           console.error(`[RealtimeDataService] Error in subscriber callback:`, error);
         }
@@ -396,7 +375,6 @@ class RealtimeDataService {
    * @param {Object} options - Additional options
    */
   async refreshData(dataType, options = {}) {
-    console.log(`[RealtimeDataService] Manually refreshing ${dataType}`);
     await this.pollData(dataType);
   }
 
@@ -406,7 +384,6 @@ class RealtimeDataService {
    */
   setPollingInterval(intervalMs) {
     this.pollingIntervalMs = intervalMs;
-    console.log(`[RealtimeDataService] Polling interval set to ${intervalMs}ms`);
   }
 
   /**
@@ -430,7 +407,6 @@ class RealtimeDataService {
    * Disconnect all polling and clear subscribers
    */
   disconnect() {
-    console.log('[RealtimeDataService] Disconnecting all real-time services');
     
     // Stop all polling intervals
     for (const [dataType, interval] of this.pollingIntervals) {

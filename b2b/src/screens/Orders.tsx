@@ -160,7 +160,6 @@ const Orders = () => {
 
   // Handle real-time order updates from socket events
   const handleRealTimeOrderUpdate = (updateData) => {
-    console.log('[Orders] Real-time order update received:', updateData);
     
     const { action, order, timestamp } = updateData;
     
@@ -181,7 +180,6 @@ const Orders = () => {
         break;
         
       default:
-        console.log('[Orders] Unknown order action:', action);
     }
   };
 

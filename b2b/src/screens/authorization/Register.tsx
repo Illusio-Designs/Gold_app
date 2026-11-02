@@ -83,7 +83,6 @@ const Register = () => {
    const [gstError, setGstError] = useState('');
 
   const handleSelectCountry = (country: Country) => {
-    console.log('Country selected:', country);
     setCountryFlag(country.emoji);
     setCountryCode(country.dial_code);
     setCountryModalVisible(false);
@@ -92,7 +91,6 @@ const Register = () => {
 
   const handlePhoneChange = (text: string) => {
     setPhone(text);
-    console.log('Phone changed:', text);
     validatePhone(text, countryCode);
   };
 
@@ -125,7 +123,6 @@ const Register = () => {
     }
     setPhoneError(isValid ? '' : errorMsg);
     if (!isValid) {
-      console.log('Phone validation failed:', errorMsg);
     }
   };
 
@@ -155,7 +152,6 @@ const Register = () => {
     }
     setPinError(isValid ? '' : errorMsg);
     if (!isValid) {
-      console.log('Pin validation failed:', errorMsg);
     }
   };
 
@@ -254,7 +250,6 @@ const Register = () => {
     }
     
     setLoading(true);
-    console.log('Starting registration...');
     try {
       const userData = {
         type: 'business', // or 'admin', adjust as needed
@@ -274,21 +269,17 @@ const Register = () => {
         remarks: remarks.trim(), // Optional field
         image: null, // Add image upload logic if needed
       };
-      console.log('Register user data:', userData);
       await registerUser(userData);
       setSuccess('Registration successful!');
       Toast.show({ type: 'success', text1: 'Success', text2: 'User registered successfully!' });
       setTimeout(() => {
-        console.log('Navigating to Login');
         navigation.navigate('Login');
       }, 1000);
     } catch (err: any) {
       setError(err.error || 'Registration failed.');
-      console.log('Registration error:', err);
       Toast.show({ type: 'error', text1: 'Error', text2: err.error || 'Registration failed.' });
     } finally {
       setLoading(false);
-      console.log('Set loading to false');
     }
   };
 
@@ -483,7 +474,6 @@ const Register = () => {
               else if (countryCode === '+971') code = 'AE';
               else if (countryCode === '+1-CA') code = 'CA';
               else code = 'IN'; // fallback to India
-              console.log('City modal code:', code, 'Cities:', countryCities[code]);
               return countryCities[code] || countryCities['IN'];
             })()}
           />

@@ -61,7 +61,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   
-  console.log('[CartProvider] Initializing cart provider');
 
   // Load cart items from AsyncStorage on app start
   useEffect(() => {
@@ -71,9 +70,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         if (savedCartItems) {
           const parsedItems = JSON.parse(savedCartItems);
           setCartItems(parsedItems);
-          console.log('[CartProvider] Loaded cart items from storage:', parsedItems.length, 'items');
         } else {
-          console.log('[CartProvider] No saved cart items found');
         }
       } catch (error) {
         console.error('[CartProvider] Error loading cart items:', error);
@@ -87,7 +84,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   // Handle real-time cart updates from socket events
   const handleRealTimeCartUpdate = (updateData: any) => {
-    console.log('[CartContext] Real-time cart update received:', updateData);
     
     const { action, cartItem, timestamp } = updateData;
     
@@ -149,7 +145,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         break;
         
       default:
-        console.log('[CartContext] Unknown cart action:', action);
     }
   };
 
@@ -198,12 +193,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         const token = await AsyncStorage.getItem('accessToken');
         
         if (userId && token) {
-          console.log('[CartProvider] User authenticated, syncing with backend cart');
           const Api = require('../services/Api');
           
           try {
             const backendCart = await Api.getUserCart(parseInt(userId), token);
-            console.log('[CartProvider] Backend cart synced:', backendCart);
             
             // Only update local cart with backend data if local cart is empty
             // This prevents backend from overwriting local changes
@@ -226,10 +219,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
               // Only sync if local cart is empty or has different items
               setCartItems(prevItems => {
                 if (prevItems.length === 0) {
-                  console.log('[CartProvider] Local cart empty, syncing with backend');
                   return backendItems;
                 } else {
-                  console.log('[CartProvider] Local cart has items, keeping local state');
                   return prevItems;
                 }
               });
@@ -237,13 +228,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
               // Save to storage only if we updated the cart
               if (cartItems.length === 0) {
                 await saveCartItems(backendItems);
-                console.log('[CartProvider] Local cart updated with backend data');
               }
             } else {
               // Backend cart is empty, clear local cart if it has items
               setCartItems(prevItems => {
                 if (prevItems.length > 0) {
-                  console.log('[CartProvider] Backend cart empty, clearing local cart');
                   return [];
                 }
                 return prevItems;
@@ -274,7 +263,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         
         if (currentUserId && lastUserId && currentUserId !== lastUserId) {
           // Different user logged in, clear cart
-          console.log('[CartProvider] Different user logged in, clearing cart');
           setCartItems([]);
           saveCartItems([]);
         }
@@ -295,7 +283,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const saveCartItems = async (items: CartItem[]) => {
     try {
       await AsyncStorage.setItem('cartItems', JSON.stringify(items));
-      console.log('[CartProvider] Saved cart items to storage:', items.length, 'items');
     } catch (error) {
       console.error('[CartProvider] Error saving cart items:', error);
     }
@@ -303,15 +290,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const addToCart = async (item: Omit<CartItem, 'id'>, quantity: number, amount?: string) => {
     try {
-      console.log('🛒 [CartContext] addToCart called with:', { item, quantity, amount });
-      console.log('🛒 [CartContext] Current local cart items:', cartItems);
       
       // Get user ID and token from storage
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('accessToken');
       
       if (!userId || !token) {
-        console.log('🛒 [CartContext] User not authenticated, storing locally only');
         // Store locally if not authenticated
         addToCartLocally(item, quantity, amount);
         return;
@@ -319,13 +303,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
       // Try to sync with backend first
       try {
-        console.log('🛒 [CartContext] Syncing with backend...');
         const Api = require('../services/Api');
         
         // First, get the real product ID from SKU
-        console.log('🔍 [CartContext] Getting product ID for SKU:', item.sku);
         const productResponse = await Api.getProductBySku(item.sku);
-        console.log('🔍 [CartContext] Product response:', productResponse);
         
         if (!productResponse || !productResponse.id) {
           console.error('❌ [CartContext] Product not found with SKU:', item.sku);
@@ -333,7 +314,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         }
         
         const productId = productResponse.id;
-        console.log('🔍 [CartContext] Real product ID found:', productId);
         
         const backendResponse = await Api.addToCart({
           user_id: parseInt(userId),
@@ -341,7 +321,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           quantity: quantity
         }, token);
         
-        console.log('✅ [CartContext] Backend sync successful:', backendResponse);
         
         // If backend sync successful, also store locally for consistency with backend ID
         addToCartLocally(item, quantity, amount, backendResponse.id || backendResponse.cartItemId);
@@ -390,33 +369,27 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const removeFromCart = async (id: string) => {
     try {
-      console.log('🛒 [CartContext] removeFromCart called for id:', id);
       
       // Get user authentication
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('accessToken');
       
       if (userId && token) {
-        console.log('🛒 [CartContext] User authenticated, syncing with backend...');
         
         // Find the item to get its backend ID
         const itemToRemove = cartItems.find(item => item.id === id);
         if (itemToRemove && itemToRemove.backendId) {
-          console.log('🛒 [CartContext] Removing item from backend with ID:', itemToRemove.backendId);
           
           try {
             // Remove from backend first
             await Api.removeFromCart(itemToRemove.backendId, token);
-            console.log('✅ [CartContext] Item removed from backend successfully');
           } catch (backendError) {
             console.error('❌ [CartContext] Backend removal failed:', backendError);
             // Continue with local removal even if backend fails
           }
         } else {
-          console.log('🛒 [CartContext] No backend ID found, removing locally only');
         }
       } else {
-        console.log('🛒 [CartContext] User not authenticated, removing locally only');
       }
       
       // Update local state
@@ -424,7 +397,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setCartItems(updatedItems);
       saveCartItems(updatedItems);
       
-      console.log('✅ [CartContext] Item removed from local cart');
       
     } catch (error: any) {
       console.error('❌ [CartContext] removeFromCart error:', error);
@@ -443,17 +415,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const clearCartOnLogout = () => {
     setCartItems([]);
     saveCartItems([]);
-    console.log('[CartProvider] Cart cleared on logout');
   };
 
   const clearCartForNewUser = () => {
     setCartItems([]);
     saveCartItems([]);
-    console.log('[CartProvider] Cart cleared for new user');
   };
 
   const clearCartCompletely = async () => {
-    console.log('[CartProvider] Clearing cart completely');
     setCartItems([]);
     await AsyncStorage.removeItem('cartItems');
     
@@ -465,7 +434,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       if (userId && token) {
         const Api = require('../services/Api');
         await Api.clearUserCart(parseInt(userId), token);
-        console.log('[CartProvider] Backend cart cleared');
       }
     } catch (error) {
       console.error('[CartProvider] Error clearing backend cart:', error);
@@ -482,9 +450,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const checkout = async (remark?: string, courierCompany?: string) => {
     try {
-      console.log('🛒 [CartContext] Checkout started');
-      console.log('🛒 [CartContext] Local cart items:', cartItems);
-      console.log('🛒 [CartContext] Local cart count:', cartItems.length);
       
       // Get user ID and token from storage
       const userId = await AsyncStorage.getItem('userId');
@@ -495,7 +460,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return { success: false, message: 'User not authenticated' };
       }
 
-      console.log('🛒 [CartContext] User authenticated, getting backend cart first');
       
       // Import the API function
       const Api = require('../services/Api');
@@ -503,22 +467,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       // First, get the backend cart to ensure we have the latest data
       try {
         const backendCart = await Api.getUserCart(parseInt(userId), token);
-        console.log('🛒 [CartContext] Backend cart retrieved:', backendCart);
-        console.log('🛒 [CartContext] Backend cart items count:', backendCart.items?.length || 0);
         
         if (!backendCart.items || backendCart.items.length === 0) {
-          console.log('❌ [CartContext] Cannot checkout: backend cart is empty');
-          console.log('🛒 [CartContext] Local cart has items but backend cart is empty - sync issue detected');
           
           // Try to sync local cart items to backend first
-          console.log('🛒 [CartContext] Attempting to sync local cart to backend...');
           
           let syncSuccess = true;
           for (const localItem of cartItems) {
             try {
-              console.log('🛒 [CartContext] Syncing item:', localItem.sku);
               const productResponse = await Api.getProductBySku(localItem.sku);
-              console.log('🔍 [CartContext] Product lookup response:', productResponse);
               
               if (!productResponse || !productResponse.id) {
                 console.error('❌ [CartContext] Product not found for SKU:', localItem.sku);
@@ -532,7 +489,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
                 quantity: localItem.quantity
               }, token);
               
-              console.log('✅ [CartContext] Item synced to backend:', backendResponse);
               
             } catch (syncError) {
               console.error('❌ [CartContext] Failed to sync item:', localItem.sku, syncError);
@@ -547,14 +503,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           // Cart sync completed, proceed with checkout
         }
         
-        console.log('🛒 [CartContext] Backend cart has items, proceeding with checkout');
         
       } catch (cartError) {
         console.error('❌ [CartContext] Error getting backend cart:', cartError);
         return { success: false, message: 'Failed to retrieve cart items' };
       }
       
-      console.log('🛒 [CartContext] Calling createOrderFromCart API');
       
       // Call the backend API to create orders from cart
       const response = await Api.createOrderFromCart({
@@ -563,7 +517,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         courier_company: courierCompany || ''
       }, token);
 
-      console.log('✅ [CartContext] Checkout successful, response:', response);
 
       // Take payment via Razorpay (amount is priced server-side from the gold
       // rate). If the payment module isn't installed yet the orders are still
@@ -592,7 +545,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setCartItems([]);
       await saveCartItems([]);
 
-      console.log('✅ [CartContext] Local cart cleared after successful checkout');
 
       return {
         success: true,
@@ -618,13 +570,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     const timeSinceLastRefresh = now - lastRefreshTime;
     
     if (isRefreshing) {
-      console.log('[CartContext] Refresh already in progress, skipping...');
       return;
     }
     
     // Prevent refreshing too frequently (minimum 1 second between refreshes)
     if (timeSinceLastRefresh < 1000) {
-      console.log('[CartContext] Refresh too frequent, skipping...');
       return;
     }
     
@@ -684,7 +634,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     handleRealTimeCartUpdate,
   };
 
-  console.log('[CartProvider] Providing context value with cartItems:', cartItems);
 
   return (
     <CartContext.Provider value={value}>

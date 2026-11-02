@@ -56,8 +56,6 @@ const EditProfile = () => {
           const res = await getUserById(id, token);
           const user = res.user || res; // handle { user: {...} } or just {...}
           
-          console.log('[EditProfile] API Response:', res);
-          console.log('[EditProfile] User data:', user);
           console.log('[EditProfile] User fields:', {
             name: user.name,
             email: user.email,
@@ -96,15 +94,12 @@ const EditProfile = () => {
               ? user.image
               : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
             setPhotoUri({ uri: imgUrl });
-            console.log('[EditProfile] Image URL:', imgUrl);
           }
         } else {
           // fallback to AsyncStorage if no id/token
-          console.log('[EditProfile] No userId/token, using AsyncStorage fallback');
           const userStr = await AsyncStorage.getItem('user');
           if (userStr) {
             const user = JSON.parse(userStr);
-            console.log('[EditProfile] AsyncStorage user data:', user);
             setName(user.name || '');
             setEmail(user.email || '');
             setPhone(user.phone_number || '');
@@ -124,7 +119,6 @@ const EditProfile = () => {
                 ? user.image
                 : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
               setPhotoUri({ uri: imgUrl });
-              console.log('[EditProfile] Image URL:', imgUrl);
             }
           }
         }
@@ -200,7 +194,6 @@ const EditProfile = () => {
   };
 
   const handleCameraPress = async () => {
-    console.log('[EditProfile] Camera button pressed');
 
     const showPicker = () => {
       Alert.alert('Update Photo', 'Choose source', [
@@ -222,7 +215,6 @@ const EditProfile = () => {
               );
             });
 
-            console.log('[EditProfile] Camera response:', response);
             if (response?.didCancel) return;
             if (response?.errorCode) {
               Alert.alert('Error', response.errorMessage || 'Failed to open camera');
@@ -251,7 +243,6 @@ const EditProfile = () => {
               );
             });
 
-            console.log('[EditProfile] Gallery response:', response);
             if (response?.didCancel) return;
             if (response?.errorCode) {
               Alert.alert('Error', response.errorMessage || 'Failed to open gallery');
@@ -309,7 +300,6 @@ const EditProfile = () => {
       }
       // Retrieve token from AsyncStorage
       const token = await AsyncStorage.getItem('accessToken');
-      console.log('[EditProfile] Token before update:', token);
       if (!token) {
         Alert.alert('Error', 'Access token missing. Please log in again.');
         setLoading(false);
@@ -320,7 +310,6 @@ const EditProfile = () => {
         setLoading(false);
         return;
       }
-      console.log('Token used for update:', token);
       const res = await updateUserProfile(userId, profileData, token);
       if (res && res.message) {
         // Store updated user in AsyncStorage if returned
@@ -337,7 +326,6 @@ const EditProfile = () => {
         Alert.alert('Error', 'Update failed');
       }
     } catch (err: any) {
-      console.log('Update error:', err?.error || err);
       Alert.alert('Error', err?.error || 'Update failed');
     } finally {
       setLoading(false);

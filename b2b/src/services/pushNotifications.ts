@@ -12,7 +12,6 @@ function messagingInstance(): any | null {
     const mod = require('@react-native-firebase/messaging').default;
     return mod ? mod() : null;
   } catch (e) {
-    console.log('[push] messaging unavailable:', (e as any)?.message);
     return null;
   }
 }
@@ -48,7 +47,6 @@ export async function requestNotificationPermission(): Promise<boolean> {
       status === m.AuthorizationStatus.PROVISIONAL
     );
   } catch (e) {
-    console.log('[push] permission error:', (e as any)?.message);
     return false;
   }
 }
@@ -69,11 +67,9 @@ export async function registerDeviceToken(): Promise<string | null> {
     if (stored !== token) {
       await registerFcmToken(token, Platform.OS, authToken);
       await AsyncStorage.setItem('fcmToken', token);
-      console.log('[push] token registered');
     }
     return token;
   } catch (e) {
-    console.log('[push] registerDeviceToken error:', (e as any)?.message);
     return null;
   }
 }
@@ -87,7 +83,6 @@ export async function initPushForUser(): Promise<void> {
     await requestNotificationPermission();
     await registerDeviceToken();
   } catch (e) {
-    console.log('[push] initPushForUser error:', (e as any)?.message);
   }
 }
 
@@ -117,7 +112,6 @@ export function onForegroundMessage(handler: MessageHandler): () => void {
       try { unsubRefresh && unsubRefresh(); } catch {}
     };
   } catch (e) {
-    console.log('[push] onForegroundMessage error:', (e as any)?.message);
     return () => {};
   }
 }
@@ -141,7 +135,6 @@ export function onNotificationOpened(handler: (data: any) => void): () => void {
       try { unsub && unsub(); } catch {}
     };
   } catch (e) {
-    console.log('[push] onNotificationOpened error:', (e as any)?.message);
     return () => {};
   }
 }
@@ -153,7 +146,6 @@ export async function getCurrentFcmToken(): Promise<string | null> {
     if (!inst) return null;
     return (await inst.getToken()) || null;
   } catch (e) {
-    console.log('[push] getCurrentFcmToken error:', (e as any)?.message);
     return null;
   }
 }

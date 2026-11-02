@@ -53,13 +53,10 @@ axios.interceptors.request.use(
 // still reaches the backend if @env injection fails in a release build.
 export const BASE_URL = API_URL || 'https://api.amrutkumargovinddasllp.com/api';
 
-console.log('🌍 API_URL from @env:', API_URL);
-console.log('🌍 Using BASE_URL:', BASE_URL);
 
 // ✅ Register user API call
 export const registerUser = async userData => {
   try {
-    console.log('📤 Sending registerUser request with data:', userData);
 
     // If no image is provided, prefer JSON to avoid multipart boundary/host issues
     const shouldUseJson = !userData.image;
@@ -77,10 +74,8 @@ export const registerUser = async userData => {
 
     let response;
     if (shouldUseJson) {
-      console.log('📝 registerUser: sending JSON payload');
       response = await axios.post(`${BASE_URL}/users/register`, userData);
     } else {
-      console.log('🖼️ registerUser: sending multipart/form-data payload');
       const formData = new FormData();
       for (const key in userData) {
         if (userData[key] !== undefined && userData[key] !== null) {
@@ -90,7 +85,6 @@ export const registerUser = async userData => {
       response = await axios.post(`${BASE_URL}/users/register`, formData);
     }
 
-    console.log('✅ registerUser response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ registerUser error:', error);
@@ -128,9 +122,7 @@ export const registerUser = async userData => {
 // ✅ Check user existence
 export const checkUserExists = async data => {
   try {
-    console.log('🔍 Checking user existence:', data);
     const response = await axios.post(`${BASE_URL}/users/check-exists`, data);
-    console.log('✅ checkUserExists response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ checkUserExists error:', error);
@@ -142,7 +134,6 @@ export const checkUserExists = async data => {
 export const getCategories = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/categories`);
-    console.log('📂 getCategories response:', response.data);
 
     // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
@@ -182,7 +173,6 @@ export const getApprovedProductsForUser = async (userId, token) => {
   try {
     // With Request-for-Login removed, approved products = all products.
     const response = await axios.get(`${BASE_URL}/products/`);
-    console.log('📦 getApprovedProductsForUser response:', response.data);
 
     if (response.data && Array.isArray(response.data)) {
       return { success: true, data: response.data };
@@ -218,13 +208,7 @@ export const sendBusinessOTP = async (phoneNumber, countryCode) => {
 export const verifyBusinessOTP = async phoneNumber => {
   try {
     const url = `${BASE_URL}/users/verify-otp`;
-    console.log('--- Attempting to verify OTP with backend ---');
-    console.log('Request URL:', url);
-    console.log('Phone Number:', phoneNumber);
     const response = await axios.post(url, { phoneNumber });
-    console.log('--- Backend verification response ---');
-    console.log(JSON.stringify(response.data, null, 2));
-    console.log('-------------------------------------');
     return response.data;
   } catch (error) {
     console.error('--- Backend verification FAILED ---');
@@ -251,7 +235,6 @@ export const verifyBusinessOTP = async phoneNumber => {
 export const getAllProducts = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/products`);
-    console.log('📦 getAllProducts response:', response.data);
 
     // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
@@ -281,7 +264,6 @@ export const getProductsByCategory = async categoryId => {
     const response = await axios.get(
       `${BASE_URL}/products/category/${categoryId}`,
     );
-    console.log('📦 getProductsByCategory response:', response.data);
 
     // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
@@ -309,7 +291,6 @@ export const getProductsByCategory = async categoryId => {
 export const getProductById = async productId => {
   try {
     const response = await axios.get(`${BASE_URL}/products/${productId}`);
-    console.log('📦 getProductById response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getProductById error:', error);
@@ -353,13 +334,11 @@ export const updateUserProfile = async (userId, profileData, token) => {
       'Content-Type': 'multipart/form-data',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
-    console.log('Headers for update:', headers);
 
     const response = await axios.put(`${BASE_URL}/users/${userId}`, formData, {
       headers,
     });
 
-    console.log('✅ updateUserProfile response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ updateUserProfile error:', error);
@@ -389,18 +368,15 @@ export const getUserById = async (userId, token) => {
 // 🛒 CART MANAGEMENT
 export const addToCart = async (cartData, token) => {
   try {
-    console.log('🛒 [API] addToCart called with data:', cartData);
     console.log(
       '🛒 [API] Token:',
       token ? token.substring(0, 20) + '...' : 'null',
     );
-    console.log('🛒 [API] BASE_URL:', BASE_URL);
 
     const response = await axios.post(`${BASE_URL}/cart/add`, cartData, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log('✅ [API] addToCart success response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ [API] addToCart error:', error);
@@ -414,19 +390,15 @@ export const addToCart = async (cartData, token) => {
 
 export const getUserCart = async (userId, token) => {
   try {
-    console.log('🛒 [API] getUserCart called for user:', userId);
     console.log(
       '🛒 [API] Token:',
       token ? token.substring(0, 20) + '...' : 'null',
     );
-    console.log('🛒 [API] BASE_URL:', BASE_URL);
-    console.log('🛒 [API] Request URL:', `${BASE_URL}/cart/user/${userId}`);
 
     const response = await axios.get(`${BASE_URL}/cart/user/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log('✅ [API] getUserCart success response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ [API] getUserCart error:', error);
@@ -440,13 +412,11 @@ export const getUserCart = async (userId, token) => {
 
 export const updateCartItemQuantity = async (cartItemId, quantity, token) => {
   try {
-    console.log('🛒 Updating cart item quantity:', { cartItemId, quantity });
     const response = await axios.put(
       `${BASE_URL}/cart/item/${cartItemId}/quantity`,
       { quantity },
       { headers: { Authorization: `Bearer ${token}` } },
     );
-    console.log('✅ updateCartItemQuantity response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ updateCartItemQuantity error:', error);
@@ -456,11 +426,9 @@ export const updateCartItemQuantity = async (cartItemId, quantity, token) => {
 
 export const removeFromCart = async (cartItemId, token) => {
   try {
-    console.log('🛒 Removing item from cart:', cartItemId);
     const response = await axios.delete(`${BASE_URL}/cart/item/${cartItemId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log('✅ removeFromCart response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ removeFromCart error:', error);
@@ -470,14 +438,12 @@ export const removeFromCart = async (cartItemId, token) => {
 
 export const clearUserCart = async (userId, token) => {
   try {
-    console.log('🛒 Clearing user cart for user:', userId);
     const response = await axios.delete(
       `${BASE_URL}/cart/user/${userId}/clear`,
       {
         headers: { Authorization: `Bearer ${token}` },
       },
     );
-    console.log('✅ clearUserCart response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ clearUserCart error:', error);
@@ -488,18 +454,15 @@ export const clearUserCart = async (userId, token) => {
 // 📦 ORDER MANAGEMENT
 export const createOrder = async (orderData, token) => {
   try {
-    console.log('📦 [API] createOrder called with data:', orderData);
     console.log(
       '📦 [API] Token:',
       token ? token.substring(0, 20) + '...' : 'null',
     );
-    console.log('📦 [API] BASE_URL:', BASE_URL);
 
     const response = await axios.post(`${BASE_URL}/orders`, orderData, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log('✅ [API] createOrder success response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ [API] createOrder error:', error);
@@ -521,8 +484,6 @@ export const createOrderFromCart = async (cartOrderData, token) => {
       '📦 [API] Token:',
       token ? token.substring(0, 20) + '...' : 'null',
     );
-    console.log('📦 [API] BASE_URL:', BASE_URL);
-    console.log('📦 [API] Request URL:', `${BASE_URL}/orders/from-cart`);
 
     const response = await axios.post(
       `${BASE_URL}/orders/from-cart`,
@@ -588,11 +549,9 @@ export const verifyRazorpayPayment = async (payload, token) => {
 
 export const getUserOrders = async (userId, token) => {
   try {
-    console.log('📦 Getting user orders for user:', userId);
     const response = await axios.get(`${BASE_URL}/orders/user/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log('✅ getUserOrders response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getUserOrders error:', error);
@@ -603,11 +562,9 @@ export const getUserOrders = async (userId, token) => {
 // Get current user's orders (requires authentication token)
 export const getCurrentUserOrders = async token => {
   try {
-    console.log('📦 Getting current user orders');
     const response = await axios.get(`${BASE_URL}/orders/my-orders`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log('✅ getCurrentUserOrders response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getCurrentUserOrders error:', error);
@@ -617,11 +574,9 @@ export const getCurrentUserOrders = async token => {
 
 export const getOrderById = async (orderId, token) => {
   try {
-    console.log('📦 Getting order by ID:', orderId);
     const response = await axios.get(`${BASE_URL}/orders/${orderId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    console.log('✅ getOrderById response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getOrderById error:', error);
@@ -631,13 +586,11 @@ export const getOrderById = async (orderId, token) => {
 
 export const updateOrderStatus = async (orderId, status, token) => {
   try {
-    console.log('📦 Updating order status:', { orderId, status });
     const response = await axios.patch(
       `${BASE_URL}/orders/${orderId}/status`,
       { status },
       { headers: { Authorization: `Bearer ${token}` } },
     );
-    console.log('✅ updateOrderStatus response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ updateOrderStatus error:', error);
@@ -648,9 +601,7 @@ export const updateOrderStatus = async (orderId, status, token) => {
 // ✅ Get product by SKU
 export const getProductBySku = async sku => {
   try {
-    console.log('🔍 [API] getProductBySku called with SKU:', sku);
     const response = await axios.get(`${BASE_URL}/products/sku/${sku}`);
-    console.log('✅ [API] getProductBySku response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ [API] getProductBySku error:', error);
@@ -730,7 +681,6 @@ export const checkAppUpdate = async (platform, versionCode) => {
     const response = await axios.get(`${BASE_URL}/app-versions/check-update`, {
       params: { platform, version_code: versionCode },
     });
-    console.log('📱 checkAppUpdate response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ checkAppUpdate error:', error);
@@ -744,7 +694,6 @@ export const getLatestVersion = async platform => {
     const response = await axios.get(
       `${BASE_URL}/app-versions/latest/${platform}`,
     );
-    console.log('📱 getLatestVersion response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getLatestVersion error:', error);
@@ -758,7 +707,6 @@ export const getCurrentAppIcon = async (platform, type = 'primary') => {
     const response = await axios.get(
       `${BASE_URL}/app-icons/current/${platform}/${type}`,
     );
-    console.log('🎨 getCurrentAppIcon response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getCurrentAppIcon error:', error);
@@ -772,7 +720,6 @@ export const getActiveAppIcons = async platform => {
     const response = await axios.get(
       `${BASE_URL}/app-icons/active/${platform}`,
     );
-    console.log('🎨 getActiveAppIcons response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getActiveAppIcons error:', error);
@@ -784,7 +731,6 @@ export const getActiveAppIcons = async platform => {
 export const getSliders = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/slider`);
-    console.log('🖼️ getSliders response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ getSliders error:', error);
@@ -795,11 +741,9 @@ export const getSliders = async () => {
 // ✅ Search all (categories and products)
 export const searchAll = async query => {
   try {
-    console.log('🔍 Searching all with query:', query);
     const response = await axios.get(
       `${BASE_URL}/search/all?query=${encodeURIComponent(query)}`,
     );
-    console.log('✅ searchAll response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ searchAll error:', error);
@@ -810,11 +754,9 @@ export const searchAll = async query => {
 // ✅ Search only categories
 export const searchCategories = async query => {
   try {
-    console.log('🔍 Searching categories with query:', query);
     const response = await axios.get(
       `${BASE_URL}/search/categories?query=${encodeURIComponent(query)}`,
     );
-    console.log('✅ searchCategories response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ searchCategories error:', error);
@@ -825,11 +767,9 @@ export const searchCategories = async query => {
 // ✅ Search only products
 export const searchProducts = async query => {
   try {
-    console.log('🔍 Searching products with query:', query);
     const response = await axios.get(
       `${BASE_URL}/search/products?query=${encodeURIComponent(query)}`,
     );
-    console.log('✅ searchProducts response:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ searchProducts error:', error);
