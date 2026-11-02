@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
+import { isReviewPhone } from '../../config/reviewAccess';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
@@ -54,6 +55,14 @@ const Login = () => {
       Alert.alert('Enter phone number', 'Please enter a valid phone number.');
       return;
     }
+
+    // Store-reviewer demo account: skip the real SMS OTP and go straight to the
+    // code screen, which accepts the fixed demo code (no SMS can reach a reviewer).
+    if (isReviewPhone(phone)) {
+      navigation.navigate('OtpVerify', { phone, countryCode, requestId: '', isReview: true });
+      return;
+    }
+
     setSendingOtp(true);
     try {
       const fullPhoneNumber = `${countryCode.replace('+', '')}${phone}`;

@@ -160,7 +160,6 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
         console.log('Categories API response:', response);
         
         if (response && response.success && response.data && Array.isArray(response.data)) {
-          console.log(`✅ Loaded ${response.data.length} categories:`, response.data);
           setCategories(response.data);
           if (response.data.length > 0) {
             setSelectedCategory(response.data[0].name);

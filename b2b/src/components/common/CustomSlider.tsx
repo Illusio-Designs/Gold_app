@@ -71,9 +71,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
 
   // Use API sliders if available, otherwise use default slides
   const slides = sliders && sliders.length > 0 ? sliders.map(slider => {
-    console.log('🖼️ Processing slider:', slider);
     const imageUrl = getSliderImageUrl(slider.image_url);
-    console.log('🖼️ Constructed image URL:', imageUrl);
     
     return {
       title: slider.title || 'Category',

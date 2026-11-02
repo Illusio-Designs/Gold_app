@@ -18,6 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { verifyBusinessOTP } from '../../services/Api';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
+import { isReviewPhone, REVIEW_OTP_CODE } from '../../config/reviewAccess';
 import RealtimeDataService from '../../services/RealtimeDataService';
 import { useNotifications } from '../../context/NotificationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,7 +42,7 @@ const maskPhone = (code: string, phone: string) => {
 const OtpVerify = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute<any>();
-  const { phone = '', countryCode = '+91', requestId: initialRequestId = '' } = route.params || {};
+  const { phone = '', countryCode = '+91', requestId: initialRequestId = '', isReview = false } = route.params || {};
   const { onLogin } = useNotifications();
   const keyboardHeight = useKeyboardHeight();
 
@@ -108,6 +109,38 @@ const OtpVerify = () => {
       setOtpError('Please enter a valid OTP');
       return;
     }
+
+    // Store-reviewer demo account: accept the fixed demo code and skip MSG91,
+    // logging in directly via the backend (which already approves this number).
+    if ((isReview || isReviewPhone(phone)) && otp === REVIEW_OTP_CODE) {
+      setOtpError('');
+      setLoading(true);
+      try {
+        let normalizedPhone = phone;
+        if (normalizedPhone.startsWith('0')) normalizedPhone = normalizedPhone.slice(1);
+        if (normalizedPhone.length > 10 && normalizedPhone.startsWith('91')) normalizedPhone = normalizedPhone.slice(-10);
+        const loginResult = await verifyBusinessOTP(normalizedPhone);
+        if (loginResult.token) {
+          await AsyncStorage.setItem('accessToken', loginResult.token);
+          if (loginResult.user && loginResult.user.id) {
+            await AsyncStorage.setItem('userId', loginResult.user.id.toString());
+            if (loginResult.user.name) await AsyncStorage.setItem('userName', loginResult.user.name);
+            if (loginResult.user.type) await AsyncStorage.setItem('userType', loginResult.user.type);
+          }
+          RealtimeDataService.reconnectWithAuth?.();
+          onLogin().catch(() => {});
+          setShowSuccess(true);
+        } else {
+          Alert.alert('Login Failed', loginResult.error || 'Could not log you in.');
+        }
+      } catch (e: any) {
+        setOtpError('Verification failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setOtpError('');
     setLoading(true);
     try {
