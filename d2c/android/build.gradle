@@ -20,3 +20,17 @@ buildscript {
 }
 
 apply plugin: "com.facebook.react.rootproject"
+
+// react-native-otp-verify (OtpVerifyModule.java) references the legacy
+// Auth.GOOGLE_SIGN_IN_API, which Google removed in play-services-auth 21.x.
+// The library module resolves play-services-auth on its OWN classpath, so a
+// force in app/build.gradle never reaches it — it must be applied to every
+// project. Pin 20.7.0 (last version with the legacy Auth API) everywhere so
+// the :react-native-otp-verify module compiles.
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.android.gms:play-services-auth:20.7.0'
+        }
+    }
+}
