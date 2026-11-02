@@ -16,7 +16,6 @@ const getImageUrl = () => {
     // Final fallback — production API host
     return 'https://api.amrutkumargovinddasllp.com';
   } catch (error) {
-    console.log('[ImageUtils] Error getting image URL, using fallback:', error);
     return 'https://api.amrutkumargovinddasllp.com';
   }
 };

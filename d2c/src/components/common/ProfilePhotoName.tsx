@@ -20,7 +20,6 @@ const ProfilePhotoName: React.FC<ProfilePhotoNameProps> = ({
       <TouchableOpacity 
         style={styles.cameraBtn} 
         onPress={() => {
-          console.log('[ProfilePhotoName] Camera button pressed');
           if (onCameraPress) {
             onCameraPress();
           }

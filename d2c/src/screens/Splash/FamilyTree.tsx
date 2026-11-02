@@ -16,7 +16,6 @@ const FamilyTree = ({ navigation }: Props) => {
       // Mark onboarding as seen before navigating to MainTabs
       try {
         await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-        console.log('🔔 [FAMILY TREE] Onboarding marked as seen');
       } catch (error) {
         console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
       }
@@ -37,7 +36,6 @@ const FamilyTree = ({ navigation }: Props) => {
           // Mark onboarding as seen when user skips
           try {
             await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-            console.log('🔔 [FAMILY TREE] Onboarding marked as seen (skip)');
           } catch (error) {
             console.error('❌ [FAMILY TREE] Error saving onboarding status:', error);
           }

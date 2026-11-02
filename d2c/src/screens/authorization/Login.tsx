@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { verifyBusinessOTP } from '../../services/Api';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
+import { isReviewPhone, REVIEW_OTP_CODE } from '../../config/reviewAccess';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // NotificationService removed as requested
@@ -52,28 +53,22 @@ const Login = () => {
     if (Platform.OS === 'android') {
       RNOtpVerify.getHash()
         .then((hash) => {
-          console.log('[OTP AUTO-READ] App Hash:', hash);
         })
         .catch((error) => {
-          console.log('[OTP AUTO-READ] Error getting hash:', error);
         });
 
       RNOtpVerify.getOtp()
         .then(() => {
-          console.log('[OTP AUTO-READ] Started listening for OTP');
         })
         .catch((error) => {
-          console.log('[OTP AUTO-READ] Error starting listener:', error);
         });
 
       const otpHandler = (message: string) => {
-        console.log('[OTP AUTO-READ] Received SMS:', message);
         try {
           // Extract OTP from message - looking for 6-digit code
           const otpMatch = message.match(/\b\d{6}\b/);
           if (otpMatch) {
             const extractedOtp = otpMatch[0];
-            console.log('[OTP AUTO-READ] Extracted OTP:', extractedOtp);
             setOtp(extractedOtp);
             Toast.show({ 
               type: 'success', 
@@ -83,13 +78,11 @@ const Login = () => {
             // Auto-verify after a short delay (only if not already loading)
             setTimeout(() => {
               if (extractedOtp.length === 6 && !loading) {
-                console.log('[OTP AUTO-READ] Auto-verifying OTP...');
                 // We'll manually trigger verification here
               }
             }, 500);
           }
         } catch (error) {
-          console.log('[OTP AUTO-READ] Error extracting OTP:', error);
         }
       };
 
@@ -98,7 +91,6 @@ const Login = () => {
       // Cleanup listener on unmount
       return () => {
         RNOtpVerify.removeListener();
-        console.log('[OTP AUTO-READ] Listener removed');
       };
     }
   }, []);
@@ -110,24 +102,21 @@ const Login = () => {
   };
 
   const handleSendOtp = async () => {
+    // Store-reviewer demo account: skip the real SMS and reveal the OTP input,
+    // which accepts the fixed demo code (no SMS can reach a reviewer).
+    if (isReviewPhone(phone)) {
+      setOtpError('');
+      setOtpSent(true);
+      return;
+    }
     setSendingOtp(true);
     setOtpError('');
     try {
       const fullPhoneNumber = `${countryCode.replace('+', '')}${phone}`;
-      console.log('[MSG91] Sending OTP to:', fullPhoneNumber);
-      console.log('[MSG91] Phone number details:');
-      console.log('  - Country Code:', countryCode);
-      console.log('  - Phone:', phone);
-      console.log('  - Full Number:', fullPhoneNumber);
-      console.log('  - Number Length:', fullPhoneNumber.length);
       
       const response = await OTPWidget.sendOTP({ 
         identifier: fullPhoneNumber
       });
-      console.log('[MSG91] sendOTP response:', response);
-      console.log('--- MSG91 sendOTP Raw Response ---');
-      console.log(JSON.stringify(response, null, 2));
-      console.log('------------------------------------');
 
       // Type guards for response
       const hasRequestId = typeof response === 'object' && response !== null && 'request_id' in response;
@@ -147,11 +136,6 @@ const Login = () => {
           ''
         );
         setOtpSent(true); // Always show OTP input on success
-        console.log('[MSG91] OTP sent successfully.');
-        console.log('[MSG91] Request ID:', requestId);
-        console.log('[MSG91] Please check your phone for OTP message');
-        console.log('[MSG91] Delivery may take 2-5 minutes');
-        console.log('[MSG91] If not received, check DND status or try again');
         Toast.show({ 
           type: 'success', 
           text1: 'OTP Sent', 
@@ -159,15 +143,10 @@ const Login = () => {
         });
       } else {
         setOtpSent(false); // Only on real failure
-        console.log('[MSG91] Failed to send OTP:', hasMessage ? response.message : 'Failed to send OTP. Please try again.');
         Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? response.message : 'Failed to send OTP. Please try again.') });
       }
     } catch (err) {
       const error = err as any;
-      console.log('[MSG91] sendOTP error:', error);
-      console.log('--- MSG91 sendOTP Raw Response ---');
-      console.log(JSON.stringify(error, null, 2));
-      console.log('------------------------------------');
       // Type guards for error
       const hasRequestId = typeof error === 'object' && error !== null && 'request_id' in error;
       const hasMessage = typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string';
@@ -183,11 +162,9 @@ const Login = () => {
           ''
         );
         setOtpSent(true); // Always show OTP input on success
-        console.log('[MSG91] OTP sent successfully (from error case).');
         Toast.show({ type: 'success', text1: 'OTP Sent', text2: (hasMessage ? error.message : 'OTP has been sent successfully.') });
       } else {
         setOtpSent(false); // Only on real failure
-        console.log('[MSG91] Failed to send OTP (error case):', hasMessage ? error.message : 'Failed to send OTP. Please try again.');
         Toast.show({ type: 'error', text1: 'Error', text2: (hasMessage ? error.message : 'Failed to send OTP. Please try again.') });
       }
     } finally {
@@ -198,20 +175,14 @@ const Login = () => {
   // Function to check delivery status
   const checkDeliveryStatus = async (requestId: string) => {
     try {
-      console.log('[MSG91] Checking delivery status for request:', requestId);
       // You can implement delivery status check here if MSG91 provides an API
       // For now, we'll just log the request ID for manual checking
-              console.log('[MSG91] To check delivery status manually:');
-        console.log('[MSG91] 1. Go to MSG91 Dashboard');
-        console.log('[MSG91] 2. Check Reports/SMS Reports');
-        console.log('[MSG91] 3. Look for Request ID:', requestId);
         
         // Check delivery status after a delay
         setTimeout(() => {
           checkDeliveryStatus(requestId);
         }, 30000); // Check after 30 seconds
     } catch (error) {
-      console.log('[MSG91] Error checking delivery status:', error);
     }
   };
 
@@ -221,50 +192,72 @@ const Login = () => {
       Toast.show({ type: 'error', text1: 'Error', text2: 'Please enter a valid OTP' });
       return;
     }
-    
+
+    // Store-reviewer demo account: accept the fixed demo code, skip MSG91, and
+    // log in directly via the backend (which already approves this number).
+    if (isReviewPhone(phone) && otp === REVIEW_OTP_CODE) {
+      setOtpError('');
+      setLoading(true);
+      try {
+        let normalizedPhone = phone;
+        if (normalizedPhone.startsWith('0')) normalizedPhone = normalizedPhone.slice(1);
+        if (normalizedPhone.length > 10 && normalizedPhone.startsWith('91')) normalizedPhone = normalizedPhone.slice(-10);
+        const loginResult = await verifyBusinessOTP(normalizedPhone);
+        if (loginResult.token) {
+          await AsyncStorage.setItem('accessToken', loginResult.token);
+          if (loginResult.user && loginResult.user.id) {
+            await AsyncStorage.setItem('userId', loginResult.user.id.toString());
+            if (loginResult.user.name) await AsyncStorage.setItem('userName', loginResult.user.name);
+            if (loginResult.user.type) await AsyncStorage.setItem('userType', loginResult.user.type);
+          }
+          Toast.show({ type: 'success', text1: 'Success', text2: 'Login successful!' });
+          navigation.navigate('MainTabs');
+        } else {
+          Toast.show({ type: 'error', text1: 'Login Failed', text2: loginResult.error || 'Could not log you in.' });
+        }
+      } catch (e: any) {
+        setOtpError('Verification failed. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setOtpError('');
     setLoading(true);
-    console.log('[MSG91] Verifying OTP:', otp);
     try {
       let response;
       try {
         // Pass both otp and reqId to MSG91
         response = await OTPWidget.verifyOTP({ otp, reqId: requestId });
         if (typeof response === 'string') {
-          console.log('[MSG91] Raw verifyOTP response (string):', response);
           if (response.trim() === '') {
             throw new Error('Empty response from OTP verification.');
           }
           try {
             response = JSON.parse(response);
           } catch (parseErr) {
-            console.log('[MSG91] JSON parse error:', parseErr);
             throw new Error('Invalid response from OTP verification.');
           }
         }
       } catch (err) {
         const error = err as Error;
-        console.log('[MSG91] Error in OTPWidget.verifyOTP:', error);
         setOtpError('Invalid OTP. Please try again.');
         Toast.show({ type: 'error', text1: 'Verification Error', text2: error.message || 'Invalid response from OTP verification.' });
         setLoading(false);
         return;
       }
-      console.log('[MSG91] verifyOTP response:', response);
       // Updated logic for MSG91 response
       if (response.type === 'success' && response.message) {
         // Only send phone number (without country code) to backend
         let normalizedPhone = phone;
         if (normalizedPhone.startsWith('0')) normalizedPhone = normalizedPhone.slice(1);
         if (normalizedPhone.length > 10 && normalizedPhone.startsWith('91')) normalizedPhone = normalizedPhone.slice(-10);
-        console.log('[MSG91] OTP verified successfully. Proceeding to backend session login with phone:', normalizedPhone);
         const loginResult = await verifyBusinessOTP(normalizedPhone); // only phone
         
-        console.log('[Backend] /users/verify-otp response:', loginResult);
         if (loginResult.token) {
           await AsyncStorage.setItem('accessToken', loginResult.token);
           const tokenCheck = await AsyncStorage.getItem('accessToken');
-          console.log('[Login] Token after setItem:', tokenCheck);
           if (loginResult.user && loginResult.user.id) {
             await AsyncStorage.setItem('userId', loginResult.user.id.toString());
             
@@ -281,7 +274,6 @@ const Login = () => {
             try {
               // const firebaseService = require('../../services/firebaseService').default;
               // await firebaseService.updateUserId(loginResult.user.id);
-              console.log('[Login] Firebase service updated with user ID:', loginResult.user.id);
             } catch (error) {
               console.error('[Login] Error updating Firebase service with user ID:', error);
             }
@@ -301,17 +293,14 @@ const Login = () => {
           }
         }
       } else {
-        console.log('[MSG91] OTP verification failed:', response.message || response.errors || 'The OTP is incorrect.');
         setOtpError('Invalid OTP. Please try again.');
         Toast.show({ type: 'error', text1: 'Verification Failed', text2: response.message || response.errors || 'The OTP is incorrect.' });
       }
     } catch (error: any) {
-      console.log('[MSG91] verifyOTP error:', error);
       setOtpError('Verification failed. Please try again.');
       Toast.show({ type: 'error', text1: 'Verification Error', text2: error.message || 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
-      console.log('[MSG91] OTP Verification process ended.');
     }
   };
 

@@ -36,14 +36,12 @@ class VersionService {
    */
   async checkForUpdates() {
     try {
-      console.log('🔍 Checking for app updates...');
       
       const updateInfo = await checkAppUpdate(
         this.platform, 
         this.currentVersion.versionCode
       );
 
-      console.log('📱 Update check result:', updateInfo);
 
       if (updateInfo.update_available) {
         this.notifyUpdateAvailable(updateInfo);
@@ -94,7 +92,6 @@ class VersionService {
       await this.checkForUpdates();
     }, intervalMinutes * 60 * 1000);
 
-    console.log(`⏰ Started periodic update check every ${intervalMinutes} minutes`);
   }
 
   /**
@@ -104,7 +101,6 @@ class VersionService {
     if (this.updateCheckInterval) {
       clearInterval(this.updateCheckInterval);
       this.updateCheckInterval = null;
-      console.log('⏰ Stopped periodic update check');
     }
   }
 

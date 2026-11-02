@@ -52,7 +52,6 @@ const Product = () => {
   
   // Debug error state changes
   useEffect(() => {
-    console.log('[Product] Error state changed:', error);
     if (error) {
       setErrorTimestamp(Date.now());
     } else {
@@ -104,7 +103,6 @@ const Product = () => {
   useEffect(() => {
     try {
       const params = route.params as any;
-      console.log('[Product] Route params:', params);
       
       // Check for categoryId from Collection page
       if (params?.categoryId) {
@@ -112,7 +110,6 @@ const Product = () => {
         const validId = Number.isFinite(idNum) && idNum > 0 ? idNum : null;
         setCategoryId(validId);
         setCategoryFilter(params.categoryName || 'Products');
-        console.log('[Product] Category ID from Collection:', params.categoryId);
         // If we have a valid ID, we are done resolving
         if (validId !== null) {
           setResolvingCategory(false);
@@ -127,7 +124,6 @@ const Product = () => {
         // Will resolve by name in next effect
       }
     } catch (error) {
-      console.log('[Product] No route params found');
       setResolvingCategory(false);
     }
   }, [route.params]);
@@ -150,7 +146,6 @@ const Product = () => {
       setProductsLoading(true);
       setProductsError(null);
       
-      console.log('[Product] Loading all products (guest/logged-in)');
       const response = await getApprovedProductsForUser(userId, accessToken);
       
       if (response && response.success && response.data) {
@@ -159,14 +154,11 @@ const Product = () => {
         // If we have a specific category, filter by it
         if (isValidCategoryId) {
           filteredProducts = response.data.filter((product: Product) => product.category_id === categoryId);
-          console.log('[Product] Filtered products by category:', categoryId, 'Found:', filteredProducts.length);
         }
         
         setProducts(filteredProducts);
-        console.log('[Product] Set products:', filteredProducts.length, 'products');
       } else {
         setProducts([]);
-        console.log('[Product] No products found');
       }
     } catch (err) {
       console.error('[Product] Error loading products:', err);
@@ -190,7 +182,6 @@ const Product = () => {
     
     // Filter out out-of-stock products
     if (p.stock_status === 'out_of_stock') {
-      console.log(`[Product] Filtering out out-of-stock product: ${p.name || p.sku} (Status: ${p.stock_status})`);
       return false;
     }
     
@@ -207,15 +198,12 @@ const Product = () => {
 
   // Update error state based on products error
   useEffect(() => {
-    console.log('[Product] Products error changed:', productsError);
     setError(productsError);
   }, [productsError]);
 
   // Clear error when products are successfully loaded
   useEffect(() => {
-    console.log('[Product] Products changed:', products);
     if (products && products.length > 0) {
-      console.log('[Product] Clearing error - products loaded successfully');
       setError(null);
     }
   }, [products]);
@@ -226,7 +214,6 @@ const Product = () => {
       const timer = setTimeout(() => {
         const now = Date.now();
         if (errorTimestamp && (now - errorTimestamp) > 5000) {
-          console.log('[Product] Clearing stale error - error is older than 5 seconds');
           setError(null);
         }
       }, 5000);
@@ -237,13 +224,11 @@ const Product = () => {
 
   // Refresh products function
   const refreshProducts = async () => {
-    console.log('[Product] Refreshing products...');
     await loadProducts();
   };
 
   // Handle real-time product updates from socket events
   const handleRealTimeProductUpdate = (updateData: any) => {
-    console.log('[Product] Real-time product update received:', updateData);
     
     const { action, product, timestamp } = updateData;
     
@@ -264,7 +249,6 @@ const Product = () => {
         break;
         
       default:
-        console.log('[Product] Unknown product action:', action);
     }
   };
 
@@ -303,8 +287,6 @@ const Product = () => {
         imageUrl = getProductImageUrl(imageUrl) || undefined;
       }
       
-      console.log(`[Product] Adding to cart: ${product.name || product.sku}`);
-      console.log(`[Product] Cart image URL: ${imageUrl || 'No image'}`);
       
       await addToCart({
         image: imageUrl && imageUrl.trim() !== '' ? imageUrl : 'fallback',
@@ -318,8 +300,6 @@ const Product = () => {
         quantity: 1,
       }, 1, '');
       
-      console.log(`[Product] Added to cart: ${product.name || product.sku} (Quantity: 1)`);
-      console.log(`[Product] Cart image: ${imageUrl || 'No image'}`);
       
       // Show success toast
       Toast.show({
@@ -364,8 +344,6 @@ const Product = () => {
         imageUrl = getProductImageUrl(imageUrl) || undefined;
       }
       
-      console.log(`[Product] Using image: ${imageUrl}`);
-      console.log(`[Product] Image type: ${product.hasProcessedImage ? 'PROCESSED (watermarked)' : 'ORIGINAL'}`);
       
       return (
         <Image 
@@ -377,14 +355,12 @@ const Product = () => {
             console.error(`[Product] Image failed to load: ${imageUrl}`, error.nativeEvent);
             // If original image fails, try to fall back to processed
             if (product.image && product.processedImageUrl && product.image !== product.processedImageUrl) {
-              console.log(`[Product] Trying fallback to processed image: ${product.processedImageUrl}`);
             }
           }}
         />
       );
     } else {
       // Show "no image" placeholder
-      console.log(`[Product] No image available, showing placeholder`);
       return (
         <View style={styles.noImageContainer}>
           <Text style={styles.noImageText}>No Image</Text>

@@ -54,7 +54,6 @@ class FirebaseService {
    */
   async initialize() {
     try {
-      console.log('🔔 [FIREBASE] Firebase disabled - skipping initialization...');
       // console.log('🔔 [FIREBASE] Initializing Firebase messaging for app startup...');
       
       // Request permission
@@ -99,7 +98,6 @@ class FirebaseService {
    */
   async checkNotificationEnabled() {
     try {
-      console.log('🔍 [FIREBASE] Firebase disabled - notifications not available...');
       // console.log('🔍 [FIREBASE] Checking if notifications are enabled...');
       
       // const authStatus = await messaging().hasPermission();
@@ -119,7 +117,6 @@ class FirebaseService {
    */
   async requestPermission() {
     try {
-      console.log('🔔 [FIREBASE] Firebase disabled - permission not available...');
       // console.log('🔔 [FIREBASE] Requesting notification permission...');
       
       // const authStatus = await messaging().requestPermission();
@@ -139,7 +136,6 @@ class FirebaseService {
    */
   async getFCMToken() {
     try {
-      console.log('🔔 [FIREBASE] Firebase disabled - no FCM token available...');
       // console.log('🔔 [FIREBASE] Getting FCM token...');
       
       // const token = await messaging().getToken();
@@ -167,12 +163,9 @@ class FirebaseService {
    */
   async registerTokenWithBackend(token) {
     try {
-      console.log('🔔 [FIREBASE] Registering token with backend...');
-      console.log('🔔 [FIREBASE] Token preview:', token.substring(0, 20) + '...');
       
       // Always use unauthenticated endpoint for app startup
       const endpoint = `${BASE_URL}/notifications/register-token-unauth`;
-      console.log('🔔 [FIREBASE] Using unauthenticated endpoint:', endpoint);
       
       // Prepare request body (no user ID)
       const requestBody = {
@@ -180,7 +173,6 @@ class FirebaseService {
         deviceType: 'mobile'
       };
       
-      console.log('🔔 [FIREBASE] Request body:', requestBody);
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -191,11 +183,8 @@ class FirebaseService {
       });
 
       const result = await response.json();
-      console.log('🔔 [FIREBASE] Backend response status:', response.status);
-      console.log('🔔 [FIREBASE] Backend response:', result);
       
       if (response.ok) {
-        console.log('✅ [FIREBASE] Token registered with backend successfully');
         return true;
       } else {
         console.error('❌ [FIREBASE] Failed to register token with backend:', result);
@@ -212,7 +201,6 @@ class FirebaseService {
    * Setup message handlers for foreground messages
    */
   setupMessageHandlers() {
-    console.log('🔔 [FIREBASE] Firebase disabled - message handlers not available...');
     // console.log('🔔 [FIREBASE] Setting up message handlers...');
     
     // // Handle foreground messages
@@ -236,7 +224,6 @@ class FirebaseService {
    * Setup notification handlers for background/quit state
    */
   setupNotificationHandlers() {
-    console.log('🔔 [FIREBASE] Firebase disabled - notification handlers not available...');
     // console.log('🔔 [FIREBASE] Setting up notification handlers...');
     
     // // Handle notification opened when app is in background
@@ -267,14 +254,12 @@ class FirebaseService {
    */
   showLocalNotification(remoteMessage) {
     try {
-      console.log('🔔 [FIREBASE] Showing native notification banner...');
       
       const { notification, data } = remoteMessage;
       const notificationType = data?.notificationType || 'default';
       
       // Handle login approval notifications - update token with user ID if available
       if (notificationType === 'login_approved' && data?.userId) {
-        console.log('🔔 [FIREBASE] Login approved notification received, updating token with user ID:', data.userId);
         this.updateUserId(parseInt(data.userId));
       }
       
@@ -342,7 +327,6 @@ class FirebaseService {
       //   timestamp: Date.now()
       // });
       
-      console.log('✅ [FIREBASE] Native notification banner shown successfully');
     } catch (error) {
       console.error('❌ [FIREBASE] Error showing native notification:', error);
       console.error('❌ [FIREBASE] Error details:', error.message);
@@ -416,7 +400,6 @@ class FirebaseService {
    * Configure push notification handlers
    */
   configureNotificationHandlers() {
-    console.log('🔔 [FIREBASE] Configuring notification handlers...');
     
     // Configure notification handlers
     // PushNotification.configure({
@@ -465,7 +448,6 @@ class FirebaseService {
   setNotificationCallbacks(onReceived, onOpened) {
     this.onNotificationReceived = onReceived;
     this.onNotificationOpened = onOpened;
-    console.log('🔔 [FIREBASE] Notification callbacks set');
   }
 
   /**
@@ -485,7 +467,6 @@ class FirebaseService {
    * Update user ID and re-register token for the specific user
    */
   async updateUserId(userId) {
-    console.log('🔔 [FIREBASE] Updating user ID:', userId);
     this.userId = userId;
     
     if (this.fcmToken) {
@@ -497,11 +478,9 @@ class FirebaseService {
    * Register FCM token for a specific user (after login)
    */
   async registerTokenForUser(userId, token = null) {
-    console.log('🔔 [FIREBASE] Registering token for user:', userId);
     
     const tokenToUse = token || this.fcmToken;
     if (!tokenToUse) {
-      console.log('❌ [FIREBASE] No token available for user registration');
       return false;
     }
     
@@ -509,16 +488,12 @@ class FirebaseService {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
       if (!accessToken) {
-        console.log('⚠️ [FIREBASE] No access token found, skipping token registration for user');
         return false;
       }
       
-      console.log('🔔 [FIREBASE] Registering token with backend for user:', userId);
-      console.log('🔔 [FIREBASE] Token preview:', tokenToUse.substring(0, 20) + '...');
       
       // Use authenticated endpoint to register token for specific user
       const endpoint = `${BASE_URL}/notifications/register-token`;
-      console.log('🔔 [FIREBASE] Using authenticated endpoint:', endpoint);
       
       const requestBody = {
         token: tokenToUse,
@@ -526,7 +501,6 @@ class FirebaseService {
         userId: userId
       };
       
-      console.log('🔔 [FIREBASE] Request body:', requestBody);
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -538,11 +512,8 @@ class FirebaseService {
       });
 
       const result = await response.json();
-      console.log('🔔 [FIREBASE] Backend response status:', response.status);
-      console.log('🔔 [FIREBASE] Backend response:', result);
       
       if (response.ok) {
-        console.log('✅ [FIREBASE] Token registered with backend for user successfully');
         return true;
       } else {
         console.error('❌ [FIREBASE] Failed to register token with backend for user:', result);
@@ -559,7 +530,6 @@ class FirebaseService {
    * Clean up Firebase service
    */
   cleanup() {
-    console.log('🔔 [FIREBASE] Cleaning up Firebase service...');
     this.isInitialized = false;
     this.fcmToken = null;
     this.userId = null;

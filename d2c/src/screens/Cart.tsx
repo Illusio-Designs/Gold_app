@@ -22,8 +22,6 @@ const Cart = () => {
   const isFocused = useIsFocused();
   const { showLoginPrompt, checkAndPromptLogin, closeLoginPrompt } = useLoginPrompt();
   
-  console.log('[Cart] Rendering with cartItems:', cartItems);
-  console.log('[Cart] Cart items length:', cartItems.length);
 
   // Check if user is logged in whenever screen comes into focus
   useEffect(() => {
@@ -36,7 +34,6 @@ const Cart = () => {
 
   // Handle real-time cart updates from socket events
   const handleRealTimeCartUpdate = (updateData: any) => {
-    console.log('[Cart] Real-time cart update received:', updateData);
     
     const { action, cartItem, timestamp } = updateData;
     
@@ -62,7 +59,6 @@ const Cart = () => {
         break;
         
       default:
-        console.log('[Cart] Unknown cart action:', action);
     }
   };
 
@@ -146,13 +142,11 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
-      console.log('[Cart] Checkout button pressed');
       setIsProcessing(true);
       
       // Call the checkout function from CartContext
       const result = await checkout();
       
-      console.log('[Cart] Checkout result:', result);
       setOrderResult(result);
       
       if (result.success) {

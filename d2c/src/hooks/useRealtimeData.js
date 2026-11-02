@@ -17,7 +17,6 @@ export const useRealtimeData = (dataType, options = {}, fetchFunction = null, de
   
   // Debug error state changes
   useEffect(() => {
-    console.log(`[useRealtimeData] Error state changed for ${dataType}:`, error);
   }, [error, dataType]);
 
   // Fetch initial data
@@ -88,7 +87,6 @@ export const useRealtimeData = (dataType, options = {}, fetchFunction = null, de
       }
       
       // Clear any previous errors on successful fetch
-      console.log(`[useRealtimeData] Clearing error - successful fetch for ${dataType}`);
       setError(null);
     } catch (err) {
       console.error(`[useRealtimeData] Error fetching initial ${dataType}:`, err);
@@ -108,9 +106,7 @@ export const useRealtimeData = (dataType, options = {}, fetchFunction = null, de
     subscriptionIdRef.current = RealtimeDataService.subscribe(
       dataType,
       (newData, updateOptions) => {
-        console.log(`[useRealtimeData] Received real-time update for ${dataType}:`, newData);
         setData(newData);
-        console.log(`[useRealtimeData] Clearing error - successful real-time update for ${dataType}`);
         setError(null); // Clear error on successful real-time update
       },
       options
@@ -139,7 +135,6 @@ export const useRealtimeData = (dataType, options = {}, fetchFunction = null, de
   // Clear error when data is successfully loaded
   useEffect(() => {
     if (data && data.length > 0) {
-      console.log(`[useRealtimeData] Clearing error - data loaded successfully for ${dataType}:`, data.length, 'items');
       setError(null);
     }
   }, [data, dataType]);

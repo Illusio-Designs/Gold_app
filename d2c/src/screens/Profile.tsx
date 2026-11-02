@@ -57,10 +57,8 @@ const Profile = () => {
               ? user.image
               : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
             setPhotoUri({ uri: imgUrl });
-            console.log('[Profile] Image URL:', imgUrl);
           } else {
             setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-            console.log('[Profile] No image, using default');
           }
         } else {
           // fallback to AsyncStorage
@@ -73,10 +71,8 @@ const Profile = () => {
                 ? user.image
                 : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
               setPhotoUri({ uri: imgUrl });
-              console.log('[Profile] Image URL:', imgUrl);
             } else {
               setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-              console.log('[Profile] No image, using default');
             }
           }
         }
@@ -91,10 +87,8 @@ const Profile = () => {
               ? user.image
               : `${BASE_URL.replace(/\/api$/, '')}/uploads/profile/${user.image}?t=${Date.now()}`;
             setPhotoUri({ uri: imgUrl });
-            console.log('[Profile] Image URL:', imgUrl);
           } else {
             setPhotoUri(require('../assets/img/profile/profilephoto.png'));
-            console.log('[Profile] No image, using default');
           }
         }
       } finally {
@@ -109,15 +103,12 @@ const Profile = () => {
   useEffect(() => {
     const getCurrentAppVersion = async () => {
       try {
-        console.log('[Profile] Fetching app version from API...');
         const platform = Platform.OS; // Dynamic platform detection
         const versionInfo = await getLatestVersion(platform);
         
         if (versionInfo && versionInfo.version) {
-          console.log('[Profile] Version info received:', versionInfo);
           setAppVersion(versionInfo.version);
         } else {
-          console.log('[Profile] No version info received, using fallback');
           setAppVersion('1.0.0'); // Fallback version
         }
       } catch (error) {
@@ -132,7 +123,6 @@ const Profile = () => {
 
 
   const handleCameraPress = async () => {
-    console.log('[Profile] Camera button pressed');
 
     // Ask permission on Android
     if (Platform.OS === 'android') {
@@ -169,7 +159,6 @@ const Profile = () => {
       });
 
     const response: any = await openCamera();
-    console.log('[Profile] Camera response:', response);
 
     if (response?.didCancel) return;
     if (response?.errorCode) {
@@ -241,7 +230,6 @@ const Profile = () => {
       }
       Toast.show({ type: 'success', text1: 'Profile updated', text2: 'Profile photo updated successfully.' });
     } catch (err) {
-      console.log('[Profile] Profile photo update error:', err);
       Alert.alert('Error', 'Failed to update profile photo');
     } finally {
       setUploading(false);

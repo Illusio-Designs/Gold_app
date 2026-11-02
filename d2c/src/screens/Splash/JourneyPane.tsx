@@ -13,9 +13,7 @@ const { width, height } = Dimensions.get('window');
 
 const JourneyPane = ({ navigation }: Props) => {
   useEffect(() => {
-    console.log('🔔 [JOURNEY] JourneyPane mounted');
     const timer = setTimeout(() => {
-      console.log('🔔 [JOURNEY] Navigating to ShreenathjiScreen');
       navigation.replace('ShreenathjiScreen');
     }, 5000); // 5 seconds
     return () => clearTimeout(timer);
@@ -45,7 +43,6 @@ const JourneyPane = ({ navigation }: Props) => {
           // Mark onboarding as seen when user skips
           try {
             await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-            console.log('🔔 [JOURNEY] Onboarding marked as seen (skip)');
           } catch (error) {
             console.error('❌ [JOURNEY] Error saving onboarding status:', error);
           }

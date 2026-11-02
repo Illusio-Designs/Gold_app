@@ -22,7 +22,6 @@ class AppIconService {
     if (this.isInitialized) return;
 
     try {
-      console.log('🎨 Initializing App Icon Service for platform:', this.platform);
       
       // Load cached icons
       await this.loadCachedIcons();
@@ -34,7 +33,6 @@ class AppIconService {
       this.startPeriodicRefresh();
       
       this.isInitialized = true;
-      console.log('✅ App Icon Service initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize App Icon Service:', error);
     }
@@ -50,12 +48,10 @@ class AppIconService {
       
       if (cachedCurrentIcon) {
         this.currentIcon = JSON.parse(cachedCurrentIcon);
-        console.log('🎨 Loaded cached current icon:', this.currentIcon.icon_name);
       }
       
       if (cachedActiveIcons) {
         this.activeIcons = JSON.parse(cachedActiveIcons);
-        console.log('🎨 Loaded cached active icons:', this.activeIcons.length);
       }
     } catch (error) {
       console.error('❌ Failed to load cached icons:', error);
@@ -72,7 +68,6 @@ class AppIconService {
       if (currentIconResponse.success && currentIconResponse.icon) {
         this.currentIcon = currentIconResponse.icon;
         await AsyncStorage.setItem(`app_icon_current_${this.platform}`, JSON.stringify(this.currentIcon));
-        console.log('🎨 Updated current icon:', this.currentIcon.icon_name);
       }
 
       // Fetch all active icons
@@ -80,7 +75,6 @@ class AppIconService {
       if (activeIconsResponse.success && activeIconsResponse.icons) {
         this.activeIcons = activeIconsResponse.icons;
         await AsyncStorage.setItem(`app_icons_active_${this.platform}`, JSON.stringify(this.activeIcons));
-        console.log('🎨 Updated active icons:', this.activeIcons.length);
       }
 
       // Notify listeners
@@ -151,7 +145,6 @@ class AppIconService {
     if (this.shouldUpdateIcon(icon)) {
       this.currentIcon = icon;
       await AsyncStorage.setItem(`app_icon_current_${this.platform}`, JSON.stringify(icon));
-      console.log('🎨 Updated current icon to:', icon.icon_name);
       this.notifyListeners();
       return true;
     }
@@ -185,7 +178,6 @@ class AppIconService {
         break;
         
       default:
-        console.log('🎨 Unknown icon update action:', action);
     }
   }
 
@@ -263,7 +255,6 @@ class AppIconService {
     try {
       await AsyncStorage.removeItem(`app_icon_current_${this.platform}`);
       await AsyncStorage.removeItem(`app_icons_active_${this.platform}`);
-      console.log('🗑️ Cleared app icon cache');
     } catch (error) {
       console.error('❌ Failed to clear icon cache:', error);
     }

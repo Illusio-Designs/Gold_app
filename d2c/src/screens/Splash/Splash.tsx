@@ -7,30 +7,25 @@ const { width, height } = Dimensions.get('window');
 
 const Splash = ({ navigation }) => {
   useEffect(() => {
-    console.log('🔔 [SPLASH] Splash screen mounted');
     
     const checkAuthAndNavigate = async () => {
       try {
-        console.log('🔔 [SPLASH] Checking user authentication and onboarding status...');
         
         const accessToken = await AsyncStorage.getItem('accessToken');
         const userId = await AsyncStorage.getItem('userId');
         const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
         
         if (accessToken && userId) {
-          console.log('🔔 [SPLASH] User logged in, navigating to MainTabs');
           // User is logged in, go directly to home screen
           setTimeout(() => {
             navigation.replace('MainTabs');
           }, 3000);
         } else if (hasSeenOnboarding === 'true') {
-          console.log('🔔 [SPLASH] User has seen onboarding, navigating to MainTabs');
           // User has seen onboarding before, go directly to MainTabs (skip login)
           setTimeout(() => {
             navigation.replace('MainTabs');
           }, 3000);
         } else {
-          console.log('🔔 [SPLASH] First time user, navigating to onboarding');
           // First time user, show onboarding flow
           setTimeout(() => {
             navigation.replace('JourneyPane');

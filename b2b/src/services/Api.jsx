@@ -203,13 +203,7 @@ export const sendBusinessOTP = async (phoneNumber, countryCode) => {
 export const verifyBusinessOTP = async phoneNumber => {
   try {
     const url = `${BASE_URL}/users/verify-otp`;
-    console.log('--- Attempting to verify OTP with backend ---');
-    console.log('Request URL:', url);
-    console.log('Phone Number:', phoneNumber);
     const response = await axios.post(url, { phoneNumber });
-    console.log('--- Backend verification response ---');
-    console.log(JSON.stringify(response.data, null, 2));
-    console.log('-------------------------------------');
     return response.data;
   } catch (error) {
     console.error('--- Backend verification FAILED ---');
@@ -335,7 +329,6 @@ export const updateUserProfile = async (userId, profileData, token) => {
       'Content-Type': 'multipart/form-data',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
-    console.log('Headers for update:', headers);
 
     const response = await axios.put(`${BASE_URL}/users/${userId}`, formData, {
       headers,

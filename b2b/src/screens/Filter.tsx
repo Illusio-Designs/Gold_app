@@ -155,9 +155,7 @@ const Filter = ({ visible, onClose, onApply }: FilterProps) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        console.log('Fetching categories for Filter...');
         const response = await getCategories();
-        console.log('Categories API response:', response);
         
         if (response && response.success && response.data && Array.isArray(response.data)) {
           setCategories(response.data);

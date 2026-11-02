@@ -12,9 +12,7 @@ const { width, height } = Dimensions.get('window');
 
 const ShreenathjiScreen = ({ navigation }: Props) => {
   useEffect(() => {
-    console.log('🔔 [SHRENATHJI] ShreenathjiScreen mounted');
     const timer = setTimeout(() => {
-      console.log('🔔 [SHRENATHJI] Navigating to FamilyTree');
       navigation.replace('FamilyTree');
     }, 5000); // 5 seconds
     return () => clearTimeout(timer);
@@ -32,7 +30,6 @@ const ShreenathjiScreen = ({ navigation }: Props) => {
           // Mark onboarding as seen when user skips
           try {
             await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-            console.log('🔔 [SHRENATHJI] Onboarding marked as seen (skip)');
           } catch (error) {
             console.error('❌ [SHRENATHJI] Error saving onboarding status:', error);
           }
