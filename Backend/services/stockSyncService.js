@@ -123,7 +123,11 @@ function resolveImageUrl(imgPath) {
     const base = new URL((config.ERP && config.ERP.STOCK_API_URL) || DEFAULT_URL);
     origin = `${base.protocol}//${base.host}`;
   }
-  const clean = String(imgPath || "").replace(/^\/+/, "");
+  // Product images live under /Images/SKUImage/<filename> on the ERP. The feed's
+  // imageurl points at /Images/TagImage/, which 404s — so rebuild the path from
+  // just the file name against the SKUImage folder.
+  const fileName = String(imgPath || "").split("/").pop() || "";
+  const clean = fileName ? `Images/SKUImage/${fileName}` : "";
   return `${origin}/${clean}`;
 }
 
