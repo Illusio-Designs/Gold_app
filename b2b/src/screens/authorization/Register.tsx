@@ -198,14 +198,8 @@ const Register = () => {
     
     // Validate only required fields (Address, Landmark, and PAN/GST are now optional)
     isValid = validateRequiredField(name, 'Name', setNameError) && isValid;
-    isValid = validateEmail(email) && isValid;
-    // Password is optional (business accounts sign in by phone OTP). Only
-    // validate it when the user actually typed one.
-    if (password && password.trim() !== '') {
-      isValid = validatePassword(password) && isValid;
-    } else {
-      setPasswordError('');
-    }
+    // Email and password are no longer collected at registration (accounts sign
+    // in by phone OTP).
     isValid = validateRequiredField(phone, 'Phone number', setPhoneError) && isValid;
     // Address fields are now optional - removed validation
     isValid = validateRequiredField(city, 'City', setCityError) && isValid;
@@ -261,8 +255,6 @@ const Register = () => {
       const userData = {
         type: 'business', // or 'admin', adjust as needed
         name: name.trim(),
-        email: email.trim(),
-        password: password && password.trim() !== '' ? password : null,
         phone_number: phone.trim(),
         address_line1: address1.trim() || null, // Optional field - send null if empty
         address_line2: address2.trim() || null, // Optional field - send null if empty
@@ -327,28 +319,6 @@ const Register = () => {
             }} 
           />
           {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
-          
-          <CustomTextInput 
-            placeholder="Email *" 
-            value={email} 
-            onChangeText={(text) => {
-              setEmail(text);
-              if (emailError) validateEmail(text);
-            }} 
-            keyboardType="email-address" 
-          />
-          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-          
-          <CustomTextInput
-            placeholder="Password (Optional)"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (passwordError) validatePassword(text);
-            }}
-            secureTextEntry={!showPassword}
-          />
-          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
           <View style={styles.row}>
             <TouchableOpacity style={styles.countryCodeBox} onPress={() => setCountryModalVisible(true)}>
               {countryCode === '+91' ? (
