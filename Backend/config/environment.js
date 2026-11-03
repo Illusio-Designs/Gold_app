@@ -54,6 +54,18 @@ const config = {
     QUALITY: 80,
     FORMAT: "webp",
   },
+
+  // RG jewelry ERP stock feed. The catalog (products/categories/images) comes
+  // live from this API and is NOT stored in our DB. Server-side only — the API
+  // key must never reach the mobile app. Host/company are non-secret defaults;
+  // the key comes from env (RG_API_KEY) or is passed by an admin when testing.
+  ERP: {
+    STOCK_API_URL:
+      process.env.RG_API_URL ||
+      "http://183.83.240.52:17800/Ws/API_RG_GetAllStock",
+    API_KEY: process.env.RG_API_KEY || "",
+    COMPANY_ID: process.env.RG_COMPANY_ID || 1,
+  },
 };
 
 // Helper function to get base URL based on environment

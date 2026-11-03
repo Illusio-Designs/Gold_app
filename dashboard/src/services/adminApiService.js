@@ -220,6 +220,12 @@ export const getProductById = (id, token) =>
     .get(`/products/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+// ERP stock feed — admin test/preview. Returns the raw ERP response (count,
+// fields, sample) without storing anything. The bearer token is attached by the
+// request interceptor. `payload` may include { apiUrl, apiKey, companyId }.
+export const fetchErpStockPreview = (payload) =>
+  axiosInstance.post("/products/erp/preview", payload).then((r) => r.data);
+
 export const createProduct = (data, token) =>
   axiosInstance
     .post("/products", toFormData(data), {
