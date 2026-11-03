@@ -11,6 +11,7 @@ class RealtimeNotificationService {
     this.pollingIntervalMs = 30000; // Poll every 30s (5s hammered the API 12x/min)
     this.processedNotifications = new Set(); // To prevent duplicate notifications
     this.notificationCache = new Map(); // To cache notifications
+    this.initialized = false; // first poll after connect = baseline, not alerts
   }
 
   connect() {
@@ -43,7 +44,24 @@ class RealtimeNotificationService {
 
       const response = await getAdminNotifications(token);
       const notifications = response.notifications || [];
-      
+
+      // FIRST poll after (re)connect — e.g. right after login. Establish the
+      // baseline from whatever already exists and do NOT replay it as new.
+      // Without this, every login re-toasted and re-played a sound for every
+      // existing notification ("multiple notifications on every login").
+      if (!this.initialized) {
+        this.lastNotificationCount = notifications.length;
+        this.lastNotificationId = notifications.reduce(
+          (max, n) => Math.max(max, Number(n.id) || 0),
+          0
+        );
+        notifications.forEach((n) => {
+          if (n && n.id != null) this.processedNotifications.add(n.id);
+        });
+        this.initialized = true;
+        return;
+      }
+
       console.log('[RealtimeNotificationService] Polled notifications:', notifications.length);
       console.log('[RealtimeNotificationService] Current notifications:', notifications.map(n => ({
         id: n.id,
@@ -192,6 +210,7 @@ class RealtimeNotificationService {
       this.lastNotificationTimestamp = 0;
       this.lastNotificationId = 0;
       this.lastNotificationCount = 0;
+      this.initialized = false; // next connect re-establishes the baseline
     }
   }
 
@@ -202,6 +221,7 @@ class RealtimeNotificationService {
     this.lastNotificationTimestamp = 0;
     this.lastNotificationId = 0;
     this.lastNotificationCount = 0;
+    this.initialized = false; // re-baseline on the next poll
     console.log('[RealtimeNotificationService] Notification cache cleared manually');
   }
 
