@@ -94,9 +94,9 @@ const UsersPage = () => {
       ),
     },
     {
-      header: "Email",
-      accessor: "email",
-      cell: (row) => <span className="au-sub">{row.email || "—"}</span>,
+      header: "Phone",
+      accessor: "phone_number",
+      cell: (row) => <span className="au-sub">{row.phone_number || "—"}</span>,
     },
     {
       header: "Image",
@@ -253,15 +253,6 @@ const UsersPage = () => {
         setError("Name is required");
         return;
       }
-      if (!form.email || form.email.trim() === "") {
-        setError("Email is required");
-        return;
-      }
-      if (!editUser && (!form.password || form.password.trim() === "")) {
-        setError("Password is required for new users");
-        return;
-      }
-
       setLoading(true);
       setError("");
       const token = localStorage.getItem("admin_token");
@@ -275,10 +266,6 @@ const UsersPage = () => {
       const formData = new FormData();
       formData.append("type", form.type);
       formData.append("name", form.name.trim());
-      formData.append("email", form.email.trim());
-      if (form.password) {
-        formData.append("password", form.password);
-      }
       if (form.image) {
         formData.append("image", form.image);
       }
@@ -494,26 +481,6 @@ const UsersPage = () => {
           name="name"
           placeholder="Enter full name"
           value={form.name}
-          onChange={handleInputChange}
-          className="form-control"
-        />
-        <InputField
-          label="Email"
-          name="email"
-          type="email"
-          placeholder="Enter email"
-          value={form.email}
-          onChange={handleInputChange}
-          className="form-control"
-        />
-        <InputField
-          label="Password"
-          name="password"
-          type="password"
-          placeholder={
-            editUser ? "Leave blank to keep current password" : "Enter password"
-          }
-          value={form.password}
           onChange={handleInputChange}
           className="form-control"
         />

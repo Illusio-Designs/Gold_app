@@ -424,14 +424,18 @@ async function createUser(req, res) {
     if (!req.body.name || req.body.name.trim() === "") {
       return res.status(400).json({ error: "Name is required" });
     }
-    if (!req.body.email || req.body.email.trim() === "") {
-      return res.status(400).json({ error: "Email is required" });
-    }
-    if (!req.body.password || req.body.password.trim() === "") {
-      return res.status(400).json({ error: "Password is required" });
-    }
     if (!req.body.type || !["admin", "business"].includes(req.body.type)) {
       return res.status(400).json({ error: "Valid user type is required" });
+    }
+    // Admin accounts sign in with email + password, so those stay required.
+    // Business accounts sign in by phone OTP — email/password are optional.
+    if (req.body.type === "admin") {
+      if (!req.body.email || req.body.email.trim() === "") {
+        return res.status(400).json({ error: "Email is required for admin accounts" });
+      }
+      if (!req.body.password || req.body.password.trim() === "") {
+        return res.status(400).json({ error: "Password is required for admin accounts" });
+      }
     }
 
     let imageFilename = null;
@@ -460,10 +464,20 @@ async function createUser(req, res) {
       }
     }
 
+    // Business accounts may have no email — derive a unique placeholder from the
+    // phone so the row is valid even if the email column is NOT NULL / UNIQUE.
+    const phoneDigits = String(req.body.phone_number || "").replace(/\D/g, "");
+    const emailValue =
+      req.body.email && req.body.email.trim() !== ""
+        ? req.body.email.trim()
+        : phoneDigits
+        ? `${req.body.type[0]}${phoneDigits}@noemail.amrutkumargovinddasllp.com`
+        : null;
+
     const user = {
       type: req.body.type,
       name: req.body.name.trim(),
-      email: req.body.email.trim(),
+      email: emailValue,
       // Pass the PLAINTEXT password. The user model (insertUser) hashes it
       // exactly once with bcrypt. Pre-hashing here caused a double hash, so
       // the stored value never matched at login and the account was locked out.
