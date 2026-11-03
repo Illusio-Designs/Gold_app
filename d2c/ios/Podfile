@@ -22,6 +22,20 @@ end
 target 'Amrut' do
   config = use_native_modules!
 
+  # Firebase pods @import each other and GoogleUtilities as Clang modules, so
+  # each needs a module map. Enable modular headers for the Firebase/Google
+  # pods specifically. (Doing it globally with use_modular_headers! instead
+  # makes React Native emit two modulemaps for module `react_runtime` and the
+  # archive fails with a redefinition error — so we scope it to just these.)
+  %w[
+    GoogleUtilities
+    FirebaseCore
+    FirebaseCoreInternal
+    FirebaseCoreExtension
+    FirebaseInstallations
+    FirebaseMessaging
+  ].each { |fb_pod| pod fb_pod, :modular_headers => true }
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
