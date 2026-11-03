@@ -1,10 +1,10 @@
-const { fetchAllStock } = require("../services/stockSyncService");
+const { fetchAllStock, fetchErpImage } = require("../services/stockSyncService");
 
 // The ERP may wrap the list in an envelope — pull the array out wherever it is.
 function extractItems(data) {
   if (Array.isArray(data)) return data;
   if (!data || typeof data !== "object") return null;
-  const keys = ["Data", "data", "Result", "result", "Stock", "stock", "items", "Items", "StockList", "Table"];
+  const keys = ["lstresult", "lstResult", "LstResult", "Data", "data", "Result", "result", "ResultList", "Stock", "stock", "items", "Items", "StockList", "Table"];
   for (const k of keys) {
     if (Array.isArray(data[k])) return data[k];
   }
@@ -89,4 +89,27 @@ async function previewStock(req, res) {
   }
 }
 
-module.exports = { previewStock };
+// Public image proxy: fetches a product image from the ERP (relative path) and
+// streams it back, so the browser/app can display ERP images without reaching
+// the whitelisted ERP host directly. Only relative paths are allowed (no SSRF).
+async function proxyImage(req, res) {
+  const p = req.query.path;
+  if (!p || typeof p !== "string") {
+    return res.status(400).send("missing path");
+  }
+  // Safety: only relative ERP paths — reject absolute URLs and traversal.
+  if (/^[a-z]+:\/\//i.test(p) || p.includes("..")) {
+    return res.status(400).send("bad path");
+  }
+  try {
+    const { buffer, contentType } = await fetchErpImage(p);
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "public, max-age=3600");
+    return res.send(buffer);
+  } catch (e) {
+    // Image missing/unreachable — 404 so the <img> falls back to a placeholder.
+    return res.status(404).end();
+  }
+}
+
+module.exports = { previewStock, proxyImage };

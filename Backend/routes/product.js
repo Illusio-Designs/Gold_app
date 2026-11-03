@@ -15,6 +15,10 @@ router.post(
   stockSyncController.previewStock
 );
 
+// Public image proxy for ERP product images (relative paths only). Public so
+// <img> tags can load it; it only serves images from the ERP host.
+router.get("/erp/image", stockSyncController.proxyImage);
+
 // Public routes (no authentication required)
 router.get("/", optionalAuth, productController.getAllProducts);
 router.get("/category/:categoryId", productController.getProductsByCategory);
