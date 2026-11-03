@@ -50,6 +50,7 @@ const NavGroups = [
     label: "Catalog",
     links: [
       { name: "Products", path: "/dashboard/products", icon: PackageIcon },
+      { name: "ERP Stock (API)", path: "/dashboard/stock-sync", icon: PackageIcon },
       { name: "Categories", path: "/dashboard/categories", icon: Folder01Icon },
       { name: "Sliders", path: "/dashboard/sliders", icon: GalleryHorizontalIcon },
       { name: "Media Gallery", path: "/dashboard/media-gallery", icon: Image01Icon },

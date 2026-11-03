@@ -13,6 +13,7 @@ import AuthLayout from "./components/layout/AuthLayout";
 const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
 const OrdersPage = React.lazy(() => import("./pages/OrdersPage"));
 const ProductsPage = React.lazy(() => import("./pages/ProductsPage"));
+const StockSyncPage = React.lazy(() => import("./pages/StockSyncPage"));
 const UsersPage = React.lazy(() => import("./pages/UsersPage"));
 const ConsumersPage = React.lazy(() => import("./pages/ConsumersPage"));
 const CategoriesPage = React.lazy(() => import("./pages/CategoriesPage"));
@@ -86,6 +87,7 @@ function App() {
             <Route path="consumers" element={<ConsumersPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="products" element={<ProductsPage />} />
+            <Route path="stock-sync" element={<StockSyncPage />} />
             <Route path="orders" element={<OrdersPage />} />
             <Route path="media-gallery" element={<MediaGalleryPage />} />
             <Route path="sliders" element={<SliderPage />} />
