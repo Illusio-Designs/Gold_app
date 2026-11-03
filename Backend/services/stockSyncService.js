@@ -111,13 +111,26 @@ function getBinary(urlStr, timeoutMs) {
   });
 }
 
-// Fetch a product image from the ERP by its relative path (e.g.
-// "Images/TagImage/xxxx.Jpg"). The image host is the same host as the stock API.
-async function fetchErpImage(imgPath) {
-  const base = new URL((config.ERP && config.ERP.STOCK_API_URL) || DEFAULT_URL);
-  const origin = `${base.protocol}//${base.host}`;
+// Resolve a relative ERP image path to a full URL. Uses RG_IMAGE_BASE_URL when
+// set (in case images are served from a different host/port than the API),
+// otherwise the same host as the stock API.
+function resolveImageUrl(imgPath) {
+  const imgBase = config.ERP && config.ERP.IMAGE_BASE_URL;
+  let origin;
+  if (imgBase) {
+    origin = String(imgBase).replace(/\/+$/, "");
+  } else {
+    const base = new URL((config.ERP && config.ERP.STOCK_API_URL) || DEFAULT_URL);
+    origin = `${base.protocol}//${base.host}`;
+  }
   const clean = String(imgPath || "").replace(/^\/+/, "");
-  return getBinary(`${origin}/${clean}`, 30000);
+  return `${origin}/${clean}`;
+}
+
+// Fetch a product image from the ERP by its relative path (e.g.
+// "Images/TagImage/xxxx.Jpg").
+async function fetchErpImage(imgPath) {
+  return getBinary(resolveImageUrl(imgPath), 30000);
 }
 
 // Fetch the full stock list from the ERP. Returns { status, data } where data is
@@ -142,4 +155,10 @@ async function fetchAllStock({ apiUrl, apiKey, companyId } = {}) {
   );
 }
 
-module.exports = { fetchAllStock, fetchErpImage, DEFAULT_URL, DEFAULT_COMPANY_ID };
+module.exports = {
+  fetchAllStock,
+  fetchErpImage,
+  resolveImageUrl,
+  DEFAULT_URL,
+  DEFAULT_COMPANY_ID,
+};

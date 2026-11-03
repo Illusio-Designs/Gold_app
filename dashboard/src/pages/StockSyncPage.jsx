@@ -185,6 +185,43 @@ const StockSyncPage = () => {
             </div>
           </div>
 
+          {result.imageCheck || result.withTagImage != null ? (
+            <div
+              style={{
+                background: result.imageCheck && result.imageCheck.ok ? "#f0fdf4" : "#fff7ed",
+                border: "1px solid " + (result.imageCheck && result.imageCheck.ok ? "#bbf7d0" : "#fed7aa"),
+                borderRadius: 10,
+                padding: "10px 14px",
+                marginBottom: 16,
+                fontSize: 13,
+                color: "#5D0829",
+              }}
+            >
+              <strong>Image check: </strong>
+              {result.withTagImage != null ? (
+                <span>
+                  {result.withTagImage} of {result.itemCount} items have a photo in the ERP (<code>HasTagImage</code>).{" "}
+                </span>
+              ) : null}
+              {result.imageCheck ? (
+                result.imageCheck.ok ? (
+                  <span>
+                    Proxy reached an image ✓ ({result.imageCheck.bytes} bytes,{" "}
+                    {result.imageCheck.contentType}).
+                  </span>
+                ) : (
+                  <span>
+                    Proxy could NOT load the test image (status {String(result.imageCheck.status)}
+                    {result.imageCheck.error ? `, ${result.imageCheck.error}` : ""}). URL tried:{" "}
+                    <code style={{ wordBreak: "break-all" }}>{result.imageCheck.url}</code>
+                  </span>
+                )
+              ) : (
+                <span>No item had an image path to test.</span>
+              )}
+            </div>
+          ) : null}
+
           {view === "cards" ? (
             items.length ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))", gap: 16 }}>

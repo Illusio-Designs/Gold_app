@@ -1,4 +1,11 @@
-const { fetchAllStock, fetchErpImage } = require("../services/stockSyncService");
+const {
+  fetchAllStock,
+  fetchErpImage,
+  resolveImageUrl,
+} = require("../services/stockSyncService");
+
+const imgPathOf = (it) =>
+  it && (it.imageurl || it.ImageUrl || it.Image || it.ImagePath) ? (it.imageurl || it.ImageUrl || it.Image || it.ImagePath) : null;
 
 // The ERP may wrap the list in an envelope — pull the array out wherever it is.
 function extractItems(data) {
@@ -43,6 +50,42 @@ async function previewStock(req, res) {
       ? Object.keys(data)
       : typeof data;
 
+    // --- image diagnostics -------------------------------------------------
+    // How many items actually have a photo in the ERP, and does the image proxy
+    // reach one? This tells us whether "No image" is missing ERP photos vs a
+    // wrong image host/path.
+    let withTagImage = null;
+    let anyImagePath = null;
+    if (Array.isArray(items)) {
+      withTagImage = items.filter((i) => i && i.HasTagImage === true).length;
+      const firstWithPath = items.find((i) => imgPathOf(i));
+      anyImagePath = firstWithPath ? imgPathOf(firstWithPath) : null;
+    }
+
+    let imageCheck = null;
+    if (anyImagePath) {
+      const url = resolveImageUrl(anyImagePath);
+      try {
+        const img = await fetchErpImage(anyImagePath);
+        imageCheck = {
+          ok: true,
+          status: img.status,
+          bytes: img.buffer ? img.buffer.length : 0,
+          contentType: img.contentType,
+          url,
+          path: anyImagePath,
+        };
+      } catch (e) {
+        imageCheck = {
+          ok: false,
+          status: e.status || null,
+          error: e.message,
+          url,
+          path: anyImagePath,
+        };
+      }
+    }
+
     return res.json({
       success: true,
       reachable: true,
@@ -51,6 +94,8 @@ async function previewStock(req, res) {
       fields,
       sample,
       responseShape,
+      withTagImage,
+      imageCheck,
       // When we couldn't find an array, hand back the raw body so the page can
       // still show what came back (helps us spot the right envelope key).
       rawPreview: Array.isArray(items) ? undefined : data,

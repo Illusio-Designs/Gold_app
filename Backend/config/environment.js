@@ -65,6 +65,9 @@ const config = {
       "http://183.83.240.52:17800/Ws/API_RG_GetAllStock",
     API_KEY: process.env.RG_API_KEY || "",
     COMPANY_ID: process.env.RG_COMPANY_ID || 1,
+    // Optional override if product images are served from a different host/port
+    // than the API (e.g. "http://183.83.240.52:8080"). Blank = same host as API.
+    IMAGE_BASE_URL: process.env.RG_IMAGE_BASE_URL || "",
   },
 };
 
