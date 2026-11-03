@@ -51,7 +51,12 @@ const mapItem = (it) => ({
   group: firstVal(it, ["GroupName", "CounterName"]),
   priceRaw: firstVal(it, ["NetAmt", "TagSalesAmount", "TagSalesAmt", "MRP"]),
   inStock: val(it, "IsStock"),
-  imagePath: firstVal(it, ["imageurl", "ImageUrl", "Image"]),
+  // The ERP fills in `imageurl` even when there's no actual photo, so only use
+  // it when HasTagImage is true (otherwise it's a guaranteed 404).
+  imagePath:
+    val(it, "HasTagImage") === true
+      ? firstVal(it, ["imageurl", "ImageUrl", "Image"])
+      : null,
 });
 
 const card = { background: "#fff", border: "1px solid rgba(93,8,41,0.12)", borderRadius: 14, padding: 20, marginBottom: 20 };
