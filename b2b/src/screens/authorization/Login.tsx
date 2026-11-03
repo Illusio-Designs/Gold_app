@@ -21,6 +21,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MSG91_WIDGET_ID, MSG91_TOKEN_AUTH } from '@env';
 import { OTPWidget } from '@msg91comm/sendotp-react-native';
 import { isReviewPhone } from '../../config/reviewAccess';
+import { checkUserExists } from '../../services/Api';
 import { wp, hp } from '../../utils/responsiveConfig';
 import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { isSmallScreen, isMediumScreen, isLargeScreen, isShortScreen, isTallScreen, getResponsiveSpacing, getResponsiveFontSize } from '../../utils/responsive';
@@ -64,6 +65,33 @@ const Login = () => {
     }
 
     setSendingOtp(true);
+
+    // Only registered users can log in — check BEFORE sending an OTP so an
+    // unregistered number gets a clear "please register" message instead of a
+    // wasted SMS.
+    try {
+      const check: any = await checkUserExists({ phone: phone.replace(/\D/g, '') });
+      if (!check || !check.exists) {
+        setSendingOtp(false);
+        Alert.alert(
+          'Not registered',
+          "This number isn't registered yet. Please register first.",
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Register', onPress: () => navigation.navigate('Register') },
+          ],
+        );
+        return;
+      }
+      if (check.user && check.user.status === 'denied') {
+        setSendingOtp(false);
+        Alert.alert('Registration declined', 'Your registration was declined. Please contact support.');
+        return;
+      }
+    } catch (e) {
+      // Network/check failure — don't hard-block login; fall through to the OTP.
+    }
+
     try {
       const fullPhoneNumber = `${countryCode.replace('+', '')}${phone}`;
       const response: any = await OTPWidget.sendOTP({ identifier: fullPhoneNumber });
