@@ -226,6 +226,15 @@ export const getProductById = (id, token) =>
 export const fetchErpStockPreview = (payload) =>
   axiosInstance.post("/products/erp/preview", payload).then((r) => r.data);
 
+// Build the backend image-proxy URL for an ERP image (relative path). The
+// backend fetches it from the ERP host and streams it, so the browser can load
+// it. Returns null for an empty/absolute path.
+export const erpImageUrl = (path) => {
+  if (!path || typeof path !== "string") return null;
+  if (/^[a-z]+:\/\//i.test(path)) return path; // already absolute
+  return `${BASE_URL}/products/erp/image?path=${encodeURIComponent(path)}`;
+};
+
 export const createProduct = (data, token) =>
   axiosInstance
     .post("/products", toFormData(data), {

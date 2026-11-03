@@ -68,6 +68,58 @@ function postJson(urlStr, headers, bodyObj, timeoutMs) {
   });
 }
 
+// GET a binary resource (e.g. a product image) from the ERP. Resolves
+// { status, buffer, contentType }. Throws on network/timeout errors.
+function getBinary(urlStr, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    let u;
+    try {
+      u = new URL(urlStr);
+    } catch (e) {
+      return reject(new Error("Invalid URL"));
+    }
+    const lib = u.protocol === "https:" ? https : http;
+    const req = lib.request(
+      {
+        protocol: u.protocol,
+        hostname: u.hostname,
+        port: u.port || (u.protocol === "https:" ? 443 : 80),
+        path: (u.pathname || "/") + (u.search || ""),
+        method: "GET",
+      },
+      (res) => {
+        if (res.statusCode >= 400) {
+          res.resume();
+          return reject(Object.assign(new Error("HTTP " + res.statusCode), { status: res.statusCode }));
+        }
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () =>
+          resolve({
+            status: res.statusCode,
+            buffer: Buffer.concat(chunks),
+            contentType: res.headers["content-type"] || "image/jpeg",
+          })
+        );
+      }
+    );
+    req.setTimeout(timeoutMs || 30000, () => {
+      req.destroy(Object.assign(new Error("timeout"), { code: "ETIMEDOUT" }));
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+// Fetch a product image from the ERP by its relative path (e.g.
+// "Images/TagImage/xxxx.Jpg"). The image host is the same host as the stock API.
+async function fetchErpImage(imgPath) {
+  const base = new URL((config.ERP && config.ERP.STOCK_API_URL) || DEFAULT_URL);
+  const origin = `${base.protocol}//${base.host}`;
+  const clean = String(imgPath || "").replace(/^\/+/, "");
+  return getBinary(`${origin}/${clean}`, 30000);
+}
+
 // Fetch the full stock list from the ERP. Returns { status, data } where data is
 // the parsed response. Throws on network/timeout errors.
 async function fetchAllStock({ apiUrl, apiKey, companyId } = {}) {
@@ -90,4 +142,4 @@ async function fetchAllStock({ apiUrl, apiKey, companyId } = {}) {
   );
 }
 
-module.exports = { fetchAllStock, DEFAULT_URL, DEFAULT_COMPANY_ID };
+module.exports = { fetchAllStock, fetchErpImage, DEFAULT_URL, DEFAULT_COMPANY_ID };
