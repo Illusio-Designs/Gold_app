@@ -14,10 +14,20 @@ const {
 // business/consumer and never taken as "admin" from untrusted input.
 function buildRegistrationUser(req) {
   const safeType = req.body.type === "consumer" ? "consumer" : "business";
+  // Email and password are no longer collected at registration (accounts sign
+  // in by phone OTP). Keep a stable, unique placeholder email derived from the
+  // phone so the row stays valid even if the email column is NOT NULL / UNIQUE.
+  const phoneDigits = String(req.body.phone_number || "").replace(/\D/g, "");
+  const email =
+    req.body.email && String(req.body.email).trim() !== ""
+      ? String(req.body.email).trim()
+      : phoneDigits
+      ? `${safeType[0]}${phoneDigits}@noemail.amrutkumargovinddasllp.com`
+      : null;
   return {
     type: safeType,
     name: req.body.name,
-    email: req.body.email,
+    email,
     password: req.body.password,
     image: req.file ? req.file.filename : null,
     phone_number: req.body.phone_number,

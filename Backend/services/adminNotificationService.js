@@ -176,7 +176,8 @@ async function sendAdminNotification(type, title, body, data = {}) {
  */
 async function notifyUserRegistration(userData) {
   const title = 'New User Registration';
-  const body = `${userData.name} (${userData.email}) has registered for an account.`;
+  const contact = userData.phone_number || userData.email || 'no contact';
+  const body = `${userData.name} (${contact}) has registered for an account.`;
   
   const data = {
     action: 'view_user',
