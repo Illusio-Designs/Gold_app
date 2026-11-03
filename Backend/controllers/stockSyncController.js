@@ -38,7 +38,17 @@ async function previewStock(req, res) {
     const { status, data } = await fetchAllStock({ apiUrl, apiKey, companyId });
 
     const items = extractItems(data);
-    const sample = Array.isArray(items) ? items.slice(0, 10) : null;
+    // Only ~10% of stock has a tag photo, so put the items that DO have one
+    // first in the preview sample — that way the cards actually show images.
+    const withPhoto = Array.isArray(items)
+      ? items.filter((i) => i && i.HasTagImage === true)
+      : [];
+    const others = Array.isArray(items)
+      ? items.filter((i) => !(i && i.HasTagImage === true))
+      : [];
+    const sample = Array.isArray(items)
+      ? [...withPhoto.slice(0, 12), ...others].slice(0, 12)
+      : null;
     const fields =
       sample && sample.length && sample[0] && typeof sample[0] === "object"
         ? Object.keys(sample[0])
@@ -54,13 +64,13 @@ async function previewStock(req, res) {
     // How many items actually have a photo in the ERP, and does the image proxy
     // reach one? This tells us whether "No image" is missing ERP photos vs a
     // wrong image host/path.
-    let withTagImage = null;
-    let anyImagePath = null;
-    if (Array.isArray(items)) {
-      withTagImage = items.filter((i) => i && i.HasTagImage === true).length;
-      const firstWithPath = items.find((i) => imgPathOf(i));
-      anyImagePath = firstWithPath ? imgPathOf(firstWithPath) : null;
-    }
+    const withTagImage = Array.isArray(items) ? withPhoto.length : null;
+    // Test an item that actually HAS a photo — testing a HasTagImage:false item
+    // always 404s because the ERP still fills in an imageurl for it.
+    const imageTargetItem =
+      withPhoto.find((i) => imgPathOf(i)) ||
+      (Array.isArray(items) ? items.find((i) => imgPathOf(i)) : null);
+    const anyImagePath = imageTargetItem ? imgPathOf(imageTargetItem) : null;
 
     let imageCheck = null;
     if (anyImagePath) {
