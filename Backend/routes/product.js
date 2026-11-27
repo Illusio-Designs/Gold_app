@@ -2,29 +2,16 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
 const stockSyncController = require("../controllers/stockSyncController");
+const categoryController = require("../controllers/categoryController");
 const erpCatalogController = require("../controllers/erpCatalogController");
 const { upload, excelUpload } = require("../config/multerConfig");
 const { verifyToken, requireAdmin, optionalAuth } = require("../middlewares/auth");
 
-// ERP stock feed — admin-only test/preview. Calls API_RG_GetAllStock and
-// returns the raw response (count, fields, sample) WITHOUT writing to the DB,
-// so the dashboard can show exactly what the API returns.
-router.post(
-  "/erp/preview",
-  verifyToken,
-  requireAdmin,
-  stockSyncController.previewStock
-);
-
-// Public image proxy for ERP product images (relative paths only). Public so
-// <img> tags can load it; it only serves images from the ERP host.
+// Keep the catalog routes used by existing B2B builds backed by MySQL.
 router.get("/erp/image", stockSyncController.proxyImage);
-
-// Live ERP catalog (public) — the app's products & categories come from here
-// (cached from API_RG_GetAllStock), not the DB.
 router.get("/erp/catalog", erpCatalogController.getCatalog);
-router.get("/erp/catalog/:id", erpCatalogController.getCatalogItem);
-router.get("/erp/categories", erpCatalogController.getCatalogCategories);
+router.get("/erp/catalog/:id", productController.getProductById);
+router.get("/erp/categories", categoryController.getAllCategories);
 
 // Public routes (no authentication required)
 router.get("/", optionalAuth, productController.getAllProducts);

@@ -128,8 +128,7 @@ export const checkUserExists = async data => {
 // ✅ Get categories
 export const getCategories = async () => {
   try {
-    // Catalog comes live from the ERP, not our DB.
-    const response = await axios.get(`${BASE_URL}/products/erp/categories`);
+    const response = await axios.get(`${BASE_URL}/categories`);
 
     // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
@@ -167,8 +166,7 @@ export const getApprovedCategoriesForUser = async (userId, token) => {
 // ✅ Get approved products for logged-in user (filtered by selected categories)
 export const getApprovedProductsForUser = async (userId, token) => {
   try {
-    // Products come live from the ERP catalog (cached), not our DB.
-    const response = await axios.get(`${BASE_URL}/products/erp/catalog`);
+    const response = await axios.get(`${BASE_URL}/products`);
 
     if (response.data && Array.isArray(response.data)) {
       return { success: true, data: response.data };
@@ -230,7 +228,7 @@ export const verifyBusinessOTP = async phoneNumber => {
 // ✅ Get all products
 export const getAllProducts = async () => {
   try {
-    const response = await axios.get(`${BASE_URL}/products/erp/catalog`);
+    const response = await axios.get(`${BASE_URL}/products`);
 
     // Check if response has data property or if it's directly an array
     if (response.data && Array.isArray(response.data)) {
@@ -258,7 +256,7 @@ export const getAllProducts = async () => {
 export const getProductsByCategory = async categoryId => {
   try {
     const response = await axios.get(
-      `${BASE_URL}/products/erp/catalog?category=${encodeURIComponent(categoryId)}`,
+      `${BASE_URL}/products/category/${encodeURIComponent(categoryId)}`,
     );
 
     // Check if response has data property or if it's directly an array
@@ -286,7 +284,7 @@ export const getProductsByCategory = async categoryId => {
 // ✅ Get product by ID (for product details)
 export const getProductById = async productId => {
   try {
-    const response = await axios.get(`${BASE_URL}/products/erp/catalog/${productId}`);
+    const response = await axios.get(`${BASE_URL}/products/${productId}`);
     return (response.data && response.data.data) || response.data;
   } catch (error) {
     console.error('❌ getProductById error:', error);

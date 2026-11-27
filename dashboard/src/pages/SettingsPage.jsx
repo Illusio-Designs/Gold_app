@@ -6,6 +6,9 @@ import {
   wipeAllData,
   getAppSettings,
   updateAppSettings,
+  getErpSettings,
+  saveErpSettings,
+  syncErpStock,
 } from "../services/adminApiService";
 import { isAuthenticated, getAdminToken } from "../utils/authUtils";
 import { showErrorToast, showSuccessToast } from "../utils/toast";
@@ -34,6 +37,35 @@ const SettingsPage = () => {
   const [makingPct, setMakingPct] = useState("");
   const [rateUpdatedAt, setRateUpdatedAt] = useState("");
   const [savingRate, setSavingRate] = useState(false);
+
+  const [erp, setErp] = useState(null);
+  const [erpKey, setErpKey] = useState("");
+  const [erpAction, setErpAction] = useState("");
+  const [erpError, setErpError] = useState("");
+
+  useEffect(() => {
+    getErpSettings().then(setErp).catch(() => setErpError("Could not load ERP settings."));
+  }, []);
+
+  const handleErpAction = async (action) => {
+    setErpAction(action);
+    setErpError("");
+    try {
+      const saved = await saveErpSettings({ ...erp, apiKey: erpKey });
+      setErp(saved);
+      setErpKey("");
+      if (action === "sync") {
+        const result = await syncErpStock();
+        showSuccessToast(`ERP sync complete. ${result.inserted} added, ${result.updated} updated, ${result.removedFromFeed} removed from stock, ${result.manualSkuConflicts} existing SKUs skipped.`);
+      } else {
+        showSuccessToast("ERP settings saved.");
+      }
+    } catch (error) {
+      setErpError(error.response?.data?.error || "Could not complete the ERP request.");
+    } finally {
+      setErpAction("");
+    }
+  };
 
   // Danger zone
   const [confirmText, setConfirmText] = useState("");
@@ -167,6 +199,49 @@ const SettingsPage = () => {
             {savingRate ? "Saving…" : "Save today's rate"}
           </Button>
         </div>
+      </section>
+
+      <section className="au-panel erp-settings">
+        <div className="au-panel-head">
+          <h3>ERP stock connection</h3>
+        </div>
+        <p className="settings-note">Sync stock into Products and Categories to make it available through the catalogue API.</p>
+        {erpError && <p role="alert">{erpError}</p>}
+        {erp && (
+          <>
+            <div className="rate-grid">
+              <div className="field">
+                <label htmlFor="erp-api-url">ERP API URL</label>
+                <input id="erp-api-url" type="url" className="form-control" value={erp.apiUrl}
+                  disabled={Boolean(erpAction)} onChange={(event) => setErp({ ...erp, apiUrl: event.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="erp-company-id">Company ID</label>
+                <input id="erp-company-id" type="number" min="1" className="form-control" value={erp.companyId}
+                  disabled={Boolean(erpAction)} onChange={(event) => setErp({ ...erp, companyId: event.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="erp-image-url">Image base URL (optional)</label>
+                <input id="erp-image-url" type="url" className="form-control" value={erp.imageBaseUrl}
+                  disabled={Boolean(erpAction)} onChange={(event) => setErp({ ...erp, imageBaseUrl: event.target.value })} />
+              </div>
+              <div className="field">
+                <label htmlFor="erp-api-key">ERP API key</label>
+                <input id="erp-api-key" type="password" autoComplete="new-password" className="form-control"
+                  placeholder={erp.hasApiKey ? "Leave blank to keep the current key" : "Enter the ERP API key"}
+                  disabled={Boolean(erpAction)} value={erpKey} onChange={(event) => setErpKey(event.target.value)} />
+              </div>
+            </div>
+            <div className="settings-actions erp-settings__actions">
+              <Button onClick={() => handleErpAction("save")} disabled={Boolean(erpAction)}>
+                {erpAction === "save" ? "Saving…" : "Save ERP settings"}
+              </Button>
+              <Button variant="secondary" onClick={() => handleErpAction("sync")} disabled={Boolean(erpAction)}>
+                {erpAction === "sync" ? "Syncing…" : "Save and sync stock"}
+              </Button>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Danger Zone */}
