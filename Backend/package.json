@@ -6,6 +6,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "setup": "node scripts/setup.js",
+    "sync-erp-stock": "node scripts/syncErpStock.js",
     "debug-cart": "node debug-cart.js",
     "check-db": "node check-db.js"
   },

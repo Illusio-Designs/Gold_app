@@ -1,24 +1,9 @@
-// RG jewelry ERP stock feed client.
-//
-// The app's catalog (products, categories, images) is NOT stored in our DB — it
-// comes live from the ERP's API_RG_GetAllStock endpoint, which this service
-// calls. Dependency-free (Node's built-in http/https) so it works regardless of
-// which HTTP client packages are installed. Server-side ONLY: the API key must
-// never reach the mobile app.
+// Server-side client for the RG jewellery ERP.
 
 const http = require("http");
 const https = require("https");
 const { URL } = require("url");
-const { config } = require("../config/environment");
-
-// Non-secret defaults (host + company). The API key is read from env
-// (RG_API_KEY) or passed in by an admin from the dashboard test form — never
-// hardcoded here.
-const DEFAULT_URL =
-  (config.ERP && config.ERP.STOCK_API_URL) ||
-  "http://183.83.240.52:17800/Ws/API_RG_GetAllStock";
-const DEFAULT_COMPANY_ID =
-  (config.ERP && config.ERP.COMPANY_ID != null ? config.ERP.COMPANY_ID : 1);
+const { getErpSettings } = require("./erpSettingsService");
 
 // Minimal POST-JSON helper over Node's http/https. Resolves { status, data }.
 function postJson(urlStr, headers, bodyObj, timeoutMs) {
@@ -28,6 +13,9 @@ function postJson(urlStr, headers, bodyObj, timeoutMs) {
       u = new URL(urlStr);
     } catch (e) {
       return reject(new Error("Invalid ERP URL"));
+    }
+    if (!["http:", "https:"].includes(u.protocol)) {
+      return reject(new Error("Unsupported ERP URL protocol"));
     }
     const lib = u.protocol === "https:" ? https : http;
     const payload = Buffer.from(JSON.stringify(bodyObj));
@@ -78,6 +66,9 @@ function getBinary(urlStr, timeoutMs) {
     } catch (e) {
       return reject(new Error("Invalid URL"));
     }
+    if (!["http:", "https:"].includes(u.protocol)) {
+      return reject(new Error("Unsupported ERP URL protocol"));
+    }
     const lib = u.protocol === "https:" ? https : http;
     const req = lib.request(
       {
@@ -114,13 +105,13 @@ function getBinary(urlStr, timeoutMs) {
 // Resolve a relative ERP image path to a full URL. Uses RG_IMAGE_BASE_URL when
 // set (in case images are served from a different host/port than the API),
 // otherwise the same host as the stock API.
-function resolveImageUrl(imgPath) {
-  const imgBase = config.ERP && config.ERP.IMAGE_BASE_URL;
+async function resolveImageUrl(imgPath) {
+  const { apiUrl, imageBaseUrl: imgBase } = await getErpSettings();
   let origin;
   if (imgBase) {
     origin = String(imgBase).replace(/\/+$/, "");
   } else {
-    const base = new URL((config.ERP && config.ERP.STOCK_API_URL) || DEFAULT_URL);
+    const base = new URL(apiUrl);
     origin = `${base.protocol}//${base.host}`;
   }
   // Product images live under /Images/SKUImage/<filename> on the ERP. The feed's
@@ -134,35 +125,28 @@ function resolveImageUrl(imgPath) {
 // Fetch a product image from the ERP by its relative path (e.g.
 // "Images/TagImage/xxxx.Jpg").
 async function fetchErpImage(imgPath) {
-  return getBinary(resolveImageUrl(imgPath), 30000);
+  return getBinary(await resolveImageUrl(imgPath), 30000);
 }
 
 // Fetch the full stock list from the ERP. Returns { status, data } where data is
 // the parsed response. Throws on network/timeout errors.
-async function fetchAllStock({ apiUrl, apiKey, companyId } = {}) {
-  const url = apiUrl || DEFAULT_URL;
-  const key = apiKey || (config.ERP && config.ERP.API_KEY) || "";
-  const company = companyId != null && companyId !== "" ? companyId : DEFAULT_COMPANY_ID;
-
-  if (!key) {
-    throw Object.assign(new Error("ERP API key is not configured"), {
-      code: "NO_API_KEY",
-    });
+async function fetchAllStock() {
+  const { apiUrl: url, apiKey: key, companyId: company } = await getErpSettings(true);
+  if (!url || !key) {
+    throw new Error("Configure the ERP connection before importing stock");
   }
 
   // The vendor expects the key both as a header and in the body.
-  return postJson(
+  const response = await postJson(
     url,
     { APIKey: key },
     { APIKey: key, CompanyID: company },
     60000
   );
+  return { ...response, companyId: Number(company) };
 }
 
 module.exports = {
   fetchAllStock,
   fetchErpImage,
-  resolveImageUrl,
-  DEFAULT_URL,
-  DEFAULT_COMPANY_ID,
 };

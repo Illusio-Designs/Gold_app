@@ -381,7 +381,10 @@ function withResolvedImageUrls(product) {
   let originalImageUrl = null;
   let finalImageUrl = null;
 
-  if (product.image) {
+  if (typeof product.image === "string" && /^https?:\/\//i.test(product.image)) {
+    originalImageUrl = product.image;
+    finalImageUrl = product.image;
+  } else if (product.image) {
     originalImageUrl = `${getBaseUrl()}/uploads/products/${product.image}`;
     const baseName = product.image.split(".")[0];
     const cleanedImageName = `${baseName}-cleaned.webp`;

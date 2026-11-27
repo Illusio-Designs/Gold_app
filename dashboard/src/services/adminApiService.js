@@ -112,6 +112,15 @@ export const updateAppSettings = (data, token) =>
     .put("/settings", data, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
 
+export const getErpSettings = () =>
+  axiosInstance.get("/settings/erp").then((r) => r.data);
+
+export const saveErpSettings = (settings) =>
+  axiosInstance.put("/settings/erp", settings).then((r) => r.data);
+
+export const syncErpStock = () =>
+  axiosInstance.post("/settings/erp/sync").then((r) => r.data);
+
 // Build a FormData body from a plain object (skipping null/undefined values),
 // or pass an existing FormData through unchanged.
 function toFormData(data) {
@@ -219,21 +228,6 @@ export const getProductById = (id, token) =>
   axiosInstance
     .get(`/products/${id}`, { headers: { Authorization: `Bearer ${token}` } })
     .then((r) => r.data);
-
-// ERP stock feed — admin test/preview. Returns the raw ERP response (count,
-// fields, sample) without storing anything. The bearer token is attached by the
-// request interceptor. `payload` may include { apiUrl, apiKey, companyId }.
-export const fetchErpStockPreview = (payload) =>
-  axiosInstance.post("/products/erp/preview", payload).then((r) => r.data);
-
-// Build the backend image-proxy URL for an ERP image (relative path). The
-// backend fetches it from the ERP host and streams it, so the browser can load
-// it. Returns null for an empty/absolute path.
-export const erpImageUrl = (path) => {
-  if (!path || typeof path !== "string") return null;
-  if (/^[a-z]+:\/\//i.test(path)) return path; // already absolute
-  return `${BASE_URL}/products/erp/image?path=${encodeURIComponent(path)}`;
-};
 
 export const createProduct = (data, token) =>
   axiosInstance

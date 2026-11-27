@@ -336,6 +336,29 @@ needed) and produces a standalone release APK.
 This test APK is signed with the **debug** keystore — fine for sideloading, but
 **not** valid for the Play Store (see below).
 
+### ERP stock import
+
+Set `RG_API_URL` in the backend environment to the trusted stock endpoint. Use
+`RG_ALLOWED_ORIGINS` (comma-separated) if admins need to select additional ERP
+hosts and `RG_IMAGE_BASE_URL` if images use a separate host. On the cPanel
+deployment, put the environment values in `BACKEND_ENV` so they persist across
+deploys.
+
+In **Dashboard → Settings → ERP stock connection**, enter the API key and
+company ID, then select **Save and sync stock**. The saved key is encrypted using
+`RG_SETTINGS_SECRET` or `JWT_SECRET` and the dashboard never receives the saved
+key. Keep the encryption secret stable or re-enter the key after changing it.
+An environment-provided `RG_API_KEY` is used until an admin saves a replacement.
+From the backend server, `cd Backend && npm run sync-erp-stock` runs the same
+import for scheduled jobs or large feeds.
+
+The import updates existing product rows by ERP tag ID and category rows by
+ERP group ID. The app's Collection screen already lists those categories. SKU
+conflicts are skipped, existing product IDs are retained, and a successful
+full response marks missing imported products out of stock for that company.
+A later response can restore pieces withdrawn by the ERP import. Locally sold
+or reserved pieces retain their status. Photos use the backend image proxy.
+
 ## 🔐 App Signing & GitHub Actions Secrets
 
 For a real Play Store release you need a private **upload keystore**. Keystores
